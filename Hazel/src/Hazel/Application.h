@@ -3,6 +3,9 @@
 
 namespace Hazel
 {
+	/// <summary>
+	/// The application class with the main run loop.
+	/// </summary>
 	class HAZEL_API Application
 	{
 	public:
@@ -10,10 +13,9 @@ namespace Hazel
 		virtual ~Application();
 
 		void Run();
-	private:
 
 	};
 
-	// To be define in client.
+	// To be define by the client.
 	Application* CreateApplication();
 }
