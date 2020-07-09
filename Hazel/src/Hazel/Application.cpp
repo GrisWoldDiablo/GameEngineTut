@@ -12,6 +12,9 @@ namespace Hazel
 
 	void Application::Run()
 	{
+		std::printf("\n");
+		HZ_CORE_LDEBUG("Application::Run()");
+		
 		while (true)
 		{
 
