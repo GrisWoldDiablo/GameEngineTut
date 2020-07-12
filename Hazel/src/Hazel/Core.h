@@ -11,3 +11,6 @@
 #else
 	#error Hazel Support only windows.
 #endif // HZ_PLATFORM_WINDOWS
+
+// This macro is for enum flags.
+#define BIT(x) (1 << x)

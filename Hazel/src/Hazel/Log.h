@@ -2,6 +2,7 @@
 
 #include "Core.h"
 #include "spdlog/spdlog.h"
+#include "spdlog/fmt/ostr.h"
 
 namespace Hazel
 {
@@ -18,7 +19,7 @@ namespace Hazel
 	};
 }
 
-// To place fields in message use curly brackets : FUNCTION("my field here =>{}",field);
+// To place fields in message use curly brackets : MACRO("my field here =>{}",field);
 //Core log Macros
 #define HZ_CORE_LDEBUG(...)		::Hazel::Log::GetCoreLogger()->debug(__VA_ARGS__)
 #define HZ_CORE_LTRACE(...)		::Hazel::Log::GetCoreLogger()->trace(__VA_ARGS__)
