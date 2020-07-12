@@ -2,12 +2,14 @@
 #include "Application.h"
 
 #include "Hazel/Events/ApplicationEvent.h"
-#include "Hazel/Log.h"
+
+#include <GLFW/glfw3.h>
 
 namespace Hazel
 {
 	Application::Application()
 	{
+		m_Window = std::unique_ptr<Window>(Window::Create());
 	}
 
 	Application::~Application()
@@ -19,18 +21,12 @@ namespace Hazel
 		std::printf("\n");
 		HZ_CORE_LDEBUG("Application::Run()");
 
-		WindowResizeEvent e(1280, 720);
-		if (e.IsInCategory(EventCategoryApplication))
+		while (m_Running)
 		{
-			// Will run since it is the right category.
-			HZ_CORE_LTRACE(e);
-		}
-		if (e.IsInCategory(EventCategoryMouse))
-		{
-			// Won't run since it is the wrong category.
-			HZ_CORE_LTRACE(e);
-		}
+			glClearColor(1, 0, 1, 1);
+			glClear(GL_COLOR_BUFFER_BIT);
+			m_Window->OnUpdate();
 
-		while (true);
+		}
 	}
 }
