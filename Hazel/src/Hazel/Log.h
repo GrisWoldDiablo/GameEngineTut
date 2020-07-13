@@ -19,7 +19,7 @@ namespace Hazel
 	};
 }
 
-// To place fields in message use curly brackets : MACRO("my field here =>{}",field);
+// To place fields in message use curly brackets : MACRO("my field here =>{0}",field);
 //Core log Macros
 #define HZ_CORE_LDEBUG(...)		::Hazel::Log::GetCoreLogger()->debug(__VA_ARGS__)
 #define HZ_CORE_LTRACE(...)		::Hazel::Log::GetCoreLogger()->trace(__VA_ARGS__)
