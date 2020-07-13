@@ -35,6 +35,29 @@ namespace Hazel
 		EVENT_CLASS_CATEGORY(EventCategoryApplication)
 	};
 
+	class HAZEL_API WindowMovedEvent : public Event
+	{
+	public:
+		WindowMovedEvent(int x, int y)
+			: m_WindowX(x), m_WindowY(y) {}
+
+		inline unsigned int GetX() const { return m_WindowX; }
+		inline unsigned int GetY() const { return m_WindowY; }
+
+		std::string ToString() const override
+		{
+			std::stringstream ss;
+			ss << "WindowMovedEvent : (" << m_WindowX << "," << m_WindowY << ")";
+			return ss.str();
+		}
+
+		EVENT_CLASS_TYPE(WindowMoved)
+		EVENT_CLASS_CATEGORY(EventCategoryApplication)
+
+	private:
+		unsigned int m_WindowX, m_WindowY;
+	};
+
 	class HAZEL_API AppTickEvent : public Event
 	{
 	public:

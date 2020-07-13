@@ -10,9 +10,9 @@ namespace Hazel
 	static bool s_GLFWInitialized = false;
 
 	// The callback fucntion to errors from GLFW.
-	static void GLFWErrorCallback(int error, const char* description)
+	static void GLFWErrorCallback(int error_code, const char* description)
 	{
-		HZ_CORE_LERROR("GLFW Error ({0}) : {1}", error, description);
+		HZ_CORE_LERROR("GLFW Error ({0}) : {1}", error_code, description);
 	}
 
 	Window* Window::Create(const WindowProps& props)
@@ -130,6 +130,13 @@ namespace Hazel
 				auto data = *(WindowData*)glfwGetWindowUserPointer(window);
 
 				MouseMovedEvent event((float)xPos, (float)yPos);
+				data.EventCallback(event);
+			});
+		
+		glfwSetWindowPosCallback(m_Window, [](GLFWwindow* window, int x, int y)
+			{
+				auto data = *(WindowData*)glfwGetWindowUserPointer(window);
+				WindowMovedEvent event(x, y);
 				data.EventCallback(event);
 			});
 	}
