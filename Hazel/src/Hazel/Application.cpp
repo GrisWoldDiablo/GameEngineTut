@@ -1,7 +1,7 @@
 #include "hzpch.h"
 #include "Application.h"
 
-#include <GLFW/glfw3.h>
+#include <glad/glad.h>
 
 namespace Hazel
 {
@@ -24,6 +24,7 @@ namespace Hazel
 		dispatcher.Dispatch<WindowCloseEvent>(BIND_EVENT_FN(OnWindowClose));
 		dispatcher.Dispatch<KeyPressedEvent>(BIND_EVENT_FN(OnKeypress));
 
+		// going through the layerstack top to bottom and consume events.
 		for (auto it = m_LayerStack.end(); it != m_LayerStack.begin();)
 		{
 			(*--it)->OnEvent(event);
