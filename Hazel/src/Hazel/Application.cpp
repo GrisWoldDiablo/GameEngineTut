@@ -18,12 +18,32 @@ namespace Hazel
 	{
 	}
 
-	void Application::OnEvent(Event& e)
+	void Application::OnEvent(Event& event)
 	{
-		EventDispatcher dispatcher(e);
+		EventDispatcher dispatcher(event);
 		dispatcher.Dispatch<WindowCloseEvent>(BIND_EVENT_FN(OnWindowClose));
+		dispatcher.Dispatch<KeyPressedEvent>(BIND_EVENT_FN(OnKeypress));
 
-		HZ_CORE_LTRACE("{0}", e);
+		for (auto it = m_LayerStack.end(); it != m_LayerStack.begin();)
+		{
+			(*--it)->OnEvent(event);
+			if (event.Handled)
+			{
+				break;
+			}
+		}
+
+		HZ_CORE_LTRACE("{0}", event);
+	}
+
+	void Application::PushLayer(Layer* layer)
+	{
+		m_LayerStack.PushLayer(layer);
+	}
+
+	void Application::PushOverlay(Layer* overlay)
+	{
+		m_LayerStack.PopOverlay(overlay);
 	}
 
 	void Application::Run()
@@ -33,16 +53,55 @@ namespace Hazel
 
 		while (m_Running)
 		{
-			glClearColor(1, 0, 1, 1);
+			glClearColor(m_Red, m_Green, m_Blue, 1);
 			glClear(GL_COLOR_BUFFER_BIT);
-			m_Window->OnUpdate();
 
+			// Go through the layers from bottom to top
+			for (Layer* layer : m_LayerStack)
+			{
+				layer->OnUpdate();
+			}
+
+			m_Window->OnUpdate();
 		}
 	}
 
-	bool Application::OnWindowClose(WindowCloseEvent& e)
+	bool Application::OnWindowClose(WindowCloseEvent& event)
 	{
 		m_Running = false;
+		return true;
+	}
+
+	bool Application::OnKeypress(KeyPressedEvent& event)
+	{
+		
+		switch (event.GetKeyCode())
+		{
+		case 82: // 'r'
+			m_Red += 0.1f;
+			if (m_Red > 1.0f)
+			{
+				m_Red = 0.0f;
+			}
+			break;
+		case 71: // 'g'
+			m_Green += 0.1f;
+			if (m_Green > 1.0f)
+			{
+				m_Green = 0.0f;
+			}
+			break;
+		case 66: // 'b'
+			m_Blue += 0.1f;
+			if (m_Blue > 1.0f)
+			{
+				m_Blue = 0.0f;
+			}
+			break;
+		default:
+			break;
+		}
+		HZ_CORE_LDEBUG("Color : R({0}), G({1}), B({2})", m_Red, m_Green, m_Blue);
 		return true;
 	}
 }

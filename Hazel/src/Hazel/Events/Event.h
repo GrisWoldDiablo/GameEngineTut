@@ -41,6 +41,8 @@ namespace Hazel
 		friend class EventDispatcher;
 
 	public:
+		bool Handled = false;
+
 		virtual EventType GetEventType() const  = 0;
 		virtual const char* GetName() const = 0;
 		virtual int GetCategoryFlags() const = 0;
@@ -52,7 +54,6 @@ namespace Hazel
 		}
 
 	protected:
-		bool m_Handled = false;
 	};
 
 	class EventDispatcher
@@ -68,7 +69,7 @@ namespace Hazel
 		{
 			if (m_Event.GetEventType() == T::GetStaticType())
 			{
-				m_Event.m_Handled = func(*(T*)&m_Event);
+				m_Event.Handled = func(*(T*)&m_Event);
 				return true;
 			}
 			return false;
@@ -78,8 +79,8 @@ namespace Hazel
 		Event& m_Event;
 	};
 
-	inline std::ostream& operator<<(std::ostream& os, const Event& e)
+	inline std::ostream& operator<<(std::ostream& os, const Event& event)
 	{
-		return os << e.ToString();
+		return os << event.ToString();
 	}
 }
