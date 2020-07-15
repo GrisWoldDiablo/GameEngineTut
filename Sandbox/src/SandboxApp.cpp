@@ -1,7 +1,5 @@
 #include <Hazel.h>
 
-#define BIND_EVENT_FN(x) std::bind(&ExampleLayer::x, this, std::placeholders::_1)
-
 class ExampleLayer : public Hazel::Layer
 {
 public:
@@ -10,14 +8,13 @@ public:
 
 	void OnUpdate() override
 	{
-		//HZ_LINFO("ExampleLayer::Update");
+
 	}
 
 	void OnEvent(Hazel::Event& event) override
 	{
 		Hazel::EventDispatcher dispatcher(event);
-		dispatcher.Dispatch<Hazel::KeyPressedEvent>(BIND_EVENT_FN(OnKeypress));
-		//HZ_LTRACE("{0}", event);
+		dispatcher.Dispatch<Hazel::KeyPressedEvent>(HZ_BIND_EVENT_FN(ExampleLayer::OnKeypress));
 	}
 	
 	bool OnKeypress(Hazel::KeyPressedEvent& event)

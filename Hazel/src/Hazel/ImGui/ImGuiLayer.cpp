@@ -62,6 +62,7 @@ namespace Hazel
 
 	void ImGuiLayer::OnDetach()
 	{
+
 	}
 
 	void ImGuiLayer::OnUpdate()

@@ -42,10 +42,11 @@ namespace Hazel
 
 		if (!s_GLFWInitialized)
 		{
-			// TODO: glwfTerminate on system shutdown
 			int success = glfwInit();
 			HZ_CORE_ASSERT(success, "Could not initialized GLFW!");
-			glfwSetErrorCallback(GLFWErrorCallback);
+
+			// Made a static function to be the callback.
+			glfwSetErrorCallback(GLFWErrorCallback); 
 			s_GLFWInitialized = true;
 		}
 
@@ -53,48 +54,49 @@ namespace Hazel
 		glfwMakeContextCurrent(m_Window);
 		int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress); // Glad setup/initialization
 		HZ_CORE_ASSERT(status, "Failed to initialize Glad!");
+		// 
 		glfwSetWindowUserPointer(m_Window, &m_Data);
 		SetVSync(true);
 		
 		// Set GLFW callbacks
 		glfwSetWindowSizeCallback(m_Window, [](GLFWwindow* window, int width, int height)
 			{
-				auto& data = *(WindowData*)glfwGetWindowUserPointer(window);
-				data.Width = width;
-				data.Height = height;
+				auto data = (WindowData*)glfwGetWindowUserPointer(window);
+				data->Width = width;
+				data->Height = height;
 
 				WindowResizeEvent event(width, height);
-				data.EventCallback(event);
+				data->EventCallback(event);
 			});
 
 		glfwSetWindowCloseCallback(m_Window, [](GLFWwindow* window)
 			{
-				auto& data = *(WindowData*)glfwGetWindowUserPointer(window);
+				auto data = (WindowData*)glfwGetWindowUserPointer(window);
 				WindowCloseEvent event;
-				data.EventCallback(event);
+				data->EventCallback(event);
 			});
 
 		glfwSetKeyCallback(m_Window, [](GLFWwindow* window, int key, int scancode, int action, int mods)
 			{
-				auto& data = *(WindowData*)glfwGetWindowUserPointer(window);
+				auto data = (WindowData*)glfwGetWindowUserPointer(window);
 				switch (action)
 				{
 					case GLFW_PRESS:
 					{
 						KeyPressedEvent event(key, 0);
-						data.EventCallback(event);
+						data->EventCallback(event);
 						break;
 					}
 					case GLFW_RELEASE:
 					{
 						KeyReleasedEvent event(key);
-						data.EventCallback(event);
+						data->EventCallback(event);
 						break;
 					}
 					case GLFW_REPEAT:
 					{
 						KeyPressedEvent event(key, 1);
-						data.EventCallback(event);
+						data->EventCallback(event);
 						break;
 					}
 				}
@@ -102,28 +104,28 @@ namespace Hazel
 
 		glfwSetCharCallback(m_Window, [](GLFWwindow* window, unsigned int key)
 			{
-				auto& data = *(WindowData*)glfwGetWindowUserPointer(window);
+				auto data = (WindowData*)glfwGetWindowUserPointer(window);
 				KeyTypedEvent event(key);
-				data.EventCallback(event);
+				data->EventCallback(event);
 
 			});
 
 		glfwSetMouseButtonCallback(m_Window, [](GLFWwindow* window, int button, int action, int mods)
 			{
-				auto& data = *(WindowData*)glfwGetWindowUserPointer(window);
+				auto data = (WindowData*)glfwGetWindowUserPointer(window);
 
 				switch (action)
 				{
 					case GLFW_PRESS:
 					{
 						MouseButtonPressedEvent event(button);
-						data.EventCallback(event);
+						data->EventCallback(event);
 						break;
 					}
 					case GLFW_RELEASE:
 					{
 						MouseButtonReleasedEvent event(button);
-						data.EventCallback(event);
+						data->EventCallback(event);
 						break;
 					}
 				}
@@ -131,31 +133,32 @@ namespace Hazel
 
 		glfwSetScrollCallback(m_Window, [](GLFWwindow* window, double xOffset, double yOffset)
 			{
-				auto& data = *(WindowData*)glfwGetWindowUserPointer(window);
+				auto data = (WindowData*)glfwGetWindowUserPointer(window);
 
 				MouseScrolledEvent event((float)xOffset, (float)yOffset);
-				data.EventCallback(event);
+				data->EventCallback(event);
 			});
 
 		glfwSetCursorPosCallback(m_Window, [](GLFWwindow* window, double xPos, double yPos)
 			{
-				auto& data = *(WindowData*)glfwGetWindowUserPointer(window);
+				auto data = (WindowData*)glfwGetWindowUserPointer(window);
 
 				MouseMovedEvent event((float)xPos, (float)yPos);
-				data.EventCallback(event);
+				data->EventCallback(event);
 			});
 		
 		glfwSetWindowPosCallback(m_Window, [](GLFWwindow* window, int x, int y)
 			{
-				auto& data = *(WindowData*)glfwGetWindowUserPointer(window);
+				auto data = (WindowData*)glfwGetWindowUserPointer(window);
 				WindowMovedEvent event(x, y);
-				data.EventCallback(event);
+				data->EventCallback(event);
 			});
 	}
 
 	void WindowsWindow::Shutdown()
 	{
 		glfwDestroyWindow(m_Window);
+		glfwTerminate();
 	}
 
 	void WindowsWindow::OnUpdate()

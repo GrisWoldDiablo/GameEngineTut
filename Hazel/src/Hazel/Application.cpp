@@ -5,12 +5,15 @@
 
 namespace Hazel
 {
+	// Static singleton access
 	Application* Application::s_Instance = nullptr;
 
 	Application::Application()
 	{
 		HZ_CORE_ASSERT(!s_Instance, "Application already exist!")
+		// Initialize the singleton.
 		s_Instance = this;
+
 		m_Window = std::unique_ptr<Window>(Window::Create());
 		m_Window->SetEventCallback(HZ_BIND_EVENT_FN(Application::OnEvent));
 	}
@@ -71,11 +74,6 @@ namespace Hazel
 
 			m_Window->OnUpdate();
 		}
-
-		for (Layer* layer : m_LayerStack)
-		{
-			layer->OnDetach();
-		}
 	}
 
 	bool Application::OnWindowClose(WindowCloseEvent& event)
@@ -86,7 +84,7 @@ namespace Hazel
 
 	bool Application::OnKeypress(KeyPressedEvent& event)
 	{
-		
+		bool colorChanged = false;
 		switch (event.GetKeyCode())
 		{
 		case 82: // 'r'
@@ -95,6 +93,7 @@ namespace Hazel
 			{
 				m_Red = 0.0f;
 			}
+			colorChanged = true;
 			break;
 		case 71: // 'g'
 			m_Green += 0.1f;
@@ -102,6 +101,7 @@ namespace Hazel
 			{
 				m_Green = 0.0f;
 			}
+			colorChanged = true;
 			break;
 		case 66: // 'b'
 			m_Blue += 0.1f;
@@ -109,14 +109,21 @@ namespace Hazel
 			{
 				m_Blue = 0.0f;
 			}
+			colorChanged = true;
 			break;
 		case 256: // ESC
 			m_Running = false;
+			HZ_CORE_LWARN("ESC Key pressed, exiting application.");
 			break;
 		default:
 			break;
 		}
-		HZ_CORE_LDEBUG("Color : R({0}), G({1}), B({2})", m_Red, m_Green, m_Blue);
+
+		if (colorChanged)
+		{
+			HZ_CORE_LDEBUG("Color : R({0}), G({1}), B({2})", m_Red, m_Green, m_Blue);
+		}
+
 		return true;
 	}
 }

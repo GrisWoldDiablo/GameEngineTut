@@ -67,6 +67,6 @@ namespace Hazel
 			return ss.str();
 		}
 
-		EVENT_CLASS_TYPE(KeyTyped);
+		EVENT_CLASS_TYPE(KeyTyped)
 	};
 }
