@@ -24,6 +24,9 @@ namespace Hazel
 		void PushLayer(Layer* layer);
 		void PushOverlay(Layer* overlay);
 
+		inline static Application& Get() { return *s_Instance; }
+		inline Window& GetWindow() { return *m_Window; }
+
 	private:
 		bool OnWindowClose(WindowCloseEvent& event);
 		bool OnKeypress(KeyPressedEvent& event);
@@ -33,6 +36,9 @@ namespace Hazel
 		LayerStack m_LayerStack;
 
 		float m_Red = 0.0f, m_Green = 0.0f, m_Blue = 0.0f;
+
+	private:
+		static Application* s_Instance;
 	};
 
 	// To be define by the client.

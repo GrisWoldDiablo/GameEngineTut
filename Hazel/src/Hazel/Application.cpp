@@ -5,13 +5,14 @@
 
 namespace Hazel
 {
-	// Bind an event function.
-#define BIND_EVENT_FN(x) std::bind(&Application::x, this, std::placeholders::_1)
+	Application* Application::s_Instance = nullptr;
 
 	Application::Application()
 	{
+		HZ_CORE_ASSERT(!s_Instance, "Application already exist!")
+		s_Instance = this;
 		m_Window = std::unique_ptr<Window>(Window::Create());
-		m_Window->SetEventCallback(BIND_EVENT_FN(OnEvent));
+		m_Window->SetEventCallback(HZ_BIND_EVENT_FN(Application::OnEvent));
 	}
 
 	Application::~Application()
@@ -21,8 +22,8 @@ namespace Hazel
 	void Application::OnEvent(Event& event)
 	{
 		EventDispatcher dispatcher(event);
-		dispatcher.Dispatch<WindowCloseEvent>(BIND_EVENT_FN(OnWindowClose));
-		dispatcher.Dispatch<KeyPressedEvent>(BIND_EVENT_FN(OnKeypress));
+		dispatcher.Dispatch<WindowCloseEvent>(HZ_BIND_EVENT_FN(Application::OnWindowClose));
+		dispatcher.Dispatch<KeyPressedEvent>(HZ_BIND_EVENT_FN(Application::OnKeypress));
 
 		// going through the layerstack top to bottom and consume events.
 		for (auto it = m_LayerStack.end(); it != m_LayerStack.begin();)
@@ -34,23 +35,28 @@ namespace Hazel
 			}
 		}
 
-		HZ_CORE_LTRACE("{0}", event);
+		//HZ_CORE_LTRACE("{0}", event);
 	}
 
 	void Application::PushLayer(Layer* layer)
 	{
 		m_LayerStack.PushLayer(layer);
+		layer->OnAttach();
 	}
 
 	void Application::PushOverlay(Layer* overlay)
 	{
-		m_LayerStack.PopOverlay(overlay);
+		m_LayerStack.PushOverlay(overlay);
+		overlay->OnAttach();
 	}
 
 	void Application::Run()
 	{
 		std::printf("\n");
-		HZ_CORE_LDEBUG("Application::Run()");
+		HZ_CORE_LINFO("OpenGL Info:");
+		HZ_CORE_LINFO("  Vendor: {0}", glGetString(GL_VENDOR));
+		HZ_CORE_LINFO("  Renderer: {0}", glGetString(GL_RENDERER));
+		HZ_CORE_LINFO("  Version: {0}", glGetString(GL_VERSION));
 
 		while (m_Running)
 		{
@@ -64,6 +70,11 @@ namespace Hazel
 			}
 
 			m_Window->OnUpdate();
+		}
+
+		for (Layer* layer : m_LayerStack)
+		{
+			layer->OnDetach();
 		}
 	}
 
@@ -98,6 +109,9 @@ namespace Hazel
 			{
 				m_Blue = 0.0f;
 			}
+			break;
+		case 256: // ESC
+			m_Running = false;
 			break;
 		default:
 			break;

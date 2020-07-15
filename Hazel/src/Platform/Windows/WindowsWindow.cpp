@@ -38,7 +38,7 @@ namespace Hazel
 		m_Data.Width = props.Width;
 		m_Data.Height = props.Height;
 
-		HZ_CORE_LINFO("Creating window {0} ({1} x {2})", props.Title, props.Width, props.Height);
+		HZ_CORE_LINFO("Creating window : {0}, ({1} x {2})", props.Title, props.Width, props.Height);
 
 		if (!s_GLFWInitialized)
 		{
@@ -59,7 +59,7 @@ namespace Hazel
 		// Set GLFW callbacks
 		glfwSetWindowSizeCallback(m_Window, [](GLFWwindow* window, int width, int height)
 			{
-				auto data = *(WindowData*)glfwGetWindowUserPointer(window);
+				auto& data = *(WindowData*)glfwGetWindowUserPointer(window);
 				data.Width = width;
 				data.Height = height;
 
@@ -69,14 +69,14 @@ namespace Hazel
 
 		glfwSetWindowCloseCallback(m_Window, [](GLFWwindow* window)
 			{
-				auto data = *(WindowData*)glfwGetWindowUserPointer(window);
+				auto& data = *(WindowData*)glfwGetWindowUserPointer(window);
 				WindowCloseEvent event;
 				data.EventCallback(event);
 			});
 
 		glfwSetKeyCallback(m_Window, [](GLFWwindow* window, int key, int scancode, int action, int mods)
 			{
-				auto data = *(WindowData*)glfwGetWindowUserPointer(window);
+				auto& data = *(WindowData*)glfwGetWindowUserPointer(window);
 				switch (action)
 				{
 					case GLFW_PRESS:
@@ -100,9 +100,17 @@ namespace Hazel
 				}
 			});
 
+		glfwSetCharCallback(m_Window, [](GLFWwindow* window, unsigned int key)
+			{
+				auto& data = *(WindowData*)glfwGetWindowUserPointer(window);
+				KeyTypedEvent event(key);
+				data.EventCallback(event);
+
+			});
+
 		glfwSetMouseButtonCallback(m_Window, [](GLFWwindow* window, int button, int action, int mods)
 			{
-				auto data = *(WindowData*)glfwGetWindowUserPointer(window);
+				auto& data = *(WindowData*)glfwGetWindowUserPointer(window);
 
 				switch (action)
 				{
@@ -123,7 +131,7 @@ namespace Hazel
 
 		glfwSetScrollCallback(m_Window, [](GLFWwindow* window, double xOffset, double yOffset)
 			{
-				auto data = *(WindowData*)glfwGetWindowUserPointer(window);
+				auto& data = *(WindowData*)glfwGetWindowUserPointer(window);
 
 				MouseScrolledEvent event((float)xOffset, (float)yOffset);
 				data.EventCallback(event);
@@ -131,7 +139,7 @@ namespace Hazel
 
 		glfwSetCursorPosCallback(m_Window, [](GLFWwindow* window, double xPos, double yPos)
 			{
-				auto data = *(WindowData*)glfwGetWindowUserPointer(window);
+				auto& data = *(WindowData*)glfwGetWindowUserPointer(window);
 
 				MouseMovedEvent event((float)xPos, (float)yPos);
 				data.EventCallback(event);
@@ -139,7 +147,7 @@ namespace Hazel
 		
 		glfwSetWindowPosCallback(m_Window, [](GLFWwindow* window, int x, int y)
 			{
-				auto data = *(WindowData*)glfwGetWindowUserPointer(window);
+				auto& data = *(WindowData*)glfwGetWindowUserPointer(window);
 				WindowMovedEvent event(x, y);
 				data.EventCallback(event);
 			});

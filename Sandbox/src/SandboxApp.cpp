@@ -17,14 +17,14 @@ public:
 	{
 		Hazel::EventDispatcher dispatcher(event);
 		dispatcher.Dispatch<Hazel::KeyPressedEvent>(BIND_EVENT_FN(OnKeypress));
-		HZ_LTRACE("{0}", event);
+		//HZ_LTRACE("{0}", event);
 	}
 	
 	bool OnKeypress(Hazel::KeyPressedEvent& event)
 	{
 		if (event.GetKeyCode() == 81) // 'q'
 		{
-			HZ_LINFO("Press {0}", event);
+			HZ_LINFO("Example Layer : {0}", event);
 			return true;
 		}
 		return false;
@@ -37,6 +37,7 @@ public:
 	Sandbox()
 	{
 		PushLayer(new ExampleLayer());
+		PushOverlay(new Hazel::ImGuiLayer());
 	}
 
 	~Sandbox()
