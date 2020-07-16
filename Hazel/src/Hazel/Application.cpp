@@ -15,7 +15,7 @@ namespace Hazel
 		s_Instance = this;
 
 		m_Window = std::unique_ptr<Window>(Window::Create());
-		m_Window->SetEventCallback(HZ_BIND_EVENT_FN(Application::OnEvent));
+		m_Window->SetEventCallback(HZ_BIND_EVENT_FN(OnEvent));
 	}
 
 	Application::~Application()
@@ -25,8 +25,8 @@ namespace Hazel
 	void Application::OnEvent(Event& event)
 	{
 		EventDispatcher dispatcher(event);
-		dispatcher.Dispatch<WindowCloseEvent>(HZ_BIND_EVENT_FN(Application::OnWindowClose));
-		dispatcher.Dispatch<KeyPressedEvent>(HZ_BIND_EVENT_FN(Application::OnKeypress));
+		dispatcher.Dispatch<WindowCloseEvent>(HZ_BIND_EVENT_FN(OnWindowClose));
+		dispatcher.Dispatch<KeyPressedEvent>(HZ_BIND_EVENT_FN(OnKeypress));
 
 		// going through the layerstack top to bottom and consume events.
 		for (auto it = m_LayerStack.end(); it != m_LayerStack.begin();)

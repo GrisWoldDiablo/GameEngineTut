@@ -14,7 +14,7 @@ public:
 	void OnEvent(Hazel::Event& event) override
 	{
 		Hazel::EventDispatcher dispatcher(event);
-		dispatcher.Dispatch<Hazel::KeyPressedEvent>(HZ_BIND_EVENT_FN(ExampleLayer::OnKeypress));
+		dispatcher.Dispatch<Hazel::KeyPressedEvent>(HZ_BIND_EVENT_FN(OnKeypress));
 	}
 	
 	bool OnKeypress(Hazel::KeyPressedEvent& event)

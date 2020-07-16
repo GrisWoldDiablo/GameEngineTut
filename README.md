@@ -9,6 +9,4 @@ use `git clone --recursive https://github.com/GrisWoldDiablo/GameEngineTut` to p
 
 `--recursive` will get all the submodules initialized also.
 
-Then run the bat file to create the visual studio project 
-
-The project need to be compiled/builded twice because the first time, the post build command, dll copy, will fail since the copy folder does not exist.
+Then run the bat file to create the visual studio solution and projects
