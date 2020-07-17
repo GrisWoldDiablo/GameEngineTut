@@ -1,5 +1,7 @@
 #include <Hazel.h>
 
+#include "Hazel/Input.h"
+
 class ExampleLayer : public Hazel::Layer
 {
 public:
@@ -8,7 +10,12 @@ public:
 
 	void OnUpdate() override
 	{
-
+		auto [xPos, yPos] = Hazel::Input::GetMousePosition();
+		auto state = Hazel::Input::IsKeyPressed(340);
+		if (state)
+		{
+			HZ_LTRACE("{0}, {1}", xPos, yPos);
+		}
 	}
 
 	void OnEvent(Hazel::Event& event) override
@@ -39,7 +46,7 @@ public:
 
 	~Sandbox()
 	{
-
+		
 	}
 };
 

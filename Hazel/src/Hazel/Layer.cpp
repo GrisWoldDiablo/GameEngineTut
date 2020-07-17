@@ -4,7 +4,7 @@
 namespace Hazel
 {
 	Layer::Layer(const std::string& debugName)
-		: m_DebugName(debugName) {}
+		: _debugName(debugName) {}
 
-	Layer::~Layer() {}
+	Layer::~Layer() = default;
 }

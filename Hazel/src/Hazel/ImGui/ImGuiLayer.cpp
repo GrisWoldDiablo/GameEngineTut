@@ -70,8 +70,8 @@ namespace Hazel
 		ImGuiIO& io = ImGui::GetIO();
 
 		float time = (float)glfwGetTime();
-		io.DeltaTime = m_Time > 0.0f ? (time - m_Time) : (1.0f / 60.0f);
-		m_Time = time;
+		io.DeltaTime = _time > 0.0f ? (time - _time) : (1.0f / 60.0f);
+		_time = time;
 
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui::NewFrame();
@@ -146,13 +146,17 @@ namespace Hazel
 		ImGuiIO& io = ImGui::GetIO();
 		io.KeysDown[event.GetKeyCode()] = false;
 
+		io.KeyCtrl = io.KeysDown[GLFW_KEY_LEFT_CONTROL] || io.KeysDown[GLFW_KEY_RIGHT_CONTROL];
+		io.KeyShift = io.KeysDown[GLFW_KEY_LEFT_SHIFT] || io.KeysDown[GLFW_KEY_RIGHT_SHIFT];
+		io.KeyAlt = io.KeysDown[GLFW_KEY_LEFT_ALT] || io.KeysDown[GLFW_KEY_RIGHT_ALT];
+		io.KeySuper = io.KeysDown[GLFW_KEY_LEFT_SUPER] || io.KeysDown[GLFW_KEY_RIGHT_SUPER];
 		return false;
 	}
 
 	bool ImGuiLayer::OnKeyTypedEvent(KeyTypedEvent& event)
 	{
 		ImGuiIO& io = ImGui::GetIO();
-		int keycode = event.GetKeyCode();
+		auto keycode = event.GetKeyCode();
 		if (keycode > 0 && keycode < 0x10000)
 		{
 			io.AddInputCharacter((unsigned short)keycode);

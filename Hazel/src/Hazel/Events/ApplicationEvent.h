@@ -7,15 +7,15 @@ namespace Hazel
 	{
 	public:
 		WindowResizeEvent(unsigned int width, unsigned int height)
-			: m_Width(width), m_Height(height){}
+			: _width(width), _height(height){}
 
-		inline unsigned int GetWidth() const { return m_Width; }
-		inline unsigned int GetHeight() const { return m_Height; }
+		inline unsigned int GetWidth() const { return _width; }
+		inline unsigned int GetHeight() const { return _height; }
 
 		std::string ToString() const override
 		{
 			std::stringstream ss;
-			ss << "WindowResizeEvent : " << m_Width << " x " << m_Height;
+			ss << "WindowResizeEvent : " << _width << " x " << _height;
 			return ss.str();
 		}
 
@@ -23,13 +23,13 @@ namespace Hazel
 		EVENT_CLASS_CATEGORY(EventCategoryApplication)
 	
 	private:
-		unsigned int m_Width, m_Height;
+		unsigned int _width, _height;
 	};
 
 	class HAZEL_API WindowCloseEvent : public Event
 	{
 	public:
-		WindowCloseEvent() {}
+		WindowCloseEvent() = default;
 
 		EVENT_CLASS_TYPE(WindowClose)
 		EVENT_CLASS_CATEGORY(EventCategoryApplication)
@@ -39,15 +39,15 @@ namespace Hazel
 	{
 	public:
 		WindowMovedEvent(int x, int y)
-			: m_WindowX(x), m_WindowY(y) {}
+			: _windowX(x), _windowY(y) {}
 
-		inline unsigned int GetX() const { return m_WindowX; }
-		inline unsigned int GetY() const { return m_WindowY; }
+		inline unsigned int GetX() const { return _windowX; }
+		inline unsigned int GetY() const { return _windowY; }
 
 		std::string ToString() const override
 		{
 			std::stringstream ss;
-			ss << "WindowMovedEvent : (" << m_WindowX << "," << m_WindowY << ")";
+			ss << "WindowMovedEvent : (" << _windowX << "," << _windowY << ")";
 			return ss.str();
 		}
 
@@ -55,13 +55,13 @@ namespace Hazel
 		EVENT_CLASS_CATEGORY(EventCategoryApplication)
 
 	private:
-		unsigned int m_WindowX, m_WindowY;
+		unsigned int _windowX, _windowY;
 	};
 
 	class HAZEL_API AppTickEvent : public Event
 	{
 	public:
-		AppTickEvent() {}
+		AppTickEvent() = default;
 
 		EVENT_CLASS_TYPE(AppTick)
 		EVENT_CLASS_CATEGORY(EventCategoryApplication)
@@ -71,7 +71,7 @@ namespace Hazel
 	class HAZEL_API AppUpdateEvent : public Event
 	{
 	public:
-		AppUpdateEvent() {}
+		AppUpdateEvent() = default;
 
 		EVENT_CLASS_TYPE(AppUpdate)
 		EVENT_CLASS_CATEGORY(EventCategoryApplication)
@@ -81,7 +81,7 @@ namespace Hazel
 	class HAZEL_API AppRenderEvent : public Event
 	{
 	public:
-		AppRenderEvent() {}
+		AppRenderEvent() = default;
 
 		EVENT_CLASS_TYPE(AppRender)
 		EVENT_CLASS_CATEGORY(EventCategoryApplication)

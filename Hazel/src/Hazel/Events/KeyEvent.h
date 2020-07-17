@@ -6,36 +6,36 @@ namespace Hazel
 	class HAZEL_API KeyEvent : public Event
 	{
 	public:
-		inline int GetKeyCode() const { return m_KeyCode; }
+		inline int GetKeyCode() const { return _keyCode; }
 
 		EVENT_CLASS_CATEGORY(EventCategoryKeyboard | EventCategoryInput)
 
 	protected:
 		KeyEvent(int keyCode) 
-			: m_KeyCode(keyCode) {}
+			: _keyCode(keyCode) {}
 
-		int m_KeyCode;
+		int _keyCode;
 	};
 
 	class HAZEL_API KeyPressedEvent : public KeyEvent
 	{
 	public:
 		KeyPressedEvent(int keyCode, int repeatCount)
-			: KeyEvent(keyCode), m_RepeatCount(repeatCount) {}
+			: KeyEvent(keyCode), _repeatCount(repeatCount) {}
 
-		inline int GetRepeatCount() const { return m_RepeatCount; }
+		inline int GetRepeatCount() const { return _repeatCount; }
 
 		std::string ToString() const override
 		{
 			std::stringstream ss;
-			ss << "KeyPressedEvent : " << m_KeyCode << " (" << m_RepeatCount << " repeats)";
+			ss << "KeyPressedEvent : " << _keyCode << " (" << _repeatCount << " repeats)";
 			return ss.str();
 		}
 
 		EVENT_CLASS_TYPE(KeyPressed)
 
 	private:
-		int m_RepeatCount;
+		int _repeatCount;
 	};
 
 	class HAZEL_API KeyReleasedEvent : public KeyEvent
@@ -47,7 +47,7 @@ namespace Hazel
 		std::string ToString() const override
 		{
 			std::stringstream ss;
-			ss << "KeyReleasedEvent : " << m_KeyCode;
+			ss << "KeyReleasedEvent : " << _keyCode;
 			return ss.str();
 		}
 
@@ -63,7 +63,7 @@ namespace Hazel
 		std::string ToString() const override
 		{
 			std::stringstream ss;
-			ss << "KeyTypedEvent : " << m_KeyCode;
+			ss << "KeyTypedEvent : " << _keyCode;
 			return ss.str();
 		}
 

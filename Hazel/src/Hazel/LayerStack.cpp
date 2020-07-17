@@ -5,12 +5,12 @@ namespace Hazel
 {
 	LayerStack::LayerStack()
 	{
-		m_LayerInsert = m_Layers.begin();
+		_layerInsert = _layers.begin();
 	}
 
 	LayerStack::~LayerStack()
 	{
-		for (Layer* layer : m_Layers)
+		for (auto* layer : _layers)
 		{
 			delete layer;
 		}
@@ -18,30 +18,30 @@ namespace Hazel
 
 	void LayerStack::PushLayer(Layer* layer)
 	{
-		m_LayerInsert = m_Layers.emplace(m_LayerInsert, layer);
+		_layerInsert = _layers.emplace(_layerInsert, layer);
 	}
 
 	void LayerStack::PushOverlay(Layer* overlay)
 	{
-		m_Layers.emplace_back(overlay);
+		_layers.emplace_back(overlay);
 	}
 
 	void LayerStack::PopLayer(Layer* layer)
 	{
-		auto it = std::find(m_Layers.begin(), m_Layers.end(), layer);
-		if (it != m_Layers.end())
+		auto it = std::find(_layers.begin(), _layers.end(), layer);
+		if (it != _layers.end())
 		{
-			m_Layers.erase(it);
-			m_LayerInsert--;
+			_layers.erase(it);
+			_layerInsert--;
 		}
 	}
 
 	void LayerStack::PopOverlay(Layer* overlay)
 	{
-		auto it = std::find(m_Layers.begin(), m_Layers.end(), overlay);
-		if (it != m_Layers.end())
+		auto it = std::find(_layers.begin(), _layers.end(), overlay);
+		if (it != _layers.end())
 		{
-			m_Layers.erase(it);
+			_layers.erase(it);
 		}
 	}
 }

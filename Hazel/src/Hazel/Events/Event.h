@@ -52,8 +52,7 @@ namespace Hazel
 		{
 			return GetCategoryFlags() & category;
 		}
-
-	protected:
+		
 	};
 
 	class EventDispatcher
@@ -62,21 +61,21 @@ namespace Hazel
 		using EventFn = std::function<bool(T&)>;
 	public:
 		EventDispatcher(Event& event)
-			: m_Event(event) {}
+			: _event(event) {}
 
 		template<typename T>
 		bool Dispatch(EventFn<T> func)
 		{
-			if (m_Event.GetEventType() == T::GetStaticType())
+			if (_event.GetEventType() == T::GetStaticType())
 			{
-				m_Event.Handled = func(*(T*)&m_Event);
+				_event.Handled = func(*(T*)&_event);
 				return true;
 			}
 			return false;
 		}
 
 	private:
-		Event& m_Event;
+		Event& _event;
 	};
 
 	inline std::ostream& operator<<(std::ostream& os, const Event& event)

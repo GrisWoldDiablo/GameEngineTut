@@ -17,12 +17,12 @@ namespace Hazel
 		void PopLayer(Layer* layer);
 		void PopOverlay(Layer* overlay);
 
-		std::vector<Layer*>::iterator begin() { return m_Layers.begin(); }
-		std::vector<Layer*>::iterator end() { return m_Layers.end(); }
+		std::vector<Layer*>::iterator begin() { return _layers.begin(); }
+		std::vector<Layer*>::iterator end() { return _layers.end(); }
 
 	private:
-		std::vector<Layer*> m_Layers;
-		std::vector<Layer*>::iterator m_LayerInsert;
+		std::vector<Layer*> _layers;
+		std::vector<Layer*>::iterator _layerInsert;
 	};
 }
 

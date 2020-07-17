@@ -15,10 +15,10 @@ namespace Hazel
 		virtual void OnUpdate() {}
 		virtual void OnEvent(Event& event) {}
 
-		inline const std::string& GetName() const { return m_DebugName; }
+		inline const std::string& GetName() const { return _debugName; }
 
 	protected:
-		std::string m_DebugName;
+		std::string _debugName;
 	};
 
 }

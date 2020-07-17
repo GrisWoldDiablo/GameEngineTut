@@ -15,7 +15,7 @@ namespace Hazel
 	{
 	public:
 		Application();
-		virtual ~Application();
+		virtual ~Application() = default;
 
 		void Run();
 
@@ -24,21 +24,21 @@ namespace Hazel
 		void PushLayer(Layer* layer);
 		void PushOverlay(Layer* overlay);
 
-		inline static Application& Get() { return *s_Instance; }
-		inline Window& GetWindow() { return *m_Window; }
+		inline static Application& Get() { return *_sInstance; }
+		inline Window& GetWindow() { return *_window; }
 
 	private:
 		bool OnWindowClose(WindowCloseEvent& event);
 		bool OnKeypress(KeyPressedEvent& event);
 
-		std::unique_ptr<Window> m_Window;
-		bool m_Running = true;
-		LayerStack m_LayerStack;
+		std::unique_ptr<Window> _window;
+		bool _running = true;
+		LayerStack _layerStack;
 
-		float m_Red = 0.0f, m_Green = 0.0f, m_Blue = 0.0f;
+		float _red = 0.0f, _green = 0.0f, _blue = 0.0f;
 
 	private:
-		static Application* s_Instance;
+		static Application* _sInstance;
 	};
 
 	// To be define by the client.

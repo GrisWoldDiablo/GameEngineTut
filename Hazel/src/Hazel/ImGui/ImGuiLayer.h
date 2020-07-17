@@ -13,10 +13,10 @@ namespace Hazel
 		ImGuiLayer();
 		~ImGuiLayer();
 
-		void OnAttach();
-		void OnDetach();
-		void OnUpdate();
-		void OnEvent(Event& event);
+		virtual void OnAttach() override;
+		virtual void OnDetach() override;
+		virtual void OnUpdate() override;
+		virtual void OnEvent(Event& event) override;
 
 	private:
 		bool OnMouseButtonPressedEvent(MouseButtonPressedEvent& event);
@@ -29,6 +29,6 @@ namespace Hazel
 		bool OnWindowResizeEvent(WindowResizeEvent& event);
 
 	private:
-		float m_Time = 0.0f;
+		float _time = 0.0f;
 	};
 }
