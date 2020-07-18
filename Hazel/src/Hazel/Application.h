@@ -6,6 +6,8 @@
 #include "Hazel/Events/ApplicationEvent.h"
 #include "Hazel/Events/KeyEvent.h"
 
+#include "Hazel/ImGui/ImGuiLayer.h"
+
 namespace Hazel
 {
 	/// <summary>
@@ -32,6 +34,7 @@ namespace Hazel
 		bool OnKeypress(KeyPressedEvent& event);
 
 		std::unique_ptr<Window> _window;
+		ImGuiLayer* _imGuiLayer;
 		bool _running = true;
 		LayerStack _layerStack;
 

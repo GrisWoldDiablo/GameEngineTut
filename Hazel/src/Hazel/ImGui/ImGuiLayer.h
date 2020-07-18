@@ -15,19 +15,10 @@ namespace Hazel
 
 		virtual void OnAttach() override;
 		virtual void OnDetach() override;
-		virtual void OnUpdate() override;
-		virtual void OnEvent(Event& event) override;
+		virtual void OnImGuiRender() override;
 
-	private:
-		bool OnMouseButtonPressedEvent(MouseButtonPressedEvent& event);
-		bool OnMouseButtonReleasedEvent(MouseButtonReleasedEvent& event);
-		bool OnMouseMovedEvent(MouseMovedEvent& event);
-		bool OnMouseScrolledEvent(MouseScrolledEvent& event);
-		bool OnKeyPressedEvent(KeyPressedEvent& event);
-		bool OnKeyReleasedEvent(KeyReleasedEvent& event);
-		bool OnKeyTypedEvent(KeyTypedEvent& event);
-		bool OnWindowResizeEvent(WindowResizeEvent& event);
-
+		void Begin();
+		void End();
 	private:
 		float _time = 0.0f;
 	};

@@ -3,10 +3,7 @@
 
 namespace Hazel
 {
-	LayerStack::LayerStack()
-	{
-		_layerInsert = _layers.begin();
-	}
+	LayerStack::LayerStack() = default;
 
 	LayerStack::~LayerStack()
 	{
@@ -18,7 +15,8 @@ namespace Hazel
 
 	void LayerStack::PushLayer(Layer* layer)
 	{
-		_layerInsert = _layers.emplace(_layerInsert, layer);
+		_layers.emplace(_layers.begin() + _layerInsertIndex, layer);
+		_layerInsertIndex++;
 	}
 
 	void LayerStack::PushOverlay(Layer* overlay)
@@ -32,7 +30,7 @@ namespace Hazel
 		if (it != _layers.end())
 		{
 			_layers.erase(it);
-			_layerInsert--;
+			_layerInsertIndex--;
 		}
 	}
 
