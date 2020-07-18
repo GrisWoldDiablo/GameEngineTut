@@ -12,9 +12,9 @@ namespace Hazel
 	static bool s_GLFWInitialized = false;
 
 	// The callback fucntion to errors from GLFW.
-	static void GLFWErrorCallback(int error_code, const char* description)
+	static void GLFWErrorCallback(int errorCode, const char* description)
 	{
-		HZ_CORE_LERROR("GLFW Error ({0}) : {1}", error_code, description);
+		HZ_CORE_LERROR("GLFW Error ({0}) : {1}", errorCode, description);
 	}
 
 	Window* Window::Create(const WindowProps& props)
