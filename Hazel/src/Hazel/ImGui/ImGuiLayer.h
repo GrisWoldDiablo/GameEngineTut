@@ -15,10 +15,10 @@ namespace Hazel
 
 		virtual void OnAttach() override;
 		virtual void OnDetach() override;
-		virtual void OnImGuiRender() override;
+		virtual void OnImGuiRender() override; // Generate what is on the frame.
 
-		void Begin();
-		void End();
+		void Begin(); // Start a new frame.
+		void End(); // Send the new frame
 	private:
 		float _time = 0.0f;
 	};

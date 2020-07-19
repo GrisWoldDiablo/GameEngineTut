@@ -17,6 +17,7 @@ namespace Hazel
 		_window = std::unique_ptr<Window>(Window::Create());
 		_window->SetEventCallback(HZ_BIND_EVENT_FN(OnEvent));
 
+		// Create ImGui and push it to the layer stack as an overlay.
 		_imGuiLayer = new ImGuiLayer();
 		PushOverlay(_imGuiLayer);
 	}
@@ -72,13 +73,11 @@ namespace Hazel
 	void Application::PushLayer(Layer* layer)
 	{
 		_layerStack.PushLayer(layer);
-		layer->OnAttach();
 	}
 
 	void Application::PushOverlay(Layer* overlay)
 	{
 		_layerStack.PushOverlay(overlay);
-		overlay->OnAttach();
 	}
 
 	

@@ -6,6 +6,9 @@ namespace Hazel
 {
 	// Events in Hazel are currently blocking.
 
+	/// <summary>
+	/// The type of the event.
+	/// </summary>
 	enum class EventType
 	{
 		None = 0,
@@ -15,6 +18,9 @@ namespace Hazel
 		MouseButtonPressed, MouseButtonReleased, MouseMoved, MouseScrolled
 	};
 
+	/// <summary>
+	/// The category the event is part of.
+	/// </summary>
 	enum EventCategory
 	{
 		None = 0,
@@ -55,6 +61,9 @@ namespace Hazel
 		
 	};
 
+	/// <summary>
+	/// The class that will send the event to be processed.
+	/// </summary>
 	class EventDispatcher
 	{
 		template<typename T>

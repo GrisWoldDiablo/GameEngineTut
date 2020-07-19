@@ -13,9 +13,7 @@
 namespace Hazel
 {
 	ImGuiLayer::ImGuiLayer()
-		:Layer("ImGuiLayer")
-	{
-	}
+		:Layer("ImGuiLayer") {}
 
 	ImGuiLayer::~ImGuiLayer() = default;
 
@@ -53,6 +51,7 @@ namespace Hazel
 
 	void ImGuiLayer::OnDetach()
 	{
+		// Clean ImGui
 		ImGui_ImplOpenGL3_Shutdown();
 		ImGui_ImplGlfw_Shutdown();
 		ImGui::DestroyContext();

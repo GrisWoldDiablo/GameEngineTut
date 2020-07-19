@@ -32,5 +32,5 @@
 // This macro is for enum flags.
 #define BIT(x) (1 << (x))
 
-// This macro is to bind functions for callbacks, now uses lamda for faster response.
+// This macro is to bind functions for callbacks, now uses lambda for faster response.
 #define HZ_BIND_EVENT_FN(fn) [this](auto&&... args) -> decltype(auto) { return this->fn(std::forward<decltype(args)>(args)...); }
