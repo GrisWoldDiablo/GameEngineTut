@@ -7,7 +7,7 @@
 
 namespace Hazel
 {
-	class HAZEL_API ImGuiLayer : public Layer
+	class HAZEL_API ImGuiLayer final : public Layer
 	{
 	public:
 		ImGuiLayer();
@@ -19,7 +19,5 @@ namespace Hazel
 
 		void Begin(); // Start a new frame.
 		void End(); // Send the new frame
-	private:
-		float _time = 0.0f;
 	};
 }
