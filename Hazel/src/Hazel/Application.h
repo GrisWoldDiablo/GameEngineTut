@@ -37,8 +37,9 @@ namespace Hazel
 		ImGuiLayer* _imGuiLayer;
 		bool _running = true;
 		LayerStack _layerStack;
-
-		float _red = 0.0f, _green = 0.0f, _blue = 0.0f;
+		
+	public:
+		float* ClearColor;
 
 	private:
 		static Application* _sInstance;

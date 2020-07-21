@@ -1,10 +1,13 @@
 #include <Hazel.h>
-
+#include <imgui/imgui.h>
 class ExampleLayer : public Hazel::Layer
 {
 public:
 	ExampleLayer()
-		: Layer("Example") {}
+		: Layer("Example")
+	{
+		_color = Hazel::Application::Get().ClearColor;
+	}
 
 	void OnUpdate() override
 	{
@@ -18,7 +21,19 @@ public:
 		{
 			HZ_LTRACE("Tab being pressed!!");
 		}
+		state = Hazel::Input::IsMouseButtonPressed(HZ_MOUSE_BUTTON_MIDDLE);
+		if (state)
+		{
+			HZ_LTRACE("Color : R({0}), G({1}), B({2})", _color[0], _color[1], _color[2]);
+		}
+	}
 
+	void OnImGuiRender() override
+	{
+		ImGui::Begin("Select your background Color.");
+		ImGui::TextColored(ImVec4(_color[0], _color[1], _color[2],_color[3]),"Color");
+		ImGui::ColorPicker4("Color", _color, ImGuiColorEditFlags_InputRGB);
+		ImGui::End();
 	}
 
 	void OnEvent(Hazel::Event& event) override
@@ -36,6 +51,7 @@ public:
 		}
 		return false;
 	}
+	float* _color;
 };
 
 class Sandbox : public Hazel::Application

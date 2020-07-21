@@ -20,6 +20,7 @@ namespace Hazel
 		// Create ImGui and push it to the layer stack as an overlay.
 		_imGuiLayer = new ImGuiLayer();
 		PushOverlay(_imGuiLayer);
+		ClearColor = new float[4]{ 1.0f,1.0f,1.0f,1.0f };
 	}
 	
 	void Application::Run()
@@ -32,7 +33,7 @@ namespace Hazel
 
 		while (_running)
 		{
-			glClearColor(_red, _green, _blue, 1);
+			glClearColor(ClearColor[0], ClearColor[1], ClearColor[2], ClearColor[3]);
 			glClear(GL_COLOR_BUFFER_BIT);
 
 			// Go through the layers from bottom to top
@@ -93,26 +94,26 @@ namespace Hazel
 		switch (event.GetKeyCode())
 		{
 		case 82: // 'r'
-			_red += 0.1f;
-			if (_red > 1.0f)
+			ClearColor[0] += 0.1f;
+			if (ClearColor[0] > 1.0f)
 			{
-				_red = 0.0f;
+				ClearColor[0] = 0.0f;
 			}
 			colorChanged = true;
 			break;
 		case 71: // 'g'
-			_green += 0.1f;
-			if (_green > 1.0f)
+			ClearColor[1] += 0.1f;
+			if (ClearColor[1] > 1.0f)
 			{
-				_green = 0.0f;
+				ClearColor[1] = 0.0f;
 			}
 			colorChanged = true;
 			break;
 		case 66: // 'b'
-			_blue += 0.1f;
-			if (_blue > 1.0f)
+			ClearColor[2] += 0.1f;
+			if (ClearColor[2] > 1.0f)
 			{
-				_blue = 0.0f;
+				ClearColor[2] = 0.0f;
 			}
 			colorChanged = true;
 			break;
@@ -126,7 +127,7 @@ namespace Hazel
 
 		if (colorChanged)
 		{
-			HZ_CORE_LDEBUG("Color : R({0}), G({1}), B({2})", _red, _green, _blue);
+			HZ_CORE_LDEBUG("Color : R({0}), G({1}), B({2})", ClearColor[0], ClearColor[1], ClearColor[1]);
 		}
 
 		return true;
