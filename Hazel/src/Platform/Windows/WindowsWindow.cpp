@@ -5,13 +5,15 @@
 #include "Hazel/Events/MouseEvent.h"
 #include "Hazel/Events/KeyEvent.h"
 
+#include "Platform/OpenGL/OpenGLContext.h"
+
 #include <glad/glad.h>
 
 namespace Hazel
 {
-	static bool s_GLFWInitialized = false;
+	static bool sGLFWInitialized = false;
 
-	// The callback fucntion to errors from GLFW.
+	// The callback function to errors from GLFW.
 	static void GLFWErrorCallback(int errorCode, const char* description)
 	{
 		HZ_CORE_LERROR("GLFW Error ({0}) : {1}", errorCode, description);
@@ -39,22 +41,24 @@ namespace Hazel
 		_data.Height = props.Height;
 
 		HZ_CORE_LINFO("Creating window : {0}, ({1} x {2})", props.Title, props.Width, props.Height);
+		
 
-		if (!s_GLFWInitialized)
+		if (!sGLFWInitialized)
 		{
-			int success = glfwInit();
+			auto success = glfwInit();
 			HZ_CORE_ASSERT(success, "Could not initialized GLFW!");
 
 			// Made a static function to be the callback.
 			glfwSetErrorCallback(GLFWErrorCallback); 
-			s_GLFWInitialized = true;
+			sGLFWInitialized = true;
 		}
 
 		_window = glfwCreateWindow((int)_data.Width, (int)_data.Height, _data.Title.c_str(), nullptr, nullptr);
-		glfwMakeContextCurrent(_window);
-		int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress); // Glad setup/initialization
-		HZ_CORE_ASSERT(status, "Failed to initialize Glad!");
-		// 
+
+		_context = new OpenGLContext(_window);
+		
+		_context->Init();
+		
 		glfwSetWindowUserPointer(_window, &_data);
 		SetVSync(true);
 		
@@ -164,7 +168,7 @@ namespace Hazel
 	void WindowsWindow::OnUpdate()
 	{
 		glfwPollEvents();
-		glfwSwapBuffers(_window);
+		_context->SwapBuffers();
 	}
 
 	void WindowsWindow::SetVSync(bool enable)
