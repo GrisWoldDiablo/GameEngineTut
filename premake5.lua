@@ -1,7 +1,7 @@
 workspace "Hazel"
 	architecture "x86_64"
 	startproject "Sandbox"
-	
+
 	configurations
 	{
 		"Debug",
@@ -27,19 +27,19 @@ group "Dependencies"
 	include "Hazel/vendor/GLFW"
 	include "Hazel/vendor/Glad"
 	include "Hazel/vendor/imgui"
-	
+
 group ""
 
 project "Hazel"
 	location "Hazel"
-	kind "SharedLib"
+	kind "StaticLib"
 	language "C++"
 	cppdialect "C++17"
-	staticruntime "off"
-	
+	staticruntime "on"
+
 	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
-	
+
 	pchheader "hzpch.h"
 	pchsource "Hazel/src/hzpch.cpp"
 
@@ -50,7 +50,7 @@ project "Hazel"
 		"%{prj.name}/vendor/glm/glm/**.hpp",
 		"%{prj.name}/vendor/glm/glm/**.inl",
 	}
-	
+
 	includedirs
 	{
 		"%{prj.name}/src",
@@ -61,6 +61,11 @@ project "Hazel"
 		"%{IncludeDir.glm}"
 	}
 
+	defines
+	{
+		"_CRT_SECURE_NO_WARNINGS"
+	}
+	
 	links
 	{
 		"GLFW",
@@ -71,17 +76,12 @@ project "Hazel"
 
 	filter "system:windows"
 		systemversion "latest"
-		
+
 		defines
 		{
 			"HZ_BUILD_DLL",
 			"HZ_PLATFORM_WINDOWS",
 			"GLFW_INCLUDE_NONE"
-		}
-		
-		postbuildcommands
-		{
-			("{COPY} %{cfg.buildtarget.relpath} \"../bin/" .. outputdir .. "/Sandbox/\"")
 		}
 
 	filter "configurations:Debug"
@@ -104,17 +104,17 @@ project "Sandbox"
 	kind "ConsoleApp"
 	language "C++"
 	cppdialect "C++17"
-	staticruntime "off"
-	
+	staticruntime "on"
+
 	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
-	
+
 	files
 	{
 		"%{prj.name}/src/**.h",
 		"%{prj.name}/src/**.cpp"
 	}
-	
+
 	includedirs
 	{
 		"Hazel/vendor/spdlog/include",
@@ -122,7 +122,7 @@ project "Sandbox"
 		"Hazel/vendor",
 		"%{IncludeDir.glm}"
 	}
-	
+
 	links
 	{
 		"Hazel"
@@ -130,12 +130,12 @@ project "Sandbox"
 
 	filter "system:windows"
 		systemversion "latest"
-		
+
 		defines
 		{
 			"HZ_PLATFORM_WINDOWS"
 		}
-		
+
 	filter "configurations:Debug"
 		defines "HZ_DEBUG"
 		runtime "Debug"
@@ -150,4 +150,3 @@ project "Sandbox"
 		defines "HZ_DIST"
 		runtime "Release"
 		optimize "on"
-		
