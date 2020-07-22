@@ -2,14 +2,12 @@
 
 #ifdef HZ_PLATFORM_WINDOWS
 
-extern Hazel::Application* Hazel::CreateApplication();
-
 int main(int argc, char** argv)
 {
 	Hazel::Log::Init();
 
 	// Create the application using the define function by the client.
-	auto app = Hazel::CreateApplication();
+	auto* app = Hazel::CreateApplication();
 	
 	// application run loop.
 	app->Run();

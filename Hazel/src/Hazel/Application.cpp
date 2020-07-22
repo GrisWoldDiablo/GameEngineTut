@@ -20,7 +20,7 @@ namespace Hazel
 		// Create ImGui and push it to the layer stack as an overlay.
 		_imGuiLayer = new ImGuiLayer();
 		PushOverlay(_imGuiLayer);
-		ClearColor = new float[4]{ 1.0f,1.0f,1.0f,1.0f };
+		ClearColor = new float[4]{ 0.13f, 0.0f, 0.3f, 1.0f }; // purple
 	}
 	
 	void Application::Run()

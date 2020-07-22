@@ -42,7 +42,7 @@ namespace Hazel
 		}
 
 		auto& app = Application::Get();
-		auto window = static_cast<GLFWwindow*>(app.GetWindow().GetNativeWindow());
+		auto* window = static_cast<GLFWwindow*>(app.GetWindow().GetNativeWindow());
 
 		// Setup Platform/Renderer bindings
 		ImGui_ImplGlfw_InitForOpenGL(window, true);

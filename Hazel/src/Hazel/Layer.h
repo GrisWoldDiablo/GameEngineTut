@@ -7,7 +7,7 @@ namespace Hazel
 	class HAZEL_API Layer
 	{
 	public:
-		Layer(const std::string& debugName = "Layer");
+		Layer(std::string debugName = "Layer");
 		virtual ~Layer();
 
 		virtual void OnAttach() {}

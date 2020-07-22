@@ -62,10 +62,7 @@ public:
 		PushLayer(new ExampleLayer());
 	}
 
-	~Sandbox()
-	{
-		
-	}
+	~Sandbox() = default;
 };
 
 

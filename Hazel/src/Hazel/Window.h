@@ -1,5 +1,8 @@
 #pragma once
 
+#include <utility>
+
+
 #include "hzpch.h"
 
 #include "Hazel/Core.h"
@@ -14,10 +17,10 @@ namespace Hazel
 		unsigned int Width;
 		unsigned int Height;
 
-		WindowProps(const std::string& title = "Hazel Engine",
-					unsigned int width = 1280,
-					unsigned int height = 720)
-			: Title(title), Width(width), Height(height) {}
+		WindowProps(std::string title = "Hazel Engine",
+		            unsigned int width = 1280,
+		            unsigned int height = 720)
+			: Title(std::move(title)), Width(width), Height(height) {}
 	};
 
 	// Interface representing a desktop system based Window
