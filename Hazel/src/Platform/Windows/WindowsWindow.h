@@ -8,11 +8,11 @@
 
 namespace Hazel
 {
-	class WindowsWindow : public Window
+	class WindowsWindow final : public Window
 	{
 	public:
 		WindowsWindow(const WindowProps& props);
-		virtual ~WindowsWindow();
+		~WindowsWindow();
 
 		void OnUpdate() override;
 
@@ -24,11 +24,11 @@ namespace Hazel
 		void SetVSync(bool enable) override;
 		bool IsVSync() const override;
 
-		inline virtual void* GetNativeWindow() const override { return _window; }
+		inline void* GetNativeWindow() const override { return _window; }
 
 	private:
-		virtual void Init(const WindowProps& props);
-		virtual void Shutdown();
+		void Init(const WindowProps& props);
+		void Shutdown();
 
 	private:
 		GLFWwindow* _window;
@@ -46,5 +46,4 @@ namespace Hazel
 
 		WindowData _data;
 	};
-
 }

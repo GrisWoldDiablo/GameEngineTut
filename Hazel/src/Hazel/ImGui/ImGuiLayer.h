@@ -10,9 +10,9 @@ namespace Hazel
 		ImGuiLayer();
 		~ImGuiLayer();
 
-		virtual void OnAttach() override;
-		virtual void OnDetach() override;
-		virtual void OnImGuiRender() override; // Generate what is on the frame.
+		void OnAttach() override;
+		void OnDetach() override;
+		void OnImGuiRender() override; // Generate what is on the frame.
 
 		void Begin(); // Start a new frame.
 		void End(); // Send the new frame

@@ -21,30 +21,59 @@ namespace Hazel
 		_imGuiLayer = new ImGuiLayer();
 		PushOverlay(_imGuiLayer);
 		ClearColor = new float[4]{ 0.13f, 0.0f, 0.3f, 1.0f }; // purple
+
+		// -- Draw Triangle
+		glGenVertexArrays(1, &_vertexArray);
+		glBindVertexArray(_vertexArray);
+
+		glGenBuffers(1, &_vertexBuffer);
+		glBindBuffer(GL_ARRAY_BUFFER, _vertexBuffer);
+
+		float vertices[3 * 3] =
+		{
+			-0.5f, -0.5f , 0.0f,
+			 0.5f, -0.5f , 0.0f,
+			 0.0f,  0.5f , 0.0f
+		};
+
+		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
+
+		glGenBuffers(1, &_indexBuffer);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _indexBuffer);
+
+		unsigned int indices[3] = { 0, 1, 2 };
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+		// -- Draw Triangle
 	}
+
+	Application::~Application() = default;
 	
 	void Application::Run()
 	{
 		std::printf("\n");
-		HZ_CORE_LINFO("OpenGL Info:");
-		HZ_CORE_LINFO("  Vendor: {0}", glGetString(GL_VENDOR));
-		HZ_CORE_LINFO("  Renderer: {0}", glGetString(GL_RENDERER));
-		HZ_CORE_LINFO("  Version: {0}", glGetString(GL_VERSION));
 
 		while (_running)
 		{
 			glClearColor(ClearColor[0], ClearColor[1], ClearColor[2], ClearColor[3]);
 			glClear(GL_COLOR_BUFFER_BIT);
 
+			// -- Draw Triangle
+			glBindVertexArray(_vertexArray);
+			glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, nullptr);
+			// -- Draw Triangle
+
 			// Go through the layers from bottom to top
-			for (Layer* layer : _layerStack)
+			for (auto* layer : _layerStack)
 			{
 				layer->OnUpdate();
 			}
 
 			// Render the ImGui layer.			
 			_imGuiLayer->Begin();
-			for (Layer* layer : _layerStack)
+			for (auto* layer : _layerStack)
 			{
 				layer->OnImGuiRender();
 			}
@@ -81,7 +110,6 @@ namespace Hazel
 		_layerStack.PushOverlay(overlay);
 	}
 
-	
 	bool Application::OnWindowClose(WindowCloseEvent& event)
 	{
 		_running = false;
@@ -90,44 +118,14 @@ namespace Hazel
 
 	bool Application::OnKeypress(KeyPressedEvent& event)
 	{
-		bool colorChanged = false;
 		switch (event.GetKeyCode())
 		{
-		case 82: // 'r'
-			ClearColor[0] += 0.1f;
-			if (ClearColor[0] > 1.0f)
-			{
-				ClearColor[0] = 0.0f;
-			}
-			colorChanged = true;
-			break;
-		case 71: // 'g'
-			ClearColor[1] += 0.1f;
-			if (ClearColor[1] > 1.0f)
-			{
-				ClearColor[1] = 0.0f;
-			}
-			colorChanged = true;
-			break;
-		case 66: // 'b'
-			ClearColor[2] += 0.1f;
-			if (ClearColor[2] > 1.0f)
-			{
-				ClearColor[2] = 0.0f;
-			}
-			colorChanged = true;
-			break;
 		case 256: // ESC
 			_running = false;
-			HZ_CORE_LWARN("ESC Key pressed, exiting application.");
+			HZ_CORE_LCRITICAL("ESC Key pressed, exiting application.");
 			break;
 		default:
 			break;
-		}
-
-		if (colorChanged)
-		{
-			HZ_CORE_LDEBUG("Color : R({0}), G({1}), B({2})", ClearColor[0], ClearColor[1], ClearColor[1]);
 		}
 
 		return true;

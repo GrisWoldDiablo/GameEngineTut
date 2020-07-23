@@ -17,7 +17,7 @@ namespace Hazel
 	{
 	public:
 		Application();
-		virtual ~Application() = default;
+		virtual ~Application();
 
 		void Run();
 
@@ -33,10 +33,15 @@ namespace Hazel
 		bool OnWindowClose(WindowCloseEvent& event);
 		bool OnKeypress(KeyPressedEvent& event);
 
+	private:
 		std::unique_ptr<Window> _window;
 		ImGuiLayer* _imGuiLayer;
 		bool _running = true;
 		LayerStack _layerStack;
+
+		unsigned int _vertexArray;
+		unsigned int _vertexBuffer;
+		unsigned int _indexBuffer;
 		
 	public:
 		float* ClearColor;

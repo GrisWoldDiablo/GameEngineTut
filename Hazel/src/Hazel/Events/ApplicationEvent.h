@@ -23,7 +23,8 @@ namespace Hazel
 		EVENT_CLASS_CATEGORY(EventCategoryApplication)
 	
 	private:
-		unsigned int _width, _height;
+		unsigned int _width;
+		unsigned int _height;
 	};
 
 	class HAZEL_API WindowCloseEvent : public Event
