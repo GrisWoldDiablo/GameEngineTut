@@ -8,6 +8,8 @@
 
 #include "Hazel/ImGui/ImGuiLayer.h"
 
+#include "Renderer/Shader.h"
+
 namespace Hazel
 {
 	/// <summary>
@@ -42,7 +44,12 @@ namespace Hazel
 		unsigned int _vertexArray;
 		unsigned int _vertexBuffer;
 		unsigned int _indexBuffer;
-		
+
+		std::unique_ptr<Shader> _shader;
+		int _timeLoc;
+		float _lastFrameTime;
+		int _colorLoc;
+
 	public:
 		float* ClearColor;
 
