@@ -10,11 +10,32 @@ namespace Hazel
 	// Static singleton access
 	Application* Application::_sInstance = nullptr;
 
+	static GLenum ShaderDataTypeToOpenGLBaseType(ShaderDataType type)
+	{
+		switch (type)
+		{
+			case ShaderDataType::Float:	return GL_FLOAT;
+			case ShaderDataType::Float2: return GL_FLOAT;
+			case ShaderDataType::Float3: return GL_FLOAT;
+			case ShaderDataType::Float4: return GL_FLOAT;
+			case ShaderDataType::Mat3:	return GL_FLOAT;
+			case ShaderDataType::Mat4:	return GL_FLOAT;
+			case ShaderDataType::Int:	return GL_INT;
+			case ShaderDataType::Int2:	return GL_INT;
+			case ShaderDataType::Int3:	return GL_INT;
+			case ShaderDataType::Int4:	return GL_INT;
+			case ShaderDataType::Bool:	return GL_BOOL;
+		}
+
+		HZ_CORE_ASSERT(false, "Unknown ShaderDataType!");
+		return 0;
+	}
+
 	Application::Application()
 	{
 		HZ_CORE_ASSERT(!_sInstance, "Application already exist!")
-		// Initialize the singleton.
-		_sInstance = this;
+			// Initialize the singleton.
+			_sInstance = this;
 
 		_window = std::unique_ptr<Window>(Window::Create());
 		_window->SetEventCallback(HZ_BIND_EVENT_FN(OnEvent));
@@ -28,79 +49,95 @@ namespace Hazel
 		glGenVertexArrays(1, &_vertexArray);
 		glBindVertexArray(_vertexArray);
 
-		float vertices[3 * 3] =
+		float vertices[6 * 7] =
 		{
-			-0.5f, -0.5f, 0.0f,
-			 0.5f, -0.5f, 0.0f,
-			 0.0f, 0.5f, 0.0f
+			-0.5f, -0.5f, 0.0f, 0.8f, 0.2f, 0.8f, 1.0f,
+			 0.0f, -0.5f, 0.0f, 0.2f, 0.3f, 0.8f, 1.0f,
+			-0.25f,  0.5f, 0.0f, 0.8f, 0.8f, 0.2f, 1.0f,
+			 0.5f, -0.5f, 0.0f, 0.2f, 0.3f, 0.8f, 1.0f,
+			 0.25f,  0.5f, 0.0f, 0.8f, 0.8f, 0.2f, 1.0f,
+			 0.0f,  -1.0f, 0.0f, 0.8f, 0.0f, 0.0f, 1.0f,
 		};
 		_vertexBuffer.reset(VertexBuffer::Create(vertices, sizeof(vertices)));
+		
+		{
+			BufferLayout layout =
+			{
+				{ ShaderDataType::Float3, "a_Position" },
+				{ ShaderDataType::Float4, "a_Color" },
+			};
+			_vertexBuffer->SetLayout(layout);
+		}
 
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
+		uint32_t index = 0;
+		const auto& layout = _vertexBuffer->GetLayout();
+		for (const auto& element : layout)
+		{
+			glEnableVertexAttribArray(index);
+			glVertexAttribPointer(index,
+				element.GetComponentCount(),
+				_vertexBuffer->GetBaseType(element),
+				element.Normalized,
+				layout.GetStride(),
+				(const void*)element.Offset);
+			index++;
+		}
 
-		uint32_t indices[3] = { 0, 1, 2};
+		uint32_t indices[9] = { 0, 1, 2, 0, 5, 3, 1, 3, 4 };
 		_indexBuffer.reset(IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t)));
 		// -- Draw Triangle
 
 		std::string vertexSrc = R"(
 			#version 430
 			layout(location = 0) in vec3 a_Position;
-			layout(location = 1) uniform float _time;
-			layout(location = 2) uniform vec4 _color;
+			layout(location = 1) in vec4 a_Color;
 
-			out float v_Time;
-			out vec4 v_Color;
+			uniform float _time;
 			out vec3 v_Position;
-		
+			out vec4 v_Color;
+
 			void main()
 			{
-				v_Time = _time;
-				v_Color = _color;
+				v_Color = a_Color;
 				v_Position = a_Position;
-				v_Position.y += sin(_time) * 0.5;
-				v_Position.x += cos(_time) * 0.5;
+				v_Position.y += sin(_time) * 0.1;
+				v_Position.x += cos(_time) * 0.1;
 				gl_Position = vec4(v_Position, 1.0);
 			}
-			
 		)";
 
 		std::string fragmentSrc = R"(
 			#version 430
 			layout(location = 0) out vec4 color;
+			uniform vec4 _color;
 
-			in float v_Time;
-			in vec4 v_Color;
+			uniform float _time;
 			in vec3 v_Position;
+			in vec4 v_Color;
 			
 			void main()
 			{
-				color = v_Color;// * sin(v_Time) * 0.5 + 1;
-				color.x += 0.2;
-				//color = vec4(v_Position * 0.5 + 0.5 + sin(v_Time), 1.0);
-				//color.x += sin(v_Time);
+				color = v_Color;
+				color *= _color;
+				//color += vec4(v_Position * 0.5 + 0.5, 1.0);
+				//color.x += sin(_time)*2.0;
 			}
-			
 		)";
+
 		_shader.reset(new Shader(vertexSrc, fragmentSrc));
 		_timeLoc = glGetUniformLocation(_shader->GetRendererID(), "_time");
 		_colorLoc = glGetUniformLocation(_shader->GetRendererID(), "_color");
-		
 	}
 
-	Application::~Application() = default;
-	
 	void Application::Run()
 	{
 		std::printf("\n");
-		_lastFrameTime = 0.0f;
 		while (_running)
 		{
 			glClearColor(ClearColor[0], ClearColor[1], ClearColor[2], ClearColor[3]);
 			glClear(GL_COLOR_BUFFER_BIT);
-			
+
 			auto time = (float)glfwGetTime();
-			_lastFrameTime = time - _lastFrameTime;
 			// -- Draw Triangle
 			glUniform1f(_timeLoc, time);
 			glUniform4f(_colorLoc, ClearColor[0], ClearColor[1], ClearColor[2], ClearColor[3]);
@@ -122,7 +159,7 @@ namespace Hazel
 				layer->OnImGuiRender();
 			}
 			_imGuiLayer->End();
-			
+
 			_window->OnUpdate();
 		}
 	}
@@ -156,6 +193,7 @@ namespace Hazel
 
 	bool Application::OnWindowClose(WindowCloseEvent& event)
 	{
+		HZ_CORE_LCRITICAL("Window was closed, exiting application.");
 		_running = false;
 		return true;
 	}

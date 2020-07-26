@@ -20,7 +20,7 @@ namespace Hazel
 	{
 	public:
 		Application();
-		virtual ~Application();
+		virtual ~Application() = default;
 
 		void Run();
 
@@ -48,7 +48,6 @@ namespace Hazel
 
 		std::unique_ptr<Shader> _shader;
 		int _timeLoc;
-		float _lastFrameTime;
 		int _colorLoc;
 
 	public:

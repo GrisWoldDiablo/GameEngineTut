@@ -12,8 +12,14 @@ namespace Hazel
 		void Bind() const override;
 		void Unbind() const override;
 
+		const BufferLayout& GetLayout() override { return _layout; }
+		void SetLayout(const BufferLayout& layout) override { _layout = layout; }
+		// TODO Tempory GetBaseType.
+		unsigned int GetBaseType(BufferElement element) override;
+
 	private:
 		uint32_t _rendererID;
+		BufferLayout _layout;
 	};
 
 	class OpenGLIndexBuffer : public IndexBuffer
