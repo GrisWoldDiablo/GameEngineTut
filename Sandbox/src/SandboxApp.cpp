@@ -7,6 +7,8 @@ public:
 		: Layer("Example")
 	{
 		_color = Hazel::Application::Get().ClearColor;
+		_scale = &Hazel::Application::Get().ScaleValue;
+		_position = Hazel::Application::Get().Position;
 	}
 
 	void OnUpdate() override
@@ -39,6 +41,11 @@ public:
 	void OnEvent(Hazel::Event& event) override
 	{
 		Hazel::EventDispatcher dispatcher(event);
+		if (event.GetEventType() == Hazel::EventType::KeyPressed)
+		{
+			auto& e = (Hazel::KeyPressedEvent&)event;
+			HZ_LTRACE("{0}", (char)e.GetKeyCode());
+		}
 		dispatcher.Dispatch<Hazel::KeyPressedEvent>(HZ_BIND_EVENT_FN(OnKeypress));
 	}
 	
@@ -47,11 +54,36 @@ public:
 		if (event.GetEventType() == Hazel::EventType::KeyPressed)
 		{
 			auto& e = (Hazel::KeyPressedEvent&)event;
+			switch (e.GetKeyCode())
+			{
+			case HZ_KEY_KP_ADD:
+				*_scale += 0.1f;
+				break;
+			case HZ_KEY_KP_SUBTRACT:
+				*_scale -= 0.1f;
+				break;
+			case HZ_KEY_UP:
+				_position[1] += 0.1f;
+				break;
+			case HZ_KEY_DOWN:
+				_position[1] -= 0.1f;
+				break;
+			case HZ_KEY_LEFT:
+				_position[0] -= 0.1f;
+				break;
+			case HZ_KEY_RIGHT:
+				_position[0] += 0.1f;
+				break;
+			default:
+				break;
+			}
 			HZ_LTRACE("{0}", (char)e.GetKeyCode());
 		}
 		return false;
 	}
 	float* _color;
+	float* _scale;
+	float* _position;
 };
 
 class Sandbox : public Hazel::Application

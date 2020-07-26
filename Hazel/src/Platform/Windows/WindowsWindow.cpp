@@ -111,7 +111,6 @@ namespace Hazel
 				auto* data = (WindowData*)glfwGetWindowUserPointer(window);
 				KeyTypedEvent event(key);
 				data->EventCallback(event);
-
 			});
 
 		glfwSetMouseButtonCallback(_window, [](GLFWwindow* window, int button, int action, int mods)

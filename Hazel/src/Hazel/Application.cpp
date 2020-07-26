@@ -43,8 +43,6 @@ namespace Hazel
 		// Create ImGui and push it to the layer stack as an overlay.
 		_imGuiLayer = new ImGuiLayer();
 		PushOverlay(_imGuiLayer);
-		ClearColor = new float[4]{ 0.13f, 0.0f, 0.3f, 1.0f }; // purple
-
 		// -- Draw Triangle
 		glGenVertexArrays(1, &_vertexArray);
 		glBindVertexArray(_vertexArray);
@@ -53,10 +51,10 @@ namespace Hazel
 		{
 			-0.5f, -0.5f, 0.0f, 0.8f, 0.2f, 0.8f, 1.0f,
 			 0.0f, -0.5f, 0.0f, 0.2f, 0.3f, 0.8f, 1.0f,
-			-0.25f,  0.5f, 0.0f, 0.8f, 0.8f, 0.2f, 1.0f,
+			-0.25f, 0.5f,-0.0f, 0.8f, 0.8f, 0.2f, 1.0f,
 			 0.5f, -0.5f, 0.0f, 0.2f, 0.3f, 0.8f, 1.0f,
-			 0.25f,  0.5f, 0.0f, 0.8f, 0.8f, 0.2f, 1.0f,
-			 0.0f,  -1.0f, 0.0f, 0.8f, 0.0f, 0.0f, 1.0f,
+			 0.25f, 0.5f, 0.0f, 0.8f, 0.8f, 0.2f, 1.0f,
+			 0.0f, -1.0f, 0.0f, 0.8f, 0.0f, 0.0f, 1.0f,
 		};
 		_vertexBuffer.reset(VertexBuffer::Create(vertices, sizeof(vertices)));
 		
@@ -93,6 +91,8 @@ namespace Hazel
 			layout(location = 1) in vec4 a_Color;
 
 			uniform float _time;
+			uniform float _scale;
+			uniform vec2 _position;
 			out vec3 v_Position;
 			out vec4 v_Color;
 
@@ -101,7 +101,10 @@ namespace Hazel
 				v_Color = a_Color;
 				v_Position = a_Position;
 				v_Position.y += sin(_time) * 0.1;
+				v_Position *= _scale;
+				//v_Position.y *= _scale;
 				v_Position.x += cos(_time) * 0.1;
+				v_Position.xy += _position.xy;
 				gl_Position = vec4(v_Position, 1.0);
 			}
 		)";
@@ -125,12 +128,15 @@ namespace Hazel
 		)";
 
 		_shader.reset(new Shader(vertexSrc, fragmentSrc));
-		_timeLoc = glGetUniformLocation(_shader->GetRendererID(), "_time");
-		_colorLoc = glGetUniformLocation(_shader->GetRendererID(), "_color");
+		
 	}
 
 	void Application::Run()
 	{
+		auto timeLoc = glGetUniformLocation(_shader->GetRendererID(), "_time");
+		auto colorLoc = glGetUniformLocation(_shader->GetRendererID(), "_color");
+		auto scaleLoc = glGetUniformLocation(_shader->GetRendererID(), "_scale");
+		auto positionLoc = glGetUniformLocation(_shader->GetRendererID(), "_position");
 		std::printf("\n");
 		while (_running)
 		{
@@ -139,8 +145,11 @@ namespace Hazel
 
 			auto time = (float)glfwGetTime();
 			// -- Draw Triangle
-			glUniform1f(_timeLoc, time);
-			glUniform4f(_colorLoc, ClearColor[0], ClearColor[1], ClearColor[2], ClearColor[3]);
+			glUniform1f(timeLoc, time);
+			glUniform4f(colorLoc, ClearColor[0], ClearColor[1], ClearColor[2], ClearColor[3]);
+			glUniform1f(scaleLoc, ScaleValue);
+			glUniform2f(positionLoc, Position[0],Position[1]);
+
 			_shader->Bind();
 			glBindVertexArray(_vertexArray);
 			glDrawElements(GL_TRIANGLES, _indexBuffer->GetCount(), GL_UNSIGNED_INT, nullptr);
@@ -210,6 +219,6 @@ namespace Hazel
 			break;
 		}
 
-		return true;
+		return false;
 	}
 }

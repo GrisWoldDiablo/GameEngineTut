@@ -47,11 +47,11 @@ namespace Hazel
 		std::unique_ptr<IndexBuffer> _indexBuffer;
 
 		std::unique_ptr<Shader> _shader;
-		int _timeLoc;
-		int _colorLoc;
 
 	public:
-		float* ClearColor;
+		float* ClearColor = new float[4]{ 0.13f, 0.0f, 0.3f, 1.0f }; // Purple
+		float ScaleValue = 1.0f;
+		float* Position = new float[2]{ 0.0f, 0.0f };
 
 	private:
 		static Application* _sInstance;
