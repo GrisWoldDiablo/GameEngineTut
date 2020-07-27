@@ -41,11 +41,6 @@ public:
 	void OnEvent(Hazel::Event& event) override
 	{
 		Hazel::EventDispatcher dispatcher(event);
-		if (event.GetEventType() == Hazel::EventType::KeyPressed)
-		{
-			auto& e = (Hazel::KeyPressedEvent&)event;
-			HZ_LTRACE("{0}", (char)e.GetKeyCode());
-		}
 		dispatcher.Dispatch<Hazel::KeyPressedEvent>(HZ_BIND_EVENT_FN(OnKeypress));
 	}
 	
@@ -77,10 +72,11 @@ public:
 			default:
 				break;
 			}
-			HZ_LTRACE("{0}", (char)e.GetKeyCode());
 		}
 		return false;
 	}
+	
+private:
 	float* _color;
 	float* _scale;
 	float* _position;
