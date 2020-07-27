@@ -10,6 +10,7 @@
 
 #include "Renderer/Shader.h"
 #include "Renderer/Buffer.h"
+#include "Renderer/VertexArray.h"
 
 namespace Hazel
 {
@@ -42,11 +43,11 @@ namespace Hazel
 		bool _running = true;
 		LayerStack _layerStack;
 
-		unsigned int _vertexArray;
-		std::unique_ptr<VertexBuffer> _vertexBuffer;
-		std::unique_ptr<IndexBuffer> _indexBuffer;
+		std::shared_ptr<Shader> _shader;
+		std::shared_ptr<VertexArray> _vertexArray;
 
-		std::unique_ptr<Shader> _shader;
+		std::shared_ptr<Shader> _blueShader;
+		std::shared_ptr<VertexArray> _squareVertexArray;
 
 	public:
 		float* ClearColor = new float[4]{ 0.13f, 0.0f, 0.3f, 1.0f }; // Purple

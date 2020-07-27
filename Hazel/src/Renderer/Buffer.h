@@ -105,8 +105,6 @@ namespace Hazel
 
 		virtual const BufferLayout& GetLayout() = 0;
 		virtual void SetLayout(const BufferLayout& layout) = 0;
-		// TODO Tempory GetBaseType.
-		virtual unsigned int GetBaseType(BufferElement element) = 0;
 
 		static VertexBuffer* Create(float* vertices, uint32_t size);
 	};
