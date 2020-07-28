@@ -1,9 +1,8 @@
 #include "hzpch.h"
 #include "Application.h"
 
-#include <glad/glad.h>
+#include "Hazel/Renderer/Renderer.h"
 
-#include "GLFW/glfw3.h"
 
 namespace Hazel
 {
@@ -54,9 +53,9 @@ namespace Hazel
 			layout(location = 0) in vec3 a_Position;
 			layout(location = 1) in vec4 a_Color;
 
-			uniform float _time;
-			uniform float _scale;
-			uniform vec2 _position;
+			//uniform float _time;
+			//uniform float _scale;
+			//uniform vec2 _position;
 			out vec3 v_Position;
 			out vec4 v_Color;
 
@@ -64,11 +63,11 @@ namespace Hazel
 			{
 				v_Color = a_Color;
 				v_Position = a_Position;
-				v_Position.y += sin(_time) * 0.1;
-				v_Position *= _scale;
+				//v_Position.y += sin(_time) * 0.1;
+				//v_Position *= _scale;
 				//v_Position.y *= _scale;
-				v_Position.x += cos(_time) * 0.1;
-				v_Position.xy += _position.xy;
+				//v_Position.x += cos(_time) * 0.1;
+				//v_Position.xy += _position.xy;
 				gl_Position = vec4(v_Position, 1.0);
 			}
 		)";
@@ -76,16 +75,16 @@ namespace Hazel
 		std::string fragmentSrc = R"(
 			#version 430
 			layout(location = 0) out vec4 color;
-			uniform vec4 _color;
+			//uniform vec4 _color;
 
-			uniform float _time;
+			//uniform float _time;
 			in vec3 v_Position;
 			in vec4 v_Color;
 			
 			void main()
 			{
 				color = v_Color;
-				color.xy *= _color.xy;
+				//color.xy *= _color.xy;
 				//color += vec4(v_Position * 0.5 + 0.5, 1.0);
 				//color.x += sin(_time)*2.0;
 			}
@@ -147,32 +146,21 @@ namespace Hazel
 
 	void Application::Run()
 	{
-		auto timeLoc = glGetUniformLocation(_shader->GetRendererID(), "_time");
-		auto colorLoc = glGetUniformLocation(_shader->GetRendererID(), "_color");
-		auto scaleLoc = glGetUniformLocation(_shader->GetRendererID(), "_scale");
-		auto positionLoc = glGetUniformLocation(_shader->GetRendererID(), "_position");
-		std::printf("\n");
 		while (_running)
 		{
-			glClearColor(ClearColor[0], ClearColor[1], ClearColor[2], ClearColor[3]);
-			glClear(GL_COLOR_BUFFER_BIT);
-
-			// -- Draw Square
-			_blueShader->Bind();
-			_squareVertexArray->Bind();
-			glDrawElements(GL_TRIANGLES, _squareVertexArray->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr);
-			// -- Draw Square
+			RenderCommand::SetClearColor({ ClearColor[0], ClearColor[1], ClearColor[2], ClearColor[3] });
+			RenderCommand::Clear();
 			
-			// -- Draw Triangle
+			Renderer::BeginScene();
+
+			// Triangle
+			_blueShader->Bind();
+			Renderer::Submit(_squareVertexArray);
+			// Square
 			_shader->Bind();
-			auto time = (float)glfwGetTime();
-			glUniform1f(timeLoc, time);
-			glUniform4f(colorLoc, ClearColor[0], ClearColor[1], ClearColor[2], ClearColor[3]);
-			glUniform1f(scaleLoc, ScaleValue);
-			glUniform2f(positionLoc, Position[0], Position[1]);
-			_vertexArray->Bind();
-			glDrawElements(GL_TRIANGLES, _vertexArray->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr);
-			// -- Draw Triangle
+			Renderer::Submit(_vertexArray);
+
+			Renderer::EndScene();
 
 			// Go through the layers from bottom to top
 			for (auto* layer : _layerStack)

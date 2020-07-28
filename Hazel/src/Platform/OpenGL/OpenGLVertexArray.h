@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Renderer/VertexArray.h"
+#include "Hazel/Renderer/VertexArray.h"
 
 namespace Hazel
 {

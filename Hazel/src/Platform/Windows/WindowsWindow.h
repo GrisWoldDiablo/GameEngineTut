@@ -4,7 +4,7 @@
 
 #include <GLFW/glfw3.h>
 
-#include "Renderer/GraphicsContext.h"
+#include "Hazel/Renderer/GraphicsContext.h"
 
 namespace Hazel
 {

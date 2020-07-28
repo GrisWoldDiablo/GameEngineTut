@@ -1,16 +1,13 @@
 #include <Hazel.h>
 #include <imgui/imgui.h>
-class ExampleLayer : public Hazel::Layer
+class ExampleLayer final : public Hazel::Layer
 {
 public:
 	ExampleLayer()
 		: Layer("Example")
 	{
 		_color = Hazel::Application::Get().ClearColor;
-		_scale = &Hazel::Application::Get().ScaleValue;
-		_position = Hazel::Application::Get().Position;
 	}
-
 	void OnUpdate() override
 	{
 		auto [xPos, yPos] = Hazel::Input::GetMousePosition();
@@ -49,40 +46,16 @@ public:
 		if (event.GetEventType() == Hazel::EventType::KeyPressed)
 		{
 			auto& e = (Hazel::KeyPressedEvent&)event;
-			switch (e.GetKeyCode())
-			{
-			case HZ_KEY_KP_ADD:
-				*_scale += 0.1f;
-				break;
-			case HZ_KEY_KP_SUBTRACT:
-				*_scale -= 0.1f;
-				break;
-			case HZ_KEY_UP:
-				_position[1] += 0.1f;
-				break;
-			case HZ_KEY_DOWN:
-				_position[1] -= 0.1f;
-				break;
-			case HZ_KEY_LEFT:
-				_position[0] -= 0.1f;
-				break;
-			case HZ_KEY_RIGHT:
-				_position[0] += 0.1f;
-				break;
-			default:
-				break;
-			}
+			// Insert what to do with event...
 		}
 		return false;
 	}
 	
 private:
 	float* _color;
-	float* _scale;
-	float* _position;
 };
 
-class Sandbox : public Hazel::Application
+class Sandbox final : public Hazel::Application
 {
 public:
 	Sandbox()

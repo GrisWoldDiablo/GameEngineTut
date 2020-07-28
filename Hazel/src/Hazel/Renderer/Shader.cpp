@@ -7,6 +7,10 @@ namespace Hazel
 {
 	Shader::Shader(const std::string& vertexSrc, const std::string& fragmentSrc)
 	{
+		// This was taken from OpenGL manual.
+		// Shader Compilation
+		// https://www.khronos.org/opengl/wiki/Shader_Compilation#Example
+
 		// Create an empty vertex shader handle
 		auto vertexShader = glCreateShader(GL_VERTEX_SHADER);
 
