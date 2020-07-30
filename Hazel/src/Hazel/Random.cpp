@@ -3,11 +3,20 @@
 
 namespace Hazel
 {
-	Random* Random::_sInstance = new Random();
+	// Static singleton access
+	Random* Random::_sInstance = nullptr;
 
 	Random::Random(int seed)
 		:_mersenneTwister(seed)
 	{
+	}
+
+	void Random::Init()
+	{
+		if (_sInstance == nullptr)
+		{
+			_sInstance = new Random();
+		}
 	}
 
 	float Random::GetRandomImpl()
@@ -18,7 +27,7 @@ namespace Hazel
 
 	int Random::GetRandomRangeImpl(int min, int max)
 	{
-		_uniformIntDistribution = std::uniform_int_distribution<int>(min, max);
+		_uniformIntDistribution = std::uniform_int_distribution<int>(min, max - 1);
 		return _uniformIntDistribution(_mersenneTwister);
 	}
 

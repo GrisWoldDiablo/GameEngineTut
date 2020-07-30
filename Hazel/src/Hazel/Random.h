@@ -15,19 +15,31 @@ namespace Hazel
 		/// <summary>
 		/// Get random float between 0.0f - 1.0f
 		/// </summary>
-		inline static float GetRandom() { return _sInstance->GetRandomImpl(); }
-		inline static int GetRandomRange(int min, int max) { return _sInstance->GetRandomRangeImpl(min, max); }
-		inline static float GetRandomRange(float min, float max) { return _sInstance->GetRandomRangeImpl(min, max); }
+		inline static float GetRandom() { Init(); return _sInstance->GetRandomImpl(); }
+		/// <summary>
+		/// Get a random integer between min and max exclusive.
+		/// </summary>
+		/// <param name="min">Minimum of the range</param>
+		/// <param name="max">Maximum of the range</param>
+		inline static int GetRandomRange(int min, int max) { Init(); return _sInstance->GetRandomRangeImpl(min, max); }
+		/// <summary>
+		/// Get a random float between min and max inclusive.
+		/// </summary>
+		/// <param name="min">Minimum of the range</param>
+		/// <param name="max">Maximum of the range</param>
+		inline static float GetRandomRange(float min, float max) { Init(); return _sInstance->GetRandomRangeImpl(min, max); }
 		/// <summary>
 		/// Get Random normalized vec2
 		/// </summary>
-		inline static glm::vec2 GetRandomVec2() { return _sInstance->GetRandomVec2Impl(); }
-		
+		inline static glm::vec2 GetRandomVec2() { Init(); return _sInstance->GetRandomVec2Impl(); }
+
 		/// <summary>
 		/// Get Random normalized vec3
 		/// </summary>
-		inline static glm::vec3 GetRandomVec3() { return _sInstance->GetRandomVec3Impl(); }
+		inline static glm::vec3 GetRandomVec3() { Init(); return _sInstance->GetRandomVec3Impl(); }
+
 	private:
+		static void Init();
 		float GetRandomImpl();
 		int GetRandomRangeImpl(int min, int max);
 		float GetRandomRangeImpl(float min, float max);
