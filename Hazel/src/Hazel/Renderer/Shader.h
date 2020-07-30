@@ -1,6 +1,8 @@
 #pragma once
 #include <string>
 
+#include <glm/glm.hpp>
+
 namespace Hazel
 {
 	class Shader
@@ -11,7 +13,9 @@ namespace Hazel
 
 		void Bind() const;
 		void Unbind() const;
-		uint32_t GetRendererID() { return _rendererID; }
+
+		void UploadUniformMat4(const std::string& name, const glm::mat4& matrix);
+		
 	private:
 		uint32_t _rendererID;
 	};

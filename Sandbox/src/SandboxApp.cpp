@@ -1,5 +1,6 @@
 #include <Hazel.h>
 #include <imgui/imgui.h>
+
 class ExampleLayer final : public Hazel::Layer
 {
 public:
@@ -11,27 +12,36 @@ public:
 	void OnUpdate() override
 	{
 		auto [xPos, yPos] = Hazel::Input::GetMousePosition();
-		auto state = Hazel::Input::IsKeyPressed(340);
-		if (state)
+
+		if (Hazel::Input::IsKeyPressed(340))
 		{
 			HZ_LTRACE("{0}, {1}", xPos, yPos);
 		}
+
 		if (Hazel::Input::IsKeyPressed(HZ_KEY_TAB))
 		{
 			HZ_LTRACE("Tab being pressed!!");
 		}
-		state = Hazel::Input::IsMouseButtonPressed(HZ_MOUSE_BUTTON_MIDDLE);
-		if (state)
+
+		if (Hazel::Input::IsMouseButtonPressed(HZ_MOUSE_BUTTON_MIDDLE))
 		{
 			HZ_LTRACE("Color : R({0}), G({1}), B({2})", _color[0], _color[1], _color[2]);
+			std::system("clear");
+		}
+
+		if (Hazel::Input::IsMouseButtonPressed(HZ_MOUSE_BUTTON_RIGHT))
+		{
+			HZ_LDEBUG("Random float: {0}, Random Int range: {1}, Random float range: {2}",
+				Hazel::Random::GetRandom(), Hazel::Random::GetRandomRange(1, 10), Hazel::Random::GetRandomRange(1.0f, 10.0f));
+			HZ_LINFO("Random vec2: {0}, Random vec3: {1}", Hazel::Random::GetRandomVec2(), Hazel::Random::GetRandomVec3());
 		}
 	}
 
 	void OnImGuiRender() override
 	{
 		ImGui::Begin("Select your background Color.");
-		ImGui::TextColored(ImVec4(_color[0], _color[1], _color[2],_color[3]),"Color");
-		ImGui::ColorPicker4("Color", _color, ImGuiColorEditFlags_InputRGB);
+		ImGui::TextColored(ImVec4(_color[0], _color[1], _color[2], _color[3]), "Color");
+		ImGui::ColorEdit4("Color", _color, ImGuiColorEditFlags_InputRGB);
 		ImGui::End();
 	}
 
@@ -40,7 +50,7 @@ public:
 		Hazel::EventDispatcher dispatcher(event);
 		dispatcher.Dispatch<Hazel::KeyPressedEvent>(HZ_BIND_EVENT_FN(OnKeypress));
 	}
-	
+
 	bool OnKeypress(Hazel::KeyPressedEvent& event)
 	{
 		if (event.GetEventType() == Hazel::EventType::KeyPressed)
@@ -50,7 +60,7 @@ public:
 		}
 		return false;
 	}
-	
+
 private:
 	float* _color;
 };

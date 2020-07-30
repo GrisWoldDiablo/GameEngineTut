@@ -12,6 +12,8 @@
 #include "Renderer/Buffer.h"
 #include "Renderer/VertexArray.h"
 
+#include "Hazel/Renderer/OrthographicCamera.h"
+
 namespace Hazel
 {
 	/// <summary>
@@ -37,6 +39,9 @@ namespace Hazel
 		bool OnWindowClose(WindowCloseEvent& event);
 		bool OnKeypress(KeyPressedEvent& event);
 
+	public:
+		float* ClearColor = new float[4]{ 0.13f, 0.0f, 0.3f, 1.0f }; // Purple
+
 	private:
 		std::unique_ptr<Window> _window;
 		ImGuiLayer* _imGuiLayer;
@@ -50,9 +55,8 @@ namespace Hazel
 		std::shared_ptr<Shader> _blueShader;
 		std::shared_ptr<VertexArray> _squareVertexArray;
 
-	public:
-		float* ClearColor = new float[4]{ 0.13f, 0.0f, 0.3f, 1.0f }; // Purple
-		
+		OrthographicCamera _camera;
+
 	private:
 		static Application* _sInstance;
 	};

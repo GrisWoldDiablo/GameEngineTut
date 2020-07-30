@@ -2,7 +2,7 @@
 #include "Application.h"
 
 #include "Hazel/Renderer/Renderer.h"
-
+#include <glm/gtc/random.hpp>
 
 namespace Hazel
 {
@@ -10,6 +10,7 @@ namespace Hazel
 	Application* Application::_sInstance = nullptr;
 
 	Application::Application()
+		:_camera(-1.6f, 1.6f, -0.9f, 0.9f)
 	{
 		HZ_CORE_ASSERT(!_sInstance, "Application already exist!")
 			// Initialize the singleton.
@@ -47,15 +48,14 @@ namespace Hazel
 		std::shared_ptr<IndexBuffer> indexBuffer;
 		indexBuffer.reset(IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t)));
 		_vertexArray->SetIndexBuffer(indexBuffer);
-		
+
 		std::string vertexSrc = R"(
 			#version 430
 			layout(location = 0) in vec3 a_Position;
 			layout(location = 1) in vec4 a_Color;
 
-			//uniform float _time;
-			//uniform float _scale;
-			//uniform vec2 _position;
+			uniform mat4 u_ViewProjection;
+		
 			out vec3 v_Position;
 			out vec4 v_Color;
 
@@ -63,30 +63,20 @@ namespace Hazel
 			{
 				v_Color = a_Color;
 				v_Position = a_Position;
-				//v_Position.y += sin(_time) * 0.1;
-				//v_Position *= _scale;
-				//v_Position.y *= _scale;
-				//v_Position.x += cos(_time) * 0.1;
-				//v_Position.xy += _position.xy;
-				gl_Position = vec4(v_Position, 1.0);
+				gl_Position = u_ViewProjection * vec4(v_Position, 1.0);
 			}
 		)";
 
 		std::string fragmentSrc = R"(
 			#version 430
 			layout(location = 0) out vec4 color;
-			//uniform vec4 _color;
 
-			//uniform float _time;
 			in vec3 v_Position;
 			in vec4 v_Color;
 			
 			void main()
 			{
 				color = v_Color;
-				//color.xy *= _color.xy;
-				//color += vec4(v_Position * 0.5 + 0.5, 1.0);
-				//color.x += sin(_time)*2.0;
 			}
 		)";
 
@@ -105,11 +95,11 @@ namespace Hazel
 		std::shared_ptr<VertexBuffer> squareVertexBuffer;
 		squareVertexBuffer.reset(VertexBuffer::Create(squareVertices, sizeof(squareVertices)));
 		squareVertexBuffer->SetLayout(
-		{
-			{ ShaderDataType::Float3, "a_Position" },
-		});
+			{
+				{ ShaderDataType::Float3, "a_Position" },
+			});
 		_squareVertexArray->AddVertexBuffer(squareVertexBuffer);
-		
+
 		uint32_t squareIndices[6] = { 0, 1, 3, 3, 1, 2 };
 		std::shared_ptr<IndexBuffer> squareIndexBuffer;
 		squareIndexBuffer.reset(IndexBuffer::Create(squareIndices, sizeof(squareIndices) / sizeof(uint32_t)));
@@ -119,15 +109,17 @@ namespace Hazel
 			#version 430
 			layout(location = 0) in vec3 a_Position;
 
+			uniform mat4 u_ViewProjection;
+
 			out vec3 v_Position;
 
 			void main()
 			{
 				v_Position = a_Position;
-				gl_Position = vec4(v_Position, 1.0);
+				gl_Position = u_ViewProjection * vec4(v_Position, 1.0);
 			}
 		)";
-		
+
 		std::string blueFragmentShaderSrc = R"(
 			#version 430
 			layout(location = 0) out vec4 color;
@@ -136,10 +128,10 @@ namespace Hazel
 			
 			void main()
 			{
-				color = vec4(0.2, 0.3, 0.8, 1.0);
+				color = vec4(0.1, 0.2, 0.7, 1.0);
 			}
 		)";
-		
+
 		_blueShader.reset(new Shader(blueShaderVertexSrc, blueFragmentShaderSrc));
 		// -- Square
 	}
@@ -150,15 +142,15 @@ namespace Hazel
 		{
 			RenderCommand::SetClearColor({ ClearColor[0], ClearColor[1], ClearColor[2], ClearColor[3] });
 			RenderCommand::Clear();
-			
-			Renderer::BeginScene();
 
+			Renderer::BeginScene(_camera);
+
+			_camera.SetPosition({ 0.5f,0.5f,0.0f });
+			_camera.SetRotation(45.0f);
 			// Triangle
-			_blueShader->Bind();
-			Renderer::Submit(_squareVertexArray);
+			Renderer::Submit(_blueShader, _squareVertexArray);
 			// Square
-			_shader->Bind();
-			Renderer::Submit(_vertexArray);
+			Renderer::Submit(_shader, _vertexArray);
 
 			Renderer::EndScene();
 

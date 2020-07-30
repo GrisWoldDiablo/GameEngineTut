@@ -7,8 +7,6 @@
 
 #include "Platform/OpenGL/OpenGLContext.h"
 
-#include <glad/glad.h>
-
 namespace Hazel
 {
 	static bool sGLFWInitialized = false;
@@ -41,7 +39,6 @@ namespace Hazel
 		_data.Height = props.Height;
 
 		HZ_CORE_LINFO("Creating window : {0}, ({1} x {2})", props.Title, props.Width, props.Height);
-		
 
 		if (!sGLFWInitialized)
 		{

@@ -57,12 +57,6 @@ namespace Hazel
 		ImGui::DestroyContext();
 	}
 
-	void ImGuiLayer::OnImGuiRender()
-	{
-		static bool sShow = true;
-		ImGui::ShowDemoWindow(&sShow);
-	}
-
 	void ImGuiLayer::Begin()
 	{
 		ImGui_ImplOpenGL3_NewFrame();
