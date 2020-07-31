@@ -19,31 +19,46 @@ namespace Hazel
 		}
 	}
 
-	float Random::GetRandomImpl()
+	float Random::FloatImpl()
 	{
-		_uniformRealDistribution = std::uniform_real_distribution<float>(0.0f, 1.0f);
-		return _uniformRealDistribution(_mersenneTwister);
+		return (float)_uniformDouble(_mersenneTwister);
 	}
 
-	int Random::GetRandomRangeImpl(int min, int max)
+	double Random::DoubleImpl()
+	{
+		return _uniformDouble(_mersenneTwister);
+	}
+
+	int32_t Random::RangeImpl(int32_t min, int32_t max)
 	{
 		_uniformIntDistribution = std::uniform_int_distribution<int>(min, max - 1);
 		return _uniformIntDistribution(_mersenneTwister);
 	}
 
-	float Random::GetRandomRangeImpl(float min, float max)
+	float Random::RangeImpl(float min, float max)
 	{
-		_uniformRealDistribution = std::uniform_real_distribution<float>(min, max);
-		return _uniformRealDistribution(_mersenneTwister);
+		_uniformFloatDistribution = std::uniform_real_distribution<float>(min, max);
+		return _uniformFloatDistribution(_mersenneTwister);
 	}
 
-	glm::vec2 Random::GetRandomVec2Impl()
+	double Random::RangeImpl(double min, double max)
 	{
-		return { GetRandomImpl(),GetRandomImpl() };
+		_uniformDoubleDistribution = std::uniform_real_distribution<double>(min, max);
+		return _uniformFloatDistribution(_mersenneTwister);
 	}
 
-	glm::vec3 Random::GetRandomVec3Impl()
+	glm::vec2 Random::Vec2Impl()
 	{
-		return { GetRandomImpl(), GetRandomImpl(), GetRandomImpl() };
+		return { FloatImpl(),FloatImpl() };
+	}
+
+	glm::vec3 Random::Vec3Impl()
+	{
+		return { FloatImpl(), FloatImpl(), FloatImpl() };
+	}
+
+	glm::vec4 Random::Vec4Impl()
+	{
+		return { FloatImpl(), FloatImpl(), FloatImpl(), FloatImpl() };
 	}
 }

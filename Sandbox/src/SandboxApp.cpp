@@ -32,8 +32,10 @@ public:
 		if (Hazel::Input::IsMouseButtonPressed(HZ_MOUSE_BUTTON_RIGHT))
 		{
 			HZ_LDEBUG("Random float: {0}, Random Int range: {1}, Random float range: {2}",
-				Hazel::Random::GetRandom(), Hazel::Random::GetRandomRange(1, 10), Hazel::Random::GetRandomRange(1.0f, 10.0f));
-			HZ_LINFO("Random vec2: {0}, Random vec3: {1}", Hazel::Random::GetRandomVec2(), Hazel::Random::GetRandomVec3());
+				Hazel::Random::Float(), Hazel::Random::Range(-10, 10), Hazel::Random::Range(-10.0f, 10.0f));
+			HZ_LDEBUG("Random double: {0}, Random double range: {1}",
+				Hazel::Random::Double(), Hazel::Random::Range(-10.0, 10.0));
+			HZ_LINFO("Random vec2: {0}, Random vec3: {1}, Random vec4: {2}", Hazel::Random::Vec2(), Hazel::Random::Vec3(), Hazel::Random::Vec4());
 		}
 	}
 

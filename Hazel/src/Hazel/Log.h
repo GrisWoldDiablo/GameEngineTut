@@ -6,6 +6,7 @@
 
 #include "glm/vec2.hpp"
 #include "glm/vec3.hpp"
+#include "glm/vec4.hpp"
 
 namespace Hazel
 {
@@ -39,7 +40,7 @@ namespace Hazel
 #define HZ_LERROR(...)		::Hazel::Log::GetClientLogger()->error(__VA_ARGS__)
 #define HZ_LCRITICAL(...)	::Hazel::Log::GetClientLogger()->critical(__VA_ARGS__)
 
-// String formater for glm structs
+// String formaters for glm structs
 
 template <>
 struct fmt::formatter<glm::vec2>
@@ -64,7 +65,7 @@ struct fmt::formatter<glm::vec2>
 	template <typename FormatContext>
 	auto format(const glm::vec2& vec2, FormatContext& ctx)
 	{
-		return format_to(ctx.out(), "({:.3f}, {:.3f})", vec2.x, vec2.y);
+		return format_to(ctx.out(), "(x:{:.3f}, y:{:.3f})", vec2.x, vec2.y);
 	}
 };
 
@@ -91,6 +92,33 @@ struct fmt::formatter<glm::vec3>
 	template <typename FormatContext>
 	auto format(const glm::vec3& vec3, FormatContext& ctx)
 	{
-		return format_to(ctx.out(), "({:.3f}, {:.3f}, {:.3f})", vec3.x, vec3.y, vec3.z);
+		return format_to(ctx.out(), "(x:{:.3f}, y:{:.3f}, z:{:.3f})", vec3.x, vec3.y, vec3.z);
+	}
+};
+
+template <>
+struct fmt::formatter<glm::vec4>
+{
+	// Presentation format: 'f' - fixed
+	char presentation = 'f';
+
+	constexpr auto parse(fmt::format_parse_context& ctx)
+	{
+		// Parse the presentation format and store it in the formatter:
+		auto it = ctx.begin(), end = ctx.end();
+		if (it != end && (*it == 'f')) presentation = *it++;
+
+		// Check if reached the end of the range:
+		if (it != end && *it != '}')
+			throw format_error("invalid format");
+
+		// Return an iterator past the end of the parsed range:
+		return it;
+	}
+
+	template <typename FormatContext>
+	auto format(const glm::vec4& vec4, FormatContext& ctx)
+	{
+		return format_to(ctx.out(), "(x:{:.3f}, y:{:.3f}, z:{:.3f}, w:{:.3f})", vec4.x, vec4.y, vec4.z, vec4.w);
 	}
 };
