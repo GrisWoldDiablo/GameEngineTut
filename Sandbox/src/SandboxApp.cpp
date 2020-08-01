@@ -5,91 +5,212 @@ class ExampleLayer final : public Hazel::Layer
 {
 public:
 	ExampleLayer()
-		: Layer("Example")
+		: Layer("Example"), _camera(-1.6f, 1.6f, -0.9f, 0.9f)
 	{
-		_color = Hazel::Application::Get().ClearColor;
-		_cameraPosition = &Hazel::Application::Get().CameraPosition;
-		_cameraRotation = &Hazel::Application::Get().CameraRotation;
+		// -- Triangle
+		_vertexArray.reset(Hazel::VertexArray::Create());
+
+		float vertices[3 * 7] =
+		{
+			-0.5f, -0.5f, 0.0f, 0.8f, 0.2f, 0.8f, 1.0f,
+			 0.5f, -0.5f, 0.0f, 0.2f, 0.3f, 0.8f, 1.0f,
+			 0.0f,  0.5f, 0.0f, 0.8f, 0.8f, 0.2f, 1.0f,
+		};
+		std::shared_ptr<Hazel::VertexBuffer> vertexBuffer;
+		vertexBuffer.reset(Hazel::VertexBuffer::Create(vertices, sizeof(vertices)));
+
+
+		Hazel::BufferLayout layout =
+		{
+			{Hazel::ShaderDataType::Float3, "a_Position" },
+			{Hazel::ShaderDataType::Float4, "a_Color" },
+		};
+		vertexBuffer->SetLayout(layout);
+		_vertexArray->AddVertexBuffer(vertexBuffer);
+
+		uint32_t indices[3] = { 0, 1, 2 };
+		std::shared_ptr<Hazel::IndexBuffer> indexBuffer;
+		indexBuffer.reset(Hazel::IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t)));
+		_vertexArray->SetIndexBuffer(indexBuffer);
+
+		std::string vertexSrc = R"(
+			#version 430
+			layout(location = 0) in vec3 a_Position;
+			layout(location = 1) in vec4 a_Color;
+
+			uniform mat4 u_ViewProjection;
+		
+			out vec3 v_Position;
+			out vec4 v_Color;
+
+			void main()
+			{
+				v_Color = a_Color;
+				v_Position = a_Position;
+				gl_Position = u_ViewProjection * vec4(v_Position, 1.0);
+			}
+		)";
+
+		std::string fragmentSrc = R"(
+			#version 430
+			layout(location = 0) out vec4 color;
+
+			in vec3 v_Position;
+			in vec4 v_Color;
+			
+			void main()
+			{
+				color = v_Color;
+			}
+		)";
+
+		_shader.reset(new Hazel::Shader(vertexSrc, fragmentSrc));
+		// -- Triangle
+
+		// -- Square
+		_squareVertexArray.reset(Hazel::VertexArray::Create());
+		float squareVertices[4 * 3] =
+		{
+			-0.75f, -0.75f, 0.0f,
+			 0.75f, -0.75f, 0.0f,
+			 0.75f,  0.75f, 0.0f,
+			-0.75f,  0.75f, 0.0f
+		};
+		std::shared_ptr<Hazel::VertexBuffer> squareVertexBuffer;
+		squareVertexBuffer.reset(Hazel::VertexBuffer::Create(squareVertices, sizeof(squareVertices)));
+		squareVertexBuffer->SetLayout(
+			{
+				{ Hazel::ShaderDataType::Float3, "a_Position" },
+			});
+		_squareVertexArray->AddVertexBuffer(squareVertexBuffer);
+
+		uint32_t squareIndices[6] = { 0, 1, 3, 3, 1, 2 };
+		std::shared_ptr<Hazel::IndexBuffer> squareIndexBuffer;
+		squareIndexBuffer.reset(Hazel::IndexBuffer::Create(squareIndices, sizeof(squareIndices) / sizeof(uint32_t)));
+		_squareVertexArray->SetIndexBuffer(squareIndexBuffer);
+
+		std::string blueShaderVertexSrc = R"(
+			#version 430
+			layout(location = 0) in vec3 a_Position;
+
+			uniform mat4 u_ViewProjection;
+
+			out vec3 v_Position;
+
+			void main()
+			{
+				v_Position = a_Position;
+				gl_Position = u_ViewProjection * vec4(v_Position, 1.0);
+			}
+		)";
+
+		std::string blueFragmentShaderSrc = R"(
+			#version 430
+			layout(location = 0) out vec4 color;
+
+			in vec3 v_Position;
+			
+			void main()
+			{
+				color = vec4(0.1, 0.2, 0.7, 1.0);
+			}
+		)";
+
+		_blueShader.reset(new Hazel::Shader(blueShaderVertexSrc, blueFragmentShaderSrc));
+		// -- Square
 	}
+
 	void OnUpdate() override
 	{
-		auto [xPos, yPos] = Hazel::Input::GetMousePosition();
+		CameraMovement();
 
-		if (Hazel::Input::IsKeyPressed(340))
+		Hazel::RenderCommand::SetClearColor({ _clearColor[0], _clearColor[1], _clearColor[2], _clearColor[3] });
+		Hazel::RenderCommand::Clear();
+
+		Hazel::Renderer::BeginScene(_camera);
+
+		_camera.SetPosition(_cameraPosition);
+		_camera.SetRotation(_cameraRotation);
+
+		// Triangle
+		Hazel::Renderer::Submit(_blueShader, _squareVertexArray);
+		// Square
+		Hazel::Renderer::Submit(_shader, _vertexArray);
+
+		Hazel::Renderer::EndScene();
+	}
+
+	void CameraMovement()
+	{
+		if (Hazel::Input::IsKeyPressed(HZ_KEY_W))
 		{
-			HZ_LTRACE("{0}, {1}", xPos, yPos);
+			_cameraPosition.y += _movementSpeed;
 		}
-
-		if (Hazel::Input::IsKeyPressed(HZ_KEY_TAB))
+		else if (Hazel::Input::IsKeyPressed(HZ_KEY_S))
 		{
-			HZ_LTRACE("Tab being pressed!!");
+			_cameraPosition.y -= _movementSpeed;
 		}
-
-		if (Hazel::Input::IsMouseButtonPressed(HZ_MOUSE_BUTTON_MIDDLE))
+		
+		if (Hazel::Input::IsKeyPressed(HZ_KEY_A))
 		{
-			HZ_LTRACE("Color : R({0}), G({1}), B({2})", _color[0], _color[1], _color[2]);
-			std::system("clear");
+			_cameraPosition.x -= _movementSpeed;
 		}
-
-		if (Hazel::Input::IsMouseButtonPressed(HZ_MOUSE_BUTTON_RIGHT))
+		else if (Hazel::Input::IsKeyPressed(HZ_KEY_D))
 		{
-			HZ_LDEBUG("Random float: {0}, Random Int range: {1}, Random float range: {2}",
-				Hazel::Random::Float(), Hazel::Random::Range(-10, 10), Hazel::Random::Range(-10.0f, 10.0f));
-			HZ_LDEBUG("Random double: {0}, Random double range: {1}",
-				Hazel::Random::Double(), Hazel::Random::Range(-10.0, 10.0));
-			HZ_LINFO("Random vec2: {0}, Random vec3: {1}, Random vec4: {2}", Hazel::Random::Vec2(), Hazel::Random::Vec3(), Hazel::Random::Vec4());
+			_cameraPosition.x += _movementSpeed;
+		}
+		
+		if (Hazel::Input::IsKeyPressed(HZ_KEY_Q))
+		{
+			_cameraRotation += _rotationSpeed;
+		}
+		else if (Hazel::Input::IsKeyPressed(HZ_KEY_E))
+		{
+			_cameraRotation -= _rotationSpeed;
 		}
 	}
 
 	void OnImGuiRender() override
 	{
 		ImGui::Begin("Select your background Color.");
-		ImGui::TextColored(ImVec4(_color[0], _color[1], _color[2], _color[3]), "Color");
-		ImGui::ColorEdit4("Color", _color, ImGuiColorEditFlags_InputRGB);
+		ImGui::TextColored(ImVec4(_clearColor[0], _clearColor[1], _clearColor[2], _clearColor[3]), "Color");
+		ImGui::ColorEdit4("Color", _clearColor, ImGuiColorEditFlags_InputRGB);
 		ImGui::End();
 	}
 
 	void OnEvent(Hazel::Event& event) override
 	{
 		Hazel::EventDispatcher dispatcher(event);
-		dispatcher.Dispatch<Hazel::KeyPressedEvent>(HZ_BIND_EVENT_FN(OnKeypress));
+		dispatcher.Dispatch<Hazel::KeyPressedEvent>(HZ_BIND_EVENT_FN(OnKeyPressedEvent));
 	}
 
-	bool OnKeypress(Hazel::KeyPressedEvent& event)
+	bool OnKeyPressedEvent(Hazel::KeyPressedEvent& event)
 	{
-		if (event.GetEventType() == Hazel::EventType::KeyPressed)
+		switch (event.GetKeyCode())
 		{
-			auto& e = (Hazel::KeyPressedEvent&)event;
-			// Insert what to do with event....
-			switch (e.GetKeyCode())
-			{
-			case HZ_KEY_W:
-				_cameraPosition->y += 0.1f;
-				break;
-			case HZ_KEY_S:
-				_cameraPosition->y -= 0.1f;
-				break;
-			case HZ_KEY_A:
-				_cameraPosition->x -= 0.1f;
-				break;
-			case HZ_KEY_D:
-				_cameraPosition->x += 0.1f;
-				break;
-			case HZ_KEY_Q:
-				*_cameraRotation += 1.0f;
-				break;
-			case HZ_KEY_E:
-				*_cameraRotation -= 1.0f;
-				break;
-			}
+		case HZ_KEY_ESCAPE:
+			Hazel::Application::Get().Stop();
+			HZ_CORE_LCRITICAL("ESC Key pressed, exiting application.");
+			break;
 		}
 		return false;
 	}
 
 private:
-	float* _color;
-	glm::vec3* _cameraPosition;
-	float* _cameraRotation;
+	float* _clearColor = new float[4]{ 0.13f, 0.0f, 0.3f, 1.0f };
+	glm::vec3 _cameraPosition = { 0.0f,0.0f,0.0f };
+	float _movementSpeed = 0.1f;
+	float _cameraRotation = 0.0f;
+	float _rotationSpeed = 1.0f;
+
+	// Triangle
+	std::shared_ptr<Hazel::Shader> _shader;
+	std::shared_ptr<Hazel::VertexArray> _vertexArray;
+	//Square
+	std::shared_ptr<Hazel::Shader> _blueShader;
+	std::shared_ptr<Hazel::VertexArray> _squareVertexArray;
+
+	Hazel::OrthographicCamera _camera;
 };
 
 class Sandbox final : public Hazel::Application

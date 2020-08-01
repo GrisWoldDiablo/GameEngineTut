@@ -40,7 +40,7 @@ namespace Hazel
 #define HZ_LERROR(...)		::Hazel::Log::GetClientLogger()->error(__VA_ARGS__)
 #define HZ_LCRITICAL(...)	::Hazel::Log::GetClientLogger()->critical(__VA_ARGS__)
 
-// String formaters for glm structs
+// String formatters for glm structs
 
 template <>
 struct fmt::formatter<glm::vec2>
