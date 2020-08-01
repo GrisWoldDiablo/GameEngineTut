@@ -2,8 +2,7 @@
 #include "Application.h"
 #include "Events/Event.h"
 #include "Hazel/Renderer/Renderer.h"
-
-#include "GLFW/glfw3.h"
+#include "Platform/Platform.h"
 
 namespace Hazel
 {
@@ -28,7 +27,7 @@ namespace Hazel
 	{
 		while (_running)
 		{
-			auto time = (float)glfwGetTime(); // Platform::GetTime();
+			auto time = Platform::GetTime();
 			auto timestep = Timestep(time - _lastFrameTime);
 			_lastFrameTime = time;
 			

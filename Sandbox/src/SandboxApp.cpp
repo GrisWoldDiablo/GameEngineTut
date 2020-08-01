@@ -1,6 +1,8 @@
 #include <Hazel.h>
 #include <imgui/imgui.h>
 
+#include "Hazel/Events/KeyEvent.h"
+
 class ExampleLayer final : public Hazel::Layer
 {
 public:

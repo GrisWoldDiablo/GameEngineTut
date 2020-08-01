@@ -15,6 +15,10 @@ namespace Hazel
 			HZ_CORE_ASSERT(false, "RendererAPI::None is currently not supported.");
 		case RendererAPI::API::OpenGL:
 			return new OpenGLVertexBuffer(vertices, size);
+		case RendererAPI::API::DirectX:
+			HZ_CORE_ASSERT(false, "RendererAPI::DirectX is currently not supported.");
+		case RendererAPI::API::Vulkan:
+			HZ_CORE_ASSERT(false, "RendererAPI::Vulkan is currently not supported.");
 		}
 
 		HZ_CORE_ASSERT(false, "Unknow RendererAPI, VertexBuffer::Create");
@@ -29,6 +33,11 @@ namespace Hazel
 			HZ_CORE_ASSERT(false, "RendererAPI::None is currently not supported.");
 		case RendererAPI::API::OpenGL:
 			return new OpenGLIndexBuffer(indices, count);
+		case RendererAPI::API::DirectX:
+			HZ_CORE_ASSERT(false, "RendererAPI::DirectX is currently not supported.");
+		case RendererAPI::API::Vulkan:
+			HZ_CORE_ASSERT(false, "RendererAPI::Vulkan is currently not supported.");
+		default: ;
 		}
 
 		HZ_CORE_ASSERT(false, "Unknow RendererAPI, IndexBuffer::Create");

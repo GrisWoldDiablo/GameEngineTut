@@ -3,6 +3,8 @@
 
 #include <glad/glad.h>
 
+#include "GLFW/glfw3.h"
+
 namespace Hazel
 {
 	void OpenGLRendererAPI::SetClearColor(const glm::vec4& color)
@@ -18,5 +20,11 @@ namespace Hazel
 	void OpenGLRendererAPI::DrawIndexed(const std::shared_ptr<VertexArray>& vertexArray)
 	{
 		glDrawElements(GL_TRIANGLES, vertexArray->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr);
+	}
+
+	float OpenGLRendererAPI::GetTime()
+	{
+		HZ_ASSERT(GLFW_NOT_INITIALIZED, "GLFW was not initialized, you cannot get the time");
+		return glfwGetTime();
 	}
 }

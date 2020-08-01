@@ -9,16 +9,18 @@ namespace Hazel
 	{
 		switch (type)
 		{
-		case ShaderDataType::Float:	return GL_FLOAT;
-		case ShaderDataType::Float2: return GL_FLOAT;
-		case ShaderDataType::Float3: return GL_FLOAT;
-		case ShaderDataType::Float4: return GL_FLOAT;
-		case ShaderDataType::Mat3:	return GL_FLOAT;
+		case ShaderDataType::Float:
+		case ShaderDataType::Float2:
+		case ShaderDataType::Float3:
+		case ShaderDataType::Float4:
+		case ShaderDataType::Mat3:
 		case ShaderDataType::Mat4:	return GL_FLOAT;
-		case ShaderDataType::Int:	return GL_INT;
-		case ShaderDataType::Int2:	return GL_INT;
-		case ShaderDataType::Int3:	return GL_INT;
+
+		case ShaderDataType::Int:
+		case ShaderDataType::Int2:
+		case ShaderDataType::Int3:
 		case ShaderDataType::Int4:	return GL_INT;
+
 		case ShaderDataType::Bool:	return GL_BOOL;
 		}
 
@@ -52,7 +54,7 @@ namespace Hazel
 		vertexBuffer->Bind();
 
 		HZ_CORE_ASSERT(vertexBuffer->GetLayout().GetElement().size(), "Vertex Buffer has no layout!");
-		
+
 		uint32_t index = 0;
 		const auto& layout = vertexBuffer->GetLayout();
 		for (const auto& element : layout)

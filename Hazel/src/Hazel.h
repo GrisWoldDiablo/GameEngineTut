@@ -8,9 +8,6 @@
 #include "Hazel/Core/Timestep.h"
 
 #include "Hazel/Input.h"
-#include "Hazel/Events/ApplicationEvent.h"
-#include "Hazel/Events/KeyEvent.h"
-#include "Hazel/Events/MouseEvent.h"
 #include "Hazel/KeyCodes.h"
 #include "Hazel/MouseButtonCodes.h"
 

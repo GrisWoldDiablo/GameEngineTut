@@ -3,7 +3,7 @@
 
 namespace Hazel
 {
-	class RenderCommand
+	class HAZEL_API RenderCommand
 	{
 	public:
 		inline static void DrawIndexed(const std::shared_ptr<VertexArray>& vertexArray)
@@ -20,9 +20,8 @@ namespace Hazel
 		{
 			_sRendererAPI->Clear();
 		}
-
+		
 	private:
 		static RendererAPI* _sRendererAPI;
 	};
-
 }

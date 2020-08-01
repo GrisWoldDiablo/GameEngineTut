@@ -3,7 +3,7 @@
 
 namespace Hazel
 {
-	Renderer::SceneData* Renderer::_sSceneData = new Renderer::SceneData;
+	Renderer::SceneData* Renderer::_sSceneData = new SceneData;
 	
 	void Renderer::BeginScene(OrthographicCamera& camera)
 	{

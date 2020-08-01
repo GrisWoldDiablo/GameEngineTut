@@ -1,3 +1,6 @@
+#include <utility>
+
+
 #pragma once
 
 namespace Hazel
@@ -29,14 +32,14 @@ namespace Hazel
 
 	struct BufferElement
 	{
-		std::string Name;
 		ShaderDataType Type;
+		std::string Name;
 		uint32_t Size;
 		uint32_t Offset;
 		bool Normalized;
 
-		BufferElement(ShaderDataType type, const std::string name, bool normalized = false)
-			:Type(type), Name(name), Size(ShaderDataTypeSize(type)), Offset(0), Normalized(normalized) {}
+		BufferElement(ShaderDataType type, std::string name, bool normalized = false)
+			:Type(type), Name(std::move(name)), Size(ShaderDataTypeSize(type)), Offset(0), Normalized(normalized) {}
 
 		uint32_t GetComponentCount() const
 		{
