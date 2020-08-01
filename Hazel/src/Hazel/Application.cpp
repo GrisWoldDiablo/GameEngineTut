@@ -145,8 +145,8 @@ namespace Hazel
 
 			Renderer::BeginScene(_camera);
 
-			_camera.SetPosition({ 0.5f,0.5f,0.0f });
-			_camera.SetRotation(45.0f);
+			_camera.SetPosition(CameraPosition);
+			_camera.SetRotation(CameraRotation);
 			// Triangle
 			Renderer::Submit(_blueShader, _squareVertexArray);
 			// Square

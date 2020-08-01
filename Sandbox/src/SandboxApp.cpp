@@ -8,6 +8,8 @@ public:
 		: Layer("Example")
 	{
 		_color = Hazel::Application::Get().ClearColor;
+		_cameraPosition = &Hazel::Application::Get().CameraPosition;
+		_cameraRotation = &Hazel::Application::Get().CameraRotation;
 	}
 	void OnUpdate() override
 	{
@@ -58,13 +60,36 @@ public:
 		if (event.GetEventType() == Hazel::EventType::KeyPressed)
 		{
 			auto& e = (Hazel::KeyPressedEvent&)event;
-			// Insert what to do with event...
+			// Insert what to do with event....
+			switch (e.GetKeyCode())
+			{
+			case HZ_KEY_W:
+				_cameraPosition->y += 0.1f;
+				break;
+			case HZ_KEY_S:
+				_cameraPosition->y -= 0.1f;
+				break;
+			case HZ_KEY_A:
+				_cameraPosition->x -= 0.1f;
+				break;
+			case HZ_KEY_D:
+				_cameraPosition->x += 0.1f;
+				break;
+			case HZ_KEY_Q:
+				*_cameraRotation += 1.0f;
+				break;
+			case HZ_KEY_E:
+				*_cameraRotation -= 1.0f;
+				break;
+			}
 		}
 		return false;
 	}
 
 private:
 	float* _color;
+	glm::vec3* _cameraPosition;
+	float* _cameraRotation;
 };
 
 class Sandbox final : public Hazel::Application

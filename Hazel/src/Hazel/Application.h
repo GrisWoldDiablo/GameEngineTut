@@ -41,7 +41,8 @@ namespace Hazel
 
 	public:
 		float* ClearColor = new float[4]{ 0.13f, 0.0f, 0.3f, 1.0f }; // Purple
-
+		glm::vec3 CameraPosition = { 0.0f,0.0f,0.0f };
+		float CameraRotation = 0.0f;
 	private:
 		std::unique_ptr<Window> _window;
 		ImGuiLayer* _imGuiLayer;
