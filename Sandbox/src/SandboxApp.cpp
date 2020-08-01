@@ -120,10 +120,10 @@ public:
 		// -- Square
 	}
 
-	void OnUpdate() override
+	void OnUpdate(Hazel::Timestep timestep) override
 	{
-		CameraMovement();
-
+		CameraMovement(timestep);
+		
 		Hazel::RenderCommand::SetClearColor({ _clearColor[0], _clearColor[1], _clearColor[2], _clearColor[3] });
 		Hazel::RenderCommand::Clear();
 
@@ -140,33 +140,33 @@ public:
 		Hazel::Renderer::EndScene();
 	}
 
-	void CameraMovement()
+	void CameraMovement(float timestep)
 	{
 		if (Hazel::Input::IsKeyPressed(HZ_KEY_W))
 		{
-			_cameraPosition.y += _movementSpeed;
+			_cameraPosition.y += _movementSpeed * timestep;
 		}
 		else if (Hazel::Input::IsKeyPressed(HZ_KEY_S))
 		{
-			_cameraPosition.y -= _movementSpeed;
+			_cameraPosition.y -= _movementSpeed * timestep;
 		}
 		
 		if (Hazel::Input::IsKeyPressed(HZ_KEY_A))
 		{
-			_cameraPosition.x -= _movementSpeed;
+			_cameraPosition.x -= _movementSpeed * timestep;
 		}
 		else if (Hazel::Input::IsKeyPressed(HZ_KEY_D))
 		{
-			_cameraPosition.x += _movementSpeed;
+			_cameraPosition.x += _movementSpeed * timestep;
 		}
 		
 		if (Hazel::Input::IsKeyPressed(HZ_KEY_Q))
 		{
-			_cameraRotation += _rotationSpeed;
+			_cameraRotation += _rotationSpeed * timestep;
 		}
 		else if (Hazel::Input::IsKeyPressed(HZ_KEY_E))
 		{
-			_cameraRotation -= _rotationSpeed;
+			_cameraRotation -= _rotationSpeed * timestep;
 		}
 	}
 
@@ -199,9 +199,9 @@ public:
 private:
 	float* _clearColor = new float[4]{ 0.13f, 0.0f, 0.3f, 1.0f };
 	glm::vec3 _cameraPosition = { 0.0f,0.0f,0.0f };
-	float _movementSpeed = 0.1f;
+	float _movementSpeed = 5.0f;
 	float _cameraRotation = 0.0f;
-	float _rotationSpeed = 1.0f;
+	float _rotationSpeed = 90.0f;
 
 	// Triangle
 	std::shared_ptr<Hazel::Shader> _shader;

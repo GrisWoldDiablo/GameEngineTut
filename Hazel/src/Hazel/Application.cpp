@@ -3,6 +3,8 @@
 #include "Events/Event.h"
 #include "Hazel/Renderer/Renderer.h"
 
+#include "GLFW/glfw3.h"
+
 namespace Hazel
 {
 	// Static singleton access
@@ -16,7 +18,7 @@ namespace Hazel
 
 		_window = std::unique_ptr<Window>(Window::Create());
 		_window->SetEventCallback(HZ_BIND_EVENT_FN(OnEvent));
-
+		
 		// Create ImGui and push it to the layer stack as an overlay.
 		_imGuiLayer = new ImGuiLayer();
 		PushOverlay(_imGuiLayer);
@@ -26,10 +28,14 @@ namespace Hazel
 	{
 		while (_running)
 		{
+			auto time = (float)glfwGetTime(); // Platform::GetTime();
+			auto timestep = Timestep(time - _lastFrameTime);
+			_lastFrameTime = time;
+			
 			// Go through the layers from bottom to top
 			for (auto* layer : _layerStack)
 			{
-				layer->OnUpdate();
+				layer->OnUpdate(timestep);
 			}
 
 			// Render the ImGui layer.			
