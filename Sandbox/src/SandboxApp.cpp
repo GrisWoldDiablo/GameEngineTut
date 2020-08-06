@@ -1,6 +1,9 @@
 #include <Hazel.h>
 #include <imgui/imgui.h>
 
+
+#include <glm/gtc/matrix_transform.hpp>
+
 #include "Hazel/Events/KeyEvent.h"
 
 class ExampleLayer final : public Hazel::Layer
@@ -10,7 +13,7 @@ public:
 		: Layer("Example"), _camera(-1.6f, 1.6f, -0.9f, 0.9f)
 	{
 		// -- Triangle
-		_vertexArray.reset(Hazel::VertexArray::Create());
+		_triangleVertexArray.reset(Hazel::VertexArray::Create());
 
 		float vertices[3 * 7] =
 		{
@@ -28,12 +31,12 @@ public:
 			{Hazel::ShaderDataType::Float4, "a_Color" },
 		};
 		vertexBuffer->SetLayout(layout);
-		_vertexArray->AddVertexBuffer(vertexBuffer);
+		_triangleVertexArray->AddVertexBuffer(vertexBuffer);
 
 		uint32_t indices[3] = { 0, 1, 2 };
 		std::shared_ptr<Hazel::IndexBuffer> indexBuffer;
 		indexBuffer.reset(Hazel::IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t)));
-		_vertexArray->SetIndexBuffer(indexBuffer);
+		_triangleVertexArray->SetIndexBuffer(indexBuffer);
 
 		std::string vertexSrc = R"(
 			#version 430
@@ -41,6 +44,7 @@ public:
 			layout(location = 1) in vec4 a_Color;
 
 			uniform mat4 u_ViewProjection;
+			uniform mat4 u_Transform;
 		
 			out vec3 v_Position;
 			out vec4 v_Color;
@@ -49,7 +53,7 @@ public:
 			{
 				v_Color = a_Color;
 				v_Position = a_Position;
-				gl_Position = u_ViewProjection * vec4(v_Position, 1.0);
+				gl_Position = u_ViewProjection * u_Transform * vec4(v_Position, 1.0);
 			}
 		)";
 
@@ -73,10 +77,10 @@ public:
 		_squareVertexArray.reset(Hazel::VertexArray::Create());
 		float squareVertices[4 * 3] =
 		{
-			-0.75f, -0.75f, 0.0f,
-			 0.75f, -0.75f, 0.0f,
-			 0.75f,  0.75f, 0.0f,
-			-0.75f,  0.75f, 0.0f
+			-0.5f, -0.5f, 0.0f,
+			 0.5f, -0.5f, 0.0f,
+			 0.5f,  0.5f, 0.0f,
+			-0.5f,  0.5f, 0.0f
 		};
 		std::shared_ptr<Hazel::VertexBuffer> squareVertexBuffer;
 		squareVertexBuffer.reset(Hazel::VertexBuffer::Create(squareVertices, sizeof(squareVertices)));
@@ -96,13 +100,15 @@ public:
 			layout(location = 0) in vec3 a_Position;
 
 			uniform mat4 u_ViewProjection;
+			uniform mat4 u_Transform;
+;
 
 			out vec3 v_Position;
 
 			void main()
 			{
 				v_Position = a_Position;
-				gl_Position = u_ViewProjection * vec4(v_Position, 1.0);
+				gl_Position = u_ViewProjection * u_Transform * vec4(v_Position, 1.0);
 			}
 		)";
 
@@ -124,8 +130,8 @@ public:
 
 	void OnUpdate(Hazel::Timestep timestep) override
 	{
-		CameraMovement(timestep);
-		
+		Movement(timestep);
+
 		Hazel::RenderCommand::SetClearColor({ _clearColor[0], _clearColor[1], _clearColor[2], _clearColor[3] });
 		Hazel::RenderCommand::Clear();
 
@@ -133,43 +139,113 @@ public:
 
 		_camera.SetPosition(_cameraPosition);
 		_camera.SetRotation(_cameraRotation);
-
 		// Triangle
-		Hazel::Renderer::Submit(_blueShader, _squareVertexArray);
-		// Square
-		Hazel::Renderer::Submit(_shader, _vertexArray);
+		Hazel::Renderer::Submit(_shader, _triangleVertexArray);
+
+		auto scale = glm::scale(glm::identity<glm::mat4>(), _squareScale);
+		for (int y = 0; y < 20; y++)
+		{
+			for (int x = 0; x < 20; x++)
+			{
+				// Square
+				glm::vec3 pos(x * 0.11f, y * 0.11f, 0.0f);
+				auto transform = glm::translate(glm::identity<glm::mat4>(), pos + _squarePosition) * scale;
+				Hazel::Renderer::Submit(_blueShader, _squareVertexArray, transform);
+			}
+		}
 
 		Hazel::Renderer::EndScene();
 	}
 
-	void CameraMovement(float timestep)
+	void Movement(float timestep)
 	{
 		if (Hazel::Input::IsKeyPressed(HZ_KEY_W))
 		{
-			_cameraPosition.y += _movementSpeed * timestep;
+			if (Hazel::Input::IsKeyPressed(HZ_KEY_LEFT_SHIFT))
+			{
+				_cameraPosition.y += _cameraMoveSpeed * timestep;
+			}
+			else
+			{
+				_squarePosition.y += _squareMoveSpeed * timestep;
+			}
 		}
 		else if (Hazel::Input::IsKeyPressed(HZ_KEY_S))
 		{
-			_cameraPosition.y -= _movementSpeed * timestep;
+			if (Hazel::Input::IsKeyPressed(HZ_KEY_LEFT_SHIFT))
+			{
+				_cameraPosition.y -= _cameraMoveSpeed * timestep;
+			}
+			else
+			{
+				_squarePosition.y -= _squareMoveSpeed * timestep;
+			}
 		}
-		
+
 		if (Hazel::Input::IsKeyPressed(HZ_KEY_A))
 		{
-			_cameraPosition.x -= _movementSpeed * timestep;
+			if (Hazel::Input::IsKeyPressed(HZ_KEY_LEFT_SHIFT))
+			{
+				_cameraPosition.x -= _cameraMoveSpeed * timestep;
+			}
+			else
+			{
+				_squarePosition.x -= _squareMoveSpeed * timestep;
+			}
 		}
 		else if (Hazel::Input::IsKeyPressed(HZ_KEY_D))
 		{
-			_cameraPosition.x += _movementSpeed * timestep;
+			if (Hazel::Input::IsKeyPressed(HZ_KEY_LEFT_SHIFT))
+			{
+				_cameraPosition.x += _cameraMoveSpeed * timestep;
+			}
+			else
+			{
+				_squarePosition.x += _squareMoveSpeed * timestep;
+			}
 		}
-		
+
 		if (Hazel::Input::IsKeyPressed(HZ_KEY_Q))
 		{
-			_cameraRotation += _rotationSpeed * timestep;
+			_cameraRotation += _cameraRotationSpeed * timestep;
 		}
 		else if (Hazel::Input::IsKeyPressed(HZ_KEY_E))
 		{
-			_cameraRotation -= _rotationSpeed * timestep;
+			_cameraRotation -= _cameraRotationSpeed * timestep;
 		}
+
+
+		if (Hazel::Input::IsKeyPressed(HZ_KEY_LEFT_CONTROL))
+		{
+			if (_squareGrow)
+			{
+				_squareScale += _scaleSpeed * timestep;
+				if (glm::greaterThan(_squareScale, glm::vec3(0.107f)).x)
+				{
+					_squareGrow = false;
+				}
+			}
+			else
+			{
+				_squareScale -= _scaleSpeed * timestep;
+				if (glm::lessThanEqual(_squareScale, glm::vec3(0.01f)).x)
+				{
+					_squareGrow = true;
+				}
+			}
+		}
+		else
+		{
+			if (Hazel::Input::IsKeyPressed(HZ_KEY_R))
+			{
+				_squareScale += _scaleSpeed * timestep;
+			}
+			else if (Hazel::Input::IsKeyPressed(HZ_KEY_F))
+			{
+				_squareScale -= _scaleSpeed * timestep;
+			}
+		}
+		_squareScale = glm::clamp(_squareScale, (0.01f), (0.107f));
 	}
 
 	void OnImGuiRender() override
@@ -177,6 +253,8 @@ public:
 		ImGui::Begin("Select your background Color.");
 		ImGui::TextColored(ImVec4(_clearColor[0], _clearColor[1], _clearColor[2], _clearColor[3]), "Color");
 		ImGui::ColorEdit4("Color", _clearColor, ImGuiColorEditFlags_InputRGB);
+		ImGui::Text("Camera Control\n Hold Left SHIFT:\n  ASWD move\n  QE rotate");
+		ImGui::Text("Grid Control\n  ASWD move\n  QE rotate\n  RF scale,\n  Holding Left CTRL scale pulse");
 		ImGui::End();
 	}
 
@@ -201,13 +279,19 @@ public:
 private:
 	float* _clearColor = new float[4]{ 0.13f, 0.0f, 0.3f, 1.0f };
 	glm::vec3 _cameraPosition = { 0.0f,0.0f,0.0f };
-	float _movementSpeed = 5.0f;
+	float _cameraMoveSpeed = 5.0f;
 	float _cameraRotation = 0.0f;
-	float _rotationSpeed = 90.0f;
+	float _cameraRotationSpeed = 90.0f;
+
+	float _squareMoveSpeed = 1.0f;
+	glm::vec3 _squarePosition = { -1.045f, -1.045f, 0.0f };
+	bool _squareGrow = false;
+	float _scaleSpeed = 0.1f;
+	glm::vec3 _squareScale = { 0.1f,0.1f,0.1f };
 
 	// Triangle
 	std::shared_ptr<Hazel::Shader> _shader;
-	std::shared_ptr<Hazel::VertexArray> _vertexArray;
+	std::shared_ptr<Hazel::VertexArray> _triangleVertexArray;
 	//Square
 	std::shared_ptr<Hazel::Shader> _blueShader;
 	std::shared_ptr<Hazel::VertexArray> _squareVertexArray;
