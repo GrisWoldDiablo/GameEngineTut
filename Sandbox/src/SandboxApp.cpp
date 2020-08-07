@@ -95,7 +95,7 @@ public:
 		squareIndexBuffer.reset(Hazel::IndexBuffer::Create(squareIndices, sizeof(squareIndices) / sizeof(uint32_t)));
 		_squareVertexArray->SetIndexBuffer(squareIndexBuffer);
 
-		std::string blueShaderVertexSrc = R"(
+		std::string flatColorShaderVertexSrc = R"(
 			#version 430
 			layout(location = 0) in vec3 a_Position;
 
@@ -112,19 +112,20 @@ public:
 			}
 		)";
 
-		std::string blueFragmentShaderSrc = R"(
+		std::string flatColorShaderFragmentShaderSrc = R"(
 			#version 430
 			layout(location = 0) out vec4 color;
 
 			in vec3 v_Position;
-			
+			uniform vec4 u_Color;
+		
 			void main()
 			{
-				color = vec4(0.1, 0.2, 0.7, 1.0);
+				color = u_Color;
 			}
 		)";
 
-		_blueShader.reset(new Hazel::Shader(blueShaderVertexSrc, blueFragmentShaderSrc));
+		_flatColorShader.reset(new Hazel::Shader(flatColorShaderVertexSrc, flatColorShaderFragmentShaderSrc));
 		// -- Square
 	}
 
@@ -143,6 +144,15 @@ public:
 		Hazel::Renderer::Submit(_shader, _triangleVertexArray);
 
 		auto scale = glm::scale(glm::identity<glm::mat4>(), _squareScale);
+		glm::vec4 redColor(0.7f, 0.1f, 0.2f, 1.0f);
+		glm::vec4 blueColor(0.1f, 0.2f, 0.7f, 1.0f);
+
+		//Hazel::MaterialRef material = new Hazel::Material(_flatColorShader);
+		//Hazel::MaterialInstanceRef materialInstance = new Hazel::MaterialInstance(material);
+		//
+		//materialInstance->Set("u_Color", redColor);
+		//squareMesh->SetMaterial(materialInstance);
+		
 		for (int y = 0; y < 20; y++)
 		{
 			for (int x = 0; x < 20; x++)
@@ -150,7 +160,16 @@ public:
 				// Square
 				glm::vec3 pos(x * 0.11f, y * 0.11f, 0.0f);
 				auto transform = glm::translate(glm::identity<glm::mat4>(), pos + _squarePosition) * scale;
-				Hazel::Renderer::Submit(_blueShader, _squareVertexArray, transform);
+				if ((x+y) % 2 == 0)
+				{
+					_flatColorShader->UploadUniformFloat4("u_Color", redColor);
+				}
+				else
+				{
+
+					_flatColorShader->UploadUniformFloat4("u_Color", blueColor);
+				}
+				Hazel::Renderer::Submit(_flatColorShader, _squareVertexArray, transform);
 			}
 		}
 
@@ -293,7 +312,7 @@ private:
 	std::shared_ptr<Hazel::Shader> _shader;
 	std::shared_ptr<Hazel::VertexArray> _triangleVertexArray;
 	//Square
-	std::shared_ptr<Hazel::Shader> _blueShader;
+	std::shared_ptr<Hazel::Shader> _flatColorShader;
 	std::shared_ptr<Hazel::VertexArray> _squareVertexArray;
 
 	Hazel::OrthographicCamera _camera;
