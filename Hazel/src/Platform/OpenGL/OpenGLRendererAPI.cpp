@@ -24,7 +24,6 @@ namespace Hazel
 
 	float OpenGLRendererAPI::GetTime()
 	{
-		HZ_ASSERT(GLFW_NOT_INITIALIZED, "GLFW was not initialized, you cannot get the time");
-		return glfwGetTime();
+		return (float)glfwGetTime();
 	}
 }
