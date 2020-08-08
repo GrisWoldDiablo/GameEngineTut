@@ -1,10 +1,11 @@
 #include <Hazel.h>
+#include "Platform/OpenGL/OpenGLShader.h"
+#include "Hazel/Events/KeyEvent.h"
+
 #include <imgui/imgui.h>
 
-
 #include <glm/gtc/matrix_transform.hpp>
-
-#include "Hazel/Events/KeyEvent.h"
+#include "glm/gtc/type_ptr.hpp"
 
 class ExampleLayer final : public Hazel::Layer
 {
@@ -70,7 +71,7 @@ public:
 			}
 		)";
 
-		_shader.reset(new Hazel::Shader(vertexSrc, fragmentSrc));
+		_shader.reset(Hazel::Shader::Create(vertexSrc, fragmentSrc));
 		// -- Triangle
 
 		// -- Square
@@ -117,15 +118,15 @@ public:
 			layout(location = 0) out vec4 color;
 
 			in vec3 v_Position;
-			uniform vec4 u_Color;
+			uniform vec3 u_Color;
 		
 			void main()
 			{
-				color = u_Color;
+				color = vec4(u_Color, 1.0);
 			}
 		)";
 
-		_flatColorShader.reset(new Hazel::Shader(flatColorShaderVertexSrc, flatColorShaderFragmentShaderSrc));
+		_flatColorShader.reset(Hazel::Shader::Create(flatColorShaderVertexSrc, flatColorShaderFragmentShaderSrc));
 		// -- Square
 	}
 
@@ -133,7 +134,7 @@ public:
 	{
 		Movement(timestep);
 
-		Hazel::RenderCommand::SetClearColor({ _clearColor[0], _clearColor[1], _clearColor[2], _clearColor[3] });
+		Hazel::RenderCommand::SetClearColor(_clearColor);
 		Hazel::RenderCommand::Clear();
 
 		Hazel::Renderer::BeginScene(_camera);
@@ -144,15 +145,9 @@ public:
 		Hazel::Renderer::Submit(_shader, _triangleVertexArray);
 
 		auto scale = glm::scale(glm::identity<glm::mat4>(), _squareScale);
-		glm::vec4 redColor(0.7f, 0.1f, 0.2f, 1.0f);
-		glm::vec4 blueColor(0.1f, 0.2f, 0.7f, 1.0f);
 
-		//Hazel::MaterialRef material = new Hazel::Material(_flatColorShader);
-		//Hazel::MaterialInstanceRef materialInstance = new Hazel::MaterialInstance(material);
-		//
-		//materialInstance->Set("u_Color", redColor);
-		//squareMesh->SetMaterial(materialInstance);
-		
+		std::dynamic_pointer_cast<Hazel::OpenGLShader>(_flatColorShader)->Bind();
+		std::dynamic_pointer_cast<Hazel::OpenGLShader>(_flatColorShader)->UploadUniformFloat3("u_Color", _squareColor);
 		for (int y = 0; y < 20; y++)
 		{
 			for (int x = 0; x < 20; x++)
@@ -160,15 +155,6 @@ public:
 				// Square
 				glm::vec3 pos(x * 0.11f, y * 0.11f, 0.0f);
 				auto transform = glm::translate(glm::identity<glm::mat4>(), pos + _squarePosition) * scale;
-				if ((x+y) % 2 == 0)
-				{
-					_flatColorShader->UploadUniformFloat4("u_Color", redColor);
-				}
-				else
-				{
-
-					_flatColorShader->UploadUniformFloat4("u_Color", blueColor);
-				}
 				Hazel::Renderer::Submit(_flatColorShader, _squareVertexArray, transform);
 			}
 		}
@@ -270,8 +256,9 @@ public:
 	void OnImGuiRender() override
 	{
 		ImGui::Begin("Select your background Color.");
-		ImGui::TextColored(ImVec4(_clearColor[0], _clearColor[1], _clearColor[2], _clearColor[3]), "Color");
-		ImGui::ColorEdit4("Color", _clearColor, ImGuiColorEditFlags_InputRGB);
+		ImGui::TextColored(ImVec4(_clearColor.x, _clearColor.y, _clearColor.z, _clearColor.w), "Color");
+		ImGui::ColorEdit4("Color", glm::value_ptr(_clearColor), ImGuiColorEditFlags_InputRGB);
+		ImGui::ColorEdit3("Square Color", glm::value_ptr(_squareColor), ImGuiColorEditFlags_InputRGB);
 		ImGui::Text("Camera Control\n Hold Left SHIFT:\n  ASWD move\n  QE rotate");
 		ImGui::Text("Grid Control\n  ASWD move\n  QE rotate\n  RF scale,\n  Holding Left CTRL scale pulse");
 		ImGui::End();
@@ -296,12 +283,14 @@ public:
 	}
 
 private:
-	float* _clearColor = new float[4]{ 0.13f, 0.0f, 0.3f, 1.0f };
+	glm::vec4 _clearColor = { 0.13f, 0.0f, 0.3f,1.0f };
 	glm::vec3 _cameraPosition = { 0.0f,0.0f,0.0f };
 	float _cameraMoveSpeed = 5.0f;
 	float _cameraRotation = 0.0f;
 	float _cameraRotationSpeed = 90.0f;
 
+	glm::vec3 _squareColor = { 0.1f, 0.2f, 0.7f};
+	
 	float _squareMoveSpeed = 1.0f;
 	glm::vec3 _squarePosition = { -1.045f, -1.045f, 0.0f };
 	bool _squareGrow = false;
