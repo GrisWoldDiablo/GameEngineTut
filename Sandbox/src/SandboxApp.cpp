@@ -155,7 +155,7 @@ public:
 				// Square
 				glm::vec3 pos(x * 0.11f, y * 0.11f, 0.0f);
 				auto transform = glm::translate(_identityMatrix, pos + _squarePosition) * scale;
-				transform *= glm::rotate(_identityMatrix, glm::radians(_squareRotation),glm::vec3(0, 0, 1));
+				transform *= _rotationMatrix;
 				Hazel::Renderer::Submit(_flatColorShader, _squareVertexArray, transform);
 			}
 		}
@@ -220,6 +220,7 @@ public:
 			else
 			{
 				_squareRotation += _squareRotationSpeed * timestep;
+				_rotationMatrix = glm::rotate(_identityMatrix, glm::radians(_squareRotation), glm::vec3(0, 0, 1));
 			}
 		}
 		else if (Hazel::Input::IsKeyPressed(HZ_KEY_E))
@@ -231,6 +232,7 @@ public:
 			else
 			{
 				_squareRotation -= _squareRotationSpeed * timestep;
+				_rotationMatrix = glm::rotate(_identityMatrix, glm::radians(_squareRotation), glm::vec3(0, 0, 1));
 			}
 		}
 
@@ -315,6 +317,7 @@ private:
 	float _squareRotationSpeed = 90.0f;
 
 	glm::mat4 _identityMatrix = glm::identity<glm::mat4>();
+	glm::mat4 _rotationMatrix = glm::identity<glm::mat4>();
 
 	// Triangle
 	std::shared_ptr<Hazel::Shader> _shader;
