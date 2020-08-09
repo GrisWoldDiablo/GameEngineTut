@@ -14,7 +14,7 @@ public:
 		: Layer("Example"), _camera(-1.6f, 1.6f, -0.9f, 0.9f)
 	{
 		// -- Triangle
-		_triangleVertexArray.reset(Hazel::VertexArray::Create());
+		_triangleVertexArray = Hazel::VertexArray::Create();
 
 		float vertices[3 * 7] =
 		{
@@ -23,7 +23,7 @@ public:
 			 0.0f,  0.5f, 0.0f, 0.8f, 0.8f, 0.2f, 1.0f,
 		};
 		Hazel::Ref<Hazel::VertexBuffer> vertexBuffer;
-		vertexBuffer.reset(Hazel::VertexBuffer::Create(vertices, sizeof(vertices)));
+		vertexBuffer = Hazel::VertexBuffer::Create(vertices, sizeof(vertices));
 
 
 		Hazel::BufferLayout layout =
@@ -36,7 +36,7 @@ public:
 
 		uint32_t indices[3] = { 0, 1, 2 };
 		Hazel::Ref<Hazel::IndexBuffer> indexBuffer;
-		indexBuffer.reset(Hazel::IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t)));
+		indexBuffer = Hazel::IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t));
 		_triangleVertexArray->SetIndexBuffer(indexBuffer);
 
 		std::string vertexSrc = R"(
@@ -71,29 +71,30 @@ public:
 			}
 		)";
 
-		_shader.reset(Hazel::Shader::Create(vertexSrc, fragmentSrc));
+		_shader = Hazel::Shader::Create(vertexSrc, fragmentSrc);
 		// -- Triangle
 
 		// -- Square
-		_squareVertexArray.reset(Hazel::VertexArray::Create());
-		float squareVertices[4 * 3] =
+		_squareVertexArray = Hazel::VertexArray::Create();
+		float squareVertices[4 * 5] =
 		{
-			-0.5f, -0.5f, 0.0f,
-			 0.5f, -0.5f, 0.0f,
-			 0.5f,  0.5f, 0.0f,
-			-0.5f,  0.5f, 0.0f
+			-0.5f, -0.5f, 0.0f, 0.0f, 0.0f,
+			 0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
+			 0.5f,  0.5f, 0.0f, 1.0f, 1.0f,
+			-0.5f,  0.5f, 0.0f, 0.0f, 1.0f
 		};
 		Hazel::Ref<Hazel::VertexBuffer> squareVertexBuffer;
-		squareVertexBuffer.reset(Hazel::VertexBuffer::Create(squareVertices, sizeof(squareVertices)));
+		squareVertexBuffer = Hazel::VertexBuffer::Create(squareVertices, sizeof(squareVertices));
 		squareVertexBuffer->SetLayout(
 			{
 				{ Hazel::ShaderDataType::Float3, "a_Position" },
+				{ Hazel::ShaderDataType::Float2, "a_TexCoord" },
 			});
 		_squareVertexArray->AddVertexBuffer(squareVertexBuffer);
 
-		uint32_t squareIndices[6] = { 0, 1, 3, 3, 1, 2 };
+		uint32_t squareIndices[6] = { 0, 1, 2, 2, 3, 0 };
 		Hazel::Ref<Hazel::IndexBuffer> squareIndexBuffer;
-		squareIndexBuffer.reset(Hazel::IndexBuffer::Create(squareIndices, sizeof(squareIndices) / sizeof(uint32_t)));
+		squareIndexBuffer = Hazel::IndexBuffer::Create(squareIndices, sizeof(squareIndices) / sizeof(uint32_t));
 		_squareVertexArray->SetIndexBuffer(squareIndexBuffer);
 
 		std::string flatColorShaderVertexSrc = R"(
@@ -126,8 +127,44 @@ public:
 			}
 		)";
 
-		_flatColorShader.reset(Hazel::Shader::Create(flatColorShaderVertexSrc, flatColorShaderFragmentShaderSrc));
+		_flatColorShader = Hazel::Shader::Create(flatColorShaderVertexSrc, flatColorShaderFragmentShaderSrc);
 		// -- Square
+		std::string textureShaderVertexSrc = R"(
+			#version 430
+			layout(location = 0) in vec3 a_Position;
+			layout(location = 1) in vec2 a_TexCoord;
+
+			uniform mat4 u_ViewProjection;
+			uniform mat4 u_Transform;
+
+			out vec2 v_TexCoord;
+
+			void main()
+			{
+				v_TexCoord = a_TexCoord;
+				gl_Position = u_ViewProjection * u_Transform * vec4(a_Position, 1.0);
+			}
+		)";
+
+		std::string textureShaderFragmentShaderSrc = R"(
+			#version 430
+			layout(location = 0) out vec4 color;
+
+			in vec2 v_TexCoord;
+
+			uniform sampler2D u_Texture;
+		
+			void main()
+			{
+				color = texture(u_Texture, v_TexCoord);
+			}
+		)";
+
+		_textureShader = Hazel::Shader::Create(textureShaderVertexSrc, textureShaderFragmentShaderSrc);
+		_texture = Hazel::Texture2D::Create("assets/textures/unwrap_helper.png");
+
+		std::dynamic_pointer_cast<Hazel::OpenGLShader>(_textureShader)->Bind();
+		std::dynamic_pointer_cast<Hazel::OpenGLShader>(_textureShader)->UploadUniformInt("u_Texture", 0);
 	}
 
 	void OnUpdate(Hazel::Timestep timestep) override
@@ -137,12 +174,12 @@ public:
 		Hazel::RenderCommand::SetClearColor(_clearColor);
 		Hazel::RenderCommand::Clear();
 
-		Hazel::Renderer::BeginScene(_camera);
-
 		_camera.SetPosition(_cameraPosition);
 		_camera.SetRotation(_cameraRotation);
-		// Triangle
-		Hazel::Renderer::Submit(_shader, _triangleVertexArray);
+
+		Hazel::Renderer::BeginScene(_camera);
+		//Triangle
+		//Hazel::Renderer::Submit(_shader, _triangleVertexArray);
 
 		auto scale = glm::scale(glm::identity<glm::mat4>(), _squareScale);
 
@@ -159,6 +196,9 @@ public:
 				Hazel::Renderer::Submit(_flatColorShader, _squareVertexArray, transform);
 			}
 		}
+		// Textured square
+		_texture->Bind();
+		Hazel::Renderer::Submit(_textureShader, _squareVertexArray, glm::scale(glm::identity<glm::mat4>(), glm::vec3(1.5f)));
 
 		Hazel::Renderer::EndScene();
 	}
@@ -300,14 +340,14 @@ public:
 	}
 
 private:
-	glm::vec4 _clearColor = { 0.13f, 0.0f, 0.3f,1.0f };
-	glm::vec3 _cameraPosition = { 0.0f,0.0f,0.0f };
+	glm::vec4 _clearColor = { 0.13f, 0.0f, 0.3f, 1.0f };
+	glm::vec3 _cameraPosition = { 0.0f, 0.0f, 0.0f };
 	float _cameraMoveSpeed = 5.0f;
 	float _cameraRotation = 0.0f;
 	float _cameraRotationSpeed = 90.0f;
 
-	glm::vec3 _squareColor = { 0.1f, 0.2f, 0.7f};
-	
+	glm::vec3 _squareColor = { 0.1f, 0.2f, 0.7f };
+
 	float _squareMoveSpeed = 1.0f;
 	glm::vec3 _squarePosition = { -1.045f, -1.045f, 0.0f };
 	bool _squareGrow = false;
@@ -324,7 +364,10 @@ private:
 	Hazel::Ref<Hazel::VertexArray> _triangleVertexArray;
 	//Square
 	Hazel::Ref<Hazel::Shader> _flatColorShader;
+	Hazel::Ref<Hazel::Shader> _textureShader;
 	Hazel::Ref<Hazel::VertexArray> _squareVertexArray;
+
+	Hazel::Ref<Hazel::Texture2D> _texture;
 
 	Hazel::OrthographicCamera _camera;
 };
