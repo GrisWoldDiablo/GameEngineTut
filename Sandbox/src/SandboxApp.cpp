@@ -22,7 +22,7 @@ public:
 			 0.5f, -0.5f, 0.0f, 0.2f, 0.3f, 0.8f, 1.0f,
 			 0.0f,  0.5f, 0.0f, 0.8f, 0.8f, 0.2f, 1.0f,
 		};
-		std::shared_ptr<Hazel::VertexBuffer> vertexBuffer;
+		Hazel::Ref<Hazel::VertexBuffer> vertexBuffer;
 		vertexBuffer.reset(Hazel::VertexBuffer::Create(vertices, sizeof(vertices)));
 
 
@@ -35,7 +35,7 @@ public:
 		_triangleVertexArray->AddVertexBuffer(vertexBuffer);
 
 		uint32_t indices[3] = { 0, 1, 2 };
-		std::shared_ptr<Hazel::IndexBuffer> indexBuffer;
+		Hazel::Ref<Hazel::IndexBuffer> indexBuffer;
 		indexBuffer.reset(Hazel::IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t)));
 		_triangleVertexArray->SetIndexBuffer(indexBuffer);
 
@@ -83,7 +83,7 @@ public:
 			 0.5f,  0.5f, 0.0f,
 			-0.5f,  0.5f, 0.0f
 		};
-		std::shared_ptr<Hazel::VertexBuffer> squareVertexBuffer;
+		Hazel::Ref<Hazel::VertexBuffer> squareVertexBuffer;
 		squareVertexBuffer.reset(Hazel::VertexBuffer::Create(squareVertices, sizeof(squareVertices)));
 		squareVertexBuffer->SetLayout(
 			{
@@ -92,7 +92,7 @@ public:
 		_squareVertexArray->AddVertexBuffer(squareVertexBuffer);
 
 		uint32_t squareIndices[6] = { 0, 1, 3, 3, 1, 2 };
-		std::shared_ptr<Hazel::IndexBuffer> squareIndexBuffer;
+		Hazel::Ref<Hazel::IndexBuffer> squareIndexBuffer;
 		squareIndexBuffer.reset(Hazel::IndexBuffer::Create(squareIndices, sizeof(squareIndices) / sizeof(uint32_t)));
 		_squareVertexArray->SetIndexBuffer(squareIndexBuffer);
 
@@ -320,11 +320,11 @@ private:
 	glm::mat4 _rotationMatrix = glm::identity<glm::mat4>();
 
 	// Triangle
-	std::shared_ptr<Hazel::Shader> _shader;
-	std::shared_ptr<Hazel::VertexArray> _triangleVertexArray;
+	Hazel::Ref<Hazel::Shader> _shader;
+	Hazel::Ref<Hazel::VertexArray> _triangleVertexArray;
 	//Square
-	std::shared_ptr<Hazel::Shader> _flatColorShader;
-	std::shared_ptr<Hazel::VertexArray> _squareVertexArray;
+	Hazel::Ref<Hazel::Shader> _flatColorShader;
+	Hazel::Ref<Hazel::VertexArray> _squareVertexArray;
 
 	Hazel::OrthographicCamera _camera;
 };

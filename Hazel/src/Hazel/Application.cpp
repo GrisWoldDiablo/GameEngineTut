@@ -15,7 +15,7 @@ namespace Hazel
 			// Initialize the singleton.
 			_sInstance = this;
 
-		_window = std::unique_ptr<Window>(Window::Create());
+		_window = Scope<Window>(Window::Create());
 		_window->SetEventCallback(HZ_BIND_EVENT_FN(OnEvent));
 		
 		// Create ImGui and push it to the layer stack as an overlay.
