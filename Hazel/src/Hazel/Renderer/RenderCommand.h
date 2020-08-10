@@ -22,6 +22,12 @@ namespace Hazel
 		}
 		
 	private:
-		static RendererAPI* _sRendererAPI;
+		static Ref<RendererAPI> _sRendererAPI;
+	public:
+
+		inline static void Init()
+		{
+			_sRendererAPI->Init();
+		}
 	};
 }

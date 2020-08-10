@@ -162,6 +162,7 @@ public:
 
 		_textureShader = Hazel::Shader::Create(textureShaderVertexSrc, textureShaderFragmentShaderSrc);
 		_texture = Hazel::Texture2D::Create("assets/textures/unwrap_helper.png");
+		_chernoLogotexture = Hazel::Texture2D::Create("assets/textures/ChernoLogo.png");
 
 		std::dynamic_pointer_cast<Hazel::OpenGLShader>(_textureShader)->Bind();
 		std::dynamic_pointer_cast<Hazel::OpenGLShader>(_textureShader)->UploadUniformInt("u_Texture", 0);
@@ -181,7 +182,7 @@ public:
 		//Triangle
 		//Hazel::Renderer::Submit(_shader, _triangleVertexArray);
 
-		auto scale = glm::scale(glm::identity<glm::mat4>(), _squareScale);
+		auto scale = glm::scale(_identityMatrix, _squareScale);
 
 		std::dynamic_pointer_cast<Hazel::OpenGLShader>(_flatColorShader)->Bind();
 		std::dynamic_pointer_cast<Hazel::OpenGLShader>(_flatColorShader)->UploadUniformFloat3("u_Color", _squareColor);
@@ -196,9 +197,12 @@ public:
 				Hazel::Renderer::Submit(_flatColorShader, _squareVertexArray, transform);
 			}
 		}
-		// Textured square
+		// Textured squares
 		_texture->Bind();
-		Hazel::Renderer::Submit(_textureShader, _squareVertexArray, glm::scale(glm::identity<glm::mat4>(), glm::vec3(1.5f)));
+		Hazel::Renderer::Submit(_textureShader, _squareVertexArray, glm::scale(_identityMatrix, glm::vec3(1.5f)));
+
+		_chernoLogotexture->Bind();
+		Hazel::Renderer::Submit(_textureShader, _squareVertexArray, glm::scale(_identityMatrix, glm::vec3(1.5f)));
 
 		Hazel::Renderer::EndScene();
 	}
@@ -310,7 +314,7 @@ public:
 		_squareScale = glm::clamp(_squareScale, (0.01f), (0.107f));
 	}
 
-	void OnImGuiRender() override
+	void OnImGuiRender(Hazel::Timestep timestep) override
 	{
 		ImGui::Begin("Select your background Color.");
 		ImGui::TextColored(ImVec4(_clearColor.x, _clearColor.y, _clearColor.z, _clearColor.w), "Color");
@@ -318,6 +322,28 @@ public:
 		ImGui::ColorEdit3("Square Color", glm::value_ptr(_squareColor), ImGuiColorEditFlags_InputRGB);
 		ImGui::Text("Camera Control\n Hold Left SHIFT:\n  ASWD move\n  QE rotate");
 		ImGui::Text("Grid Control\n  ASWD move\n  QE rotate\n  RF scale,\n  Holding Left CTRL scale pulse");
+		ImGui::End();
+
+		if (_showFPS)
+		{
+			ShowFPS(timestep);
+		}
+	}
+
+	void ShowFPS(Hazel::Timestep timestep)
+	{
+		// Frames per second.
+		_oneSecond -= timestep;
+		_frameCount++;
+		if (_oneSecond <= 0.0f)
+		{
+			_currentFPS = _frameCount;
+			_oneSecond = 1.0f;
+			_frameCount = 0;
+		}
+		ImGui::Begin("FPS", NULL, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoFocusOnAppearing);
+		ImGui::SetWindowFontScale(1.5f);
+		ImGui::Text(std::to_string(_currentFPS).c_str());
 		ImGui::End();
 	}
 
@@ -333,7 +359,11 @@ public:
 		{
 		case HZ_KEY_ESCAPE:
 			Hazel::Application::Get().Stop();
-			HZ_CORE_LCRITICAL("ESC Key pressed, exiting application.");
+			HZ_LCRITICAL("ESC Key pressed, exiting application.");
+			break;
+		case HZ_KEY_Z:
+			_showFPS = !_showFPS;
+			HZ_LDEBUG("Show FPS {0}", _showFPS);
 			break;
 		}
 		return false;
@@ -368,8 +398,14 @@ private:
 	Hazel::Ref<Hazel::VertexArray> _squareVertexArray;
 
 	Hazel::Ref<Hazel::Texture2D> _texture;
+	Hazel::Ref<Hazel::Texture2D> _chernoLogotexture;
 
 	Hazel::OrthographicCamera _camera;
+
+	int _frameCount = 0;
+	int _currentFPS = 0;
+	float _oneSecond = 1.0f;
+	bool _showFPS = true;
 };
 
 class Sandbox final : public Hazel::Application

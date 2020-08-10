@@ -14,7 +14,7 @@ namespace Hazel
 		virtual void OnAttach() {}
 		virtual void OnDetach() {}
 		virtual void OnUpdate(Timestep timestep) {}
-		virtual void OnImGuiRender() {}
+		virtual void OnImGuiRender(Timestep timestep) {}
 		virtual void OnEvent(Event& event) {}
 
 		inline const std::string& GetName() const { return _debugName; }

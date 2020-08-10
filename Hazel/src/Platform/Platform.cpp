@@ -11,8 +11,8 @@ namespace Hazel
 	// Currently using OpenGL since its only one supported.
 	RendererAPI::API RendererAPI::_sAPI = API::OpenGL;
 
-	auto* renderAPI = Renderer::GetAPI() == RendererAPI::API::OpenGL ? new OpenGLRendererAPI : nullptr;
-	RendererAPI* RenderCommand::_sRendererAPI = renderAPI;
+	Ref<RendererAPI> renderAPI = Renderer::GetAPI() == RendererAPI::API::OpenGL ? CreateRef<OpenGLRendererAPI>() : nullptr;
+	Ref<RendererAPI> RenderCommand::_sRendererAPI = renderAPI;
 
-	Platform* Platform::_sInstance = new Platform(renderAPI);
+	Ref<Platform> Platform::_sInstance = CreateRef<Platform>(renderAPI);
 }

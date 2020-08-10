@@ -6,7 +6,7 @@ namespace Hazel
 	class Platform
 	{
 	public:
-		Platform(RendererAPI* renderAPI)
+		Platform(Ref<RendererAPI> renderAPI)
 			:_rendererAPI(renderAPI)
 		{
 		}
@@ -17,9 +17,9 @@ namespace Hazel
 		inline float GetTimeImpl() { return _rendererAPI->GetTime(); }
 
 	private:
-		RendererAPI* _rendererAPI;
+		Ref<RendererAPI> _rendererAPI;
 
 		// Singleton related 
-		static Platform* _sInstance;
+		static Ref<Platform> _sInstance;
 	};
 }

@@ -18,6 +18,8 @@ namespace Hazel
 		_window = Scope<Window>(Window::Create());
 		_window->SetEventCallback(HZ_BIND_EVENT_FN(OnEvent));
 		
+		Renderer::Init();
+
 		// Create ImGui and push it to the layer stack as an overlay.
 		_imGuiLayer = new ImGuiLayer();
 		PushOverlay(_imGuiLayer);
@@ -41,7 +43,7 @@ namespace Hazel
 			_imGuiLayer->Begin();
 			for (auto* layer : _layerStack)
 			{
-				layer->OnImGuiRender();
+				layer->OnImGuiRender(timestep);
 			}
 			_imGuiLayer->End();
 
