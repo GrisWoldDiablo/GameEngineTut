@@ -6,6 +6,25 @@
 
 namespace Hazel
 {
+	Ref<Shader> Shader::Create(const std::string& glslFilePath)
+	{
+		switch (Renderer::GetAPI())
+		{
+		case RendererAPI::API::None:
+			HZ_CORE_ASSERT(false, "RendererAPI::None is currently not supported.");
+		case RendererAPI::API::OpenGL:
+			return CreateRef<OpenGLShader>(glslFilePath);
+		case RendererAPI::API::DirectX:
+			HZ_CORE_ASSERT(false, "RendererAPI::DirectX is currently not supported.");
+		case RendererAPI::API::Vulkan:
+			HZ_CORE_ASSERT(false, "RendererAPI::Vulkan is currently not supported.");
+		default:;
+		}
+
+		HZ_CORE_ASSERT(false, "Unknow RendererAPI, Shader::Create");
+		return nullptr;
+	}
+
 	Ref<Shader> Shader::Create(const std::string& vertexSrc, const std::string& fragmentSrc)
 	{
 		switch (Renderer::GetAPI())
