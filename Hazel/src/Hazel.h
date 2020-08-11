@@ -27,6 +27,7 @@
 
 // Misc
 #include "Hazel/Random.h"
+#include "Platform/Platform.h"
 
 // -- Entry Point --------------
 #include "Hazel/EntryPoint.h"

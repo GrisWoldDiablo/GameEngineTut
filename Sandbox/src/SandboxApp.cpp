@@ -16,11 +16,12 @@ public:
 		// -- Triangle
 		_triangleVertexArray = Hazel::VertexArray::Create();
 
-		float vertices[3 * 7] =
+		float vertices[4 * 7] =
 		{
-			-0.5f, -0.5f, 0.0f, 0.8f, 0.2f, 0.8f, 1.0f,
+			-0.5f, -0.5f, 0.0f, 0.8f, 0.2f, 0.3f, 1.0f,
 			 0.5f, -0.5f, 0.0f, 0.2f, 0.3f, 0.8f, 1.0f,
-			 0.0f,  0.5f, 0.0f, 0.8f, 0.8f, 0.2f, 1.0f,
+			 0.5f,  0.5f, 0.0f, 0.3f, 0.8f, 0.2f, 1.0f,
+			-0.5f,  0.5f, 0.0f, 0.8f, 0.8f, 0.2f, 1.0f,
 		};
 		Hazel::Ref<Hazel::VertexBuffer> vertexBuffer;
 		vertexBuffer = Hazel::VertexBuffer::Create(vertices, sizeof(vertices));
@@ -34,44 +35,13 @@ public:
 		vertexBuffer->SetLayout(layout);
 		_triangleVertexArray->AddVertexBuffer(vertexBuffer);
 
-		uint32_t indices[3] = { 0, 1, 2 };
+		uint32_t indices[6] = { 0, 1, 2 , 2, 3, 0 };
 		Hazel::Ref<Hazel::IndexBuffer> indexBuffer;
 		indexBuffer = Hazel::IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t));
 		_triangleVertexArray->SetIndexBuffer(indexBuffer);
 
-		std::string vertexSrc = R"(
-			#version 430
-			layout(location = 0) in vec3 a_Position;
-			layout(location = 1) in vec4 a_Color;
 
-			uniform mat4 u_ViewProjection;
-			uniform mat4 u_Transform;
-		
-			out vec3 v_Position;
-			out vec4 v_Color;
-
-			void main()
-			{
-				v_Color = a_Color;
-				v_Position = a_Position;
-				gl_Position = u_ViewProjection * u_Transform * vec4(v_Position, 1.0);
-			}
-		)";
-
-		std::string fragmentSrc = R"(
-			#version 430
-			layout(location = 0) out vec4 color;
-
-			in vec3 v_Position;
-			in vec4 v_Color;
-			
-			void main()
-			{
-				color = v_Color;
-			}
-		)";
-
-		_shader = Hazel::Shader::Create(vertexSrc, fragmentSrc);
+		_shaderVertexColor = Hazel::Shader::Create("assets/shaders/VertexColor.glsl");
 		// -- Triangle
 
 		// -- Square
@@ -120,8 +90,6 @@ public:
 		_camera.SetRotation(_cameraRotation);
 
 		Hazel::Renderer::BeginScene(_camera);
-		//Triangle
-		//Hazel::Renderer::Submit(_shader, _triangleVertexArray);
 
 		auto scale = glm::scale(_identityMatrix, _squareScale);
 
@@ -142,13 +110,19 @@ public:
 		_texture->Bind();
 		Hazel::Renderer::Submit(_textureShader, _squareVertexArray, glm::scale(_identityMatrix, glm::vec3(1.5f)));
 
+		//Triangle
+		std::dynamic_pointer_cast<Hazel::OpenGLShader>(_shaderVertexColor)->Bind();
+		std::dynamic_pointer_cast<Hazel::OpenGLShader>(_shaderVertexColor)->UploadUniformFloat("u_Time", Hazel::Platform::GetTime());
+
+		Hazel::Renderer::Submit(_shaderVertexColor, _triangleVertexArray);
+
 		_chernoLogotexture->Bind();
 		Hazel::Renderer::Submit(_textureShader, _squareVertexArray, glm::scale(_identityMatrix, glm::vec3(1.5f)));
 
 		Hazel::Renderer::EndScene();
 	}
 
-	void Movement(float timestep)
+	void Movement(Hazel::Timestep timestep)
 	{
 		if (Hazel::Input::IsKeyPressed(HZ_KEY_W))
 		{
@@ -263,6 +237,7 @@ public:
 		ImGui::ColorEdit3("Square Color", glm::value_ptr(_squareColor), ImGuiColorEditFlags_InputRGB);
 		ImGui::Text("Camera Control\n Hold Left SHIFT:\n  ASWD move\n  QE rotate");
 		ImGui::Text("Grid Control\n  ASWD move\n  QE rotate\n  RF scale,\n  Holding Left CTRL scale pulse");
+		ImGui::Text("FPS Counter\n  Z hide/show");
 		ImGui::End();
 
 		if (_showFPS)
@@ -282,7 +257,7 @@ public:
 			_oneSecond = 1.0f;
 			_frameCount = 0;
 		}
-		ImGui::Begin("FPS", NULL, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoFocusOnAppearing);
+		ImGui::Begin("FPS", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoFocusOnAppearing);
 		ImGui::SetWindowFontScale(1.5f);
 		ImGui::Text(std::to_string(_currentFPS).c_str());
 		ImGui::End();
@@ -305,6 +280,9 @@ public:
 		case HZ_KEY_Z:
 			_showFPS = !_showFPS;
 			HZ_LDEBUG("Show FPS {0}", _showFPS);
+			break;
+		case HZ_KEY_P:
+			_shaderVertexColor = Hazel::Shader::Create("assets/shaders/VertexColor.glsl");
 			break;
 		}
 		return false;
@@ -331,7 +309,7 @@ private:
 	glm::mat4 _rotationMatrix = glm::identity<glm::mat4>();
 
 	// Triangle
-	Hazel::Ref<Hazel::Shader> _shader;
+	Hazel::Ref<Hazel::Shader> _shaderVertexColor;
 	Hazel::Ref<Hazel::VertexArray> _triangleVertexArray;
 	//Square
 	Hazel::Ref<Hazel::Shader> _flatColorShader;
