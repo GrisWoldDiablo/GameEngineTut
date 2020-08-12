@@ -1,4 +1,4 @@
-Folowing Game Engine Series by The Cherno.
+Following Game Engine Series by The Cherno and adding/changing stuff.
 ### Channel:
 https://www.youtube.com/channel/UCQ-W1KE9EYfdxhL6S4twUNw
 ### Serie's playlist:
