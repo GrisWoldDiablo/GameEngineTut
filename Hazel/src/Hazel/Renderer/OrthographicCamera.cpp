@@ -11,6 +11,12 @@ namespace Hazel
 		RecalculateViewMatrix();
 	}
 
+	void OrthographicCamera::SetProjection(float left, float right, float bottom, float top)
+	{
+		_projectionMatrix = glm::ortho(left, right, bottom, top, -1.0f, 1.0f);
+		_viewProjectionMatrix = _projectionMatrix * _viewMatrix;
+	}
+
 	void OrthographicCamera::RecalculateViewMatrix()
 	{
 		auto identityMatrix = glm::identity<glm::mat4>();
