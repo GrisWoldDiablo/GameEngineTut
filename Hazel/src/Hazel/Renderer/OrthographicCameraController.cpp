@@ -61,15 +61,19 @@ namespace Hazel
 		dispatcher.Dispatch<WindowResizeEvent>(HZ_BIND_EVENT_FN(OnWindowResized));
 	}
 
-	bool OrthographicCameraController::OnMouseScrolled(MouseScrolledEvent& event)
+	void OrthographicCameraController::SetZoomLevel(float level)
 	{
-		_zoomLevel -= event.GetYOffset() * 0.25f;
-		_zoomLevel = std::max(_zoomLevel, 0.1f);
+		_zoomLevel -= level;
+		_zoomLevel = std::max(_zoomLevel, _zoomLevelMinimum);
 		_camera.SetProjection(-_aspectRation * _zoomLevel, _aspectRation * _zoomLevel, -_zoomLevel, _zoomLevel);
 
 		// Slow camera as you zoom in and speed it up as you zoom out
 		_cameraTranslationSpeed = _zoomLevel;
+	}
 
+	bool OrthographicCameraController::OnMouseScrolled(MouseScrolledEvent& event)
+	{
+		SetZoomLevel(event.GetYOffset() * _zoomLevelSpeed);
 		return false;
 	}
 
