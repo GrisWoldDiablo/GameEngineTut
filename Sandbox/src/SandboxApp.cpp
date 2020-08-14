@@ -89,8 +89,22 @@ public:
 
 	void OnImGuiRender(Hazel::Timestep timestep) override
 	{
-		ImGui::Begin("Welcome");
-		ImGui::Text("FPS : %i\n", _currentFPS);
+		ImGui::Begin("Title", nullptr, ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoTitleBar);
+		if (ImGui::BeginMenuBar())
+		{
+			if (ImGui::BeginMenu("File"))
+			{
+				if (ImGui::MenuItem("Exit"))
+				{
+					HZ_LCRITICAL("Exiting application.");
+					Hazel::Application::Get().Stop();
+				}
+				ImGui::EndMenu();
+			}
+			ImGui::Text("\tFPS : %i", _currentFPS);
+			ImGui::EndMenuBar();
+		}
+
 		ImGui::ColorEdit4("Back Color", glm::value_ptr(_clearColor), ImGuiColorEditFlags_InputRGB);
 		ImGui::ColorEdit3("Grid Color", glm::value_ptr(_squareColor), ImGuiColorEditFlags_InputRGB);
 		ImGui::Text("Camera Control\n ASWD move\n QE rotate\n R reset\n Scroll zoom");
@@ -112,20 +126,6 @@ public:
 	void OnEvent(Hazel::Event& event) override
 	{
 		_cameraController.OnEvent(event);
-		Hazel::EventDispatcher dispatcher(event);
-		dispatcher.Dispatch<Hazel::KeyPressedEvent>(HZ_BIND_EVENT_FN(OnKeyPressedEvent));
-	}
-
-	bool OnKeyPressedEvent(Hazel::KeyPressedEvent& event)
-	{
-		switch (event.GetKeyCode())
-		{
-		case HZ_KEY_ESCAPE:
-			Hazel::Application::Get().Stop();
-			HZ_LCRITICAL("ESC Key pressed, exiting application.");
-			break;
-		}
-		return false;
 	}
 
 private:

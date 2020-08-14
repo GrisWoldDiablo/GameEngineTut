@@ -33,10 +33,15 @@ namespace Hazel
 			auto timestep = Timestep(time - _lastFrameTime);
 			_lastFrameTime = time;
 			
-			// Go through the layers from bottom to top
-			for (auto* layer : _layerStack)
+			// if minimized do not bother updating
+			if (!_minimized)
 			{
-				layer->OnUpdate(timestep);
+				// Go through the layers from bottom to top
+				for (auto* layer : _layerStack)
+				{
+					layer->OnUpdate(timestep);
+				}
+
 			}
 
 			// Render the ImGui layer.			
@@ -60,6 +65,7 @@ namespace Hazel
 	{
 		EventDispatcher dispatcher(event);
 		dispatcher.Dispatch<WindowCloseEvent>(HZ_BIND_EVENT_FN(OnWindowClose));
+		dispatcher.Dispatch<WindowResizeEvent>(HZ_BIND_EVENT_FN(OnWindowResize));
 
 		// going through the layerstack top to bottom and consume events.
 		for (auto it = _layerStack.end(); it != _layerStack.begin();)
@@ -87,5 +93,19 @@ namespace Hazel
 		HZ_CORE_LCRITICAL("Window was closed, exiting application.");
 		_running = false;
 		return true;
+	}
+
+	bool Application::OnWindowResize(WindowResizeEvent& event)
+	{
+		if (event.GetWidth()== 0 || event.GetHeight() == 0)
+		{
+			_minimized = true;
+			return true;
+		}
+
+		_minimized = false;
+		Renderer::OnWindowResize(event.GetWidth(), event.GetHeight());
+
+		return false;
 	}
 }

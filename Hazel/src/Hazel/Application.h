@@ -33,12 +33,14 @@ namespace Hazel
 
 	private:
 		bool OnWindowClose(WindowCloseEvent& event);
+		bool OnWindowResize(WindowResizeEvent& event);
 
 	private:
 		Scope<Window> _window;
 		ImGuiLayer* _imGuiLayer;
 		LayerStack _layerStack;
 		bool _running = true;
+		bool _minimized = false;
 		float _lastFrameTime = 0.0f;
 		
 	private:

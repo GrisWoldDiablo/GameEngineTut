@@ -164,6 +164,11 @@ namespace Hazel
 	void WindowsWindow::OnUpdate()
 	{
 		glfwPollEvents();
+		// TODO : Keep this?
+		if (this->GetWidth() == 0 || this->GetHeight() == 0)
+		{
+			return;
+		}
 		_context->SwapBuffers();
 	}
 

@@ -6,6 +6,16 @@ namespace Hazel
 	class HAZEL_API RenderCommand
 	{
 	public:
+		inline static void Init()
+		{
+			_sRendererAPI->Init();
+		}
+
+		inline static void SetViewport(uint32_t x, uint32_t y, uint32_t width, uint32_t height)
+		{
+			_sRendererAPI->SetViewport(x, y, width, height);
+		}
+
 		inline static void DrawIndexed(const Ref<VertexArray>& vertexArray)
 		{
 			_sRendererAPI->DrawIndexed(vertexArray);
@@ -23,11 +33,5 @@ namespace Hazel
 		
 	private:
 		static Ref<RendererAPI> _sRendererAPI;
-	public:
-
-		inline static void Init()
-		{
-			_sRendererAPI->Init();
-		}
 	};
 }
