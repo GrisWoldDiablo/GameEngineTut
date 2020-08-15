@@ -60,12 +60,15 @@ namespace Hazel
 		for (const auto& element : layout)
 		{
 			glEnableVertexAttribArray(index);
-			glVertexAttribPointer(index,
+			glVertexAttribPointer
+			(
+				index,
 				element.GetComponentCount(),
 				ShaderDataTypeToOpenGLBaseType(element.Type),
 				element.Normalized,
 				layout.GetStride(),
-				(const void*)element.Offset);
+				(const void*)(size_t)element.Offset
+			);
 			index++;
 		}
 		_vertexBuffers.push_back(vertexBuffer);

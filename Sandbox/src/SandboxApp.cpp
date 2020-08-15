@@ -118,8 +118,8 @@ public:
 		{
 			ImGui::ColorEdit3("Grid Color", glm::value_ptr(_squareColor), ImGuiColorEditFlags_InputRGB);
 		}
-		ImGui::Checkbox("Draw Logo", &_shouldDrawLogo);
 		ImGui::Checkbox("Draw Textured Square", &_shouldDrawSquare);
+		ImGui::Checkbox("Draw Logo", &_shouldDrawLogo);
 		ImGui::Text("Camera Control\n ASWD move\n QE rotate\n R reset\n Scroll zoom");
 		ImGui::End();
 	}

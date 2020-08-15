@@ -1,6 +1,6 @@
 #include "hzpch.h"
 #include "Application.h"
-#include "Events/Event.h"
+#include "Hazel/Events/Event.h"
 #include "Hazel/Renderer/Renderer.h"
 #include "Platform/Platform.h"
 

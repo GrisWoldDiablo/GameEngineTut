@@ -2,7 +2,7 @@
 #include "Core.h"
 
 #include "Window.h"
-#include "Hazel/LayerStack.h"
+#include "LayerStack.h"
 #include "Hazel/Events/ApplicationEvent.h"
 
 #include "Hazel/Core/Timestep.h"

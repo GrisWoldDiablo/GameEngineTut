@@ -1,5 +1,5 @@
 #pragma once
-#include "Hazel/Core.h"
+#include "Core.h"
 #include "Layer.h"
 
 #include <vector>
