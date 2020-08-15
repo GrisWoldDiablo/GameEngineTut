@@ -1,4 +1,6 @@
 #include <Hazel.h>
+#include <Hazel/Core/EntryPoint.h>
+
 #include "Platform/OpenGL/OpenGLShader.h"
 #include "Hazel/Events/KeyEvent.h"
 
@@ -6,6 +8,8 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 #include "glm/gtc/type_ptr.hpp"
+
+#include "Sandbox2D.h"
 
 class ExampleLayer final : public Hazel::Layer
 {
@@ -65,7 +69,7 @@ public:
 		if (_shouldDrawGrid)
 		{
 			std::dynamic_pointer_cast<Hazel::OpenGLShader>(_flatColorShader)->Bind();
-			std::dynamic_pointer_cast<Hazel::OpenGLShader>(_flatColorShader)->UploadUniformFloat3("u_Color", _squareColor);
+			std::dynamic_pointer_cast<Hazel::OpenGLShader>(_flatColorShader)->UploadUniformFloat4("u_Color", _squareColor);
 			for (int y = 0; y < 20; y++)
 			{
 				for (int x = 0; x < 20; x++)
@@ -112,17 +116,17 @@ public:
 			ImGui::Text("\tFPS : %i", _currentFPS);
 			ImGui::EndMenuBar();
 		}
-		ImGui::ColorEdit4("Back Color", glm::value_ptr(_clearColor), ImGuiColorEditFlags_InputRGB);
+		ImGui::ColorEdit4("Back Color", glm::value_ptr(_clearColor));
 		ImGui::Checkbox("Draw Grid", &_shouldDrawGrid);
 		if (_shouldDrawGrid)
 		{
-			ImGui::ColorEdit3("Grid Color", glm::value_ptr(_squareColor), ImGuiColorEditFlags_InputRGB);
+			ImGui::ColorEdit4("Grid Color", glm::value_ptr(_squareColor));
 		}
 		ImGui::Checkbox("Draw Textured Square", &_shouldDrawSquare);
 		ImGui::Checkbox("Draw Logo", &_shouldDrawLogo);
 		ImGui::Text("Camera Control\n ASWD move\n QE rotate\n R reset\n Scroll zoom");
 		auto camPos = _cameraController.GetPosition();
-		ImGui::Text("Camera Info\n Rotation : %f\n Position : (x:%f, y:%f)",_cameraController.GetRotation(), camPos.x, camPos.y);
+		ImGui::Text("Camera Info\n Rotation : %f\n Position : (x:%f, y:%f)", _cameraController.GetRotation(), camPos.x, camPos.y);
 		ImGui::End();
 	}
 
@@ -148,7 +152,7 @@ private:
 
 	glm::mat4 _identityMatrix = glm::identity<glm::mat4>();
 
-	glm::vec3 _squareColor = { 0.1f, 0.2f, 0.7f };
+	glm::vec4 _squareColor = { 0.1f, 0.2f, 0.7f, 1.0f };
 	glm::vec3 _squarePosition = { -1.045f, -1.045f, 0.0f };
 
 	Hazel::ShaderLibrary _shaderLibrary;
@@ -176,7 +180,8 @@ class Sandbox final : public Hazel::Application
 public:
 	Sandbox()
 	{
-		PushLayer(new ExampleLayer());
+		//PushLayer(new ExampleLayer());
+		PushLayer(new Sandbox2D());
 	}
 
 	~Sandbox() = default;

@@ -29,7 +29,3 @@
 // Misc
 #include "Hazel/Core/Random.h"
 #include "Platform/Platform.h"
-
-// -- Entry Point --------------
-#include "Hazel/Core/EntryPoint.h"
-// -----------------------------
