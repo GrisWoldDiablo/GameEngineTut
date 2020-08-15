@@ -60,29 +60,37 @@ public:
 		Hazel::RenderCommand::SetClearColor(_clearColor);
 		Hazel::RenderCommand::Clear();
 
-
 		Hazel::Renderer::BeginScene(_cameraController.GetCamera());
 
-
-		std::dynamic_pointer_cast<Hazel::OpenGLShader>(_flatColorShader)->Bind();
-		std::dynamic_pointer_cast<Hazel::OpenGLShader>(_flatColorShader)->UploadUniformFloat3("u_Color", _squareColor);
-		for (int y = 0; y < 20; y++)
+		if (_shouldDrawGrid)
 		{
-			for (int x = 0; x < 20; x++)
+			std::dynamic_pointer_cast<Hazel::OpenGLShader>(_flatColorShader)->Bind();
+			std::dynamic_pointer_cast<Hazel::OpenGLShader>(_flatColorShader)->UploadUniformFloat3("u_Color", _squareColor);
+			for (int y = 0; y < 20; y++)
 			{
-				// Square
-				glm::vec3 pos(x * 0.11f, y * 0.11f, 0.0f);
-				auto transform = glm::translate(_identityMatrix, pos + _squarePosition) * glm::scale(_identityMatrix, glm::vec3(0.1f));
-				Hazel::Renderer::Submit(_flatColorShader, _squareVertexArray, transform);
+				for (int x = 0; x < 20; x++)
+				{
+					// Square
+					glm::vec3 pos(x * 0.11f, y * 0.11f, 0.0f);
+					auto transform = glm::translate(_identityMatrix, pos + _squarePosition) * glm::scale(_identityMatrix, glm::vec3(0.1f));
+					Hazel::Renderer::Submit(_flatColorShader, _squareVertexArray, transform);
+				}
 			}
 		}
-		// Texture
-		_coloredGridTexture->Bind();
-		auto textureShader = _shaderLibrary.Get("Texture");
-		Hazel::Renderer::Submit(textureShader, _squareVertexArray, glm::scale(_identityMatrix, glm::vec3(1.5f)));
 
-		_chernoLogotexture->Bind();
-		Hazel::Renderer::Submit(textureShader, _squareVertexArray, glm::scale(_identityMatrix, glm::vec3(1.5f)));
+		auto textureShader = _shaderLibrary.Get("Texture");
+		if (_shouldDrawSquare)
+		{
+			// Texture
+			_coloredGridTexture->Bind();
+			Hazel::Renderer::Submit(textureShader, _squareVertexArray, glm::scale(_identityMatrix, glm::vec3(1.5f)));
+		}
+
+		if (_shouldDrawLogo)
+		{
+			_chernoLogotexture->Bind();
+			Hazel::Renderer::Submit(textureShader, _squareVertexArray, glm::scale(_identityMatrix, glm::vec3(1.5f)));
+		}
 
 		Hazel::Renderer::EndScene();
 	}
@@ -104,9 +112,14 @@ public:
 			ImGui::Text("\tFPS : %i", _currentFPS);
 			ImGui::EndMenuBar();
 		}
-
 		ImGui::ColorEdit4("Back Color", glm::value_ptr(_clearColor), ImGuiColorEditFlags_InputRGB);
-		ImGui::ColorEdit3("Grid Color", glm::value_ptr(_squareColor), ImGuiColorEditFlags_InputRGB);
+		ImGui::Checkbox("Draw Grid", &_shouldDrawGrid);
+		if (_shouldDrawGrid)
+		{
+			ImGui::ColorEdit3("Grid Color", glm::value_ptr(_squareColor), ImGuiColorEditFlags_InputRGB);
+		}
+		ImGui::Checkbox("Draw Logo", &_shouldDrawLogo);
+		ImGui::Checkbox("Draw Textured Square", &_shouldDrawSquare);
 		ImGui::Text("Camera Control\n ASWD move\n QE rotate\n R reset\n Scroll zoom");
 		ImGui::End();
 	}
@@ -151,6 +164,9 @@ private:
 	int _frameCount = 0;
 	int _currentFPS = 0;
 	float _oneSecondCountDown = 1.0f;
+	bool _shouldDrawLogo = true;
+	bool _shouldDrawGrid = true;
+	bool _shouldDrawSquare = true;
 };
 
 class Sandbox final : public Hazel::Application
