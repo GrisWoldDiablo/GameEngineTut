@@ -19,12 +19,24 @@ namespace Hazel
 		OrthographicCamera& GetCamera() { return _camera; }
 		const OrthographicCamera& GetCamera() const { return _camera; }
 
-		void SetZoomLevel(float level);
 		float GetZoomLevel() { return _zoomLevel; }
-		void SetZoomLevelSpeed(float speed) { _zoomLevelSpeed = speed; }
+		void SetZoomLevel(float value);
 		float GetZoomLevelSpeed() { return _zoomLevelSpeed; }
-		void SetZoomLevelMinimum(float value) { _zoomLevelMinimum = value; }
+		void SetZoomLevelSpeed(float value) { _zoomLevelSpeed = value; }
 		float GetZoomLevelMinimum() { return _zoomLevelMinimum; }
+		void SetZoomLevelMinimum(float value) { _zoomLevelMinimum = value; }
+		glm::vec3 GetPosition() { return _cameraPosition; }
+		void SetPosition(glm::vec3 value)
+		{
+			_cameraPosition = value;
+			_camera.SetPosition(_cameraPosition);
+		}
+		float GetRotation() { return _cameraRotation; }
+		void SetRotation(float value)
+		{
+			_cameraRotation = value;
+			_camera.SetRotation(_cameraRotation);
+		}
 
 	private:
 		bool OnMouseScrolled(MouseScrolledEvent& event);

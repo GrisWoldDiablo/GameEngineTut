@@ -32,7 +32,7 @@ namespace Hazel
 	};
 
 // This macro is to simplify the definition of event classes.
-#define EVENT_CLASS_TYPE(type) static EventType GetStaticType() { return EventType::##type;}\
+#define EVENT_CLASS_TYPE(type) static EventType GetStaticType() { return EventType::type;}\
 								virtual EventType GetEventType() const override { return GetStaticType(); }\
 								virtual const char* GetName() const override { return #type; }
 
@@ -41,7 +41,7 @@ namespace Hazel
 	/// <summary>
 	/// Base event class
 	/// </summary>
-	class HAZEL_API Event
+	class Event
 	{
 	private:
 		friend class EventDispatcher;

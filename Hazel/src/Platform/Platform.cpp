@@ -14,5 +14,5 @@ namespace Hazel
 	Ref<RendererAPI> renderAPI = Renderer::GetAPI() == RendererAPI::API::OpenGL ? CreateRef<OpenGLRendererAPI>() : nullptr;
 	Ref<RendererAPI> RenderCommand::_sRendererAPI = renderAPI;
 
-	Ref<Platform> Platform::_sInstance = CreateRef<Platform>(renderAPI);
+	Scope<Platform> Platform::_sInstance = CreateScope<Platform>(renderAPI);
 }

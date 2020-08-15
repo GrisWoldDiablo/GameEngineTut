@@ -121,6 +121,8 @@ public:
 		ImGui::Checkbox("Draw Textured Square", &_shouldDrawSquare);
 		ImGui::Checkbox("Draw Logo", &_shouldDrawLogo);
 		ImGui::Text("Camera Control\n ASWD move\n QE rotate\n R reset\n Scroll zoom");
+		auto camPos = _cameraController.GetPosition();
+		ImGui::Text("Camera Info\n Rotation : %f\n Position : (x:%f, y:%f)",_cameraController.GetRotation(), camPos.x, camPos.y);
 		ImGui::End();
 	}
 

@@ -3,7 +3,7 @@
 
 namespace Hazel
 {
-	class HAZEL_API RenderCommand
+	class RenderCommand
 	{
 	public:
 		inline static void Init()

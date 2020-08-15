@@ -9,6 +9,7 @@ namespace Hazel
 	{
 		for (auto* layer : _layers)
 		{
+			layer->OnDetach();
 			delete layer;
 		}
 	}

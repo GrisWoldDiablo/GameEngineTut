@@ -3,7 +3,7 @@
 
 namespace Hazel
 {
-	class HAZEL_API Input
+	class Input
 	{
 	public:
 		inline static bool IsKeyPressed(int keycode) { return _sInstance->IsKeyPressedImpl(keycode); }
@@ -21,6 +21,6 @@ namespace Hazel
 		virtual float GetMouseYImpl() = 0;
 
 	private:
-		static Input* _sInstance;
+		static Scope<Input> _sInstance;
 	};
 }

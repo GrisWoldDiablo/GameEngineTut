@@ -17,20 +17,25 @@ namespace Hazel
 	{
 		if (Input::IsKeyPressed(HZ_KEY_W))
 		{
-			_cameraPosition.y += _cameraTranslationSpeed * timestep;
+			
+			_cameraPosition.x += -sin(glm::radians(_cameraRotation)) * _cameraTranslationSpeed * timestep;
+			_cameraPosition.y += cos(glm::radians(_cameraRotation)) * _cameraTranslationSpeed * timestep;
 		}
 		else if (Input::IsKeyPressed(HZ_KEY_S))
 		{
-			_cameraPosition.y -= _cameraTranslationSpeed * timestep;
+			_cameraPosition.x -= -sin(glm::radians(_cameraRotation)) * _cameraTranslationSpeed * timestep;
+			_cameraPosition.y -= cos(glm::radians(_cameraRotation)) * _cameraTranslationSpeed * timestep;
 		}
 
 		if (Input::IsKeyPressed(HZ_KEY_A))
 		{
-			_cameraPosition.x -= _cameraTranslationSpeed * timestep;
+			_cameraPosition.x -= cos(glm::radians(_cameraRotation)) * _cameraTranslationSpeed * timestep;
+			_cameraPosition.y -= sin(glm::radians(_cameraRotation)) * _cameraTranslationSpeed * timestep;
 		}
 		else if (Input::IsKeyPressed(HZ_KEY_D))
 		{
-			_cameraPosition.x += _cameraTranslationSpeed * timestep;
+			_cameraPosition.x += cos(glm::radians(_cameraRotation)) * _cameraTranslationSpeed * timestep;
+			_cameraPosition.y += sin(glm::radians(_cameraRotation)) * _cameraTranslationSpeed * timestep;
 		}
 
 		if (_rotation)
@@ -43,6 +48,16 @@ namespace Hazel
 			{
 				_cameraRotation -= _cameraRotationSpeed * timestep;
 			}
+			
+			if (_cameraRotation > 180.0f)
+			{
+				_cameraRotation -= 360.0f;
+			}
+			else if (_cameraRotation <= -180.0f)
+			{
+				_cameraRotation += 360.0f;
+			}
+
 			_camera.SetRotation(_cameraRotation);
 		}
 
@@ -63,7 +78,7 @@ namespace Hazel
 
 	void OrthographicCameraController::SetZoomLevel(float level)
 	{
-		_zoomLevel -= level;
+		_zoomLevel = level;
 		_zoomLevel = std::max(_zoomLevel, _zoomLevelMinimum);
 		_camera.SetProjection(-_aspectRation * _zoomLevel, _aspectRation * _zoomLevel, -_zoomLevel, _zoomLevel);
 
@@ -73,7 +88,7 @@ namespace Hazel
 
 	bool OrthographicCameraController::OnMouseScrolled(MouseScrolledEvent& event)
 	{
-		SetZoomLevel(event.GetYOffset() * _zoomLevelSpeed);
+		SetZoomLevel(_zoomLevel - event.GetYOffset() * _zoomLevelSpeed);
 		return false;
 	}
 
@@ -86,13 +101,8 @@ namespace Hazel
 
 	void OrthographicCameraController::Reset()
 	{
-		_zoomLevel = 1.0f;
-		_camera.SetProjection(-_aspectRation * _zoomLevel, _aspectRation * _zoomLevel, -_zoomLevel, _zoomLevel);
-
-		_cameraRotation = 0.0f;
-		_camera.SetRotation(_cameraRotation);
-		
-		_cameraPosition = glm::vec3(0.0f);
-		_camera.SetPosition(_cameraPosition);
+		SetZoomLevel(1.0f); 
+		SetRotation(0.0f);
+		SetPosition(glm::vec3(0.0f));
 	}
 }

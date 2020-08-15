@@ -7,7 +7,7 @@
 
 namespace Hazel
 {
-	class HAZEL_API Random
+	class Random
 	{
 	public:
 		Random(int seed = std::time(nullptr));

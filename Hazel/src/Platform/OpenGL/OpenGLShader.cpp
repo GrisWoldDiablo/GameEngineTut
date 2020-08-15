@@ -87,10 +87,11 @@ namespace Hazel
 			HZ_CORE_ASSERT(ShaderTypeFromString(type), "Invalid shader type specified!");
 
 			size_t nextLinePosition = source.find_first_not_of("\r\n", endOfLine);
+			HZ_CORE_ASSERT(nextLinePosition != std::string::npos, "Syntax error!");
+
 			position = source.find(typeToken, nextLinePosition);
-			shaderSources[ShaderTypeFromString(type)] =
-				source.substr(nextLinePosition,
-					position - (nextLinePosition == std::string::npos ? source.size() - 1 : nextLinePosition));
+			shaderSources[ShaderTypeFromString(type)] = (position == std::string::npos) ? 
+				source.substr(nextLinePosition) : source.substr(nextLinePosition,position - nextLinePosition);
 		}
 
 		return shaderSources;
@@ -162,10 +163,11 @@ namespace Hazel
 			return;
 		}
 
-		// Always detach shaders after a successful link.
+		// Always detach and delete shaders after a successful link.
 		for (auto id : glShaderIDs)
 		{
 			glDetachShader(_rendererID, id);
+			glDeleteShader(id);
 		}
 
 		_rendererID = program;

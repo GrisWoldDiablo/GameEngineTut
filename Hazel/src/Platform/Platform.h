@@ -20,6 +20,6 @@ namespace Hazel
 		Ref<RendererAPI> _rendererAPI;
 
 		// Singleton related 
-		static Ref<Platform> _sInstance;
+		static Scope<Platform> _sInstance;
 	};
 }

@@ -14,7 +14,7 @@ namespace Hazel
 	/// <summary>
 	/// The application class with the main run loop.
 	/// </summary>
-	class HAZEL_API Application
+	class Application
 	{
 	public:
 		Application();
