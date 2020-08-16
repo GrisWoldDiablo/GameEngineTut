@@ -23,7 +23,15 @@ private:
 	Hazel::Ref<Hazel::Shader> _flatColorShader;
 
 	glm::vec4 _clearColor = { 0.13f, 0.0f, 0.3f, 1.0f };
-	glm::vec4 _squareColor = { 0.1f, 0.2f, 0.7f, 1.0f };
+	struct Square
+	{
+		glm::vec2 Position;
+		glm::vec2 Size;
+		glm::vec4 Color;
+	};
+	std::vector<Hazel::Ref<Square>> _squares = std::vector<Hazel::Ref<Square>>();
+	int _amountOfSquares = 1;
+	int amountToAdd = 0;
 
 	// FPS
 	int _frameCount = 0;

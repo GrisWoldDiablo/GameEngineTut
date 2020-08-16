@@ -61,4 +61,19 @@ namespace Hazel
 	{
 		return { FloatImpl(), FloatImpl(), FloatImpl(), FloatImpl() };
 	}
+
+	glm::vec2 Random::RangeVec2Impl(const glm::vec2& x, const glm::vec2& y)
+	{
+		return { RangeImpl(x.x,x.y), RangeImpl(y.x,y.y) };
+	}
+
+	glm::vec3 Random::RangeVec3Impl(const glm::vec2& x, const glm::vec2& y, const glm::vec2& z)
+	{
+		return { RangeImpl(x.x,x.y), RangeImpl(y.x,y.y), RangeImpl(z.x,z.y) };
+	}
+	
+	glm::vec4 Random::RangeVec4Impl(const glm::vec2& x, const glm::vec2& y, const glm::vec2& z, const glm::vec2& w)
+	{
+		return { RangeImpl(x.x,x.y), RangeImpl(y.x,y.y), RangeImpl(z.x,z.y), RangeImpl(w.x,w.y) };
+	}
 }
