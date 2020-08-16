@@ -26,7 +26,6 @@ namespace Hazel
 			RecalculateViewMatrix();
 		}
 
-
 		const glm::mat4& GetProjectionMatrix() { return _projectionMatrix; }
 		const glm::mat4& GetViewMatrix() { return _viewMatrix; }
 		const glm::mat4& GetViewProjectionMatrix() { return _viewProjectionMatrix; }

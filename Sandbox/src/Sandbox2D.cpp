@@ -13,32 +13,7 @@ Sandbox2D::Sandbox2D()
 
 void Sandbox2D::OnAttach()
 {
-	// -- Square
-	_squareVertexArray = Hazel::VertexArray::Create();
-
-	float squareVertices[4 * 3] =
-	{
-		-0.5f, -0.5f, 0.0f,
-		 0.5f, -0.5f, 0.0f,
-		 0.5f,  0.5f, 0.0f,
-		-0.5f,  0.5f, 0.0f
-	};
-
-	Hazel::Ref<Hazel::VertexBuffer> squareVertexBuffer;
-	squareVertexBuffer = Hazel::VertexBuffer::Create(squareVertices, sizeof(squareVertices));
-	squareVertexBuffer->SetLayout(
-		{
-			{ Hazel::ShaderDataType::Float3, "a_Position" },
-		});
-	_squareVertexArray->AddVertexBuffer(squareVertexBuffer);
-
-	uint32_t squareIndices[6] = { 0, 1, 2, 2, 3, 0 };
-	Hazel::Ref<Hazel::IndexBuffer> squareIndexBuffer;
-	squareIndexBuffer = Hazel::IndexBuffer::Create(squareIndices, sizeof(squareIndices) / sizeof(uint32_t));
-	_squareVertexArray->SetIndexBuffer(squareIndexBuffer);
-
-	_flatColorShader = Hazel::Shader::Create("assets/shaders/FlatColor.glsl");
-	// -- Square
+	
 }
 
 void Sandbox2D::OnDetach()
@@ -47,8 +22,7 @@ void Sandbox2D::OnDetach()
 }
 
 void Sandbox2D::OnUpdate(Hazel::Timestep timestep)
-{
-	// Update
+{	// Update
 	_cameraController.OnUpdate(timestep);
 	CalculateFPS(timestep);
 
@@ -56,13 +30,14 @@ void Sandbox2D::OnUpdate(Hazel::Timestep timestep)
 	Hazel::RenderCommand::SetClearColor(_clearColor);
 	Hazel::RenderCommand::Clear();
 
-	Hazel::Renderer::BeginScene(_cameraController.GetCamera());
+	Hazel::Renderer2D::BeginScene(_cameraController.GetCamera());
 
-	std::dynamic_pointer_cast<Hazel::OpenGLShader>(_flatColorShader)->Bind();
-	std::dynamic_pointer_cast<Hazel::OpenGLShader>(_flatColorShader)->UploadUniformFloat4("u_Color", _squareColor);
-	Hazel::Renderer::Submit(_flatColorShader, _squareVertexArray);
+	Hazel::Renderer2D::DrawQuad({ 0.0f,0.0f }, { 1.0f,1.0f }, _squareColor);
+	Hazel::Renderer2D::EndScene();
 
-	Hazel::Renderer::EndScene();
+	// TODO: add these 2 functions: Shader::SetMat4, Shader::SetFloat4
+	//std::dynamic_pointer_cast<Hazel::OpenGLShader>(_flatColorShader)->Bind();
+	//std::dynamic_pointer_cast<Hazel::OpenGLShader>(_flatColorShader)->UploadUniformFloat4("u_Color", _squareColor);
 }
 
 void Sandbox2D::OnImGuiRender(Hazel::Timestep timestep)

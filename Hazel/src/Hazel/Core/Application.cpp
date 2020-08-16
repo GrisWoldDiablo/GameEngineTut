@@ -41,7 +41,6 @@ namespace Hazel
 				{
 					layer->OnUpdate(timestep);
 				}
-
 			}
 
 			// Render the ImGui layer.			
@@ -67,7 +66,7 @@ namespace Hazel
 		dispatcher.Dispatch<WindowCloseEvent>(HZ_BIND_EVENT_FN(OnWindowClose));
 		dispatcher.Dispatch<WindowResizeEvent>(HZ_BIND_EVENT_FN(OnWindowResize));
 
-		// going through the layerstack top to bottom and consume events.
+		// going through the layer stack top to bottom and consume events.
 		for (auto it = _layerStack.end(); it != _layerStack.begin();)
 		{
 			(*--it)->OnEvent(event);
