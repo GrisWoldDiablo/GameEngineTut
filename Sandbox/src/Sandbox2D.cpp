@@ -12,7 +12,7 @@ Sandbox2D::Sandbox2D()
 
 void Sandbox2D::OnAttach()
 {
-
+	_checkerboardTexture = Hazel::Texture2D::Create("assets/textures/Checkerboard.png");
 }
 
 void Sandbox2D::OnDetach()
@@ -30,6 +30,8 @@ void Sandbox2D::OnUpdate(Hazel::Timestep timestep)
 	Hazel::RenderCommand::Clear();
 
 	Hazel::Renderer2D::BeginScene(_cameraController.GetCamera());
+	// Background to be drawn first behind everything
+	Hazel::Renderer2D::DrawQuad({ 0.0f, 0.0f, -0.1f }, { 10.0f, 10.0f }, _checkerboardTexture, glm::vec2(10.0f), { 1.0f, 1.0f, 1.0f, 1.0f });
 
 	for (int i = 0; i < _amountOfSquares; i++)
 	{
@@ -37,14 +39,15 @@ void Sandbox2D::OnUpdate(Hazel::Timestep timestep)
 		{
 			Hazel::Ref<Square> square = Hazel::CreateRef<Square>(Square
 				{
-					Hazel::Random::RangeVec2({ -2.0f,2.0f }, { -2.0f,2.0f }),
-					Hazel::Random::RangeVec2({ 0.5f,3.0f }, { 0.5f,3.0f }),
-					Hazel::Random::RangeVec4({ 0.5f,1.0f }, { 0.5f,1.0f },{ 0.5f,1.0f }, { 0.5f,1.0f }),
+					Hazel::Random::RangeVec3({ -2.0f ,2.0f }, { -2.0f ,2.0f }, { 0.0f, 0.0f }),
+					Hazel::Random::RangeVec2({ 0.5f, 3.0f }, { 0.5f, 3.0f }),
+					Hazel::Random::RangeVec4({ 0.5f, 1.0f }, { 0.5f, 1.0f }, { 0.5f, 1.0f }, { 0.5f, 1.0f }),
 				});
 			_squares.push_back(square);
 		}
 		Hazel::Renderer2D::DrawQuad(_squares[i]->Position, _squares[i]->Size, _squares[i]->Color);
 	}
+
 	Hazel::Renderer2D::EndScene();
 }
 
@@ -105,7 +108,7 @@ void Sandbox2D::OnImGuiRender(Hazel::Timestep timestep)
 		if (ImGui::Button("Randomize"))
 		{
 			*square = {
-					Hazel::Random::RangeVec2({ -2.0f,2.0f }, { -2.0f,2.0f }),
+					Hazel::Random::RangeVec3({ -2.0f,2.0f }, { -2.0f,2.0f }, { 0.0f,0.9f }),
 					Hazel::Random::RangeVec2({ 0.5f,3.0f }, { 0.5f,3.0f }),
 					Hazel::Random::RangeVec4({ 0.5f,1.0f }, { 0.5f,1.0f },{ 0.5f,1.0f }, { 0.5f,1.0f }),
 			};
@@ -114,10 +117,11 @@ void Sandbox2D::OnImGuiRender(Hazel::Timestep timestep)
 		ImGui::PushID(index + _amountOfSquares * 2);
 		if (ImGui::Button("Rand"))
 		{
-			square->Position = Hazel::Random::RangeVec2({ -2.0f,2.0f }, { -2.0f,2.0f });
+			square->Position = Hazel::Random::RangeVec3({ -2.0f,2.0f }, { -2.0f,2.0f }, { 0.0f,0.9f });
 		}
 		ImGui::SameLine();
-		ImGui::SliderFloat2("Position", glm::value_ptr(square->Position), -5.0f, 5.0f);
+		ImGui::SliderFloat2("Position XY", glm::value_ptr(square->Position), -5.0f, 5.0f);
+		ImGui::SliderFloat("Position Z", &square->Position.z, 0.0f, 0.9f);
 		ImGui::PopID();
 
 		ImGui::PushID(index + _amountOfSquares * 3);

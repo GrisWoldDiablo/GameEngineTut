@@ -22,10 +22,12 @@ private:
 	Hazel::Ref<Hazel::VertexArray> _squareVertexArray;
 	Hazel::Ref<Hazel::Shader> _flatColorShader;
 
+	Hazel::Ref<Hazel::Texture2D> _checkerboardTexture;
+
 	glm::vec4 _clearColor = { 0.13f, 0.0f, 0.3f, 1.0f };
 	struct Square
 	{
-		glm::vec2 Position;
+		glm::vec3 Position;
 		glm::vec2 Size;
 		glm::vec4 Color;
 	};
