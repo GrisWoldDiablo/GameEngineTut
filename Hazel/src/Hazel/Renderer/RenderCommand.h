@@ -30,6 +30,17 @@ namespace Hazel
 		{
 			_sRendererAPI->Clear();
 		}
+
+
+		inline static void EnableDepthTest()
+		{
+			_sRendererAPI->EnableDepthTest();
+		}
+
+		inline static void ReadOnlyDepthTest()
+		{
+			_sRendererAPI->ReadOnlyDepthTest();
+		}
 		
 	private:
 		static Ref<RendererAPI> _sRendererAPI;

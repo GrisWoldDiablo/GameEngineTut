@@ -10,6 +10,17 @@ public:
 	void OnDetach() override;
 
 	void OnUpdate(Hazel::Timestep timestep) override;
+
+	// Z sorting since squares are translucent
+	inline void SortSquares()
+	{
+		std::sort(_squares.begin(), _squares.end(),
+			[](const Hazel::Ref<Square> left, const Hazel::Ref<Square> right)
+			{
+				return left->Position.z < right->Position.z;
+			});
+	}
+
 	void OnImGuiRender(Hazel::Timestep timestep) override;
 	void OnEvent(Hazel::Event& event) override;
 

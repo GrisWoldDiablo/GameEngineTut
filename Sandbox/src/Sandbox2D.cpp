@@ -26,13 +26,16 @@ void Sandbox2D::OnUpdate(Hazel::Timestep timestep)
 	CalculateFPS(timestep);
 
 	// Render
+	Hazel::RenderCommand::EnableDepthTest();
 	Hazel::RenderCommand::SetClearColor(_clearColor);
 	Hazel::RenderCommand::Clear();
 
 	Hazel::Renderer2D::BeginScene(_cameraController.GetCamera());
 	// Background to be drawn first behind everything
-	Hazel::Renderer2D::DrawQuad({ 0.0f, 0.0f, -0.1f }, { 10.0f, 10.0f }, _checkerboardTexture, glm::vec2(10.0f), { 1.0f, 1.0f, 1.0f, 1.0f });
+	
+	Hazel::Renderer2D::DrawQuad({ 0.0f, 0.0f, -0.1f }, { 10.0f, 10.0f }, _checkerboardTexture, glm::vec2(10.0f), { 0.9f, 0.9f, 0.8f, 1.0f });
 
+	Hazel::RenderCommand::ReadOnlyDepthTest();
 	for (int i = 0; i < _amountOfSquares; i++)
 	{
 		if (_squares.size() != _amountOfSquares)
@@ -44,6 +47,7 @@ void Sandbox2D::OnUpdate(Hazel::Timestep timestep)
 					Hazel::Random::RangeVec4({ 0.5f, 1.0f }, { 0.5f, 1.0f }, { 0.5f, 1.0f }, { 0.5f, 1.0f }),
 				});
 			_squares.push_back(square);
+			SortSquares();
 		}
 		Hazel::Renderer2D::DrawQuad(_squares[i]->Position, _squares[i]->Size, _squares[i]->Color);
 	}
@@ -91,6 +95,11 @@ void Sandbox2D::OnImGuiRender(Hazel::Timestep timestep)
 			ImGui::CloseCurrentPopup();
 		}
 		ImGui::EndPopup();
+	}
+	ImGui::SameLine();
+	if (ImGui::Button("Sort"))
+	{
+		SortSquares();
 	}
 
 	int indexToRemove = -1;

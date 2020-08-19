@@ -14,7 +14,18 @@ namespace Hazel
 
 		// #TODO: This will allow for rendering using z axis but disables the blending.
 		//		  Re enable blending eventually.
-		glEnable(GL_DEPTH_TEST); 
+		EnableDepthTest();
+	}
+
+	void OpenGLRendererAPI::EnableDepthTest()
+	{
+		glEnable(GL_DEPTH_TEST);
+		glDepthMask(GL_TRUE);
+	}
+
+	void OpenGLRendererAPI::ReadOnlyDepthTest()
+	{
+		glDepthMask(GL_FALSE);
 	}
 
 	void OpenGLRendererAPI::SetViewport(uint32_t x, uint32_t y, uint32_t width, uint32_t height)
