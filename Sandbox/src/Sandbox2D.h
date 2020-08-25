@@ -24,7 +24,11 @@ public:
 	void OnImGuiRender(Hazel::Timestep timestep) override;
 	void OnEvent(Hazel::Event& event) override;
 
+private:
 	void CalculateFPS(Hazel::Timestep timestep);
+	void UpdateSquareList();
+	void DrawMainGui();
+	void DrawSquaresGui();
 
 private:
 	Hazel::OrthographicCameraController _cameraController;
@@ -44,10 +48,12 @@ private:
 	};
 	std::vector<Hazel::Ref<Square>> _squares = std::vector<Hazel::Ref<Square>>();
 	int _amountOfSquares = 1;
-	int amountToAdd = 0;
+	int _amountToAdd = 0;
+	bool _addSquare = false;
+	bool _clearSquares = false;
 
 	// FPS
 	int _frameCount = 0;
-	int _currentFPS = 0;
+	int _currentFPS = 60;
 	float _oneSecondCountDown = 1.0f;
 };

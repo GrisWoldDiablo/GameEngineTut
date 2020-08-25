@@ -83,8 +83,6 @@ project "Hazel"
 
 		defines
 		{
-			"HZ_BUILD_DLL",
-			"HZ_PLATFORM_WINDOWS",
 			"GLFW_INCLUDE_NONE"
 		}
 
