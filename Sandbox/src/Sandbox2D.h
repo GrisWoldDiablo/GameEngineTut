@@ -56,4 +56,12 @@ private:
 	int _frameCount = 0;
 	int _currentFPS = 60;
 	float _oneSecondCountDown = 1.0f;
+
+	struct ProfileResult
+	{
+		const char* Name;
+		float Time;
+	};
+
+	std::vector<ProfileResult> _profileResults;
 };
