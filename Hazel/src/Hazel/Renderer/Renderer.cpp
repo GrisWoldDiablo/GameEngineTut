@@ -10,17 +10,23 @@ namespace Hazel
 	
 	void Renderer::Init()
 	{
+		HZ_PROFILE_FUNCTION();
+
 		RenderCommand::Init();
 		Renderer2D::Init();
 	}
 
 	void Renderer::OnWindowResize(uint32_t width, uint32_t height)
 	{
+		HZ_PROFILE_FUNCTION();
+
 		RenderCommand::SetViewport(0, 0, width, height);
 	}
 
 	void Renderer::BeginScene(OrthographicCamera& camera)
 	{
+		HZ_PROFILE_FUNCTION();
+
 		_sSceneData->ViewProjectionMatrix = camera.GetViewProjectionMatrix();
 	}
 
@@ -30,6 +36,8 @@ namespace Hazel
 
 	void Renderer::Submit(const Ref<Shader>& shader, const Ref<VertexArray>& vertexArray, const glm::mat4& transform)
 	{
+		HZ_PROFILE_FUNCTION();
+
 		shader->Bind();
 		std::dynamic_pointer_cast<OpenGLShader>(shader)->UploadUniformMat4("u_ViewProjection", _sSceneData->ViewProjectionMatrix);
 		std::dynamic_pointer_cast<OpenGLShader>(shader)->UploadUniformMat4("u_Transform", transform);

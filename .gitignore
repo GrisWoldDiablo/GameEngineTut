@@ -15,3 +15,5 @@ bin-int/
 
 # imgui 
 **.ini
+
+*.json

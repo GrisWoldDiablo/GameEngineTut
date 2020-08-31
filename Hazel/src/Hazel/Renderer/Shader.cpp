@@ -46,18 +46,24 @@ namespace Hazel
 
 	void ShaderLibrary::Add(const std::string& name, const Ref<Shader>& shader)
 	{
+		HZ_PROFILE_FUNCTION();
+
 		HZ_CORE_ASSERT(!Exist(name), "Shader already exists!");
 		_shaders[name] = shader;
 	}
 
 	void ShaderLibrary::Add(const Ref<Shader>& shader)
 	{
+		HZ_PROFILE_FUNCTION();
+
 		auto name = shader->GetName();
 		Add(name, shader);
 	}
 
 	Ref<Shader> ShaderLibrary::Load(const std::string& filePath)
 	{
+		HZ_PROFILE_FUNCTION();
+
 		auto shader = Shader::Create(filePath);
 		Add(shader);
 		return shader;
@@ -65,6 +71,8 @@ namespace Hazel
 
 	Ref<Shader> ShaderLibrary::Load(const std::string& name, const std::string& filePath)
 	{
+		HZ_PROFILE_FUNCTION();
+
 		auto shader = Shader::Create(filePath);
 		Add(name, shader);
 		return shader;
@@ -72,12 +80,16 @@ namespace Hazel
 
 	Ref<Shader> ShaderLibrary::Get(const std::string& name)
 	{
+		HZ_PROFILE_FUNCTION();
+
 		HZ_CORE_ASSERT(Exist(name), "Shader not found!");
 		return _shaders[name];
 	}
 
 	bool ShaderLibrary::Exist(const std::string& name) const
 	{
+		HZ_PROFILE_FUNCTION();
+
 		return _shaders.find(name) != _shaders.end();
 	}
 }

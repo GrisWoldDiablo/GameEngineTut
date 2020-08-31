@@ -181,6 +181,7 @@ public:
 	Sandbox()
 	{
 		//PushLayer(new ExampleLayer());
+		HZ_LINFO("There is {0} cores on this machine.", std::thread::hardware_concurrency());
 		PushLayer(new Sandbox2D());
 	}
 

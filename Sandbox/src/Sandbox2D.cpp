@@ -5,45 +5,6 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "Hazel/Core/Random.h"
 
-template<typename Fn>
-class Timer
-{
-public:
-	Timer(const char* name, Fn&& func)
-		:_name(name), _func(func), _stopped(false)
-	{
-		_startTimepoint = std::chrono::high_resolution_clock::now();
-	}
-
-	~Timer()
-	{
-		if (!_stopped)
-		{
-			Stop();
-		}
-	}
-
-	void Stop()
-	{
-		auto endTimepoint = std::chrono::high_resolution_clock::now();
-
-		long long start = std::chrono::time_point_cast<std::chrono::microseconds>(_startTimepoint).time_since_epoch().count();
-		long long end = std::chrono::time_point_cast<std::chrono::microseconds>(endTimepoint).time_since_epoch().count();
-
-		_stopped = true;
-
-		float duration = (end - start) * 0.001f;
-		_func({ _name, duration });
-	}
-
-private:
-	const char* _name;
-	Fn _func;
-	bool _stopped;
-	std::chrono::time_point<std::chrono::steady_clock> _startTimepoint;
-};
-
-#define PROFILE_SCOPE(name) Timer timer##__LINE__(name, [&](ProfileResult profileResult) { _profileResults.push_back(profileResult); })
 
 Sandbox2D::Sandbox2D()
 	: Layer("Sandbox 2D"), _cameraController(1280.0f / 720.0f, true)
@@ -52,38 +13,47 @@ Sandbox2D::Sandbox2D()
 
 void Sandbox2D::OnAttach()
 {
+	HZ_PROFILE_FUNCTION();
 	_checkerboardTexture = Hazel::Texture2D::Create("assets/textures/Checkerboard.png");
 }
 
 void Sandbox2D::OnDetach()
 {
-
+	HZ_PROFILE_FUNCTION();
 }
 
 void Sandbox2D::OnUpdate(Hazel::Timestep timestep)
 {
-	PROFILE_SCOPE("Sandbox2D::OnUpdate");
+	HZ_PROFILE_FUNCTION();
 
-	{
-		PROFILE_SCOPE("_cameraController.OnUpdate");
-		// Update
-		_cameraController.OnUpdate(timestep);
-	}
+	_cameraController.OnUpdate(timestep);
 
-	{
-		PROFILE_SCOPE("calculate FPS");
-		CalculateFPS(timestep);
-	}
+	CalculateFPS(timestep);
+
 
 	// Safety shutdown 
-	if (_currentFPS <= 2)
+	if (_currentFPS < 2)
 	{
-		HZ_LCRITICAL("Shuting down, FPS went at 2 or bellow");
-		Hazel::Application::Get().Stop();
+		if (_lowFrames == 0)
+		{
+			HZ_LERROR("Application will shutdown after 10 frames below 2 FPS.", _lowFrames);
+		}
+		_lowFrames++;
+		HZ_LERROR("Frame #{0}", _lowFrames);
+		if (_lowFrames >= 10)
+		{
+			HZ_LCRITICAL("Shuting down.");
+			Hazel::Application::Get().Stop();
+		}
+	}
+	else if (_lowFrames != 0)
+	{
+		HZ_LINFO("Back to 2 FPS or above.");
+		_lowFrames = 0;
 	}
 
 	{
-		PROFILE_SCOPE("Renderer Prep");
+		HZ_PROFILE_SCOPE("Renderer Prep");
 		// Render
 		Hazel::RenderCommand::EnableDepthTest();
 		Hazel::RenderCommand::SetClearColor(_clearColor);
@@ -91,29 +61,42 @@ void Sandbox2D::OnUpdate(Hazel::Timestep timestep)
 	}
 
 	{
-		PROFILE_SCOPE("Renderer Draw");
+		HZ_PROFILE_SCOPE("Renderer Draw");
 		Hazel::Renderer2D::BeginScene(_cameraController.GetCamera());
 
 		// Background to be drawn first behind everything
 		Hazel::Renderer2D::DrawQuad({ 0.0f, 0.0f, -0.1f }, { 10.0f, 10.0f }, _checkerboardTexture, glm::vec2(10.0f), { 0.9f, 0.9f, 0.8f, 1.0f });
 
 		Hazel::RenderCommand::ReadOnlyDepthTest();
-		for (int i = 0; i < _amountOfSquares; i++)
+
+		if (_squares.size() != _amountOfSquares)
 		{
-			while (_squares.size() != _amountOfSquares)
+			HZ_PROFILE_SCOPE("Creation of Squares");
+
+			// Multithreading creation of squares.
+			_squareCreationThreads.clear();
+
+			int newqty = _amountOfSquares - _squares.size();
+			static const int divider = 100; // How many squares each thread can create.
+			int amountOfThreads = newqty / divider;
+			for (int i = 0; i < amountOfThreads; i++)
 			{
-				Hazel::Ref<Square> square = Hazel::CreateRef<Square>(Square
-					{
-						Hazel::Random::RangeVec3({ -2.0f ,2.0f }, { -2.0f ,2.0f }, { 0.0f, 0.9f }),
-						Hazel::Random::RangeVec2({ 0.5f, 3.0f }, { 0.5f, 3.0f }),
-						Hazel::Random::RangeVec4({ 0.5f, 1.0f }, { 0.5f, 1.0f }, { 0.5f, 1.0f }, { 0.5f, 1.0f }),
-					});
-				_squares.push_back(square);
-				if (_squares.size() == _amountOfSquares)
-				{
-					SortSquares();
-				}
+				_squareCreationThreads.push_back(std::thread([this]() { CreateSquare(divider); }));
 			}
+
+			int remainder = newqty % divider; // Create the remainder squares.
+			_squareCreationThreads.push_back(std::thread([this, remainder] { CreateSquare(remainder); }));
+
+			for (auto& thread : _squareCreationThreads)
+			{
+				thread.join();
+			}
+
+			SortSquares();
+		}
+
+		for (int i = 0; i < _squares.size(); i++)
+		{
 			Hazel::Renderer2D::DrawQuad(_squares[i]->Position, _squares[i]->Size, _squares[i]->Color);
 		}
 
@@ -122,25 +105,39 @@ void Sandbox2D::OnUpdate(Hazel::Timestep timestep)
 	UpdateSquareList();
 }
 
+void Sandbox2D::CreateSquare(int amount)
+{
+	HZ_PROFILE_FUNCTION();
+
+	// If lock is available create the square and push it onto the vector.
+	// If not block the thread.
+
+	for (int i = 0; i < amount; i++)
+	{
+		Hazel::Ref<Square> square = Hazel::CreateRef<Square>(Square
+			{
+				Hazel::Random::Vec3() * Hazel::Random::Range(-2.0f,2.0f),
+				Hazel::Random::Vec2() * Hazel::Random::Range(1.5f, 5.0f),
+				Hazel::Random::Vec4(),
+			});
+		square->Position.z = glm::clamp(square->Position.z, 0.1f, 0.9f);
+		{
+			std::lock_guard lock(_mutex);
+			_squares.push_back(square);
+		}
+	}
+}
+
 void Sandbox2D::OnImGuiRender(Hazel::Timestep timestep)
 {
+	HZ_PROFILE_FUNCTION();
 	DrawMainGui();
 	DrawSquaresGui();
-
-	ImGui::Begin("Profiling");
-	for (auto& result : _profileResults)
-	{
-		char label[50];
-		strcpy(label, "%.3fms : ");
-		strcat(label, result.Name);
-		ImGui::Text(label, result.Time);
-	}
-	_profileResults.clear();
-	ImGui::End();
 }
 
 void Sandbox2D::UpdateSquareList()
 {
+	HZ_PROFILE_FUNCTION();
 	if (_addSquare)
 	{
 		_amountOfSquares++;
@@ -155,7 +152,7 @@ void Sandbox2D::UpdateSquareList()
 
 void Sandbox2D::DrawMainGui()
 {
-	PROFILE_SCOPE("Draw ImGUI");
+	HZ_PROFILE_FUNCTION();
 	ImGui::Begin("Settings", nullptr, ImGuiWindowFlags_MenuBar);
 
 	if (ImGui::BeginMenuBar())
@@ -174,8 +171,8 @@ void Sandbox2D::DrawMainGui()
 	}
 
 	ImGui::ColorEdit4("Back Color", glm::value_ptr(_clearColor));
-
-	ImGui::Text("Squares Quantity: %d", _amountOfSquares);
+	auto amount = _squares.size();
+	ImGui::Text("Squares Quantity: %d / %d", amount, _amountOfSquares);
 	ImGui::SameLine();
 	_addSquare = ImGui::Button("Add");
 	ImGui::SameLine();
@@ -210,7 +207,7 @@ void Sandbox2D::DrawMainGui()
 
 void Sandbox2D::DrawSquaresGui()
 {
-	PROFILE_SCOPE("Draw SquaresGUI");
+	HZ_PROFILE_FUNCTION();
 	ImGui::Begin("Squares", nullptr);
 
 	int indexToRemove = -1;
@@ -218,6 +215,10 @@ void Sandbox2D::DrawSquaresGui()
 
 	for (auto& square : _squares)
 	{
+		if (index == 100) // Only show the first 100 squares
+		{
+			break;
+		}
 		ImGui::PushID(index + _amountOfSquares);
 		ImGui::Text("Square #%d", index);
 		ImGui::SameLine();
@@ -285,6 +286,7 @@ void Sandbox2D::OnEvent(Hazel::Event& event)
 
 void Sandbox2D::CalculateFPS(Hazel::Timestep timestep)
 {
+	HZ_PROFILE_FUNCTION();
 	_oneSecondCountDown -= timestep;
 	_frameCount++;
 	if (_oneSecondCountDown <= 0.0f)

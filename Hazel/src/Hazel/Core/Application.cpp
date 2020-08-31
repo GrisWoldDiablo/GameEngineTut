@@ -11,13 +11,14 @@ namespace Hazel
 
 	Application::Application()
 	{
+		HZ_PROFILE_FUNCTION();
 		HZ_CORE_ASSERT(!_sInstance, "Application already exist!")
 			// Initialize the singleton.
 			_sInstance = this;
 
 		_window = Scope<Window>(Window::Create());
 		_window->SetEventCallback(HZ_BIND_EVENT_FN(OnEvent));
-		
+
 		Renderer::Init();
 
 		// Create ImGui and push it to the layer stack as an overlay.
@@ -25,31 +26,47 @@ namespace Hazel
 		PushOverlay(_imGuiLayer);
 	}
 
+	Application::~Application()
+	{
+		HZ_PROFILE_FUNCTION();
+	}
+
 	void Application::Run()
 	{
+		HZ_PROFILE_FUNCTION();
+
 		while (_running)
 		{
+			HZ_PROFILE_SCOPE("Run Loop");
+
 			auto time = Platform::GetTime();
 			auto timestep = Timestep(time - _lastFrameTime);
 			_lastFrameTime = time;
-			
+
 			// if minimized do not bother updating
 			if (!_minimized)
 			{
-				// Go through the layers from bottom to top
-				for (auto* layer : _layerStack)
 				{
-					layer->OnUpdate(timestep);
-				}
-			}
+					HZ_PROFILE_SCOPE("LayerStack Update");
 
-			// Render the ImGui layer.			
-			_imGuiLayer->Begin();
-			for (auto* layer : _layerStack)
-			{
-				layer->OnImGuiRender(timestep);
+					// Go through the layers from bottom to top
+					for (auto* layer : _layerStack)
+					{
+						layer->OnUpdate(timestep);
+					}
+				}
+
+				_imGuiLayer->Begin();
+				{
+					HZ_PROFILE_SCOPE("OnImGuiRender LayerStack Update");
+					// Render the ImGui layer.			
+					for (auto* layer : _layerStack)
+					{
+						layer->OnImGuiRender(timestep);
+					}
+				}
+				_imGuiLayer->End();
 			}
-			_imGuiLayer->End();
 
 			_window->OnUpdate();
 		}
@@ -57,11 +74,13 @@ namespace Hazel
 
 	void Application::Stop()
 	{
+		HZ_PROFILE_FUNCTION();
 		_running = false;
 	}
 
 	void Application::OnEvent(Event& event)
 	{
+		HZ_PROFILE_FUNCTION();
 		EventDispatcher dispatcher(event);
 		dispatcher.Dispatch<WindowCloseEvent>(HZ_BIND_EVENT_FN(OnWindowClose));
 		dispatcher.Dispatch<WindowResizeEvent>(HZ_BIND_EVENT_FN(OnWindowResize));
@@ -79,16 +98,21 @@ namespace Hazel
 
 	void Application::PushLayer(Layer* layer)
 	{
+		HZ_PROFILE_FUNCTION();
 		_layerStack.PushLayer(layer);
+		layer->OnAttach();
 	}
 
 	void Application::PushOverlay(Layer* overlay)
 	{
+		HZ_PROFILE_FUNCTION();
 		_layerStack.PushOverlay(overlay);
+		overlay->OnAttach();
 	}
 
 	bool Application::OnWindowClose(WindowCloseEvent& event)
 	{
+		HZ_PROFILE_FUNCTION();
 		HZ_CORE_LCRITICAL("Window was closed, exiting application.");
 		_running = false;
 		return true;
@@ -96,7 +120,8 @@ namespace Hazel
 
 	bool Application::OnWindowResize(WindowResizeEvent& event)
 	{
-		if (event.GetWidth()== 0 || event.GetHeight() == 0)
+		HZ_PROFILE_FUNCTION();
+		if (event.GetWidth() == 0 || event.GetHeight() == 0)
 		{
 			_minimized = true;
 			return true;

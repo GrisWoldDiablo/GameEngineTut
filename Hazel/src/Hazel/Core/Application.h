@@ -18,7 +18,7 @@ namespace Hazel
 	{
 	public:
 		Application();
-		virtual ~Application() = default;
+		virtual ~Application();
 
 		void Run();
 		void Stop();

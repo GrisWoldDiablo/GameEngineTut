@@ -11,9 +11,12 @@ public:
 
 	void OnUpdate(Hazel::Timestep timestep) override;
 
-	// Z sorting since squares are translucent
+	void CreateSquare(int amount);
+
+	// Z sorting since squares are transparent
 	inline void SortSquares()
 	{
+		HZ_PROFILE_FUNCTION();
 		std::sort(_squares.begin(), _squares.end(),
 			[](const Hazel::Ref<Square> left, const Hazel::Ref<Square> right)
 			{
@@ -56,12 +59,8 @@ private:
 	int _frameCount = 0;
 	int _currentFPS = 60;
 	float _oneSecondCountDown = 1.0f;
+	int _lowFrames = 0;
 
-	struct ProfileResult
-	{
-		const char* Name;
-		float Time;
-	};
-
-	std::vector<ProfileResult> _profileResults;
+	std::mutex _mutex;
+	std::vector<std::thread> _squareCreationThreads = std::vector<std::thread>();
 };

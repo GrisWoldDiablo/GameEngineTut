@@ -10,6 +10,8 @@ namespace Hazel
 {
 	static GLenum ShaderTypeFromString(const std::string& type)
 	{
+		HZ_PROFILE_FUNCTION();
+
 		if (type == "vertex")
 		{
 			return GL_VERTEX_SHADER;
@@ -25,6 +27,8 @@ namespace Hazel
 
 	OpenGLShader::OpenGLShader(const std::string& glslFilePath)
 	{
+		HZ_PROFILE_FUNCTION();
+
 		auto source = ReadFile(glslFilePath);
 		auto shaderSources = PreProcess(source);
 		Compile(shaderSources);
@@ -39,6 +43,8 @@ namespace Hazel
 	OpenGLShader::OpenGLShader(std::string name, const std::string& vertexSrc, const std::string& fragmentSrc)
 		:_name(std::move(name))
 	{
+		HZ_PROFILE_FUNCTION();
+
 		std::unordered_map<GLenum, std::string> sources;
 		sources[GL_VERTEX_SHADER] = vertexSrc;
 		sources[GL_FRAGMENT_SHADER] = fragmentSrc;
@@ -47,11 +53,15 @@ namespace Hazel
 
 	OpenGLShader::~OpenGLShader()
 	{
+		HZ_PROFILE_FUNCTION();
+
 		glDeleteProgram(_rendererID);
 	}
 
 	std::string OpenGLShader::ReadFile(const std::string& filePath)
 	{
+		HZ_PROFILE_FUNCTION();
+
 		std::string result;
 		std::ifstream inputFileStream(filePath, std::ios::in | std::ios::binary);
 		if (!inputFileStream.bad())
@@ -72,6 +82,8 @@ namespace Hazel
 
 	std::unordered_map<GLenum, std::string> OpenGLShader::PreProcess(const std::string& source)
 	{
+		HZ_PROFILE_FUNCTION();
+
 		std::unordered_map<GLenum, std::string> shaderSources;
 
 		auto typeToken = "#type";
@@ -99,6 +111,8 @@ namespace Hazel
 
 	void OpenGLShader::Compile(const std::unordered_map<GLenum, std::string>& shaderSources)
 	{
+		HZ_PROFILE_FUNCTION();
+
 		GLuint program = glCreateProgram();
 
 		HZ_CORE_ASSERT(shaderSources.size() <= 2, "We only support 2 shaders for now");
@@ -175,76 +189,90 @@ namespace Hazel
 
 	void OpenGLShader::Bind() const
 	{
+		HZ_PROFILE_FUNCTION();
+
 		glUseProgram(_rendererID);
 	}
 
 	void OpenGLShader::Unbind() const
 	{
+		HZ_PROFILE_FUNCTION();
+
 		glUseProgram(0);
 	}
 	
-	void OpenGLShader::SetInt(const std::string name, int value)
+	void OpenGLShader::SetInt(std::string name, int value)
 	{
+		HZ_PROFILE_FUNCTION();
+
 		UploadUniformInt(std::move(name), value);
 	}
 
-	void OpenGLShader::SetFloat2(const std::string name, const glm::vec2& value)
+	void OpenGLShader::SetFloat2(std::string name, const glm::vec2& value)
 	{
+		HZ_PROFILE_FUNCTION();
+
 		UploadUniformFloat2(std::move(name), value);
 	}
 
-	void OpenGLShader::SetFloat3(const std::string name, const glm::vec3& value)
+	void OpenGLShader::SetFloat3(std::string name, const glm::vec3& value)
 	{
+		HZ_PROFILE_FUNCTION();
+
 		UploadUniformFloat3(std::move(name), value);
 	}
 
-	void OpenGLShader::SetFloat4(const std::string name, const glm::vec4& value)
+	void OpenGLShader::SetFloat4(std::string name, const glm::vec4& value)
 	{
+		HZ_PROFILE_FUNCTION();
+
 		UploadUniformFloat4(std::move(name), value);
 	}
 
-	void OpenGLShader::SetMat4(const std::string name, const glm::mat4& value)
+	void OpenGLShader::SetMat4(std::string name, const glm::mat4& value)
 	{
+		HZ_PROFILE_FUNCTION();
+
 		UploadUniformMat4(std::move(name), value);
 	}
 
-	void OpenGLShader::UploadUniformInt(const std::string& name, int value)
+	void OpenGLShader::UploadUniformInt(std::string name, int value)
 	{
 		auto location = glGetUniformLocation(_rendererID, name.c_str());
 		glUniform1i(location, value);
 	}
 
-	void OpenGLShader::UploadUniformFloat(const std::string& name, float value)
+	void OpenGLShader::UploadUniformFloat(std::string name, float value)
 	{
 		auto location = glGetUniformLocation(_rendererID, name.c_str());
 		glUniform1f(location, value);
 	}
 
-	void OpenGLShader::UploadUniformFloat2(const std::string& name, const glm::vec2& value)
+	void OpenGLShader::UploadUniformFloat2(std::string name, const glm::vec2& value)
 	{
 		auto location = glGetUniformLocation(_rendererID, name.c_str());
 		glUniform2f(location, value.x, value.y);
 	}
 
-	void OpenGLShader::UploadUniformFloat3(const std::string& name, const glm::vec3& value)
+	void OpenGLShader::UploadUniformFloat3(std::string name, const glm::vec3& value)
 	{
 		auto location = glGetUniformLocation(_rendererID, name.c_str());
 		glUniform3f(location, value.x, value.y, value.z);
 	}
 
-	void OpenGLShader::UploadUniformFloat4(const std::string& name, const glm::vec4& value)
+	void OpenGLShader::UploadUniformFloat4(std::string name, const glm::vec4& value)
 	{
 		auto location = glGetUniformLocation(_rendererID, name.c_str());
 		glUniform4f(location, value.x, value.y, value.z, value.w);
 	}
 
-	void OpenGLShader::UploadUniformMat3(const std::string& name, const glm::mat3& matrix)
+	void OpenGLShader::UploadUniformMat3(std::string name, const glm::mat3& matrix)
 	{
 		auto location = glGetUniformLocation(_rendererID, name.c_str());
 		glUniformMatrix3fv(location, 1, GL_FALSE, glm::value_ptr(matrix));
 	}
 
-	void OpenGLShader::UploadUniformMat4(const std::string& name, const glm::mat4& matrix)
+	void OpenGLShader::UploadUniformMat4(std::string name, const glm::mat4& matrix)
 	{
 		auto location = glGetUniformLocation(_rendererID, name.c_str());
 		glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(matrix));

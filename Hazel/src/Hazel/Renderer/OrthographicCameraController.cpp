@@ -10,11 +10,12 @@ namespace Hazel
 	OrthographicCameraController::OrthographicCameraController(float aspectRation, bool rotation)
 		:_aspectRation(aspectRation), _camera(-_aspectRation * _zoomLevel, _aspectRation* _zoomLevel, -_zoomLevel, _zoomLevel), _rotation(rotation)
 	{
-
 	}
 
 	void OrthographicCameraController::OnUpdate(Timestep timestep)
 	{
+		HZ_PROFILE_FUNCTION();
+		
 		if (Input::IsKeyPressed(HZ_KEY_W))
 		{
 			
