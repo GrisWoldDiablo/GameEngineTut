@@ -69,33 +69,20 @@ void Sandbox2D::OnUpdate(Hazel::Timestep timestep)
 
 		Hazel::RenderCommand::ReadOnlyDepthTest();
 
-		if (_squares.size() != _amountOfSquares)
+		if (_shouldCreateSquares)
 		{
-			HZ_PROFILE_SCOPE("Creation of Squares");
-
-			// Multithreading creation of squares.
-			_squareCreationThreads.clear();
-
-			int newqty = _amountOfSquares - _squares.size();
-			static const int divider = 100; // How many squares each thread can create.
-			int amountOfThreads = newqty / divider;
-			for (int i = 0; i < amountOfThreads; i++)
+			HZ_PROFILE_SNAPSHOT("_shouldCreateSquares");
+			if (!_isCreatingSquares)
 			{
-				_squareCreationThreads.push_back(std::thread([this]() { CreateSquare(divider); }));
+				HZ_PROFILE_SNAPSHOT("_isCreatingSquares");
+				_isCreatingSquares = true;
+				auto thread = std::thread([this] { CreateSquares(); });
+				thread.detach();
 			}
-
-			int remainder = newqty % divider; // Create the remainder squares.
-			_squareCreationThreads.push_back(std::thread([this, remainder] { CreateSquare(remainder); }));
-
-			for (auto& thread : _squareCreationThreads)
-			{
-				thread.join();
-			}
-
-			SortSquares();
+			_shouldCreateSquares = false;
 		}
-
-		for (int i = 0; i < _squares.size(); i++)
+		auto size = _squares.size();
+		for (int i = 0; i < size; i++)
 		{
 			Hazel::Renderer2D::DrawQuad(_squares[i]->Position, _squares[i]->Size, _squares[i]->Color);
 		}
@@ -105,15 +92,45 @@ void Sandbox2D::OnUpdate(Hazel::Timestep timestep)
 	UpdateSquareList();
 }
 
+void Sandbox2D::CreateSquares()
+{
+	HZ_PROFILE_FUNCTION();
+
+	// Multithreading creation of squares.
+	_squareCreationThreads.clear();
+
+	int newqty = _amountOfSquares - _squares.size();
+	static const int divider = 100; // How many squares each thread can create.
+	int amountOfThreads = newqty / divider;
+	for (int i = 0; i < amountOfThreads; i++)
+	{
+		_squareCreationThreads.push_back(std::thread([this]() { CreateSquare(divider); }));
+	}
+
+	int remainder = newqty % divider; // Create the remainder squares.
+	_squareCreationThreads.push_back(std::thread([this, remainder] { CreateSquare(remainder); }));
+
+	for (auto& thread : _squareCreationThreads)
+	{
+		thread.join();
+	}
+
+	SortSquares();
+
+	_isCreatingSquares = false;
+}
+
 void Sandbox2D::CreateSquare(int amount)
 {
 	HZ_PROFILE_FUNCTION();
+
 
 	// If lock is available create the square and push it onto the vector.
 	// If not block the thread.
 
 	for (int i = 0; i < amount; i++)
 	{
+		HZ_PROFILE_SNAPSHOT("CreateSquare");
 		Hazel::Ref<Square> square = Hazel::CreateRef<Square>(Square
 			{
 				Hazel::Random::Vec3() * Hazel::Random::Range(-2.0f,2.0f),
@@ -141,6 +158,7 @@ void Sandbox2D::UpdateSquareList()
 	if (_addSquare)
 	{
 		_amountOfSquares++;
+		_shouldCreateSquares = true;
 	}
 
 	if (_clearSquares)
@@ -196,6 +214,7 @@ void Sandbox2D::DrawMainGui()
 			if (_amountToAdd > 0)
 			{
 				_amountOfSquares += _amountToAdd;
+				_shouldCreateSquares = true;
 				ImGui::CloseCurrentPopup();
 			}
 		}

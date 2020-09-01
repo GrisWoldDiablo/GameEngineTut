@@ -66,6 +66,11 @@
 // This macro is to bind functions for callbacks, now uses lambda for faster response.
 #define HZ_BIND_EVENT_FN(fn) [this](auto&&... args) -> decltype(auto) { return this->fn(std::forward<decltype(args)>(args)...); }
 
+// This is to join the a name with line number : use HZ_GET_LINE([name],__LINE__) to get [name##] in macros
+#define HZ_JOIN_TO_LINE(name,line) name##line
+#define HZ_GET_LINE(name,line) HZ_JOIN_TO_LINE(name,line)
+
+// For creating of proper pointers
 namespace Hazel
 {
 	template<typename T>

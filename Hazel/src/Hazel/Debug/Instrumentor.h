@@ -16,6 +16,7 @@ namespace Hazel
 		std::string Name;
 		std::string Category;
 		FloatingPointMircroseconds Start;
+		FloatingPointMircroseconds End;
 		std::chrono::microseconds ElapsedTime;
 		std::thread::id ThreadID;
 	};
@@ -74,29 +75,66 @@ namespace Hazel
 			json << std::setprecision(3) << std::fixed;
 			json << ",{";
 			json << "\"cat\":\"" << result.Category << "\",";
-			json << "\"dur\":" << result.ElapsedTime.count() << ',';
 			json << "\"name\":\"" << result.Name << "\",";
+			json << "\"dur\":" << result.ElapsedTime.count() << ',';
 			json << "\"ph\":\"X\",";
 			json << "\"pid\":0,";
 			json << "\"tid\":" << result.ThreadID << ",";
 			json << "\"ts\":" << result.Start.count();
 			json << "}";
 
-			if (_currentSession != nullptr)
-			{
-				std::lock_guard lock(_mutex);
-				_outputStream << json.str();
-				_outputStream.flush();
-			}
+			WriteToStream(json);
 		}
 
+		void WriteProfileSnapshotStart(const ProfileResult& result)
+		{
+			std::stringstream json;
 
+			auto hash = std::hash<std::string>{}(result.Name); // To get a unique ID
 
+			json << std::setprecision(3) << std::fixed;
+			json << ",{";
+			json << "\"args\":{\"snapshot\":{}},";
+			json << "\"cat\":\"" << result.Category << "\",";
+			json << "\"id\":\"" << hash << "\",";
+			json << "\"name\":\"" << result.Name << "\",";
+			json << "\"ph\":\"O\",";
+			json << "\"pid\":0,";
+			json << "\"tid\":" << result.ThreadID << ",";
+			json << "\"ts\":" << result.Start.count();
+			json << "}";
+
+			WriteToStream(json);
+		}
+
+		void WriteProfileSnapshotEnd(const ProfileResult& result)
+		{
+			std::stringstream json;
+
+			auto hash = std::hash<std::string>{}(result.Name); // To get a unique ID
+
+			json << std::setprecision(3) << std::fixed;
+			json << ",{";
+			json << "\"args\":{\"snapshot\":{}},";
+			json << "\"cat\":\"" << result.Category << "\",";
+			json << "\"id\":\"" << hash << "\",";
+			json << "\"name\":\"" << result.Name << "\",";
+			json << "\"ph\":\"D\",";
+			json << "\"pid\":0,";
+			json << "\"tid\":" << result.ThreadID << ",";
+			json << "\"ts\":" << result.End.count();
+			json << "}";
+
+			WriteToStream(json);
+		}
+
+		
 		static Instrumentor& Get()
 		{
 			static Instrumentor sInstance;
 			return sInstance;
 		}
+
 	private:
 		Instrumentor()
 			:_currentSession(nullptr)
@@ -120,6 +158,16 @@ namespace Hazel
 			_outputStream.flush();
 		}
 
+		void WriteToStream(std::stringstream& json)
+		{
+			if (_currentSession != nullptr)
+			{
+				std::lock_guard lock(_mutex);
+				_outputStream << json.str();
+				_outputStream.flush();
+			}
+		}
+
 		// You already must own the mutex before calling this.
 		void InternalEndSession()
 		{
@@ -138,10 +186,14 @@ namespace Hazel
 	class InstrumentationTimer
 	{
 	public:
-		InstrumentationTimer(const char* name, const char* category)
-			:_name(name),_category(category), _stopped(false)
+		InstrumentationTimer(const char* name, const char* category, bool isSnapshot = false)
+			:_name(name), _category(category), _isSnapshot(isSnapshot), _stopped(false)
 		{
-			_startTimepoint = std::chrono::steady_clock::now();
+			//_profileResult = ProfileResult{};
+			_profileResult.Name = name;
+			_profileResult.Category = category;
+			_profileResult.ThreadID = std::this_thread::get_id();
+			Start();
 		}
 
 		~InstrumentationTimer()
@@ -152,15 +204,33 @@ namespace Hazel
 			}
 		}
 
+		void Start()
+		{
+			_startTimepoint = std::chrono::steady_clock::now();
+			_profileResult.Start = FloatingPointMircroseconds{ _startTimepoint.time_since_epoch() };
+
+			if (_isSnapshot)
+			{
+				Instrumentor::Get().WriteProfileSnapshotStart(_profileResult);
+			}
+		}
+
 		void Stop()
 		{
 			auto endTimepoint = std::chrono::steady_clock::now();
+			_profileResult.End = FloatingPointMircroseconds{ endTimepoint.time_since_epoch() };
 
-			auto higResStart = FloatingPointMircroseconds{ _startTimepoint.time_since_epoch() };
-			auto elapsedTime = std::chrono::time_point_cast<std::chrono::microseconds>(endTimepoint).time_since_epoch() -
-				std::chrono::time_point_cast<std::chrono::microseconds>(_startTimepoint).time_since_epoch();
+			if (_isSnapshot)
+			{
+				Instrumentor::Get().WriteProfileSnapshotEnd(_profileResult);
+			}
+			else
+			{
+				_profileResult.ElapsedTime = std::chrono::time_point_cast<std::chrono::microseconds>(endTimepoint).time_since_epoch() -
+					std::chrono::time_point_cast<std::chrono::microseconds>(_startTimepoint).time_since_epoch();
 
-			Instrumentor::Get().WriteProfile({ _name, _category, higResStart, elapsedTime, std::this_thread::get_id() });
+				Instrumentor::Get().WriteProfile(_profileResult);
+			}
 
 			_stopped = true;
 		}
@@ -169,7 +239,9 @@ namespace Hazel
 		const char* _name;
 		const char* _category;
 		std::chrono::time_point<std::chrono::steady_clock> _startTimepoint;
+		bool _isSnapshot;
 		bool _stopped;
+		struct ProfileResult _profileResult;
 	};
 }
 
@@ -177,13 +249,15 @@ namespace Hazel
 #if HZ_PROFILE
 #	define HZ_PROFILE_BEGIN_SESSION(name, filepath) ::Hazel::Instrumentor::Get().BeginSession(name, filepath)
 #	define HZ_PROFILE_END_SESSION()  ::Hazel::Instrumentor::Get().EndSession()
-#	define HZ_PROFILE_CATEGORY(name, category) ::Hazel::InstrumentationTimer timer##__LINE__(name, category)
+#	define HZ_PROFILE_CATEGORY(name, category) ::Hazel::InstrumentationTimer HZ_GET_LINE(timer,__LINE__)(name, category)
 #	define HZ_PROFILE_SCOPE(name) HZ_PROFILE_CATEGORY(name, "Scope")
 #	define HZ_PROFILE_FUNCTION() HZ_PROFILE_CATEGORY(__FUNCSIG__, "Function")
+#	define HZ_PROFILE_SNAPSHOT(name) ::Hazel::InstrumentationTimer HZ_GET_LINE(timer,__LINE__)(name, "snapshot", true)
 #else
 #	define HZ_PROFILE_BEGIN_SESSION(name, filepath)
 #	define HZ_PROFILE_END_SESSION()
 #	define HZ_PROFILE_CATEGORY(name, category)
 #	define HZ_PROFILE_SCOPE(name)
 #	define HZ_PROFILE_FUNCTION()
+#	define HZ_PROFILE_SNAPSHOT(name)
 #endif // HZ_PROFILE
