@@ -76,7 +76,7 @@ namespace Hazel
 
 	void Renderer2D::EndScene()
 	{
-
+		HZ_PROFILE_FUNCTION();
 	}
 
 	void Renderer2D::DrawQuad(const glm::vec2& position, const glm::vec2& size, glm::vec4 color)

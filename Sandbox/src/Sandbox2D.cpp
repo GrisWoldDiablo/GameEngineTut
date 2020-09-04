@@ -3,7 +3,6 @@
 #include <imgui/imgui.h>
 
 #include <glm/gtc/type_ptr.hpp>
-#include "Hazel/Core/Random.h"
 
 
 Sandbox2D::Sandbox2D()
@@ -14,6 +13,7 @@ Sandbox2D::Sandbox2D()
 void Sandbox2D::OnAttach()
 {
 	HZ_PROFILE_FUNCTION();
+
 	_checkerboardTexture = Hazel::Texture2D::Create("assets/textures/Checkerboard.png");
 }
 

@@ -7,7 +7,7 @@
 namespace Hazel
 {
 	Ref<VertexArray> VertexArray::Create()
-{
+	{
 		switch (Renderer::GetAPI())
 		{
 		case RendererAPI::API::None:
@@ -18,7 +18,7 @@ namespace Hazel
 			HZ_CORE_ASSERT(false, "RendererAPI::DirectX is currently not supported.");
 		case RendererAPI::API::Vulkan:
 			HZ_CORE_ASSERT(false, "RendererAPI::Vulkan is currently not supported.");
-		default: ;
+		default:;
 		}
 
 		HZ_CORE_ASSERT(false, "Unknow RendererAPI, VertexArray::Create");

@@ -7,8 +7,6 @@ namespace Hazel
 
 	LayerStack::~LayerStack()
 	{
-		HZ_PROFILE_FUNCTION();
-
 		for (auto* layer : _layers)
 		{
 			layer->OnDetach();
@@ -18,23 +16,17 @@ namespace Hazel
 
 	void LayerStack::PushLayer(Layer* layer)
 	{
-		HZ_PROFILE_FUNCTION();
-
 		_layers.emplace(_layers.begin() + _layerInsertIndex, layer);
 		_layerInsertIndex++;
 	}
 
 	void LayerStack::PushOverlay(Layer* overlay)
 	{
-		HZ_PROFILE_FUNCTION();
-
 		_layers.emplace_back(overlay);
 	}
 
 	void LayerStack::PopLayer(Layer* layer)
 	{
-		HZ_PROFILE_FUNCTION();
-		
 		auto it = std::find(_layers.begin(), _layers.end(), layer);
 		if (it != _layers.end())
 		{
@@ -45,8 +37,6 @@ namespace Hazel
 
 	void LayerStack::PopOverlay(Layer* overlay)
 	{
-		HZ_PROFILE_FUNCTION();
-
 		auto it = std::find(_layers.begin(), _layers.end(), overlay);
 		if (it != _layers.end())
 		{
