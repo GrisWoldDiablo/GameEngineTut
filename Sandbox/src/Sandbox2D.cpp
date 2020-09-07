@@ -130,7 +130,7 @@ void Sandbox2D::CreateSquare(int amount)
 
 	for (int i = 0; i < amount; i++)
 	{
-		HZ_PROFILE_SNAPSHOT("CreateSquare");
+		HZ_PROFILE_SCOPE("CreateSquare");
 		Hazel::Ref<Square> square = Hazel::CreateRef<Square>(Square
 			{
 				Hazel::Random::Vec3() * Hazel::Random::Range(-2.0f,2.0f),
@@ -209,7 +209,7 @@ void Sandbox2D::DrawMainGui()
 	if (ImGui::BeginPopup("Add_Amount"))
 	{
 		ImGui::InputInt("Amount", &_amountToAdd);
-		if (ImGui::Button("OK"))
+		if (ImGui::Button("OK") || Hazel::Input::IsKeyPressed(HZ_KEY_ENTER))
 		{
 			if (_amountToAdd > 0)
 			{
@@ -230,25 +230,20 @@ void Sandbox2D::DrawSquaresGui()
 	ImGui::Begin("Squares", nullptr);
 
 	int indexToRemove = -1;
-	int index = 0;
-
-	for (auto& square : _squares)
+	int vectorSize = glm::clamp((int)_squares.size(), 0, 100);
+	for (int i = 0; i < vectorSize; i++)
 	{
-		if (index == 100) // Only show the first 100 squares
-		{
-			break;
-		}
-		ImGui::PushID(index + _amountOfSquares);
-		ImGui::Text("Square #%d", index);
+		ImGui::PushID(i + _amountOfSquares);
+		ImGui::Text("Square #%d", i);
 		ImGui::SameLine();
 		if (ImGui::Button("Remove"))
 		{
-			indexToRemove = index;
+			indexToRemove = i;
 		}
 		ImGui::SameLine();
 		if (ImGui::Button("Randomize"))
 		{
-			*square = {
+			*_squares[i] = {
 				Hazel::Random::RangeVec3({ -2.0f,2.0f },{ -2.0f,2.0f },{ 0.0f,0.9f }),
 				Hazel::Random::RangeVec2({ 0.5f,3.0f },{ 0.5f,3.0f }),
 				Hazel::Random::RangeVec4({ 0.5f,1.0f },{ 0.5f,1.0f },{ 0.5f,1.0f },{ 0.5f,1.0f }),
@@ -256,37 +251,35 @@ void Sandbox2D::DrawSquaresGui()
 		}
 		ImGui::PopID();
 
-		ImGui::PushID(index + _amountOfSquares * 2);
+		ImGui::PushID(i + _amountOfSquares * 2);
 		if (ImGui::Button("Rand"))
 		{
-			square->Position = Hazel::Random::RangeVec3({ -2.0f,2.0f }, { -2.0f,2.0f }, { 0.0f,0.9f });
+			_squares[i]->Position = Hazel::Random::RangeVec3({ -2.0f,2.0f }, { -2.0f,2.0f }, { 0.0f,0.9f });
 		}
 		ImGui::SameLine();
-		ImGui::SliderFloat2("Position XY", glm::value_ptr(square->Position), -5.0f, 5.0f);
-		ImGui::SliderFloat("Position Z", &square->Position.z, 0.0f, 0.9f);
+		ImGui::SliderFloat2("Position XY", glm::value_ptr(_squares[i]->Position), -5.0f, 5.0f);
+		ImGui::SliderFloat("Position Z", &_squares[i]->Position.z, 0.0f, 0.9f);
 		ImGui::PopID();
 
-		ImGui::PushID(index + _amountOfSquares * 3);
+		ImGui::PushID(i + _amountOfSquares * 3);
 		if (ImGui::Button("Rand"))
 		{
-			square->Size = Hazel::Random::RangeVec2({ 0.5f,3.0f }, { 0.5f,3.0f });
-
-		}
-		ImGui::SameLine();
-		ImGui::SliderFloat2("Size", glm::value_ptr(square->Size), 0.1f, 5.0f);
-		ImGui::PopID();
-
-		ImGui::PushID(index + _amountOfSquares * 4);
-		if (ImGui::Button("Rand"))
-		{
-			square->Color = Hazel::Random::RangeVec4({ 0.5f,1.0f }, { 0.5f,1.0f }, { 0.5f,1.0f }, { 0.5f,1.0f });
+			_squares[i]->Size = Hazel::Random::RangeVec2({ 0.5f,3.0f }, { 0.5f,3.0f });
 
 		}
 		ImGui::SameLine();
-		ImGui::ColorEdit4("Color", glm::value_ptr(square->Color));
+		ImGui::SliderFloat2("Size", glm::value_ptr(_squares[i]->Size), 0.1f, 5.0f);
 		ImGui::PopID();
 
-		index++;
+		ImGui::PushID(i + _amountOfSquares * 4);
+		if (ImGui::Button("Rand"))
+		{
+			_squares[i]->Color = Hazel::Random::RangeVec4({ 0.5f,1.0f }, { 0.5f,1.0f }, { 0.5f,1.0f }, { 0.5f,1.0f });
+
+		}
+		ImGui::SameLine();
+		ImGui::ColorEdit4("Color", glm::value_ptr(_squares[i]->Color));
+		ImGui::PopID();
 	}
 
 	if (indexToRemove != -1)

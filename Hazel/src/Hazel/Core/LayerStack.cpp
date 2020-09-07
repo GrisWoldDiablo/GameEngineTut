@@ -7,6 +7,8 @@ namespace Hazel
 
 	LayerStack::~LayerStack()
 	{
+		HZ_PROFILE_FUNCTION();
+
 		for (auto* layer : _layers)
 		{
 			layer->OnDetach();

@@ -10,6 +10,8 @@ namespace Hazel
 
 	void Log::Init()
 	{
+		HZ_PROFILE_FUNCTION();
+		
 		// Custom formating https://github.com/gabime/spdlog/wiki/3.-Custom-formatting
 		// %^ : Start color range
 		// %T : ISO 8601 time format (HH:MM:SS)

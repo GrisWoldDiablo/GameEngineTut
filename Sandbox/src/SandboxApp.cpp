@@ -180,6 +180,8 @@ class Sandbox final : public Hazel::Application
 public:
 	Sandbox()
 	{
+		HZ_PROFILE_FUNCTION();
+
 		//PushLayer(new ExampleLayer());
 		HZ_LINFO("There is {0} cores on this machine.", std::thread::hardware_concurrency());
 		PushLayer(new Sandbox2D());
@@ -191,5 +193,7 @@ public:
 
 Hazel::Application* Hazel::CreateApplication()
 {
+	HZ_PROFILE_FUNCTION();
+
 	return new Sandbox();
 }
