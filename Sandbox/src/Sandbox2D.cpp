@@ -51,8 +51,6 @@ void Sandbox2D::OnUpdate(Hazel::Timestep timestep)
 		HZ_LINFO("Back to 2 FPS or above.");
 		_lowFrames = 0;
 	}
-	_clearColorA /= 2.0f;
-	_clearColorA = _lerpedColor == _clearColorA;
 	_lerpedColor = Hazel::Color::LerpUnclamped(_clearColorA, _clearColorB, _lerpValue);
 	_lerpValue += 0.01f * _lerpDirection;
 	if (_lerpValue > 1.0f || _lerpValue < 0.0f)
