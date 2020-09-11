@@ -245,14 +245,14 @@ namespace Hazel
 	};
 }
 
-#define HZ_PROFILE 1
+#define HZ_PROFILE 0
 #if HZ_PROFILE
 #	define HZ_PROFILE_BEGIN_SESSION(name, filepath) ::Hazel::Instrumentor::Get().BeginSession(name, filepath)
 #	define HZ_PROFILE_END_SESSION()  ::Hazel::Instrumentor::Get().EndSession()
-#	define HZ_PROFILE_CATEGORY(name, category) ::Hazel::InstrumentationTimer HZ_GET_LINE(timer,__LINE__)(name, category)
+#	define HZ_PROFILE_CATEGORY(name, category) ::Hazel::InstrumentationTimer HZ_GET_LINE(timer, __LINE__)(name, category)
 #	define HZ_PROFILE_SCOPE(name) HZ_PROFILE_CATEGORY(name, "Scope")
 #	define HZ_PROFILE_FUNCTION() HZ_PROFILE_CATEGORY(__FUNCSIG__, "Function")
-#	define HZ_PROFILE_SNAPSHOT(name) ::Hazel::InstrumentationTimer HZ_GET_LINE(timer,__LINE__)(name, "snapshot", true)
+#	define HZ_PROFILE_SNAPSHOT(name) ::Hazel::InstrumentationTimer HZ_GET_LINE(timer, __LINE__)(name, "snapshot", true)
 #else
 #	define HZ_PROFILE_BEGIN_SESSION(name, filepath)
 #	define HZ_PROFILE_END_SESSION()

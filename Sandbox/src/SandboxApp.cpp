@@ -10,6 +10,7 @@
 #include "glm/gtc/type_ptr.hpp"
 
 #include "Sandbox2D.h"
+#include "GameLayer.h"
 
 class ExampleLayer final : public Hazel::Layer
 {
@@ -61,7 +62,7 @@ public:
 		CalculateFPS(timestep);
 
 		// Render
-		Hazel::RenderCommand::SetClearColor(_clearColor);
+		Hazel::RenderCommand::SetClearColor(_clearColorA);
 		Hazel::RenderCommand::Clear();
 
 		Hazel::Renderer::BeginScene(_cameraController.GetCamera());
@@ -116,11 +117,11 @@ public:
 			ImGui::Text("\tFPS : %i", _currentFPS);
 			ImGui::EndMenuBar();
 		}
-		ImGui::ColorEdit4("Back Color", glm::value_ptr(_clearColor));
+		ImGui::ColorEdit4("Back Color", _clearColorA.GetValuePtr());
 		ImGui::Checkbox("Draw Grid", &_shouldDrawGrid);
 		if (_shouldDrawGrid)
 		{
-			ImGui::ColorEdit4("Grid Color", glm::value_ptr(_squareColor));
+			ImGui::ColorEdit4("Grid Color", _squareColor.GetValuePtr());
 		}
 		ImGui::Checkbox("Draw Textured Square", &_shouldDrawSquare);
 		ImGui::Checkbox("Draw Logo", &_shouldDrawLogo);
@@ -148,11 +149,11 @@ public:
 	}
 
 private:
-	glm::vec4 _clearColor = { 0.13f, 0.0f, 0.3f, 1.0f };
+	Hazel::Color _clearColorA = { 0.13f, 0.0f, 0.3f, 1.0f };
 
 	glm::mat4 _identityMatrix = glm::identity<glm::mat4>();
 
-	glm::vec4 _squareColor = { 0.1f, 0.2f, 0.7f, 1.0f };
+	Hazel::Color _squareColor = { 0.1f, 0.2f, 0.7f, 1.0f };
 	glm::vec3 _squarePosition = { -1.045f, -1.045f, 0.0f };
 
 	Hazel::ShaderLibrary _shaderLibrary;
@@ -182,9 +183,12 @@ public:
 	{
 		HZ_PROFILE_FUNCTION();
 
-		//PushLayer(new ExampleLayer());
 		HZ_LINFO("There is {0} cores on this machine.", std::thread::hardware_concurrency());
+		
+		//PushLayer(new ExampleLayer());
 		PushLayer(new Sandbox2D());
+		// Game
+		//PushLayer(new GameLayer());
 	}
 
 	~Sandbox() = default;

@@ -26,17 +26,11 @@ namespace Hazel
 		float GetZoomLevelMinimum() { return _zoomLevelMinimum; }
 		void SetZoomLevelMinimum(float value) { _zoomLevelMinimum = value; }
 		glm::vec3 GetPosition() { return _cameraPosition; }
-		void SetPosition(glm::vec3 value)
-		{
-			_cameraPosition = value;
-			_camera.SetPosition(_cameraPosition);
-		}
+		void SetPosition(glm::vec3 value);
 		float GetRotation() { return _cameraRotation; }
-		void SetRotation(float value)
-		{
-			_cameraRotation = value;
-			_camera.SetRotation(_cameraRotation);
-		}
+		void SetRotation(float value);
+
+		void SetDefaults();
 
 	private:
 		bool OnMouseScrolled(MouseScrolledEvent& event);
@@ -57,5 +51,9 @@ namespace Hazel
 		float _cameraRotation = 0.0f;
 		float _cameraTranslationSpeed = 5.0f;
 		float _cameraRotationSpeed = 180.0f;
+
+		float _defaultZoomLevel = 1.0f;
+		float _defaultRotation = 0.0f;
+		glm::vec3 _defaultPosition = glm::vec3(0.0f);
 	};
 }

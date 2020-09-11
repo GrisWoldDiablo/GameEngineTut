@@ -91,6 +91,25 @@ namespace Hazel
 		_cameraTranslationSpeed = _zoomLevel;
 	}
 
+	void OrthographicCameraController::SetPosition(glm::vec3 value)
+	{
+		_cameraPosition = value;
+		_camera.SetPosition(_cameraPosition);
+	}
+
+	void OrthographicCameraController::SetRotation(float value)
+	{
+		_cameraRotation = value;
+		_camera.SetRotation(_cameraRotation);
+	}
+
+	void OrthographicCameraController::SetDefaults()
+	{
+		_defaultZoomLevel = GetZoomLevel();
+		_defaultRotation = GetRotation();
+		_defaultPosition = GetPosition();
+	}
+
 	bool OrthographicCameraController::OnMouseScrolled(MouseScrolledEvent& event)
 	{
 		HZ_PROFILE_FUNCTION();
@@ -111,9 +130,9 @@ namespace Hazel
 	void OrthographicCameraController::Reset()
 	{
 		HZ_PROFILE_FUNCTION();
-		
-		SetZoomLevel(1.0f);
-		SetRotation(0.0f);
-		SetPosition(glm::vec3(0.0f));
+
+		SetZoomLevel(_defaultZoomLevel);
+		SetRotation(_defaultRotation);
+		SetPosition(_defaultPosition);
 	}
 }

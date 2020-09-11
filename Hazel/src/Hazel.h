@@ -28,5 +28,6 @@
 // -----------------------------
 
 // Misc
+#include "Hazel/Core/Color.h"
 #include "Hazel/Core/Random.h"
 #include "Platform/Platform.h"

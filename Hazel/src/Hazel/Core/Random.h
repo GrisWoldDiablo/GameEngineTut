@@ -10,8 +10,14 @@ namespace Hazel
 	class Random
 	{
 	public:
-		Random(int seed = std::time(nullptr));
+		Random(int seed);
 		~Random() = default;
+
+		/// <summary>
+		/// Initialize the Random machine to a specific seed
+		/// </summary>
+		/// <param name="seed">seed</param>
+		static void Init(int seed = std::time(nullptr));
 
 		/// <summary>
 		/// Get random float between 0.0f - 1.0f
@@ -94,7 +100,6 @@ namespace Hazel
 		std::uniform_real_distribution<double> _uniformDoubleDistribution;
 
 		// Singleton related 
-		static void Init();
 		static Random* _sInstance;
 	};
 }

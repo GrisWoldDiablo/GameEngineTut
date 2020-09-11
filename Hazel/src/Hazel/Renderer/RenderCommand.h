@@ -27,7 +27,7 @@ namespace Hazel
 			_sRendererAPI->DrawIndexed(vertexArray);
 		}
 
-		inline static void SetClearColor(const glm::vec4& color)
+		inline static void SetClearColor(const Color& color)
 		{
 			HZ_PROFILE_FUNCTION();
 

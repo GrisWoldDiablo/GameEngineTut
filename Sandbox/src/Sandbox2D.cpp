@@ -51,12 +51,20 @@ void Sandbox2D::OnUpdate(Hazel::Timestep timestep)
 		HZ_LINFO("Back to 2 FPS or above.");
 		_lowFrames = 0;
 	}
+	_clearColorA /= 2.0f;
+	_clearColorA = _lerpedColor == _clearColorA;
+	_lerpedColor = Hazel::Color::LerpUnclamped(_clearColorA, _clearColorB, _lerpValue);
+	_lerpValue += 0.01f * _lerpDirection;
+	if (_lerpValue > 1.0f || _lerpValue < 0.0f)
+	{
+		_lerpDirection *= -1.0f;
+	}
 
 	{
 		HZ_PROFILE_SCOPE("Renderer Prep");
 		// Render
 		Hazel::RenderCommand::EnableDepthTest();
-		Hazel::RenderCommand::SetClearColor(_clearColor);
+		Hazel::RenderCommand::SetClearColor(_lerpedColor);
 		Hazel::RenderCommand::Clear();
 	}
 
@@ -65,7 +73,7 @@ void Sandbox2D::OnUpdate(Hazel::Timestep timestep)
 		Hazel::Renderer2D::BeginScene(_cameraController.GetCamera());
 
 		// Background to be drawn first behind everything
-		Hazel::Renderer2D::DrawQuad({ 0.0f, 0.0f, -0.1f }, { 10.0f, 10.0f }, _checkerboardTexture, glm::vec2(10.0f), { 0.9f, 0.9f, 0.8f, 1.0f });
+		Hazel::Renderer2D::DrawQuad({ 0.0f, 0.0f, -0.1f }, { 10.0f, 10.0f }, _checkerboardTexture, glm::vec2(10.0f), Hazel::Color(0.9f, 0.9f, 0.8f, 1.0f));
 
 		Hazel::RenderCommand::ReadOnlyDepthTest();
 
@@ -81,10 +89,13 @@ void Sandbox2D::OnUpdate(Hazel::Timestep timestep)
 			}
 			_shouldCreateSquares = false;
 		}
-		auto size = _squares.size();
-		for (int i = 0; i < size; i++)
+
 		{
-			Hazel::Renderer2D::DrawQuad(_squares[i]->Position, _squares[i]->Size, _squares[i]->Color);
+			std::lock_guard lock(_mutex);
+			for (size_t i = 0; i < _squares.size(); i++)
+			{
+				Hazel::Renderer2D::DrawQuad(_squares[i]->Position, _squares[i]->Size, _squares[i]->Color);
+			}
 		}
 
 		Hazel::Renderer2D::EndScene();
@@ -99,16 +110,16 @@ void Sandbox2D::CreateSquares()
 	// Multithreading creation of squares.
 	_squareCreationThreads.clear();
 
-	int newqty = _amountOfSquares - _squares.size();
+	auto newqty = (int)(_amountOfSquares - _squares.size());
 	static const int divider = 100; // How many squares each thread can create.
 	int amountOfThreads = newqty / divider;
 	for (int i = 0; i < amountOfThreads; i++)
 	{
-		_squareCreationThreads.push_back(std::thread([this]() { CreateSquare(divider); }));
+		_squareCreationThreads.emplace_back([this]() { CreateSquare(divider); });
 	}
 
 	int remainder = newqty % divider; // Create the remainder squares.
-	_squareCreationThreads.push_back(std::thread([this, remainder] { CreateSquare(remainder); }));
+	_squareCreationThreads.emplace_back([this, remainder] { CreateSquare(remainder); });
 
 	for (auto& thread : _squareCreationThreads)
 	{
@@ -124,21 +135,18 @@ void Sandbox2D::CreateSquare(int amount)
 {
 	HZ_PROFILE_FUNCTION();
 
-
-	// If lock is available create the square and push it onto the vector.
-	// If not block the thread.
-
 	for (int i = 0; i < amount; i++)
 	{
 		HZ_PROFILE_SCOPE("CreateSquare");
 		Hazel::Ref<Square> square = Hazel::CreateRef<Square>(Square
 			{
-				Hazel::Random::Vec3() * Hazel::Random::Range(-2.0f,2.0f),
+				Hazel::Random::RangeVec3({-5.0f,5.0f},{-5.0f,5.0f},{0.1f, 0.9f}),
 				Hazel::Random::Vec2() * Hazel::Random::Range(1.5f, 5.0f),
-				Hazel::Random::Vec4(),
+				Hazel::Color::Random(),
 			});
-		square->Position.z = glm::clamp(square->Position.z, 0.1f, 0.9f);
+
 		{
+			// Block the thread until lock is available, then push the square onto the vector.
 			std::lock_guard lock(_mutex);
 			_squares.push_back(square);
 		}
@@ -188,7 +196,9 @@ void Sandbox2D::DrawMainGui()
 		ImGui::EndMenuBar();
 	}
 
-	ImGui::ColorEdit4("Back Color", glm::value_ptr(_clearColor));
+	ImGui::ColorEdit4("Back ColorA", _clearColorA.GetValuePtr());
+	ImGui::ColorEdit4("Back ColorB", _clearColorB.GetValuePtr());
+	ImGui::ColorEdit4("Lerped Back Color", _lerpedColor.GetValuePtr());
 	auto amount = _squares.size();
 	ImGui::Text("Squares Quantity: %d / %d", amount, _amountOfSquares);
 	ImGui::SameLine();
@@ -230,56 +240,58 @@ void Sandbox2D::DrawSquaresGui()
 	ImGui::Begin("Squares", nullptr);
 
 	int indexToRemove = -1;
-	int vectorSize = glm::clamp((int)_squares.size(), 0, 100);
-	for (int i = 0; i < vectorSize; i++)
 	{
-		ImGui::PushID(i + _amountOfSquares);
-		ImGui::Text("Square #%d", i);
-		ImGui::SameLine();
-		if (ImGui::Button("Remove"))
+		std::lock_guard lock(_mutex);
+		for (int i = 0; i < glm::clamp((int)_squares.size(), 0, 100); i++)
 		{
-			indexToRemove = i;
-		}
-		ImGui::SameLine();
-		if (ImGui::Button("Randomize"))
-		{
-			*_squares[i] = {
-				Hazel::Random::RangeVec3({ -2.0f,2.0f },{ -2.0f,2.0f },{ 0.0f,0.9f }),
-				Hazel::Random::RangeVec2({ 0.5f,3.0f },{ 0.5f,3.0f }),
-				Hazel::Random::RangeVec4({ 0.5f,1.0f },{ 0.5f,1.0f },{ 0.5f,1.0f },{ 0.5f,1.0f }),
-			};
-		}
-		ImGui::PopID();
+			ImGui::PushID(i + _amountOfSquares);
+			ImGui::Text("Square #%d", i);
+			ImGui::SameLine();
+			if (ImGui::Button("Remove"))
+			{
+				indexToRemove = i;
+			}
+			ImGui::SameLine();
+			if (ImGui::Button("Randomize"))
+			{
+				*_squares[i] = {
+					Hazel::Random::RangeVec3({ -2.0f,2.0f },{ -2.0f,2.0f },{ 0.0f,0.9f }),
+					Hazel::Random::RangeVec2({ 0.5f,3.0f },{ 0.5f,3.0f }),
+					Hazel::Random::RangeVec4({ 0.5f,1.0f },{ 0.5f,1.0f },{ 0.5f,1.0f },{ 0.5f,1.0f }),
+				};
+			}
+			ImGui::PopID();
 
-		ImGui::PushID(i + _amountOfSquares * 2);
-		if (ImGui::Button("Rand"))
-		{
-			_squares[i]->Position = Hazel::Random::RangeVec3({ -2.0f,2.0f }, { -2.0f,2.0f }, { 0.0f,0.9f });
+			ImGui::PushID(i + _amountOfSquares * 2);
+			if (ImGui::Button("Rand"))
+			{
+				_squares[i]->Position = Hazel::Random::RangeVec3({ -2.0f,2.0f }, { -2.0f,2.0f }, { 0.0f,0.9f });
+			}
+			ImGui::SameLine();
+			ImGui::SliderFloat2("Position XY", glm::value_ptr(_squares[i]->Position), -5.0f, 5.0f);
+			ImGui::SliderFloat("Position Z", &_squares[i]->Position.z, 0.0f, 0.9f);
+			ImGui::PopID();
+
+			ImGui::PushID(i + _amountOfSquares * 3);
+			if (ImGui::Button("Rand"))
+			{
+				_squares[i]->Size = Hazel::Random::RangeVec2({ 0.5f,3.0f }, { 0.5f,3.0f });
+
+			}
+			ImGui::SameLine();
+			ImGui::SliderFloat2("Size", glm::value_ptr(_squares[i]->Size), 0.1f, 5.0f);
+			ImGui::PopID();
+
+			ImGui::PushID(i + _amountOfSquares * 4);
+			if (ImGui::Button("Rand"))
+			{
+				_squares[i]->Color = Hazel::Random::RangeVec4({ 0.5f,1.0f }, { 0.5f,1.0f }, { 0.5f,1.0f }, { 0.5f,1.0f });
+
+			}
+			ImGui::SameLine();
+			ImGui::ColorEdit4("Color", _squares[i]->Color.GetValuePtr());
+			ImGui::PopID();
 		}
-		ImGui::SameLine();
-		ImGui::SliderFloat2("Position XY", glm::value_ptr(_squares[i]->Position), -5.0f, 5.0f);
-		ImGui::SliderFloat("Position Z", &_squares[i]->Position.z, 0.0f, 0.9f);
-		ImGui::PopID();
-
-		ImGui::PushID(i + _amountOfSquares * 3);
-		if (ImGui::Button("Rand"))
-		{
-			_squares[i]->Size = Hazel::Random::RangeVec2({ 0.5f,3.0f }, { 0.5f,3.0f });
-
-		}
-		ImGui::SameLine();
-		ImGui::SliderFloat2("Size", glm::value_ptr(_squares[i]->Size), 0.1f, 5.0f);
-		ImGui::PopID();
-
-		ImGui::PushID(i + _amountOfSquares * 4);
-		if (ImGui::Button("Rand"))
-		{
-			_squares[i]->Color = Hazel::Random::RangeVec4({ 0.5f,1.0f }, { 0.5f,1.0f }, { 0.5f,1.0f }, { 0.5f,1.0f });
-
-		}
-		ImGui::SameLine();
-		ImGui::ColorEdit4("Color", glm::value_ptr(_squares[i]->Color));
-		ImGui::PopID();
 	}
 
 	if (indexToRemove != -1)

@@ -25,4 +25,3 @@ namespace Hazel
 		unsigned int _layerInsertIndex = 0;
 	};
 }
-

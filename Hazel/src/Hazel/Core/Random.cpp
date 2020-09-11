@@ -11,11 +11,11 @@ namespace Hazel
 	{
 	}
 
-	void Random::Init()
+	void Random::Init(int seed)
 	{
 		if (_sInstance == nullptr)
 		{
-			_sInstance = new Random();
+			_sInstance = new Random(seed);
 		}
 	}
 

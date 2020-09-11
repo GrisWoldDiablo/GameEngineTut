@@ -1,7 +1,7 @@
 #pragma once
 #include "Hazel.h"
 
-class Sandbox2D : public Hazel::Layer
+class Sandbox2D final : public Hazel::Layer
 {
 public:
 	Sandbox2D();
@@ -43,12 +43,16 @@ private:
 
 	Hazel::Ref<Hazel::Texture2D> _checkerboardTexture;
 
-	glm::vec4 _clearColor = { 0.13f, 0.0f, 0.3f, 1.0f };
+	Hazel::Color _clearColorA = { 0.13f, 0.0f, 0.9f, 1.0f };
+	Hazel::Color _clearColorB = { 0.9f, 0.0f, 0.13f, 1.0f };
+	Hazel::Color _lerpedColor;
+	float _lerpValue = 1.0f;
+	float _lerpDirection = 1.0f;
 	struct Square
 	{
 		glm::vec3 Position;
 		glm::vec2 Size;
-		glm::vec4 Color;
+		Hazel::Color Color;
 	};
 	std::vector<Hazel::Ref<Square>> _squares = std::vector<Hazel::Ref<Square>>();
 	int _amountOfSquares = 0;
