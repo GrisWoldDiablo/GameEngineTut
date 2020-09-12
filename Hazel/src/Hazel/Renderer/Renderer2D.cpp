@@ -89,7 +89,8 @@ namespace Hazel
 		HZ_PROFILE_FUNCTION();
 
 		sData->TextureShader->SetFloat4("u_Color", color);
-		sData->TextureShader->SetFloat2("u_TilingFactor", glm::vec2(1.0f));
+		// No need to set Tiling factor if there is no texture
+		//sData->TextureShader->SetFloat2("u_TilingFactor", glm::vec2(1.0f));
 		sData->WhiteTexture->Bind();
 
 		auto transform = glm::translate(glm::mat4(1.0f), position) * glm::scale(glm::mat4(1.0f), { size.x,size.y,1.0f });
@@ -99,16 +100,16 @@ namespace Hazel
 		RenderCommand::DrawIndexed(sData->QuadVertexArray);
 	}
 
-	void Renderer2D::DrawQuad(const glm::vec2& position, const glm::vec2& size, const Ref<Texture2D> texture, const glm::vec2& tilingFactor, const Color& color)
+	void Renderer2D::DrawQuad(const glm::vec2& position, const glm::vec2& size, const Ref<Texture2D> texture, const glm::vec2& tilingFactor, const Color& tintColor)
 	{
-		DrawQuad({ position.x, position.y, 0.0f }, size, texture, tilingFactor, color);
+		DrawQuad({ position.x, position.y, 0.0f }, size, texture, tilingFactor, tintColor);
 	}
 
-	void Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec2& size, const Ref<Texture2D> texture, const glm::vec2& tilingFactor, const Color& color)
+	void Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec2& size, const Ref<Texture2D> texture, const glm::vec2& tilingFactor, const Color& tintColor)
 	{
 		HZ_PROFILE_FUNCTION();
 
-		sData->TextureShader->SetFloat4("u_Color", color);
+		sData->TextureShader->SetFloat4("u_Color", tintColor);
 		sData->TextureShader->SetFloat2("u_TilingFactor", tilingFactor);
 		texture->Bind();
 
@@ -119,15 +120,16 @@ namespace Hazel
 		RenderCommand::DrawIndexed(sData->QuadVertexArray);
 	}
 
-	void Renderer2D::DrawQuad(const glm::vec2& position, const glm::vec2& size, float rotation, const Color& color)
+	void Renderer2D::DrawRotatedQuad(const glm::vec2& position, const glm::vec2& size, float rotation, const Color& color)
 	{
-		DrawQuad({ position.x, position.y, 0.0f }, size, rotation, color);
+		DrawRotatedQuad({ position.x, position.y, 0.0f }, size, rotation, color);
 	}
 
-	void Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec2& size, float rotation, const Color& color)
+	void Renderer2D::DrawRotatedQuad(const glm::vec3& position, const glm::vec2& size, float rotation, const Color& color)
 	{
 		sData->TextureShader->SetFloat4("u_Color", color);
-		sData->TextureShader->SetFloat2("u_TilingFactor", glm::vec2(1.0f));
+		// No need to set Tiling factor if there is no texture
+		//sData->TextureShader->SetFloat2("u_TilingFactor", glm::vec2(1.0f));
 		sData->WhiteTexture->Bind();
 
 		auto transform = glm::translate(glm::mat4(1.0f), position)
@@ -139,14 +141,14 @@ namespace Hazel
 		RenderCommand::DrawIndexed(sData->QuadVertexArray);
 	}
 
-	void Renderer2D::DrawQuad(const glm::vec2& position, const glm::vec2& size, float rotation, const Ref<Texture2D> texture, const glm::vec2& tilingFactor, const Color& color)
+	void Renderer2D::DrawRotatedQuad(const glm::vec2& position, const glm::vec2& size, float rotation, const Ref<Texture2D> texture, const glm::vec2& tilingFactor, const Color& tintColor)
 	{
-		DrawQuad({ position.x, position.y, 0.0f }, size, rotation, texture, tilingFactor, color);
+		DrawRotatedQuad({ position.x, position.y, 0.0f }, size, rotation, texture, tilingFactor, tintColor);
 	}
 
-	void Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec2& size, float rotation, const Ref<Texture2D> texture, const glm::vec2& tilingFactor, const Color& color)
+	void Renderer2D::DrawRotatedQuad(const glm::vec3& position, const glm::vec2& size, float rotation, const Ref<Texture2D> texture, const glm::vec2& tilingFactor, const Color& tintColor)
 	{
-		sData->TextureShader->SetFloat4("u_Color", color);
+		sData->TextureShader->SetFloat4("u_Color", tintColor);
 		sData->TextureShader->SetFloat2("u_TilingFactor", tilingFactor);
 		texture->Bind();
 

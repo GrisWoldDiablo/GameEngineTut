@@ -18,15 +18,16 @@ namespace Hazel
 		// Primitives
 		static void DrawQuad(const glm::vec2& position, const glm::vec2& size, const Color& color);
 		static void DrawQuad(const glm::vec3& position, const glm::vec2& size, const Color& color);
-		static void DrawQuad(const glm::vec2& position, const glm::vec2& size, float rotation, const Color& color);
-		static void DrawQuad(const glm::vec3& position, const glm::vec2& size, float rotation, const Color& color);
 		static void DrawQuad(const glm::vec2& position, const glm::vec2& size, const Ref<Texture2D> texture,
-			const glm::vec2& tilingFactor = glm::vec2(1.0f), const Color& color = Color(1.0f));
+			const glm::vec2& tilingFactor = glm::vec2(1.0f), const Color& tintColor = Color(1.0f));
 		static void DrawQuad(const glm::vec3& position, const glm::vec2& size, const Ref<Texture2D> texture,
-			const glm::vec2& tilingFactor = glm::vec2(1.0f), const Color& color = Color(1.0f));
-		static void DrawQuad(const glm::vec2& position, const glm::vec2& size, float rotation, const Ref<Texture2D> texture,
-			const glm::vec2& tilingFactor = glm::vec2(1.0f), const Color& color = Color(1.0f));
-		static void DrawQuad(const glm::vec3& position, const glm::vec2& size, float rotation, const Ref<Texture2D> texture,
-			const glm::vec2& tilingFactor = glm::vec2(1.0f), const Color& color = Color(1.0f));
+			const glm::vec2& tilingFactor = glm::vec2(1.0f), const Color& tintColor = Color(1.0f));
+			
+		static void DrawRotatedQuad(const glm::vec2& position, const glm::vec2& size, float rotation, const Color& color);
+		static void DrawRotatedQuad(const glm::vec3& position, const glm::vec2& size, float rotation, const Color& color);
+		static void DrawRotatedQuad(const glm::vec2& position, const glm::vec2& size, float rotation, const Ref<Texture2D> texture,
+			const glm::vec2& tilingFactor = glm::vec2(1.0f), const Color& tintColor = Color(1.0f));
+		static void DrawRotatedQuad(const glm::vec3& position, const glm::vec2& size, float rotation, const Ref<Texture2D> texture,
+			const glm::vec2& tilingFactor = glm::vec2(1.0f), const Color& tintColor = Color(1.0f));
 	};
 }

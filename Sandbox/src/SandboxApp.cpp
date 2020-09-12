@@ -182,13 +182,11 @@ public:
 	Sandbox()
 	{
 		HZ_PROFILE_FUNCTION();
-
-		HZ_LINFO("There is {0} cores on this machine.", std::thread::hardware_concurrency());
 		
 		//PushLayer(new ExampleLayer());
-		//PushLayer(new Sandbox2D());
-		// Flappy Game
-		PushLayer(new GameLayer());
+		PushLayer(new Sandbox2D());
+		// FlappyGame
+		//PushLayer(new GameLayer());
 	}
 
 	~Sandbox() = default;

@@ -21,6 +21,7 @@ namespace Hazel
 
 		void SetInt(std::string name, int value) override;
 
+		void SetFloat(std::string name, float value) override;
 		void SetFloat2(std::string name, const glm::vec2& value) override;
 		void SetFloat3(std::string name, const glm::vec3& value) override;
 		void SetFloat4(std::string name, const glm::vec4& value) override;

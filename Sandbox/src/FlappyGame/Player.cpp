@@ -28,7 +28,7 @@ void Player::OnUpdate(Hazel::Timestep ts)
 
 void Player::OnRender()
 {
-	Renderer2D::DrawQuad(_position, { 1.0f,1.3f }, GetRotation(), _shipTexture);
+	Renderer2D::DrawRotatedQuad(_position, { 1.0f,1.3f }, GetRotation(), _shipTexture);
 }
 
 void Player::OnImGuiRender()

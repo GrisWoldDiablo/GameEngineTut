@@ -71,7 +71,7 @@ void Level::OnRender()
 	// Pillars
 	for (auto& pillar : _pillars)
 	{
-		Renderer2D::DrawQuad(pillar.TopPosition, pillar.TopScale, 180.0f, _triangleTexture, glm::vec2(1.0f), color);
+		Renderer2D::DrawRotatedQuad(pillar.TopPosition, pillar.TopScale, 180.0f, _triangleTexture, glm::vec2(1.0f), color);
 		Renderer2D::DrawQuad(pillar.BottomPosition, pillar.BottomScale, _triangleTexture, glm::vec2(1.0f), color);
 	}
 

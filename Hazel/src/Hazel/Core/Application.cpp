@@ -13,6 +13,10 @@ namespace Hazel
 	{
 		HZ_PROFILE_FUNCTION();
 
+#if HZ_DEBUG
+		HZ_CORE_LINFO("There is {0} cores on this machine.", std::thread::hardware_concurrency());
+#endif // HZ_DEBUG
+
 		HZ_CORE_ASSERT(!_sInstance, "Application already exist!")
 			// Initialize the singleton.
 			_sInstance = this;

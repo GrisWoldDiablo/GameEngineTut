@@ -6,6 +6,7 @@ int main(int argc, char** argv)
 {
 	HZ_PROFILE_BEGIN_SESSION("Startup", "HazelProfile-Startup.json");
 	Hazel::Log::Init();
+
 	// Create the application using the define function by the client.
 	auto* app = Hazel::CreateApplication();
 	HZ_PROFILE_END_SESSION();

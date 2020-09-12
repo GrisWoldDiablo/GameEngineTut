@@ -21,10 +21,12 @@ namespace Hazel
 		auto status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress); // Glad setup/initialization
 		HZ_CORE_ASSERT(status, "Failed to initialize Glad!");
 		
+#if HZ_DEBUG
 		HZ_CORE_LINFO("OpenGL Info:");
 		HZ_CORE_LINFO("  Vendor: {0}", glGetString(GL_VENDOR));
 		HZ_CORE_LINFO("  Renderer: {0}", glGetString(GL_RENDERER));
 		HZ_CORE_LINFO("  Version: {0}", glGetString(GL_VERSION));
+#endif // HZ_DEBUG
 
 #ifdef HZ_ENABLE_ASSERTS
 		int versionMajor;

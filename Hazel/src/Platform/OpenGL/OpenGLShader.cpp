@@ -208,6 +208,13 @@ namespace Hazel
 		UploadUniformInt(std::move(name), value);
 	}
 
+	void OpenGLShader::SetFloat(std::string name, float value)
+	{
+		HZ_PROFILE_FUNCTION();
+
+		UploadUniformFloat(std::move(name), value);
+	}
+
 	void OpenGLShader::SetFloat2(std::string name, const glm::vec2& value)
 	{
 		HZ_PROFILE_FUNCTION();
