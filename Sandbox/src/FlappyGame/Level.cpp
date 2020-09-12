@@ -61,10 +61,7 @@ void Level::OnUpdate(Hazel::Timestep ts)
 void Level::OnRender()
 {
 	const auto& playerPos = _player.GetPosition();
-	Color colorrgb = Color::HSVtoRGB(_pillarHSV);
-	colorrgb[4] = 0.2f;
-	glm::vec4 colorhsv = Color::RGBtoHSV(colorrgb);
-	Color color = Color::HSVtoRGB(colorhsv);
+	Color color = Color::HSVtoRGB(_pillarHSV);
 
 	// Ceiling
 	Renderer2D::DrawQuad({ playerPos.x,34.0f }, { 50.0f,50.0f }, color);

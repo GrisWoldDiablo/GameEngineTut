@@ -10,7 +10,7 @@
 #include "glm/gtc/type_ptr.hpp"
 
 #include "Sandbox2D.h"
-#include "GameLayer.h"
+#include "FlappyGame/GameLayer.h"
 
 class ExampleLayer final : public Hazel::Layer
 {
@@ -186,9 +186,9 @@ public:
 		HZ_LINFO("There is {0} cores on this machine.", std::thread::hardware_concurrency());
 		
 		//PushLayer(new ExampleLayer());
-		PushLayer(new Sandbox2D());
-		// Game
-		//PushLayer(new GameLayer());
+		//PushLayer(new Sandbox2D());
+		// Flappy Game
+		PushLayer(new GameLayer());
 	}
 
 	~Sandbox() = default;
