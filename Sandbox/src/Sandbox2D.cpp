@@ -55,12 +55,15 @@ void Sandbox2D::OnUpdate(Hazel::Timestep timestep)
 		HZ_PROFILE_SCOPE("Renderer Draw");
 		Hazel::Renderer2D::BeginScene(_cameraController.GetCamera());
 
-		Hazel::Renderer2D::DrawQuad({ -2.0f, 2.0f, 0.5f }, { 1.0f, 1.0f }, _logoTexture);
-		Hazel::Renderer2D::DrawQuad({ -5.0f, -5.0f, -0.1f }, { 10.0f, 10.0f }, _checkerboardTexture, glm::vec2(10.0f), Hazel::Color(0.9f, 0.9f, 0.8f, 1.0f));
-		Hazel::Renderer2D::DrawQuad({ -2.5f, -1.0f, 0.0f }, { 5.0f, 0.5f }, _checkerboardTexture, glm::vec2(5.0f,0.25f), _lerpedColor);
+		Hazel::Renderer2D::DrawRotatedQuad({ -2.0f, 2.0f, 0.5f }, { 1.0f, 1.0f }, 45, _logoTexture);
+		Hazel::Renderer2D::DrawQuad({ 0.0f, 0.0f, -0.1f }, { 10.0f, 10.0f }, _checkerboardTexture, glm::vec2(10.0f), Hazel::Color(0.9f, 0.9f, 0.8f, 1.0f));
+		Hazel::Renderer2D::DrawQuad({ -2.5f, -1.0f, 0.0f }, { 5.0f, 0.5f }, _checkerboardTexture, glm::vec2(5.0f, 0.25f), _lerpedColor);
 
 		Hazel::Renderer2D::DrawQuad({ -1.0f, 0.0f }, { 0.8f,0.8f }, Hazel::Color::Cyan);
 		Hazel::Renderer2D::DrawQuad({ 0.5f, -0.5f, 0.5 }, { 0.5f,0.75f }, Hazel::Color::Red);
+		static float rotation = 0.0f;
+		rotation += timestep * 50.0f;
+		Hazel::Renderer2D::DrawRotatedQuad({ 0.5f, 0.5f, 0.5 }, { 0.5f,0.5f }, rotation, Hazel::Color::Blue);
 
 		//Hazel::RenderCommand::ReadOnlyDepthTest();
 
@@ -79,7 +82,7 @@ void Sandbox2D::OnUpdate(Hazel::Timestep timestep)
 
 		{
 			std::lock_guard lock(_mutex);
-			for (const auto & square : _squares)
+			for (const auto& square : _squares)
 			{
 				Hazel::Renderer2D::DrawQuad(square->Position, square->Size, square->Color);
 			}
@@ -141,7 +144,7 @@ void Sandbox2D::CreateSquares()
 		// This will make this current thread wait for all other thread to complete before continuing.
 		thread.join();
 	}
-	
+
 	// Have to lock before sorting the squares.
 	std::lock_guard lock(_mutex);
 	SortSquares();
