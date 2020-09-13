@@ -16,7 +16,7 @@ namespace Hazel
 
 		void SetClearColor(const Color& color) override;
 		void Clear() override;
-		void DrawIndexed(const Ref<VertexArray>& vertexArray) override;
+		void DrawIndexed(const Ref<VertexArray>& vertexArray, uint32_t count = 0) override;
 		float GetTime() override;
 	};
 }

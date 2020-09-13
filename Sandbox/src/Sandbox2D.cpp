@@ -30,7 +30,67 @@ void Sandbox2D::OnUpdate(Hazel::Timestep timestep)
 
 	CalculateFPS(timestep);
 
+#if !HZ_PROFILE
+	SafetyShutdownCheck();
+#endif // !HZ_PROFILE
 
+
+	// Cycle Lerp background color
+	_lerpedColor = Hazel::Color::LerpUnclamped(_clearColorA, _clearColorB, _lerpValue);
+	_lerpValue += 0.01f * _lerpDirection;
+	if (_lerpValue > 1.0f || _lerpValue < 0.0f)
+	{
+		_lerpDirection *= -1.0f;
+	}
+
+	{
+		HZ_PROFILE_SCOPE("Renderer Prep");
+		// Render
+		Hazel::RenderCommand::EnableDepthTest();
+		Hazel::RenderCommand::SetClearColor(_lerpedColor);
+		Hazel::RenderCommand::Clear();
+	}
+
+	{
+		HZ_PROFILE_SCOPE("Renderer Draw");
+		Hazel::Renderer2D::BeginScene(_cameraController.GetCamera());
+
+		Hazel::Renderer2D::DrawQuad({ -1.0f, 0.0f }, { 0.8f,0.8f }, Hazel::Color::Cyan);
+		Hazel::Renderer2D::DrawQuad({ 0.5f, -0.5f }, { 0.5f,0.75f }, Hazel::Color::Red);
+
+		// Background to be drawn first behind everything
+		//Hazel::Renderer2D::DrawQuad({ 0.0f, 0.0f, -0.1f }, { 10.0f, 10.0f }, _checkerboardTexture, glm::vec2(10.0f), Hazel::Color(0.9f, 0.9f, 0.8f, 1.0f));
+
+		Hazel::RenderCommand::ReadOnlyDepthTest();
+
+		if (_shouldCreateSquares)
+		{
+			HZ_PROFILE_SNAPSHOT("_shouldCreateSquares");
+			if (!_isCreatingSquares)
+			{
+				HZ_PROFILE_SNAPSHOT("_isCreatingSquares");
+				_isCreatingSquares = true;
+				auto thread = std::thread([this] { CreateSquares(); });
+				thread.detach();
+			}
+			_shouldCreateSquares = false;
+		}
+
+		{
+			std::lock_guard lock(_mutex);
+			for (const auto & square : _squares)
+			{
+				Hazel::Renderer2D::DrawQuad(square->Position, square->Size, square->Color);
+			}
+		}
+
+		Hazel::Renderer2D::EndScene();
+	}
+	UpdateSquareList();
+}
+
+void Sandbox2D::SafetyShutdownCheck()
+{
 	// Safety shutdown 
 	if (_currentFPS < 2)
 	{
@@ -51,66 +111,19 @@ void Sandbox2D::OnUpdate(Hazel::Timestep timestep)
 		HZ_LINFO("Back to 2 FPS or above.");
 		_lowFrames = 0;
 	}
-	_lerpedColor = Hazel::Color::LerpUnclamped(_clearColorA, _clearColorB, _lerpValue);
-	_lerpValue += 0.01f * _lerpDirection;
-	if (_lerpValue > 1.0f || _lerpValue < 0.0f)
-	{
-		_lerpDirection *= -1.0f;
-	}
-
-	{
-		HZ_PROFILE_SCOPE("Renderer Prep");
-		// Render
-		Hazel::RenderCommand::EnableDepthTest();
-		Hazel::RenderCommand::SetClearColor(_lerpedColor);
-		Hazel::RenderCommand::Clear();
-	}
-
-	{
-		HZ_PROFILE_SCOPE("Renderer Draw");
-		Hazel::Renderer2D::BeginScene(_cameraController.GetCamera());
-
-		// Background to be drawn first behind everything
-		Hazel::Renderer2D::DrawQuad({ 0.0f, 0.0f, -0.1f }, { 10.0f, 10.0f }, _checkerboardTexture, glm::vec2(10.0f), Hazel::Color(0.9f, 0.9f, 0.8f, 1.0f));
-
-		Hazel::RenderCommand::ReadOnlyDepthTest();
-
-		if (_shouldCreateSquares)
-		{
-			HZ_PROFILE_SNAPSHOT("_shouldCreateSquares");
-			if (!_isCreatingSquares)
-			{
-				HZ_PROFILE_SNAPSHOT("_isCreatingSquares");
-				_isCreatingSquares = true;
-				auto thread = std::thread([this] { CreateSquares(); });
-				thread.detach();
-			}
-			_shouldCreateSquares = false;
-		}
-
-		{
-			std::lock_guard lock(_mutex);
-			for (size_t i = 0; i < _squares.size(); i++)
-			{
-				Hazel::Renderer2D::DrawQuad(_squares[i]->Position, _squares[i]->Size, _squares[i]->Color);
-			}
-		}
-
-		Hazel::Renderer2D::EndScene();
-	}
-	UpdateSquareList();
 }
 
 void Sandbox2D::CreateSquares()
 {
 	HZ_PROFILE_FUNCTION();
 
-	// Multithreading creation of squares.
+	// Multi-threading creation of squares.
 	_squareCreationThreads.clear();
 
 	auto newqty = (int)(_amountOfSquares - _squares.size());
 	static const int divider = 100; // How many squares each thread can create.
 	int amountOfThreads = newqty / divider;
+
 	for (int i = 0; i < amountOfThreads; i++)
 	{
 		_squareCreationThreads.emplace_back([this]() { CreateSquare(divider); });
@@ -121,9 +134,12 @@ void Sandbox2D::CreateSquares()
 
 	for (auto& thread : _squareCreationThreads)
 	{
+		// This will make this current thread wait for all other thread to complete before continuing.
 		thread.join();
 	}
-
+	
+	// Have to lock before sorting the squares.
+	std::lock_guard lock(_mutex);
 	SortSquares();
 
 	_isCreatingSquares = false;
@@ -132,28 +148,29 @@ void Sandbox2D::CreateSquares()
 void Sandbox2D::CreateSquare(int amount)
 {
 	HZ_PROFILE_FUNCTION();
-
+	std::vector<Hazel::Ref<Square>> tempSquares;
+	tempSquares.reserve(amount);
 	for (int i = 0; i < amount; i++)
 	{
 		HZ_PROFILE_SCOPE("CreateSquare");
-		Hazel::Ref<Square> square = Hazel::CreateRef<Square>(Square
+		tempSquares.emplace_back(Hazel::CreateRef<Square>(Square
 			{
-				Hazel::Random::RangeVec3({-5.0f,5.0f},{-5.0f,5.0f},{0.1f, 0.9f}),
+				Hazel::Random::RangeVec3({ -5.0f,5.0f }, { -5.0f,5.0f }, { 0.1f, 0.9f }),
 				Hazel::Random::Vec2() * Hazel::Random::Range(1.5f, 5.0f),
-				Hazel::Color::Random(),
-			});
-
-		{
-			// Block the thread until lock is available, then push the square onto the vector.
-			std::lock_guard lock(_mutex);
-			_squares.push_back(square);
-		}
+				Hazel::Color::Random()
+			}));
 	}
+
+	// Block the thread until lock is available, then inserts the squares onto the vector.
+	std::lock_guard lock(_mutex);
+	_squares.insert(_squares.end(), tempSquares.begin(), tempSquares.end());
+
 }
 
 void Sandbox2D::OnImGuiRender(Hazel::Timestep timestep)
 {
 	HZ_PROFILE_FUNCTION();
+	//ImGui::ShowDemoWindow(nullptr);
 	DrawMainGui();
 	DrawSquaresGui();
 }
@@ -240,7 +257,7 @@ void Sandbox2D::DrawSquaresGui()
 	int indexToRemove = -1;
 	{
 		std::lock_guard lock(_mutex);
-		for (int i = 0; i < glm::clamp((int)_squares.size(), 0, 100); i++)
+		for (int i = 0; i < glm::clamp((int)_squares.size(), 0, 10); i++)
 		{
 			ImGui::PushID(i + _amountOfSquares);
 			ImGui::Text("Square #%d", i);

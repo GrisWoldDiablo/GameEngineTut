@@ -11,6 +11,8 @@ public:
 
 	void OnUpdate(Hazel::Timestep timestep) override;
 
+	void SafetyShutdownCheck();
+
 	void OnImGuiRender(Hazel::Timestep timestep) override;
 	void OnEvent(Hazel::Event& event) override;
 

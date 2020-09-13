@@ -6,11 +6,14 @@ namespace Hazel
 	class OpenGLVertexBuffer : public VertexBuffer
 	{
 	public:
+		OpenGLVertexBuffer(uint32_t size);
 		OpenGLVertexBuffer(float* vertices, uint32_t size);
 		~OpenGLVertexBuffer();
 
 		void Bind() const override;
 		void Unbind() const override;
+
+		void SetData(const void* data, uint32_t size) override;
 
 		const BufferLayout& GetLayout() override { return _layout; }
 		void SetLayout(const BufferLayout& layout) override { _layout = layout; }

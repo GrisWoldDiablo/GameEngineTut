@@ -26,7 +26,7 @@ namespace Hazel
 		virtual void SetClearColor(const Color& color) = 0;
 
 		virtual void Clear() = 0;
-		virtual void DrawIndexed(const Ref<VertexArray>& vertexArray) = 0;
+		virtual void DrawIndexed(const Ref<VertexArray>& vertexArray, uint32_t count = 0) = 0;
 
 		virtual float GetTime() = 0;
 

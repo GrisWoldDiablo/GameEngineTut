@@ -20,11 +20,11 @@ namespace Hazel
 			_sRendererAPI->SetViewport(x, y, width, height);
 		}
 
-		inline static void DrawIndexed(const Ref<VertexArray>& vertexArray)
+		inline static void DrawIndexed(const Ref<VertexArray>& vertexArray, uint32_t count = 0)
 		{
 			HZ_PROFILE_FUNCTION();
 
-			_sRendererAPI->DrawIndexed(vertexArray);
+			_sRendererAPI->DrawIndexed(vertexArray, count);
 		}
 
 		inline static void SetClearColor(const Color& color)
