@@ -34,7 +34,6 @@ void Sandbox2D::OnUpdate(Hazel::Timestep timestep)
 	SafetyShutdownCheck();
 #endif // !HZ_PROFILE
 
-
 	// Cycle Lerp background color
 	_lerpedColor = Hazel::Color::LerpUnclamped(_clearColorA, _clearColorB, _lerpValue);
 	_lerpValue += 0.01f * _lerpDirection;
@@ -55,11 +54,13 @@ void Sandbox2D::OnUpdate(Hazel::Timestep timestep)
 		HZ_PROFILE_SCOPE("Renderer Draw");
 		Hazel::Renderer2D::BeginScene(_cameraController.GetCamera());
 
+		Hazel::Renderer2D::DrawQuad({ -5.0f, -5.0f, -0.1f }, { 10.0f, 10.0f }, _checkerboardTexture, glm::vec2(10.0f), Hazel::Color(0.9f, 0.9f, 0.8f, 1.0f));
+		Hazel::Renderer2D::DrawQuad({ -2.5f, -1.0f, 0.0f }, { 5.0f, 0.5f }, _checkerboardTexture, glm::vec2(5.0f,0.25f), _lerpedColor);
+		
 		Hazel::Renderer2D::DrawQuad({ -1.0f, 0.0f }, { 0.8f,0.8f }, Hazel::Color::Cyan);
 		Hazel::Renderer2D::DrawQuad({ 0.5f, -0.5f }, { 0.5f,0.75f }, Hazel::Color::Red);
 
 		// Background to be drawn first behind everything
-		//Hazel::Renderer2D::DrawQuad({ 0.0f, 0.0f, -0.1f }, { 10.0f, 10.0f }, _checkerboardTexture, glm::vec2(10.0f), Hazel::Color(0.9f, 0.9f, 0.8f, 1.0f));
 
 		Hazel::RenderCommand::ReadOnlyDepthTest();
 

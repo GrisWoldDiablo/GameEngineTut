@@ -94,4 +94,10 @@ namespace Hazel
 
 		glBindTextureUnit(slot, _rendererID);
 	}
+
+	bool OpenGLTexture2D::Equals(const Texture& other) const
+	{
+		return _rendererID == ((OpenGLTexture2D&)other)._rendererID;
+	}
+
 }
