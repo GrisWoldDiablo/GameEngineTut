@@ -17,7 +17,7 @@ namespace Hazel
 		virtual void OnImGuiRender(Timestep timestep) {}
 		virtual void OnEvent(Event& event) {}
 
-		inline const std::string& GetName() const { return _debugName; }
+		const std::string& GetName() const { return _debugName; }
 
 	protected:
 		std::string _debugName;

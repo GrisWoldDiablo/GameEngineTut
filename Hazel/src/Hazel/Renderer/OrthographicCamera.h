@@ -13,14 +13,14 @@ namespace Hazel
 		void SetProjection(float left, float right, float bottom, float top);
 
 		const glm::vec3& GetPosition() { return _position; }
-		inline void SetPosition(const glm::vec3 position)
+		void SetPosition(const glm::vec3 position)
 		{
 			_position = position;
 			RecalculateViewMatrix();
 		}
 
 		float GetRotation() { return _rotation; }
-		inline void SetRotation(float rotation)
+		void SetRotation(float rotation)
 		{
 			_rotation = rotation;
 			RecalculateViewMatrix();

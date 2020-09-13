@@ -15,6 +15,7 @@ void Sandbox2D::OnAttach()
 	HZ_PROFILE_FUNCTION();
 
 	_checkerboardTexture = Hazel::Texture2D::Create("assets/textures/Checkerboard.png");
+	_logoTexture = Hazel::Texture2D::Create("assets/textures/ChernoLogo.png");
 }
 
 void Sandbox2D::OnDetach()
@@ -54,15 +55,14 @@ void Sandbox2D::OnUpdate(Hazel::Timestep timestep)
 		HZ_PROFILE_SCOPE("Renderer Draw");
 		Hazel::Renderer2D::BeginScene(_cameraController.GetCamera());
 
+		Hazel::Renderer2D::DrawQuad({ -2.0f, 2.0f, 0.5f }, { 1.0f, 1.0f }, _logoTexture);
 		Hazel::Renderer2D::DrawQuad({ -5.0f, -5.0f, -0.1f }, { 10.0f, 10.0f }, _checkerboardTexture, glm::vec2(10.0f), Hazel::Color(0.9f, 0.9f, 0.8f, 1.0f));
 		Hazel::Renderer2D::DrawQuad({ -2.5f, -1.0f, 0.0f }, { 5.0f, 0.5f }, _checkerboardTexture, glm::vec2(5.0f,0.25f), _lerpedColor);
-		
+
 		Hazel::Renderer2D::DrawQuad({ -1.0f, 0.0f }, { 0.8f,0.8f }, Hazel::Color::Cyan);
-		Hazel::Renderer2D::DrawQuad({ 0.5f, -0.5f }, { 0.5f,0.75f }, Hazel::Color::Red);
+		Hazel::Renderer2D::DrawQuad({ 0.5f, -0.5f, 0.5 }, { 0.5f,0.75f }, Hazel::Color::Red);
 
-		// Background to be drawn first behind everything
-
-		Hazel::RenderCommand::ReadOnlyDepthTest();
+		//Hazel::RenderCommand::ReadOnlyDepthTest();
 
 		if (_shouldCreateSquares)
 		{
@@ -90,6 +90,9 @@ void Sandbox2D::OnUpdate(Hazel::Timestep timestep)
 	UpdateSquareList();
 }
 
+/// <summary>
+/// If FPS goes below 2, shutdown.
+/// </summary>
 void Sandbox2D::SafetyShutdownCheck()
 {
 	// Safety shutdown 

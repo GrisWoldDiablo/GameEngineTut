@@ -30,7 +30,7 @@ namespace Hazel
 
 		virtual float GetTime() = 0;
 
-		inline static API GetAPI() { return _sAPI; }
+		static API GetAPI() { return _sAPI; }
 
 	private:
 		static API _sAPI;

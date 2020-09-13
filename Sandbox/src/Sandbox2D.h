@@ -26,7 +26,7 @@ private:
 	void CreateSquare(int amount);
 
 	// Z sorting since squares are transparent
-	inline void SortSquares()
+	void SortSquares()
 	{
 		HZ_PROFILE_FUNCTION();
 		std::sort(_squares.begin(), _squares.end(),
@@ -44,6 +44,7 @@ private:
 	Hazel::Ref<Hazel::Shader> _flatColorShader;
 
 	Hazel::Ref<Hazel::Texture2D> _checkerboardTexture;
+	Hazel::Ref<Hazel::Texture2D> _logoTexture;
 
 	Hazel::Color _clearColorA = { 0.13f, 0.0f, 0.9f, 1.0f };
 	Hazel::Color _clearColorB = { 0.9f, 0.0f, 0.13f, 1.0f };

@@ -27,9 +27,9 @@ namespace Hazel
 		void PushLayer(Layer* layer);
 		void PushOverlay(Layer* overlay);
 
-		inline Window& GetWindow() { return *_window; }
+		Window& GetWindow() { return *_window; }
 		// Get the Singleton
-		inline static Application& Get() { return *_sInstance; }
+		static Application& Get() { return *_sInstance; }
 
 	private:
 		bool OnWindowClose(WindowCloseEvent& event);

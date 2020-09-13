@@ -11,10 +11,10 @@ namespace Hazel
 		{
 		}
 
-		inline static float GetTime() { return _sInstance->GetTimeImpl(); }
+		static float GetTime() { return _sInstance->GetTimeImpl(); }
 
 	private:
-		inline float GetTimeImpl() { return _rendererAPI->GetTime(); }
+		float GetTimeImpl() { return _rendererAPI->GetTime(); }
 
 	private:
 		Ref<RendererAPI> _rendererAPI;
