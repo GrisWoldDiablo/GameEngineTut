@@ -21,7 +21,8 @@ private:
 	void UpdateSquareList();
 	void DrawMainGui();
 	void DrawSquaresGui();
-
+	void DrawStats(Hazel::Timestep timestep);
+	
 	void CreateSquares();
 	void CreateSquare(int amount);
 
@@ -49,8 +50,9 @@ private:
 	Hazel::Color _clearColorA = { 0.13f, 0.0f, 0.9f, 1.0f };
 	Hazel::Color _clearColorB = { 0.9f, 0.0f, 0.13f, 1.0f };
 	Hazel::Color _lerpedColor;
-	float _lerpValue = 1.0f;
-	float _lerpDirection = 1.0f;
+	float _lerpValueSin = 1.0f;
+	float _lerpValueCos = 1.0f;
+	float _lerpSpeed = 1.0f;
 	struct Square
 	{
 		glm::vec3 Position;

@@ -36,17 +36,14 @@ void Sandbox2D::OnUpdate(Hazel::Timestep timestep)
 #endif // !HZ_PROFILE
 
 	// Cycle Lerp background color
-	_lerpedColor = Hazel::Color::LerpUnclamped(_clearColorA, _clearColorB, _lerpValue);
-	_lerpValue += 0.01f * _lerpDirection;
-	if (_lerpValue > 1.0f || _lerpValue < 0.0f)
-	{
-		_lerpDirection *= -1.0f;
-	}
+	_lerpValueSin = (glm::sin(Hazel::Platform::GetTime() * _lerpSpeed) + 1.0f) * 0.5f;
+	_lerpValueCos = (glm::cos(Hazel::Platform::GetTime() * _lerpSpeed) + 1.0f) * 0.5f;
+	_lerpedColor = Hazel::Color::LerpUnclamped(_clearColorA, _clearColorB, _lerpValueSin);
 
+	Hazel::Renderer2D::ResetStats();
 	{
 		HZ_PROFILE_SCOPE("Renderer Prep");
 		// Render
-		Hazel::RenderCommand::EnableDepthTest();
 		Hazel::RenderCommand::SetClearColor(_lerpedColor);
 		Hazel::RenderCommand::Clear();
 	}
@@ -56,7 +53,7 @@ void Sandbox2D::OnUpdate(Hazel::Timestep timestep)
 		Hazel::Renderer2D::BeginScene(_cameraController.GetCamera());
 
 		Hazel::Renderer2D::DrawRotatedQuad({ -2.0f, 2.0f, 0.5f }, { 1.0f, 1.0f }, 45, _logoTexture);
-		Hazel::Renderer2D::DrawQuad({ 0.0f, 0.0f, -0.1f }, { 10.0f, 10.0f }, _checkerboardTexture, glm::vec2(10.0f), Hazel::Color(0.9f, 0.9f, 0.8f, 1.0f));
+		Hazel::Renderer2D::DrawQuad({ 0.0f, 0.0f, -0.1f }, { 20.0f, 20.0f }, _checkerboardTexture, glm::vec2(10.0f), Hazel::Color(0.9f, 0.9f, 0.8f, 1.0f));
 		Hazel::Renderer2D::DrawQuad({ -2.5f, -1.0f, 0.0f }, { 5.0f, 0.5f }, _checkerboardTexture, glm::vec2(5.0f, 0.25f), _lerpedColor);
 
 		Hazel::Renderer2D::DrawQuad({ -1.0f, 0.0f }, { 0.8f,0.8f }, Hazel::Color::Cyan);
@@ -88,6 +85,18 @@ void Sandbox2D::OnUpdate(Hazel::Timestep timestep)
 			}
 		}
 
+		Hazel::Renderer2D::EndScene();
+
+		Hazel::Renderer2D::BeginScene(_cameraController.GetCamera());
+
+		for (float y = -5.0f; y < 5.0f; y += 0.5f)
+		{
+			for (float x = -5.0f; x < 5.0f; x += 0.5f)
+			{
+				auto color = Hazel::Color((x + 5.0f) / 10.0f, (y + 5.0f) / 10.0f, _lerpValueSin, 0.8f);
+				Hazel::Renderer2D::DrawRotatedQuad({ x + _lerpValueSin, y + _lerpValueCos, }, { 0.45f, 0.45f }, Hazel::Platform::GetTime() * 25.0f , color);
+			}
+		}
 		Hazel::Renderer2D::EndScene();
 	}
 	UpdateSquareList();
@@ -180,6 +189,7 @@ void Sandbox2D::OnImGuiRender(Hazel::Timestep timestep)
 	//ImGui::ShowDemoWindow(nullptr);
 	DrawMainGui();
 	DrawSquaresGui();
+	DrawStats(timestep);
 }
 
 void Sandbox2D::UpdateSquareList()
@@ -322,6 +332,21 @@ void Sandbox2D::DrawSquaresGui()
 		_amountOfSquares--;
 	}
 
+	ImGui::End();
+}
+
+void Sandbox2D::DrawStats(Hazel::Timestep timestep)
+{
+	auto stats = Hazel::Renderer2D::GetStats();
+
+	ImGui::Begin("Stats", nullptr);
+	ImGui::Text("Renderer 2D Stats:");
+	ImGui::Text("Draw Calls: %d", stats.DrawCalls);
+	ImGui::Text("Quad Count: %d", stats.QuadCount);
+	ImGui::Text("Vertices: %d", stats.GetTotalVertexCount());
+	ImGui::Text("Indices: %d", stats.GetTotalIndexCount());
+	auto cycle = (glm::sin(Hazel::Platform::GetTime()) + 1.0f) * 0.5f;
+	ImGui::Text("Time: %f", cycle);
 	ImGui::End();
 }
 
