@@ -96,11 +96,11 @@ namespace Hazel
 		// going through the layer stack top to bottom and consume events.
 		for (auto it = _layerStack.end(); it != _layerStack.begin();)
 		{
-			(*--it)->OnEvent(event);
 			if (event.Handled)
 			{
 				break;
 			}
+			(*--it)->OnEvent(event);
 		}
 	}
 

@@ -12,6 +12,7 @@ namespace Hazel
 
 		void OnAttach() override;
 		void OnDetach() override;
+		void OnEvent(Event& event) override;
 
 		void Begin(); // Start a new frame.
 		void End(); // Send the new frame

@@ -99,5 +99,4 @@ namespace Hazel
 	{
 		return _rendererID == ((OpenGLTexture2D&)other)._rendererID;
 	}
-
 }

@@ -74,13 +74,13 @@ namespace Hazel
 
 			json << std::setprecision(3) << std::fixed;
 			json << ",{";
-			json << "\"cat\":\"" << result.Category << "\",";
-			json << "\"name\":\"" << result.Name << "\",";
-			json << "\"dur\":" << result.ElapsedTime.count() << ',';
-			json << "\"ph\":\"X\",";
-			json << "\"pid\":0,";
-			json << "\"tid\":" << result.ThreadID << ",";
-			json << "\"ts\":" << result.Start.count();
+			json << R"("cat":")" << result.Category << "\",";
+			json << R"("name":")" << result.Name << "\",";
+			json << R"("dur":)" << result.ElapsedTime.count() << ',';
+			json << R"("ph":"X",)";
+			json << R"("pid":0,)";
+			json << R"("tid":)" << result.ThreadID << ",";
+			json << R"("ts":)" << result.Start.count();
 			json << "}";
 
 			WriteToStream(json);
@@ -94,14 +94,14 @@ namespace Hazel
 
 			json << std::setprecision(3) << std::fixed;
 			json << ",{";
-			json << "\"args\":{\"snapshot\":{}},";
-			json << "\"cat\":\"" << result.Category << "\",";
-			json << "\"id\":\"" << hash << "\",";
-			json << "\"name\":\"" << result.Name << "\",";
-			json << "\"ph\":\"O\",";
-			json << "\"pid\":0,";
-			json << "\"tid\":" << result.ThreadID << ",";
-			json << "\"ts\":" << result.Start.count();
+			json << R"("args":{"snapshot":{}},)";
+			json << R"("cat":")" << result.Category << "\",";
+			json << R"("id":")" << hash << "\",";
+			json << R"("name":")" << result.Name << "\",";
+			json << R"("ph":"O",)";
+			json << R"("pid":0,)";
+			json << R"("tid":)" << result.ThreadID << ",";
+			json << R"("ts":)" << result.Start.count();
 			json << "}";
 
 			WriteToStream(json);
@@ -115,14 +115,14 @@ namespace Hazel
 
 			json << std::setprecision(3) << std::fixed;
 			json << ",{";
-			json << "\"args\":{\"snapshot\":{}},";
-			json << "\"cat\":\"" << result.Category << "\",";
-			json << "\"id\":\"" << hash << "\",";
-			json << "\"name\":\"" << result.Name << "\",";
-			json << "\"ph\":\"D\",";
-			json << "\"pid\":0,";
-			json << "\"tid\":" << result.ThreadID << ",";
-			json << "\"ts\":" << result.End.count();
+			json << R"("args":{"snapshot":{}},)";
+			json << R"("cat":")" << result.Category << "\",";
+			json << R"("id":")" << hash << "\",";
+			json << R"("name":")" << result.Name << "\",";
+			json << R"("ph":"D",)";
+			json << R"("pid":0,)";
+			json << R"("tid":)" << result.ThreadID << ",";
+			json << R"("ts":)" << result.End.count();
 			json << "}";
 
 			WriteToStream(json);
@@ -148,7 +148,7 @@ namespace Hazel
 
 		void WriteHeader()
 		{
-			_outputStream << "{\"otherData\": {},\"traceEvents\":[{}";
+			_outputStream << R"({"otherData": {},"traceEvents":[{})";
 			_outputStream.flush();
 		}
 
