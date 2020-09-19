@@ -23,6 +23,8 @@ namespace Hazel
 
 	Color Color::HSVtoRGB(const glm::vec4& hsv)
 	{
+		HZ_PROFILE_FUNCTION();
+
 		double H = hsv.x;
 		double S = hsv.y / 100.0;
 		double V = hsv.z / 100.0;
@@ -83,6 +85,8 @@ namespace Hazel
 
 	glm::vec4 Color::RGBtoHSV(const Color& color)
 	{
+		HZ_PROFILE_FUNCTION();
+
 		double H = 0;
 		double S = 0;
 		double V = 0;
@@ -127,11 +131,15 @@ namespace Hazel
 
 	Color Color::Random()
 	{
+		HZ_PROFILE_FUNCTION();
+
 		return Color(Hazel::Random::Float(), Hazel::Random::Float(), Hazel::Random::Float(), Hazel::Random::Float());
 	}
 
 	Color Color::Lerp(const Color& colorA, const Color& colorB, float lerpValue)
 	{
+		HZ_PROFILE_FUNCTION();
+
 		auto color = LerpUnclamped(colorA, colorB, lerpValue);
 		color.r = glm::clamp(color.r, 0.0f, 1.0f);
 		color.g = glm::clamp(color.g, 0.0f, 1.0f);
@@ -142,6 +150,8 @@ namespace Hazel
 
 	Color Color::LerpUnclamped(const Color& colorA, const Color& colorB, float lerpValue)
 	{
+		HZ_PROFILE_FUNCTION();
+
 		auto red = (colorB.r * lerpValue) + (colorA.r * (1.0f - lerpValue));
 		auto green = (colorB.g * lerpValue) + (colorA.g * (1.0f - lerpValue));
 		auto blue = (colorB.b * lerpValue) + (colorA.b * (1.0f - lerpValue));

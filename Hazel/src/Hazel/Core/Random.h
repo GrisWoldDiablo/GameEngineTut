@@ -94,10 +94,7 @@ namespace Hazel
 
 	private:
 		std::mt19937 _mersenneTwister;
-		std::uniform_int_distribution<int> _uniformIntDistribution;
-		std::uniform_real_distribution<float> _uniformFloatDistribution;
-		std::uniform_real<double> _uniformDouble = std::uniform_real(0.0);
-		std::uniform_real_distribution<double> _uniformDoubleDistribution;
+		std::uniform_real_distribution<double>_uniformDouble = std::uniform_real_distribution(0.0, 1.0);
 
 		// Singleton related 
 		static Random* _sInstance;

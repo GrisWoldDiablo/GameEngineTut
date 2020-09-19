@@ -37,24 +37,21 @@ namespace Hazel
 	{
 		HZ_PROFILE_FUNCTION();
 
-		_uniformIntDistribution = std::uniform_int_distribution<int>(min, max - 1);
-		return _uniformIntDistribution(_mersenneTwister);
+		return std::uniform_int_distribution<int>(min, max - 1)(_mersenneTwister);
 	}
 
 	float Random::RangeImpl(float min, float max)
 	{
 		HZ_PROFILE_FUNCTION();
 
-		_uniformFloatDistribution = std::uniform_real_distribution<float>(min, max);
-		return _uniformFloatDistribution(_mersenneTwister);
+		return std::uniform_real_distribution<float>(min, max)(_mersenneTwister);
 	}
 
 	double Random::RangeImpl(double min, double max)
 	{
 		HZ_PROFILE_FUNCTION();
 
-		_uniformDoubleDistribution = std::uniform_real_distribution<double>(min, max);
-		return _uniformFloatDistribution(_mersenneTwister);
+		return std::uniform_real_distribution<double>(min, max)(_mersenneTwister);
 	}
 
 	glm::vec2 Random::Vec2Impl()

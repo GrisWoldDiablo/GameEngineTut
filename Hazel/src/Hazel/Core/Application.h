@@ -9,6 +9,8 @@
 
 #include "Hazel/ImGui/ImGuiLayer.h"
 
+int main(int argc, char** argv);
+
 namespace Hazel
 {
 	/// <summary>
@@ -20,7 +22,6 @@ namespace Hazel
 		Application();
 		virtual ~Application();
 
-		void Run();
 		void Stop();
 		void OnEvent(Event& event);
 
@@ -32,6 +33,7 @@ namespace Hazel
 		static Application& Get() { return *_sInstance; }
 
 	private:
+		void Run();
 		bool OnWindowClose(WindowCloseEvent& event);
 		bool OnWindowResize(WindowResizeEvent& event);
 
@@ -46,6 +48,7 @@ namespace Hazel
 	private:
 		// Singleton related.
 		static Application* _sInstance;
+		friend int ::main(int argc, char** argv);
 	};
 
 	// To be define by the client.

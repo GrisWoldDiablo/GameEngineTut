@@ -55,14 +55,14 @@ void Sandbox2D::OnUpdate(Hazel::Timestep timestep)
 		Hazel::Renderer2D::DrawRotatedQuad({ -2.0f, 2.0f, 0.5f }, { 1.0f, 1.0f }, 45, _logoTexture);
 		Hazel::Renderer2D::DrawQuad({ 0.0f, 0.0f, -0.1f }, { 20.0f, 20.0f }, _checkerboardTexture, glm::vec2(10.0f), Hazel::Color(0.9f, 0.9f, 0.8f, 1.0f));
 		Hazel::Renderer2D::DrawQuad({ -2.5f, -1.0f, 0.0f }, { 5.0f, 0.5f }, _checkerboardTexture, glm::vec2(5.0f, 0.25f), _lerpedColor);
-
+		
 		Hazel::Renderer2D::DrawQuad({ -1.0f, 0.0f }, { 0.8f,0.8f }, Hazel::Color::Cyan);
 		Hazel::Renderer2D::DrawQuad({ 0.5f, -0.5f, 0.5 }, { 0.5f,0.75f }, Hazel::Color::Red);
 		static float rotation = 0.0f;
 		rotation += timestep * 50.0f;
 		Hazel::Renderer2D::DrawRotatedQuad({ 0.5f, 0.5f, 0.5 }, { 0.5f,0.5f }, rotation, Hazel::Color::Blue);
 
-		//Hazel::RenderCommand::ReadOnlyDepthTest();
+		Hazel::RenderCommand::ReadOnlyDepthTest();
 
 		if (_shouldCreateSquares)
 		{
@@ -77,6 +77,15 @@ void Sandbox2D::OnUpdate(Hazel::Timestep timestep)
 			_shouldCreateSquares = false;
 		}
 
+		for (float y = -5.0f; y < 5.0f; y += 0.5f)
+		{
+			for (float x = -5.0f; x < 5.0f; x += 0.5f)
+			{
+				auto color = Hazel::Color((x + 5.0f) / 10.0f, (y + 5.0f) / 10.0f, _lerpValueSin, 0.8f);
+				Hazel::Renderer2D::DrawRotatedQuad({ x + _lerpValueSin, y + _lerpValueCos, }, { 0.45f, 0.45f }, Hazel::Platform::GetTime() * 25.0f, color);
+			}
+		}
+
 		{
 			std::lock_guard lock(_mutex);
 			for (const auto& square : _squares)
@@ -85,18 +94,13 @@ void Sandbox2D::OnUpdate(Hazel::Timestep timestep)
 			}
 		}
 
+	
+
 		Hazel::Renderer2D::EndScene();
 
 		Hazel::Renderer2D::BeginScene(_cameraController.GetCamera());
 
-		for (float y = -5.0f; y < 5.0f; y += 0.5f)
-		{
-			for (float x = -5.0f; x < 5.0f; x += 0.5f)
-			{
-				auto color = Hazel::Color((x + 5.0f) / 10.0f, (y + 5.0f) / 10.0f, _lerpValueSin, 0.8f);
-				Hazel::Renderer2D::DrawRotatedQuad({ x + _lerpValueSin, y + _lerpValueCos, }, { 0.45f, 0.45f }, Hazel::Platform::GetTime() * 25.0f , color);
-			}
-		}
+		
 		Hazel::Renderer2D::EndScene();
 	}
 	UpdateSquareList();
@@ -169,11 +173,14 @@ void Sandbox2D::CreateSquare(int amount)
 	for (int i = 0; i < amount; i++)
 	{
 		HZ_PROFILE_SCOPE("CreateSquare");
+		auto position = Hazel::Random::RangeVec3({ -15.0f,15.0f }, { -15.0f,15.0f }, { 0.1f,0.9f });
+		auto scale = Hazel::Random::Vec2() * Hazel::Random::Range(1.0f, 15.0f);
+		auto color = Hazel::Color::Random();
 		tempSquares.emplace_back(Hazel::CreateRef<Square>(Square
 			{
-				Hazel::Random::RangeVec3({ -5.0f,5.0f }, { -5.0f,5.0f }, { 0.1f, 0.9f }),
-				Hazel::Random::Vec2() * Hazel::Random::Range(1.5f, 5.0f),
-				Hazel::Color::Random()
+				position,
+				scale,
+				color
 			}));
 	}
 
