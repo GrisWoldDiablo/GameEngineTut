@@ -18,7 +18,7 @@ namespace Hazel
 
 	Color Color::HSVtoRGB(float h, float s, float v, float a)
 	{
-		return  HSVtoRGB({ h, s, v, a});
+		return  HSVtoRGB({ h, s, v, a });
 	}
 
 	Color Color::HSVtoRGB(const glm::vec4& hsv)
@@ -30,48 +30,57 @@ namespace Hazel
 		double V = hsv.z / 100.0;
 
 		double C = S * V;
-		auto Hprime = H / 60.0;
+		double Hprime = H / 60.0;
 		double X = C * (1 - abs(fmod(Hprime, 2) - 1));
 		double m = V - C;
 		double R, G, B;
 
-		if (Hprime >= 0 && Hprime < 1)
+		auto floorHprime = (int)glm::floor(Hprime);
+		switch (floorHprime)
+		{
+		case 0:
 		{
 			R = C;
 			G = X;
 			B = 0;
+			break;
 		}
-		else if (Hprime >= 1 && Hprime < 2)
+		case 1:
 		{
 			R = X;
 			G = C;
 			B = 0;
+			break;
 		}
-		else if (Hprime >= 2 && Hprime < 3)
+		case 2:
 		{
 			R = 0;
 			G = C;
 			B = X;
+			break;
 		}
-		else if (Hprime >= 3 && Hprime < 4)
+		case 3:
 		{
 			R = 0;
 			G = X;
 			B = C;
+			break;
 		}
-		else if (Hprime >= 4 && Hprime < 5)
+		case 4:
 		{
 			R = X;
 			G = 0;
 			B = C;
+			break;
 		}
-		else
+		default:
 		{
 			R = C;
 			G = 0;
 			B = X;
+			break;
 		}
-
+		}
 		return Color((float)(R + m), (float)(G + m), (float)(B + m), hsv.a);
 	}
 
@@ -165,17 +174,17 @@ namespace Hazel
 	}
 
 	Color::Color(glm::vec4 value)
-		:Color(value.r, value.g, value.b, value.a)
+		: Color(value.r, value.g, value.b, value.a)
 	{
 	}
 
 	Color::Color(int red, int green, int blue, float alpha)
-		:Color(red / 255.0f, green / 255.0f, blue / 255.0f, alpha)
+		: Color(red / 255.0f, green / 255.0f, blue / 255.0f, alpha)
 	{
 	}
 
 	Color::Color(float red, float green, float blue, float alpha)
-		:r(red), g(green), b(blue), a(alpha)
+		: r(red), g(green), b(blue), a(alpha)
 	{
 	}
 
