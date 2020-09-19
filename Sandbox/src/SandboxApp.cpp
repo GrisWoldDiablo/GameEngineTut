@@ -13,9 +13,9 @@ public:
 		HZ_PROFILE_FUNCTION();
 		
 		//PushLayer(new ExampleLayer());
-		//PushLayer(new Sandbox2D());
+		PushLayer(new Sandbox2D());
 		// FlappyGame
-		PushLayer(new GameLayer());
+		//PushLayer(new GameLayer());
 	}
 
 	~Sandbox() = default;
