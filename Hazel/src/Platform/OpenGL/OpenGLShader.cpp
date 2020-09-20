@@ -208,11 +208,18 @@ namespace Hazel
 		UploadUniformInt(std::move(name), value);
 	}
 
-	void OpenGLShader::SetIntArray(const std::string name, int* values, uint32_t count)
+	void OpenGLShader::SetIntArray(std::string name, int* values, uint32_t count)
 	{
 		HZ_PROFILE_FUNCTION();
 
 		UploadUniformIntArray(std::move(name), values, count);
+	}
+
+	void OpenGLShader::SetBool(std::string name, bool value)
+	{
+		HZ_PROFILE_FUNCTION();
+
+		UploadUniformInt(std::move(name), value);
 	}
 
 	void OpenGLShader::SetFloat(std::string name, float value)

@@ -18,7 +18,6 @@ namespace Hazel
 		void SetData(void* data, uint32_t size) override;
 
 		void Bind(uint32_t slot = 0) const override;
-
 		bool Equals(const Texture& other) const override;
 
 		bool operator ==(const Texture& other) const override

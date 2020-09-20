@@ -20,7 +20,8 @@ namespace Hazel
 		const std::string& GetName() override { return _name; };
 
 		void SetInt(std::string name, int value) override;
-		void SetIntArray(const std::string name, int* values, uint32_t count) override;
+		void SetIntArray(std::string name, int* values, uint32_t count) override;
+		void SetBool(std::string name, bool value) override;
 
 		void SetFloat(std::string name, float value) override;
 		void SetFloat2(std::string name, const glm::vec2& value) override;

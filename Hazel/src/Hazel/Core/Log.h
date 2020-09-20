@@ -8,6 +8,8 @@
 #include "glm/vec3.hpp"
 #include "glm/vec4.hpp"
 
+#include "Color.h"
+
 namespace Hazel
 {
 	class Log
@@ -120,5 +122,32 @@ struct fmt::formatter<glm::vec4>
 	auto format(const glm::vec4& vec4, FormatContext& ctx)
 	{
 		return format_to(ctx.out(), "(x:{:.3f}, y:{:.3f}, z:{:.3f}, w:{:.3f})", vec4.x, vec4.y, vec4.z, vec4.w);
+	}
+};
+
+template <>
+struct fmt::formatter<Hazel::Color>
+{
+	// Presentation format: 'f' - fixed
+	char presentation = 'f';
+
+	constexpr auto parse(fmt::format_parse_context& ctx)
+	{
+		// Parse the presentation format and store it in the formatter:
+		auto it = ctx.begin(), end = ctx.end();
+		if (it != end && (*it == 'f')) presentation = *it++;
+
+		// Check if reached the end of the range:
+		if (it != end && *it != '}')
+			throw format_error("invalid format");
+
+		// Return an iterator past the end of the parsed range:
+		return it;
+	}
+
+	template <typename FormatContext>
+	auto format(const Hazel::Color& color, FormatContext& ctx)
+	{
+		return format_to(ctx.out(), "(r:{:.3f}, g:{:.3f}, b:{:.3f}, a:{:.3f})", color.r, color.g, color.b, color.a);
 	}
 };

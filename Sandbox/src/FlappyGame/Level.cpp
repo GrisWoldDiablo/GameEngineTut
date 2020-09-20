@@ -1,4 +1,5 @@
 #include "Level.h"
+
 #include "glm/gtc/matrix_transform.hpp"
 
 using namespace Hazel;
@@ -43,8 +44,8 @@ void Level::OnUpdate(Hazel::Timestep ts)
 		return;
 	}
 
-	_pillarHSV.x += 36.0f * ts;
-	if(_pillarHSV.x > 360.0f)
+	_pillarHSV.x += 0.1f * ts;
+	if(_pillarHSV.x > 1.0f)
 	{
 		_pillarHSV.x = 0.0f;
 	}

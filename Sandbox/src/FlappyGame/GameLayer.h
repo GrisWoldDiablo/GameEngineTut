@@ -15,7 +15,6 @@ public:
 
 	void OnImGuiRender(Hazel::Timestep timestep) override;
 	void OnEvent(Hazel::Event& event) override;
-	bool OnWindowResize(Hazel::WindowResizeEvent& event);
 
 private:
 	Hazel::OrthographicCameraController _cameraController;

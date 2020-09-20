@@ -44,10 +44,11 @@ private:
 	Hazel::Ref<Hazel::VertexArray> _squareVertexArray;
 	Hazel::Ref<Hazel::Shader> _flatColorShader;
 
+	Hazel::Ref<Hazel::Texture2D> _unwrapTexture;
 	Hazel::Ref<Hazel::Texture2D> _checkerboardTexture;
 	Hazel::Ref<Hazel::Texture2D> _logoTexture;
 
-	Hazel::Color _clearColorA = { 0.13f, 0.0f, 0.9f, 1.0f };
+	Hazel::Color _clearColorA = { 1.0f, 1.0f, 1.0f, 1.0f };
 	Hazel::Color _clearColorB = { 0.9f, 0.0f, 0.13f, 1.0f };
 	Hazel::Color _lerpedColor;
 	float _lerpValueSin = 1.0f;

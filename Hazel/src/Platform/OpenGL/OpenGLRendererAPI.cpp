@@ -25,7 +25,7 @@ namespace Hazel
 		glDepthMask(GL_TRUE);
 	}
 
-	void OpenGLRendererAPI::ReadOnlyDepthTest()
+	void OpenGLRendererAPI::SetDepthTestReadOnly()
 	{
 		glDepthMask(GL_FALSE);
 	}

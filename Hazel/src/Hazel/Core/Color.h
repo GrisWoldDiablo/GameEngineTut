@@ -29,30 +29,58 @@ namespace Hazel
 		static Color HSVtoRGB(float h, float s, float v, float a = 1.0f);
 
 		/// <summary>
-		/// Covert from vec3 with component such as
-		/// Hue = x, Saturation = y, Value/Brightness = z to RGB Color with alpha at 1.0f
+		/// Covert from vec4 to RGB Color
+		/// <para> vec4.x = Hue				</para>
+		/// <para> vec4.y = Saturation		</para>
+		/// <para> vec4.z = Value/Brightness</para>
+		/// <para> vec4.w = Alpha			</para>
 		/// </summary>
-		/// <param name="hsv">x(Hue),y(Saturation),z(Value/Brightness)</param>
+		/// <param name="hsv">x(Hue), y(Saturation), z(Value/Brightness)</param>
 		static Color HSVtoRGB(const glm::vec4& hsv);
 
 		/// <summary>
 		/// From Red Green Blue in extracts the Hue, Saturation, Value/Brightness
 		/// </summary>
 		/// <param name="color">RGBA Color</param>
-		/// <param name="H">Hue [0 - 360]</param>
-		/// <param name="S">Saturation [0 - 100]</param>
-		/// <param name="V">Value/Brightness [0 - 100]</param>
+		/// <param name="H">Hue</param>
+		/// <param name="S">Saturation</param>
+		/// <param name="V">Value/Brightness</param>
 		static void RGBtoHSV(const Color& color, float& H, float& S, float& V);
-		
+
 		/// <summary>
 		/// Convert from Red Green Blue Color to Hue, Saturation, Value/Brightness
-		/// vec4.x = Hue [0 - 360]
-		/// vec4.y = Saturation [0 - 100]
-		/// vec4.z = Value/Brightness [0 - 100]
-		/// vec4.w = Alpha [0 - 1]
+		/// <para> vec4.x = Hue				</para>
+		/// <para> vec4.y = Saturation		</para>
+		/// <para> vec4.z = Value/Brightness</para>
+		/// <para> vec4.w = Alpha			</para>
 		/// </summary>
 		/// <param name="color">RGBA Color</param>
 		static glm::vec4 RGBtoHSV(const Color& color);
+
+		/// <summary>
+		/// From Red Green Blue in extracts the Hue, Saturation, Value/Brightness
+		/// </summary>
+		/// <param name="color">RGBA Color</param>
+		/// <param name="H">Hue</param>
+		/// <param name="S">Saturation</param>
+		/// <param name="V">Lightness</param>
+		static void RGBtoHSL(const Color& color, float& H, float& S, float& L);
+
+		/// <summary>
+		/// Convert from Red Green Blue Color to Hue, Saturation, Value/Brightness
+		/// <para> vec4.x = Hue				</para>
+		/// <para> vec4.y = Saturation		</para>
+		/// <para> vec4.z = Vightness		</para>
+		/// <para> vec4.w = Alpha			</para>
+		/// </summary>
+		/// <param name="color">RGB Color</param>
+		static glm::vec4 RGBtoHSL(const Color& color);
+
+		/// <summary>
+		/// Convert from Red Green Blue Color to GrayScale version.
+		/// </summary>
+		/// <param name="color">RGB Color</param>
+		static Color RGBtoGrayscale(const Color& color);
 
 		/// <summary>
 		/// Generate a random value for each components.
@@ -83,6 +111,12 @@ namespace Hazel
 		Color(int red, int green, int blue, float alpha = 1.0f);
 		Color(float red, float green, float blue, float alpha = 1.0f);
 		~Color() = default;
+
+		/// <summary>
+		/// Return the Grayscale value of the color.
+		/// (0.299 * r) + (0.587 * g) + (0.114 * b)
+		/// </summary>
+		float GetGrayscaleValue() const;
 
 		/// <summary>
 		/// Return address of r component.

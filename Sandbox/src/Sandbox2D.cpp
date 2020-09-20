@@ -14,6 +14,7 @@ void Sandbox2D::OnAttach()
 {
 	HZ_PROFILE_FUNCTION();
 
+	_unwrapTexture = Hazel::Texture2D::Create("assets/textures/unwrap_helper.png");
 	_checkerboardTexture = Hazel::Texture2D::Create("assets/textures/Checkerboard.png");
 	_logoTexture = Hazel::Texture2D::Create("assets/textures/ChernoLogo.png");
 }
@@ -52,17 +53,14 @@ void Sandbox2D::OnUpdate(Hazel::Timestep timestep)
 		HZ_PROFILE_SCOPE("Renderer Draw");
 		Hazel::Renderer2D::BeginScene(_cameraController.GetCamera());
 
-		Hazel::Renderer2D::DrawRotatedQuad({ -2.0f, 2.0f, 0.5f }, { 1.0f, 1.0f }, 45, _logoTexture);
-		Hazel::Renderer2D::DrawQuad({ 0.0f, 0.0f, -0.1f }, { 20.0f, 20.0f }, _checkerboardTexture, glm::vec2(10.0f), Hazel::Color(0.9f, 0.9f, 0.8f, 1.0f));
+		Hazel::Renderer2D::DrawRotatedQuad({ _cameraController.GetPosition().x, _cameraController.GetPosition().y, -0.2f }, { 10.0f * _cameraController.GetZoomLevel(), 10.0f * _cameraController.GetZoomLevel() }, _cameraController.GetRotation(), _unwrapTexture, glm::vec2(10.0f), _lerpedColor);
+		Hazel::Renderer2D::DrawQuad({ 0.0f, 0.0f, -0.1f }, { 20.0f , 20.0f }, _checkerboardTexture, glm::vec2(10.0f), Hazel::Color(0.9f, 0.9f, 0.8f, 1.0f));
 		Hazel::Renderer2D::DrawQuad({ -2.5f, -1.0f, 0.0f }, { 5.0f, 0.5f }, _checkerboardTexture, glm::vec2(5.0f, 0.25f), _lerpedColor);
-		
 		Hazel::Renderer2D::DrawQuad({ -1.0f, 0.0f }, { 0.8f,0.8f }, Hazel::Color::Cyan);
 		Hazel::Renderer2D::DrawQuad({ 0.5f, -0.5f, 0.5 }, { 0.5f,0.75f }, Hazel::Color::Red);
 		static float rotation = 0.0f;
 		rotation += timestep * 50.0f;
 		Hazel::Renderer2D::DrawRotatedQuad({ 0.5f, 0.5f, 0.5 }, { 0.5f,0.5f }, rotation, Hazel::Color::Blue);
-
-		Hazel::RenderCommand::ReadOnlyDepthTest();
 
 		if (_shouldCreateSquares)
 		{
@@ -94,13 +92,13 @@ void Sandbox2D::OnUpdate(Hazel::Timestep timestep)
 			}
 		}
 
-	
-
 		Hazel::Renderer2D::EndScene();
 
-		Hazel::Renderer2D::BeginScene(_cameraController.GetCamera());
 
-		
+		Hazel::Renderer2D::BeginScene(_cameraController.GetCamera(), true);
+
+		Hazel::Renderer2D::DrawQuad({ -5.0f, 5.0f, 1.0f }, { 5.0f, 5.0f }, _logoTexture);
+
 		Hazel::Renderer2D::EndScene();
 	}
 	UpdateSquareList();
@@ -307,7 +305,7 @@ void Sandbox2D::DrawSquaresGui()
 				_squares[i]->Position = Hazel::Random::RangeVec3({ -2.0f,2.0f }, { -2.0f,2.0f }, { 0.0f,0.9f });
 			}
 			ImGui::SameLine();
-			ImGui::SliderFloat2("Position XY", glm::value_ptr(_squares[i]->Position), -5.0f, 5.0f);
+			ImGui::SliderFloat2("Position XY", glm::value_ptr(_squares[i]->Position), -15.0f, 15.0f);
 			ImGui::SliderFloat("Position Z", &_squares[i]->Position.z, 0.0f, 0.9f);
 			ImGui::PopID();
 
@@ -318,7 +316,7 @@ void Sandbox2D::DrawSquaresGui()
 
 			}
 			ImGui::SameLine();
-			ImGui::SliderFloat2("Size", glm::value_ptr(_squares[i]->Size), 0.1f, 5.0f);
+			ImGui::SliderFloat2("Size", glm::value_ptr(_squares[i]->Size), 0.1f, 15.0f);
 			ImGui::PopID();
 
 			ImGui::PushID(i + _amountOfSquares * 4);

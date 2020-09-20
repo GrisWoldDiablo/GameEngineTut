@@ -26,11 +26,11 @@ namespace Hazel
 		HZ_PROFILE_FUNCTION();
 
 		double H = hsv.x;
-		double S = hsv.y / 100.0;
-		double V = hsv.z / 100.0;
+		double S = hsv.y;
+		double V = hsv.z;
 
 		double C = S * V;
-		double Hprime = H / 60.0;
+		double Hprime = H * 6.0;
 		double X = C * (1 - abs(fmod(Hprime, 2) - 1));
 		double m = V - C;
 		double R, G, B;
@@ -87,9 +87,9 @@ namespace Hazel
 	void Color::RGBtoHSV(const Color& color, float& H, float& S, float& V)
 	{
 		auto hsv = RGBtoHSV(color);
-		H = hsv.r;
-		S = hsv.g;
-		V = hsv.b;
+		H = hsv.x;
+		S = hsv.y;
+		V = hsv.z;
 	}
 
 	glm::vec4 Color::RGBtoHSV(const Color& color)
@@ -103,8 +103,8 @@ namespace Hazel
 		double g = color.g;
 		double b = color.b;
 
-		double Xmax = glm::max(glm::max(color.r, color.g), color.b);
-		double Xmin = glm::min(glm::min(color.r, color.g), color.b);
+		double Xmax = glm::max(glm::max(r, g), b);
+		double Xmin = glm::min(glm::min(r, g), b);
 		double C = Xmax - Xmin;
 
 		if (C == 0)
@@ -124,18 +124,84 @@ namespace Hazel
 			H = fmod((60 * ((r - g) / C) + 240), 360.0);
 		}
 
+		H /= 360.0;
+
 		if (Xmax == 0)
 		{
 			S = 0;
 		}
 		else
 		{
-			S = (C / Xmax) * 100.0;
+			S = (C / Xmax);
 		}
 
-		V = Xmax * 100.0;
+		V = Xmax;
 
 		return { H, S, V , color.a };
+	}
+
+	void Color::RGBtoHSL(const Color& color, float& H, float& S, float& L)
+	{
+		auto hsl = RGBtoHSL(color);
+		H = hsl.x;
+		S = hsl.y;
+		L = hsl.z;
+	}
+
+	glm::vec4 Color::RGBtoHSL(const Color& color)
+	{
+		HZ_PROFILE_FUNCTION();
+
+		double H = 0;
+		double S = 0;
+		double L = 0;
+		double r = color.r;
+		double g = color.g;
+		double b = color.b;
+
+		double Xmax = glm::max(glm::max(r, g), b);
+		double Xmin = glm::min(glm::min(r, g), b);
+		double C = Xmax - Xmin;
+
+		if (C == 0)
+		{
+			H = 0;
+		}
+		else if (Xmax == r)
+		{
+			H = fmod((60 * ((g - b) / C) + 360), 360.0);
+		}
+		else if (Xmax == g)
+		{
+			H = fmod((60 * ((b - r) / C) + 120), 360.0);
+		}
+		else if (Xmax == b)
+		{
+			H = fmod((60 * ((r - g) / C) + 240), 360.0);
+		}
+
+		H /= 360.0;
+
+		if (Xmax == 0)
+		{
+			S = 0;
+		}
+		else
+		{
+			S = (C / Xmax);
+		}
+
+		L = (Xmax - Xmin) / 2.0f;
+
+		return { H, S, L , color.a };
+	}
+
+	Color Color::RGBtoGrayscale(const Color& color)
+	{
+		HZ_PROFILE_FUNCTION();
+
+		auto grayscaleValue = color.GetGrayscaleValue();
+		return  Color(grayscaleValue, grayscaleValue, grayscaleValue, 1.0f);
 	}
 
 	Color Color::Random()
@@ -186,6 +252,13 @@ namespace Hazel
 	Color::Color(float red, float green, float blue, float alpha)
 		: r(red), g(green), b(blue), a(alpha)
 	{
+	}
+
+	float Color::GetGrayscaleValue() const
+	{
+		HZ_PROFILE_FUNCTION();
+
+		return (0.299f * r) + (0.587f * g) + (0.114f * b);
 	}
 
 	float* Color::GetValuePtr()

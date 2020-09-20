@@ -59,8 +59,3 @@ void GameLayer::OnEvent(Hazel::Event& event)
 {
 	_cameraController.OnEvent(event);
 }
-
-bool GameLayer::OnWindowResize(Hazel::WindowResizeEvent& event)
-{
-	return false;
-}

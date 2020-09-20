@@ -17,7 +17,7 @@ namespace Hazel
 		static void Init();
 		static void Shutdown();
 
-		static void BeginScene(OrthographicCamera& camera);
+		static void BeginScene(OrthographicCamera& camera, bool isGrayscale = false);
 		static void EndScene();
 		static void Flush();
 		static void Reset();

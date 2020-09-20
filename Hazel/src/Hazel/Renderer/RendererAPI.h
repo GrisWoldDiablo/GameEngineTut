@@ -20,7 +20,7 @@ namespace Hazel
 
 		// #TODO: Temporary, will need to have render queue with sorting.
 		virtual void EnableDepthTest() = 0;
-		virtual void ReadOnlyDepthTest() = 0;
+		virtual void SetDepthTestReadOnly() = 0;
 
 		virtual void SetViewport(uint32_t x, uint32_t y, uint32_t width, uint32_t height) = 0;
 		virtual void SetClearColor(const Color& color) = 0;

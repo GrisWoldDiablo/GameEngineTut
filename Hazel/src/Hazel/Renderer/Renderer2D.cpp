@@ -120,12 +120,13 @@ namespace Hazel
 		delete[] sData.QuadVertexBufferBase;
 	}
 
-	void Renderer2D::BeginScene(OrthographicCamera& camera)
+	void Renderer2D::BeginScene(OrthographicCamera& camera, bool isGrayscale)
 	{
 		HZ_PROFILE_FUNCTION();
 
 		sData.TextureShader->Bind();
 		sData.TextureShader->SetMat4("u_ViewProjection", camera.GetViewProjectionMatrix());
+		sData.TextureShader->SetBool("u_IsGrayscale", isGrayscale);
 
 		Reset();
 	}

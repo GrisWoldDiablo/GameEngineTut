@@ -36,10 +36,19 @@ in float v_TextureIndex;
 in vec2 v_TilingFactor;
 
 uniform sampler2D u_Texture[32];
+uniform bool u_IsGrayscale;
 
 void main()
 {
 	
 	color = v_Color;
 	color *= texture(u_Texture[int(v_TextureIndex)], v_TextureCoord * v_TilingFactor);
+	
+	if(u_IsGrayscale)
+	{ 
+		float grayScalevalue = (0.299 * color.x) + (0.587 * color.y) + (0.114 * color.z);
+		color.x = grayScalevalue;
+		color.y = grayScalevalue;
+		color.z = grayScalevalue;
+	}
 }

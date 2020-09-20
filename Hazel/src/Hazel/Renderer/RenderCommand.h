@@ -53,7 +53,7 @@ namespace Hazel
 		{
 			HZ_PROFILE_FUNCTION();
 
-			_sRendererAPI->ReadOnlyDepthTest();
+			_sRendererAPI->SetDepthTestReadOnly();
 		}
 		
 	private:
