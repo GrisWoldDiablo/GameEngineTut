@@ -13,8 +13,8 @@ namespace Hazel
 		OrthographicCameraController(float aspectRation, bool rotation = false);
 		~OrthographicCameraController() = default;
 
-		void OnUpdate(Timestep timestep);
-		void OnEvent(Event& event);
+		virtual void OnUpdate(Timestep timestep);
+		virtual void OnEvent(Event& event);
 
 		OrthographicCamera& GetCamera() { return _camera; }
 		const OrthographicCamera& GetCamera() const { return _camera; }

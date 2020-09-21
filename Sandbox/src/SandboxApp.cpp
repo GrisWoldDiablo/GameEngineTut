@@ -11,7 +11,6 @@ public:
 	Sandbox()
 	{
 		HZ_PROFILE_FUNCTION();
-
 		//PushLayer(new ExampleLayer());
 		PushLayer(new Sandbox2D());
 		// FlappyGame

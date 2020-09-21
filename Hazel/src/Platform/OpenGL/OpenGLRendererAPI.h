@@ -9,8 +9,8 @@ namespace Hazel
 	public:
 		void Init() override;
 
-		void EnableDepthTest() override;
-		void SetDepthTestReadOnly() override;
+		void SetDepthMaskReadWrite() override;
+		void SetDepthMaskReadOnly() override;
 
 		void SetViewport(uint32_t x, uint32_t y, uint32_t width, uint32_t height) override;
 

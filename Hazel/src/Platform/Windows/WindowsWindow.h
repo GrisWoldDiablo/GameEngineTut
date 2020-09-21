@@ -38,8 +38,8 @@ namespace Hazel
 		{
 		public:
 			std::string Title;
-			unsigned int Width;
-			unsigned int Height;
+			uint32_t Width;
+			uint32_t Height;
 			bool VSync;
 
 			EventCallbackFn EventCallback;

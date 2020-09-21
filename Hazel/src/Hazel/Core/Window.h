@@ -2,7 +2,6 @@
 
 #include <utility>
 
-
 #include "hzpch.h"
 
 #include "Hazel/Core/Base.h"
@@ -14,12 +13,12 @@ namespace Hazel
 	{
 	public:
 		std::string Title;
-		unsigned int Width;
-		unsigned int Height;
+		uint32_t Width;
+		uint32_t  Height;
 
 		WindowProps(std::string title = "Hazel Engine",
-		            unsigned int width = 1280,
-		            unsigned int height = 720)
+		            uint32_t width = 1280,
+		            uint32_t height = 720)
 			: Title(std::move(title)), Width(width), Height(height) {}
 	};
 
@@ -43,7 +42,7 @@ namespace Hazel
 
 		virtual void* GetNativeWindow() const = 0;
 
-		// This has to be implemented per platforms. (window/linux/mac)
+		// This has to be implemented per platforms. (Window/Linux/Mac)
 		static Window* Create(const WindowProps& props = WindowProps());
 	};
 }

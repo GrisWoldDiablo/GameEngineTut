@@ -10,22 +10,18 @@ namespace Hazel
 	void OpenGLRendererAPI::Init()
 	{
 		HZ_PROFILE_FUNCTION();
-
+		 
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-		// #TODO: This will allow for rendering using z axis but disables the blending.
-		//		  Re enable blending eventually.
-		EnableDepthTest();
+		glEnable(GL_DEPTH_TEST);
 	}
 
-	void OpenGLRendererAPI::EnableDepthTest()
+	void OpenGLRendererAPI::SetDepthMaskReadWrite()
 	{
-		glEnable(GL_DEPTH_TEST);
 		glDepthMask(GL_TRUE);
 	}
 
-	void OpenGLRendererAPI::SetDepthTestReadOnly()
+	void OpenGLRendererAPI::SetDepthMaskReadOnly()
 	{
 		glDepthMask(GL_FALSE);
 	}

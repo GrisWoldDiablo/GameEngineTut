@@ -204,6 +204,47 @@ namespace Hazel
 		return  Color(grayscaleValue, grayscaleValue, grayscaleValue, 1.0f);
 	}
 
+	Color Color::HEXtoRGB(const std::string& hexValue)
+	{
+		HZ_PROFILE_FUNCTION();
+
+		HZ_CORE_ASSERT(hexValue.length() == 6, "RGB Hexadecimal value need to consist of 6 characters.");
+
+		for (auto character : hexValue)
+		{
+			switch (toupper(character))
+			{
+			case 0: case 1: case 2: case 3: case 4:
+			case 5: case 6: case 7: case 8:case 9:
+			case 'A': case 'B': case 'C':
+			case 'D': case 'E': case 'F':
+				break;
+			default:
+				HZ_CORE_ASSERT(false, std::string("[] is not a valid Hexadecimal character.").insert(1, 1, character));
+				break;
+			}
+		}
+
+		int red;
+		int green;
+		int blue;
+
+		std::stringstream stream;
+
+		stream << std::hex << hexValue.substr(0, 2);
+		stream >> red;
+
+		stream.clear();
+		stream << std::hex << hexValue.substr(2, 2);
+		stream >> green;
+
+		stream.clear();
+		stream << std::hex << hexValue.substr(4, 2);
+		stream >> blue;
+
+		return Color(red, green, blue);
+	}
+
 	Color Color::Random()
 	{
 		HZ_PROFILE_FUNCTION();
@@ -264,6 +305,17 @@ namespace Hazel
 	float* Color::GetValuePtr()
 	{
 		return &r;
+	}
+
+	std::string Color::GetHexValue() const
+	{
+		std::stringstream stream;
+		stream << std::hex << std::uppercase
+			<< std::setfill('0') << std::setw(2) << (int)(r * 255)
+			<< std::setfill('0') << std::setw(2) << (int)(g * 255)
+			<< std::setfill('0') << std::setw(2) << (int)(b * 255);
+
+		return stream.str();
 	}
 
 	Color::operator glm::vec4() const

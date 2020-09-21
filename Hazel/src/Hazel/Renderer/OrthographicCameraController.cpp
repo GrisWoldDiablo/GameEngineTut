@@ -18,7 +18,6 @@ namespace Hazel
 		
 		if (Input::IsKeyPressed(HZ_KEY_W))
 		{
-			
 			_cameraPosition.x += -sin(glm::radians(_cameraRotation)) * _cameraTranslationSpeed * timestep;
 			_cameraPosition.y += cos(glm::radians(_cameraRotation)) * _cameraTranslationSpeed * timestep;
 		}

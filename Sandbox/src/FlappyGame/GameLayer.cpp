@@ -27,13 +27,13 @@ void GameLayer::OnUpdate(Hazel::Timestep timestep)
 	_cameraController.SetPosition({ playerPos.x,playerPos.y,0.0f });
 	_cameraController.OnUpdate(timestep);
 
-	Hazel::RenderCommand::EnableDepthTest();
+	Hazel::RenderCommand::SetDepthMaskReadWrite();
 	Hazel::RenderCommand::SetClearColor({ 0.4f, 0.4f, 0.4f, 1.0f });
 	Hazel::RenderCommand::Clear();
 
 	Hazel::Renderer2D::BeginScene(_cameraController.GetCamera());
 
-	Hazel::RenderCommand::ReadOnlyDepthTest();
+	Hazel::RenderCommand::SetDepthMaskReadOnly();
 
 	_level.OnRender();
 

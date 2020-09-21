@@ -52,7 +52,7 @@
 #	define HZ_ENABLE_ASSERTS  
 #endif // HZ_DEBUG
 
-#ifdef HZ_ENABLE_ASSERTS
+#ifdef HZ_ENABLE_ASSERTS // This is a if function
 #	define HZ_CORE_ASSERT(x, ...) { if(!(x)) { HZ_CORE_LERROR("Assertion Failed: {0}", __VA_ARGS__); HZ_DEBUG_BREAK();} }
 #	define HZ_ASSERT(x, ...) { if(!(x)) { HZ_LERROR("Assertion Failed: {0}", __VA_ARGS__); HZ_DEBUG_BREAK();} }
 #else

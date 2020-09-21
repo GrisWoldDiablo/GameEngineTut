@@ -10,7 +10,7 @@ namespace Hazel
 	OpenGLContext::OpenGLContext(GLFWwindow* windowHandle)
 		:_windowHandle(windowHandle)
 	{
-		HZ_CORE_ASSERT(windowHandle, "Window handle is null!")
+		HZ_CORE_ASSERT(windowHandle, "Window handle is null!");
 	}
 
 	void OpenGLContext::Init()

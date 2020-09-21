@@ -41,19 +41,18 @@ namespace Hazel
 			_sRendererAPI->Clear();
 		}
 
-
-		static void EnableDepthTest()
+		static void SetDepthMaskReadWrite()
 		{
 			HZ_PROFILE_FUNCTION();
 
-			_sRendererAPI->EnableDepthTest();
+			_sRendererAPI->SetDepthMaskReadWrite();
 		}
 
-		static void ReadOnlyDepthTest()
+		static void SetDepthMaskReadOnly()
 		{
 			HZ_PROFILE_FUNCTION();
 
-			_sRendererAPI->SetDepthTestReadOnly();
+			_sRendererAPI->SetDepthMaskReadOnly();
 		}
 		
 	private:

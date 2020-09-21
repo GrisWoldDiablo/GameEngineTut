@@ -17,9 +17,11 @@ namespace Hazel
 		HZ_CORE_LINFO("There is {0} cores on this machine.", std::thread::hardware_concurrency());
 #endif // HZ_DEBUG
 
-		HZ_CORE_ASSERT(!_sInstance, "Application already exist!")
 			// Initialize the singleton.
+		HZ_CORE_ASSERT(!_sInstance, "Application already exist!")
+		{
 			_sInstance = this;
+		}
 
 		_window = Scope<Window>(Window::Create());
 		_window->SetEventCallback(HZ_BIND_EVENT_FN(OnEvent));
@@ -29,11 +31,6 @@ namespace Hazel
 		// Create ImGui and push it to the layer stack as an overlay.
 		_imGuiLayer = new ImGuiLayer();
 		PushOverlay(_imGuiLayer);
-	}
-
-	Application::~Application()
-	{
-		HZ_PROFILE_FUNCTION();
 	}
 
 	void Application::Run()

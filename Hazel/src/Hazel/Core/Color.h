@@ -7,17 +7,17 @@ namespace Hazel
 	class Color final
 	{
 	public:
-		static const Color Black;  // Color(0.0f, 0.0f, 0.0f, 1.0f);
-		static const Color White;  // Color(1.0f, 1.0f, 1.0f, 1.0f);
-		static const Color Clear;  // Color(0.0f, 0.0f, 0.0f, 0.0f);
-		static const Color Red;	   // Color(1.0f, 0.0f, 0.0f, 1.0f);
-		static const Color Green;  // Color(0.0f, 1.0f, 0.0f, 1.0f);
-		static const Color Blue;   // Color(0.0f, 0.0f, 1.0f, 1.0f);
-		static const Color Cyan;   // Color(0.0f, 1.0f, 1.0f, 1.0f);
-		static const Color Gray;   // Color(0.5f, 0.5f, 0.5f, 1.0f);
-		static const Color Grey;   // Color(0.5f, 0.5f, 0.5f, 1.0f);
-		static const Color Magenta;// Color(1.0f, 0.0f, 1.0f, 1.0f);
-		static const Color Yellow; // Color(1.0f, 0.92f, 0.016f, 1.0f);
+		static const Color Black;  // [0x000000] Color(0.0f, 0.0f, 0.0f, 1.0f);
+		static const Color White;  // [0xffffff] Color(1.0f, 1.0f, 1.0f, 1.0f);
+		static const Color Clear;  // [0x000000] Color(0.0f, 0.0f, 0.0f, 0.0f);
+		static const Color Red;	   // [0xff0000] Color(1.0f, 0.0f, 0.0f, 1.0f);
+		static const Color Green;  // [0x00ff00] Color(0.0f, 1.0f, 0.0f, 1.0f);
+		static const Color Blue;   // [0x0000ff] Color(0.0f, 0.0f, 1.0f, 1.0f);
+		static const Color Cyan;   // [0x00ffff] Color(0.0f, 1.0f, 1.0f, 1.0f);
+		static const Color Gray;   // [0x7f7f7f] Color(0.5f, 0.5f, 0.5f, 1.0f);
+		static const Color Grey;   // [0x7f7f7f] Color(0.5f, 0.5f, 0.5f, 1.0f);
+		static const Color Magenta;// [0xff00ff] Color(1.0f, 0.0f, 1.0f, 1.0f);
+		static const Color Yellow; // [0xffea04] Color(1.0f, 0.92f, 0.016f, 1.0f);
 
 		/// <summary>
 		/// Covert from Hue, Saturation, Value/Brightness to Red Green Blue Color with alpha
@@ -83,6 +83,13 @@ namespace Hazel
 		static Color RGBtoGrayscale(const Color& color);
 
 		/// <summary>
+		/// Covert from hex to color
+		/// <para> "FFFFFF" = White </para>
+		/// </summary>
+		/// <param name="color">Hexadecimal value</param>
+		static Color HEXtoRGB(const std::string& hexValue);
+
+		/// <summary>
 		/// Generate a random value for each components.
 		/// </summary>
 		static Color Random();
@@ -122,6 +129,11 @@ namespace Hazel
 		/// Return address of r component.
 		/// </summary>
 		float* GetValuePtr();
+
+		/// <summary>
+		/// Return hexadecimal version of the RGB
+		/// </summary>
+		std::string GetHexValue() const;
 
 	public:
 		float r = 0.0f; // Red
@@ -186,3 +198,31 @@ namespace Hazel
 		bool operator ==(const Color other);
 	};
 }
+
+// Formating  color for log
+template <>
+struct fmt::formatter<Hazel::Color>
+{
+	// Presentation format: 'f' - fixed
+	char presentation = 'f';
+
+	constexpr auto parse(fmt::format_parse_context& ctx)
+	{
+		// Parse the presentation format and store it in the formatter:
+		auto it = ctx.begin(), end = ctx.end();
+		if (it != end && (*it == 'f')) presentation = *it++;
+
+		// Check if reached the end of the range:
+		if (it != end && *it != '}')
+			throw format_error("invalid format");
+
+		// Return an iterator past the end of the parsed range:
+		return it;
+	}
+
+	template <typename FormatContext>
+	auto format(const Hazel::Color& color, FormatContext& ctx)
+	{
+		return format_to(ctx.out(), "[0x{}](r:{:.3f}, g:{:.3f}, b:{:.3f}, a:{:.3f})", color.GetHexValue(), color.r, color.g, color.b, color.a);
+	}
+};
