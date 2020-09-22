@@ -17,6 +17,19 @@ void Sandbox2D::OnAttach()
 	_unwrapTexture = Hazel::Texture2D::Create("assets/textures/unwrap_helper.png");
 	_checkerboardTexture = Hazel::Texture2D::Create("assets/textures/Checkerboard.png");
 	_logoTexture = Hazel::Texture2D::Create("assets/textures/ChernoLogo.png");
+
+	// Init Particle props
+	_particleProps.ColorBegin = Hazel::Color::Random();
+	_particleProps.ColorEnd = Hazel::Color::Random();
+	_particleProps.SizeBegin = 0.5f;
+	_particleProps.SizeVariation = 0.3f;
+	_particleProps.SizeEnd = 0.0f;
+	_particleProps.LifeTime = 1.0f;
+	_particleProps.Velocity = glm::vec2(0.0f);
+	_particleProps.VelocityVaritation = { 3.0f, 3.0f };
+	_particleProps.Position = glm::vec2(0.0f);
+	_particleProps.RotationSpeedVariation = 35.0f;
+
 }
 
 void Sandbox2D::OnDetach()
@@ -45,6 +58,7 @@ void Sandbox2D::OnUpdate(Hazel::Timestep timestep)
 	{
 		HZ_PROFILE_SCOPE("Renderer Prep");
 		// Render
+		Hazel::RenderCommand::SetDepthMaskReadWrite();
 		Hazel::RenderCommand::SetClearColor(_lerpedColor);
 		Hazel::RenderCommand::Clear();
 	}
@@ -102,6 +116,29 @@ void Sandbox2D::OnUpdate(Hazel::Timestep timestep)
 		Hazel::Renderer2D::EndScene();
 	}
 	UpdateSquareList();
+
+	if (Hazel::Input::IsMouseButtonPressed(HZ_MOUSE_BUTTON_LEFT))
+	{
+		auto [x, y] = Hazel::Input::GetMousePosition();
+		auto width = Hazel::Application::Get().GetWindow().GetWidth();
+		auto height = Hazel::Application::Get().GetWindow().GetHeight();
+
+		auto bounds = _cameraController.GetBounds();
+		auto pos = _cameraController.GetCamera().GetPosition();
+		x = (x / width) * bounds.GetWidth() - bounds.GetWidth() * 0.5f;
+		y = bounds.GetHeight() * 0.5f - (y / height) * bounds.GetHeight();
+
+		_particleProps.Position = { x + pos.x, y + pos.y };
+		
+		for (size_t i = 0; i < _particlesAmountPerFrame; i++)
+		{
+			_particleSystem.Emit(_particleProps);
+		}
+	}
+	Hazel::RenderCommand::SetDepthMaskReadOnly();
+	_particleSystem.OnUpdate(timestep);
+	_particleSystem.OnRender(_cameraController.GetCamera());
+
 }
 
 /// <summary>
@@ -195,6 +232,7 @@ void Sandbox2D::OnImGuiRender(Hazel::Timestep timestep)
 	DrawMainGui();
 	DrawSquaresGui();
 	DrawStats(timestep);
+	DrawParticlesGui();
 }
 
 void Sandbox2D::UpdateSquareList()
@@ -352,6 +390,28 @@ void Sandbox2D::DrawStats(Hazel::Timestep timestep)
 	ImGui::Text("Indices: %d", stats.GetTotalIndexCount());
 	auto cycle = (glm::sin(Hazel::Platform::GetTime()) + 1.0f) * 0.5f;
 	ImGui::Text("Time: %f", cycle);
+	ImGui::End();
+}
+
+void Sandbox2D::DrawParticlesGui()
+{
+	auto currentPoolSize = _particlesPoolSize;
+	ImGui::Begin("Particles", nullptr);
+	ImGui::SliderInt("Max Amount Rendered", &_particlesPoolSize, 1, 100000);
+	if (_particlesPoolSize != currentPoolSize)
+	{
+		_particleSystem.SetParticlePoolSize(_particlesPoolSize);
+	}
+	ImGui::SliderInt("Amount Per Frame", &_particlesAmountPerFrame, 1, 500);
+	ImGui::SliderFloat("LifeTime", &_particleProps.LifeTime,0.0f,5.0f);
+	ImGui::Text("Colors");
+	ImGui::ColorEdit4("Begin", _particleProps.ColorBegin.GetValuePtr());
+	ImGui::ColorEdit4("End", _particleProps.ColorEnd.GetValuePtr());
+	ImGui::Text("Size");
+	ImGui::SliderFloat("Begin", &_particleProps.SizeBegin, 0.0f, 10.0f);
+	ImGui::SliderFloat("End", &_particleProps.SizeEnd, 0.0f, 10.0f);
+	ImGui::SliderFloat2("Velocity Variation", glm::value_ptr(_particleProps.VelocityVaritation), 0.0f, 10.0f);
+	ImGui::SliderFloat("Rotation Speed Variation", &_particleProps.RotationSpeedVariation, 0.0f, 360.0f);
 	ImGui::End();
 }
 

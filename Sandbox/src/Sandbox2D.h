@@ -1,6 +1,8 @@
 #pragma once
 #include "Hazel.h"
 
+#include "ParticleSystem.h"
+
 class Sandbox2D final : public Hazel::Layer
 {
 public:
@@ -22,6 +24,7 @@ private:
 	void DrawMainGui();
 	void DrawSquaresGui();
 	void DrawStats(Hazel::Timestep timestep);
+	void DrawParticlesGui();
 	
 	void CreateSquares();
 	void CreateSquare(int amount);
@@ -36,7 +39,6 @@ private:
 				return left->Position.z < right->Position.z;
 			});
 	}
-
 private:
 	Hazel::OrthographicCameraController _cameraController;
 
@@ -77,4 +79,10 @@ private:
 	std::vector<std::thread> _squareCreationThreads = std::vector<std::thread>();
 	bool _shouldCreateSquares = false;
 	bool _isCreatingSquares = false;
+
+	// Particle
+	ParticleSystem _particleSystem;
+	ParticleProps _particleProps;
+	int _particlesAmountPerFrame = 50;
+	int _particlesPoolSize = 100000;
 };

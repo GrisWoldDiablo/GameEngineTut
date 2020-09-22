@@ -7,10 +7,22 @@
 
 namespace Hazel
 {
+
+	struct OrthographicCameraBounds
+	{
+		float Left;
+		float Right;
+		float Bottom;
+		float Top;
+
+		float GetWidth() { return Right - Left; }
+		float GetHeight() { return Top - Bottom; }
+	};
+
 	class OrthographicCameraController
 	{
 	public:
-		OrthographicCameraController(float aspectRation, bool rotation = false);
+		OrthographicCameraController(float aspectRatio, bool rotation = false);
 		~OrthographicCameraController() = default;
 
 		virtual void OnUpdate(Timestep timestep);
@@ -18,6 +30,7 @@ namespace Hazel
 
 		OrthographicCamera& GetCamera() { return _camera; }
 		const OrthographicCamera& GetCamera() const { return _camera; }
+		const OrthographicCameraBounds& GetBounds() const { return _bounds; }
 
 		float GetZoomLevel() { return _zoomLevel; }
 		void SetZoomLevel(float value);
@@ -39,9 +52,11 @@ namespace Hazel
 		void Reset();
 
 	private:
-		float _aspectRation;
+		float _aspectRatio;
 		float _zoomLevel = 1.0f;
+		OrthographicCameraBounds _bounds;
 		OrthographicCamera _camera;
+
 		bool _rotation;
 
 		float _zoomLevelSpeed = 0.25f;

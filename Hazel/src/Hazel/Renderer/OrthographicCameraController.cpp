@@ -7,8 +7,8 @@
 namespace Hazel
 {
 
-	OrthographicCameraController::OrthographicCameraController(float aspectRation, bool rotation)
-		:_aspectRation(aspectRation), _camera(-_aspectRation * _zoomLevel, _aspectRation* _zoomLevel, -_zoomLevel, _zoomLevel), _rotation(rotation)
+	OrthographicCameraController::OrthographicCameraController(float aspectRatio, bool rotation)
+		:_aspectRatio(aspectRatio), _bounds({ -_aspectRatio * _zoomLevel, _aspectRatio * _zoomLevel, -_zoomLevel, _zoomLevel }), _camera(_bounds.Left,_bounds.Right,_bounds.Bottom,_bounds.Top), _rotation(rotation)
 	{
 	}
 
@@ -84,7 +84,8 @@ namespace Hazel
 		
 		_zoomLevel = level;
 		_zoomLevel = std::max(_zoomLevel, _zoomLevelMinimum);
-		_camera.SetProjection(-_aspectRation * _zoomLevel, _aspectRation * _zoomLevel, -_zoomLevel, _zoomLevel);
+		_bounds = { -_aspectRatio * _zoomLevel, _aspectRatio * _zoomLevel, -_zoomLevel, _zoomLevel };
+		_camera.SetProjection(_bounds.Left, _bounds.Right, _bounds.Bottom, _bounds.Top);
 
 		// Slow camera as you zoom in and speed it up as you zoom out
 		_cameraTranslationSpeed = _zoomLevel;
@@ -121,8 +122,9 @@ namespace Hazel
 	{
 		HZ_PROFILE_FUNCTION();
 		
-		_aspectRation = (float)event.GetWidth() / (float)event.GetHeight();
-		_camera.SetProjection(-_aspectRation * _zoomLevel, _aspectRation * _zoomLevel, -_zoomLevel, _zoomLevel);
+		_aspectRatio = (float)event.GetWidth() / (float)event.GetHeight();
+		_bounds = { -_aspectRatio * _zoomLevel, _aspectRatio * _zoomLevel, -_zoomLevel, _zoomLevel };
+		_camera.SetProjection(_bounds.Left, _bounds.Right, _bounds.Bottom, _bounds.Top);
 		return false;
 	}
 
