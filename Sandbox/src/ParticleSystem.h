@@ -48,4 +48,3 @@ private:
 	std::vector<Particle> _particlePool;
 	uint32_t _poolIndex;
 };
-

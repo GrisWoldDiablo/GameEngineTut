@@ -83,6 +83,7 @@ private:
 	// Particle
 	ParticleSystem _particleSystem;
 	ParticleProps _particleProps;
+	Hazel::InstrumentationTimer _updateTimer;
 	int _particlesAmountPerFrame = 50;
 	int _particlesPoolSize = 100000;
 };

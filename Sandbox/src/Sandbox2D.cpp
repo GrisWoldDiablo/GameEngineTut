@@ -40,6 +40,7 @@ void Sandbox2D::OnDetach()
 void Sandbox2D::OnUpdate(Hazel::Timestep timestep)
 {
 	HZ_PROFILE_FUNCTION();
+	_updateTimer.Start();
 
 	_cameraController.OnUpdate(timestep);
 
@@ -124,11 +125,19 @@ void Sandbox2D::OnUpdate(Hazel::Timestep timestep)
 		auto height = Hazel::Application::Get().GetWindow().GetHeight();
 
 		auto bounds = _cameraController.GetBounds();
-		auto pos = _cameraController.GetCamera().GetPosition();
+
 		x = (x / width) * bounds.GetWidth() - bounds.GetWidth() * 0.5f;
 		y = bounds.GetHeight() * 0.5f - (y / height) * bounds.GetHeight();
 
-		_particleProps.Position = { x + pos.x, y + pos.y };
+		auto rotation = _cameraController.GetRotation();
+		auto rad = glm::radians(rotation);
+		auto cos = glm::cos(rad);
+		auto sin = glm::sin(rad);
+		auto xPrime = x * cos - y * sin;
+		auto yPrime = x * sin + y * cos;
+
+		auto pos = _cameraController.GetPosition();
+		_particleProps.Position = { xPrime + pos.x, yPrime + pos.y };
 		
 		for (size_t i = 0; i < _particlesAmountPerFrame; i++)
 		{
@@ -138,7 +147,8 @@ void Sandbox2D::OnUpdate(Hazel::Timestep timestep)
 	Hazel::RenderCommand::SetDepthMaskReadOnly();
 	_particleSystem.OnUpdate(timestep);
 	_particleSystem.OnRender(_cameraController.GetCamera());
-
+	
+	_updateTimer.Stop();
 }
 
 /// <summary>
@@ -389,7 +399,7 @@ void Sandbox2D::DrawStats(Hazel::Timestep timestep)
 	ImGui::Text("Vertices: %d", stats.GetTotalVertexCount());
 	ImGui::Text("Indices: %d", stats.GetTotalIndexCount());
 	auto cycle = (glm::sin(Hazel::Platform::GetTime()) + 1.0f) * 0.5f;
-	ImGui::Text("Time: %f", cycle);
+	ImGui::Text("Ms per frame: %d", _updateTimer.GetProfileResult().ElapsedTime.count() / 1000);
 	ImGui::End();
 }
 
