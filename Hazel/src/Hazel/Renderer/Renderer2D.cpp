@@ -107,10 +107,21 @@ namespace Hazel
 		sData.QuadVertexPositions[2] = { 0.5f, 0.5f, 0.0f, 1.0f };
 		sData.QuadVertexPositions[3] = { -0.5f, 0.5f, 0.0f, 1.0f };
 
-		sData.QuadTextureCoordinates[0] = { 0.0f, 0.0f };
-		sData.QuadTextureCoordinates[1] = { 1.0f, 0.0f };
-		sData.QuadTextureCoordinates[2] = { 1.0f, 1.0f };
-		sData.QuadTextureCoordinates[3] = { 0.0f, 1.0f };
+		constexpr float x = 7.0f;
+		constexpr float y = 6.0f;
+		constexpr float sheetWidth = 2560.0f;
+		constexpr float sheetHeight = 1664.0f;
+		constexpr float spriteWidth = 128.0f;
+		constexpr float spriteHeight = 128.0f;
+		sData.QuadTextureCoordinates[0] = { x * spriteWidth / sheetWidth, y * spriteHeight / sheetHeight };
+		sData.QuadTextureCoordinates[1] = { (x + 1) * spriteWidth / sheetWidth, y * spriteHeight / sheetHeight };
+		sData.QuadTextureCoordinates[2] = { (x + 1) * spriteWidth / sheetWidth, (y + 1) * spriteHeight / sheetHeight };
+		sData.QuadTextureCoordinates[3] = { x * spriteWidth / sheetWidth, (y + 1) * spriteHeight / sheetHeight };
+
+		//sData.QuadTextureCoordinates[0] = { 0.0f, 0.0f };
+		//sData.QuadTextureCoordinates[1] = { 1.0f, 0.0f };
+		//sData.QuadTextureCoordinates[2] = { 1.0f, 1.0f };
+		//sData.QuadTextureCoordinates[3] = { 0.0f, 1.0f };
 	}
 
 	void Renderer2D::Shutdown()
@@ -144,7 +155,7 @@ namespace Hazel
 	void Renderer2D::Reset()
 	{
 		HZ_PROFILE_FUNCTION();
-		
+
 		sData.QuadIndexCount = 0;
 		sData.QuadVertexBufferPtr = sData.QuadVertexBufferBase;
 
@@ -285,7 +296,7 @@ namespace Hazel
 	void Renderer2D::FlushAndReset()
 	{
 		HZ_PROFILE_FUNCTION();
-		
+
 		EndScene();
 		Reset();
 	}
@@ -293,7 +304,7 @@ namespace Hazel
 	void Renderer2D::UpdateData(const glm::mat4& transform, const Hazel::Color& color, const glm::vec2& tilingFactor, float textureIndex)
 	{
 		HZ_PROFILE_FUNCTION();
-	
+
 		if (sData.QuadIndexCount >= Renderer2DData::MaxIndices)
 		{
 			FlushAndReset();

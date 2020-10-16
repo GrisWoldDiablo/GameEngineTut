@@ -17,6 +17,7 @@ void Sandbox2D::OnAttach()
 	_unwrapTexture = Hazel::Texture2D::Create("assets/textures/unwrap_helper.png");
 	_checkerboardTexture = Hazel::Texture2D::Create("assets/textures/Checkerboard.png");
 	_logoTexture = Hazel::Texture2D::Create("assets/textures/ChernoLogo.png");
+	_spriteSheet = Hazel::Texture2D::Create("assets/game/textures/RPGpack_sheet_2X.png");
 
 	// Init Particle props
 	_particleProps.ColorBegin = Hazel::Color::Random();
@@ -50,19 +51,24 @@ void Sandbox2D::OnUpdate(Hazel::Timestep timestep)
 	SafetyShutdownCheck();
 #endif // !HZ_PROFILE
 
+#if 0
 	// Cycle Lerp background color
 	_lerpValueSin = (glm::sin(Hazel::Platform::GetTime() * _lerpSpeed) + 1.0f) * 0.5f;
 	_lerpValueCos = (glm::cos(Hazel::Platform::GetTime() * _lerpSpeed) + 1.0f) * 0.5f;
 	_lerpedColor = Hazel::Color::LerpUnclamped(_clearColorA, _clearColorB, _lerpValueSin);
 
+#endif // 0
+
 	Hazel::Renderer2D::ResetStats();
 	{
 		HZ_PROFILE_SCOPE("Renderer Prep");
 		// Render
-		Hazel::RenderCommand::SetDepthMaskReadWrite();
-		Hazel::RenderCommand::SetClearColor(_lerpedColor);
+		//Hazel::RenderCommand::SetDepthMaskReadWrite();
+		Hazel::RenderCommand::SetClearColor(_clearColorB);
 		Hazel::RenderCommand::Clear();
 	}
+
+#if 0
 
 	{
 		HZ_PROFILE_SCOPE("Renderer Draw");
@@ -115,8 +121,13 @@ void Sandbox2D::OnUpdate(Hazel::Timestep timestep)
 		Hazel::Renderer2D::DrawQuad({ -5.0f, 5.0f, 1.0f }, { 5.0f, 5.0f }, _logoTexture);
 
 		Hazel::Renderer2D::EndScene();
+
+
+
 	}
 	UpdateSquareList();
+
+#endif // 0
 
 	if (Hazel::Input::IsMouseButtonPressed(HZ_MOUSE_BUTTON_LEFT))
 	{
@@ -144,10 +155,15 @@ void Sandbox2D::OnUpdate(Hazel::Timestep timestep)
 			_particleSystem.Emit(_particleProps);
 		}
 	}
-	Hazel::RenderCommand::SetDepthMaskReadOnly();
+
+	//Hazel::RenderCommand::SetDepthMaskReadOnly();
 	_particleSystem.OnUpdate(timestep);
 	_particleSystem.OnRender(_cameraController.GetCamera());
 	
+	Hazel::Renderer2D::BeginScene(_cameraController.GetCamera());
+	Hazel::Renderer2D::DrawQuad({ 0.0f, 0.0f, 1.0f }, { 1.0f, 1.0f }, _spriteSheet);
+	Hazel::Renderer2D::EndScene();
+
 	_updateTimer.Stop();
 }
 
