@@ -30,7 +30,9 @@ private:
 	Hazel::Color _clearColor = { 0.13f, 0.13f, 0.13f, 1.0f };
 	
 	Hazel::Ref<Hazel::Texture2D> _spriteSheet;
-	Hazel::Ref<Hazel::SubTexture2D> _stairsTexture;
+	Hazel::Ref<Hazel::SubTexture2D> _fenceTexture;
+	Hazel::Ref<Hazel::SubTexture2D> _fencePick;
+	Hazel::Ref<Hazel::SubTexture2D> _fenceVert;
 	Hazel::Ref<Hazel::SubTexture2D> _barrelTexture;
 	Hazel::Ref<Hazel::SubTexture2D> _treeTexture;
 
@@ -46,4 +48,9 @@ private:
 	Hazel::InstrumentationTimer _updateTimer;
 	int _particlesAmountPerFrame = 50;
 	int _particlesPoolSize = 100000;
+
+	uint32_t _mapWidth;
+	uint32_t _mapHeight;
+
+	std::unordered_map<char, Hazel::Ref<Hazel::SubTexture2D>> _textureMap;
 };

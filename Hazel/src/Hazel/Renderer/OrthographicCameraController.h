@@ -49,6 +49,8 @@ namespace Hazel
 		bool OnMouseScrolled(MouseScrolledEvent& event);
 		bool OnWindowResized(WindowResizeEvent& event);
 
+		void CalculateView();
+
 		void Reset();
 
 	private:
