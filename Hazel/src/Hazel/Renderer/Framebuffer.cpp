@@ -6,7 +6,6 @@
 
 namespace Hazel
 {
-	
 	Ref<Framebuffer> Framebuffer::Create(const FramebufferSpecification& spec)
 	{
 		switch (Renderer::GetAPI())

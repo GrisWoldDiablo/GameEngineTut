@@ -9,7 +9,7 @@ namespace Hazel
 	// Static singleton access
 	Application* Application::_sInstance = nullptr;
 
-	Application::Application()
+	Application::Application(std::string name)
 	{
 		HZ_PROFILE_FUNCTION();
 
@@ -23,7 +23,7 @@ namespace Hazel
 			_sInstance = this;
 		}
 
-		_window = Scope<Window>(Window::Create());
+		_window = Scope<Window>(Window::Create(WindowProps(std::move(name))));
 		_window->SetEventCallback(HZ_BIND_EVENT_FN(OnEvent));
 
 		Renderer::Init();

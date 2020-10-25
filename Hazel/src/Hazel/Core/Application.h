@@ -19,7 +19,7 @@ namespace Hazel
 	class Application
 	{
 	public:
-		Application();
+		Application(std::string name = "Hazel App");
 		virtual ~Application() = default;
 
 		void Stop();

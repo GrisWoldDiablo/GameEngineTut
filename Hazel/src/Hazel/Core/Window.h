@@ -14,7 +14,7 @@ namespace Hazel
 	public:
 		std::string Title;
 		uint32_t Width;
-		uint32_t  Height;
+		uint32_t Height;
 
 		WindowProps(std::string title = "Hazel Engine",
 		            uint32_t width = 1280,
@@ -32,8 +32,8 @@ namespace Hazel
 
 		virtual void OnUpdate() = 0;
 
-		virtual unsigned int GetWidth() const = 0;
-		virtual unsigned int GetHeight() const = 0;
+		virtual uint32_t GetWidth() const = 0;
+		virtual uint32_t GetHeight() const = 0;
 
 		// Window attributes
 		virtual void SetEventCallback(const EventCallbackFn& callback) = 0;
