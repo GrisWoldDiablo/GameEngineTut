@@ -13,11 +13,28 @@ namespace Hazel
 
 	OpenGLFramebuffer::~OpenGLFramebuffer()
 	{
+		Clean();
+	}
+
+	void OpenGLFramebuffer::Clean()
+	{
 		glDeleteFramebuffers(1, &_rendererID);
+		glDeleteTextures(1, &_colorAttachment);
+		glDeleteTextures(1, &_depthAttachment);
 	}
 
 	void OpenGLFramebuffer::Invalidate()
 	{
+		if (_rendererID)
+		{
+			Clean();
+		}
+
+		if (_specification.Width <= 0 || _specification.Height <= 0)
+		{
+			return;
+		}
+
 		glCreateFramebuffers(1, &_rendererID);
 		glBindFramebuffer(GL_FRAMEBUFFER, _rendererID);
 
@@ -42,10 +59,19 @@ namespace Hazel
 	void OpenGLFramebuffer::Bind()
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, _rendererID);
+		glViewport(0, 0, _specification.Width, _specification.Height);
 	}
 
 	void OpenGLFramebuffer::Unbind()
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	}
+
+	void OpenGLFramebuffer::Resize(uint32_t width, uint32_t height)
+	{
+		_specification.Width = width;
+		_specification.Height= height;
+		
+		Invalidate();
 	}
 }

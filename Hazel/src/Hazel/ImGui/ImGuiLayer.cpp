@@ -17,8 +17,6 @@ namespace Hazel
 	{
 	}
 
-	ImGuiLayer::~ImGuiLayer() = default;
-
 	void ImGuiLayer::OnAttach()
 	{
 		HZ_PROFILE_FUNCTION();
@@ -66,8 +64,10 @@ namespace Hazel
 	void ImGuiLayer::OnEvent(Event& event)
 	{
 		ImGuiIO& io = ImGui::GetIO();
-		event.Handled |= event.IsInCategory(EventCategoryMouse) & io.WantCaptureMouse;
 		event.Handled |= event.IsInCategory(EventCategoryKeyboard) & io.WantCaptureKeyboard;
+
+		// Temp disable
+		//event.Handled |= event.IsInCategory(EventCategoryMouse) & io.WantCaptureMouse;
 	}
 
 	void ImGuiLayer::Begin()

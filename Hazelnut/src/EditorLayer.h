@@ -21,7 +21,7 @@ namespace Hazel
 
 	private:
 		void CalculateFPS(Timestep timestep);
-		void DrawSceneViewport();
+		void DrawViewport();
 		void DrawStats(Timestep timestep);
 
 	private:
@@ -31,7 +31,9 @@ namespace Hazel
 
 		Ref<Framebuffer> _framebuffer;
 
-		Ref<Texture2D> _spriteSheet;
+		Ref<Texture2D> _unwrapTexture;
+
+		glm::vec2 _viewportSize = { 0,0 };
 
 		// FPS
 		int _frameCount = 0;

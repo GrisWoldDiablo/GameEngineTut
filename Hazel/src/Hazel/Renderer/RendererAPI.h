@@ -16,6 +16,8 @@ namespace Hazel
 		};
 
 	public:
+		virtual ~RendererAPI() = default;
+
 		virtual void Init() = 0;
 
 		// #TODO: Temporary, will need to have render queue with sorting.

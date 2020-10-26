@@ -47,6 +47,8 @@ namespace Hazel
 		friend class EventDispatcher;
 
 	public:
+		virtual ~Event() = default;
+		
 		bool Handled = false;
 
 		virtual EventType GetEventType() const  = 0;
@@ -58,7 +60,6 @@ namespace Hazel
 		{
 			return GetCategoryFlags() & category;
 		}
-		
 	};
 
 	/// <summary>
@@ -69,7 +70,9 @@ namespace Hazel
 		template<typename T>
 		using EventFn = std::function<bool(T&)>;
 	public:
-		EventDispatcher(Event& event)
+		virtual ~EventDispatcher() = default;
+		
+		EventDispatcher(Event & event)
 			: _event(event) {}
 
 		template<typename T>

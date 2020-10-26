@@ -15,11 +15,9 @@ namespace Hazel
 	{
 		HZ_PROFILE_FUNCTION();
 
-		_spriteSheet = Texture2D::Create("assets/textures/unwrap_helper.png");
-		FramebufferSpecification fbSpec;
-		fbSpec.Width = 1280;
-		fbSpec.Height = 720;
-		_framebuffer = Framebuffer::Create(fbSpec);
+		_unwrapTexture = Texture2D::Create("assets/textures/unwrap_helper.png");
+
+		_framebuffer = Framebuffer::Create({ 1280,720 });
 	}
 
 	void EditorLayer::OnDetach()
@@ -52,7 +50,7 @@ namespace Hazel
 
 		Renderer2D::BeginScene(_cameraController.GetCamera());
 
-		Renderer2D::DrawQuad({ 0.0f,0.0f }, { 5.0f,5.0f }, _spriteSheet);
+		Renderer2D::DrawQuad({ 0.0f,0.0f }, { 5.0f,5.0f }, _unwrapTexture);
 
 		Renderer2D::EndScene();
 
@@ -148,30 +146,41 @@ namespace Hazel
 			ImGui::EndMenuBar();
 		}
 
-
-		DrawSceneViewport();
 		DrawStats(timestep);
+		DrawViewport();
 
 		ImGui::End();
 	}
 
-	void EditorLayer::DrawSceneViewport()
+	void EditorLayer::DrawViewport()
 	{
 		HZ_PROFILE_FUNCTION();
-		ImGui::Begin("Scene", nullptr);
-		ImGui::ColorEdit4("Back Color", _clearColor.GetValuePtr());
+
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0,0 });
+
+		ImGui::Begin("Viewport");
+
+		auto viewportPanelSize = ImGui::GetContentRegionAvail();
+		if (_viewportSize != (*(glm::vec2*) & viewportPanelSize))
+		{
+			_framebuffer->Resize((uint32_t)viewportPanelSize.x, (uint32_t)viewportPanelSize.y);
+			_viewportSize = { viewportPanelSize.x,viewportPanelSize.y };
+			_cameraController.Resize(viewportPanelSize.x, viewportPanelSize.y);
+		}
 
 		auto textureID = _framebuffer->GetColorAttachmentRenderID();
-		ImGui::Image((void*)textureID, ImVec2{ 1280.0f, 720.0f }, ImVec2{ 0,1 }, ImVec2{ 1,0 });
+		ImGui::Image((void*)textureID, { _viewportSize.x,_viewportSize.y }, ImVec2{ 0,1 }, ImVec2{ 1,0 });
 
 		ImGui::End();
+
+		ImGui::PopStyleVar();
 	}
 
 	void EditorLayer::DrawStats(Timestep timestep)
 	{
 		auto stats = Renderer2D::GetStats();
 
-		ImGui::Begin("Stats", nullptr);
+		ImGui::Begin("Stats");
 		ImGui::Text("Renderer 2D Stats:");
 		ImGui::Text("Draw Calls: %d", stats.DrawCalls);
 		ImGui::Text("Quad Count: %d", stats.QuadCount);
@@ -185,7 +194,11 @@ namespace Hazel
 
 	void EditorLayer::OnEvent(Event& event)
 	{
-		_cameraController.OnEvent(event);
+		// #HACK to remove. 
+		if (event.GetEventType() != EventType::WindowResize)
+		{
+			_cameraController.OnEvent(event);
+		}
 	}
 
 	void EditorLayer::CalculateFPS(Timestep timestep)
