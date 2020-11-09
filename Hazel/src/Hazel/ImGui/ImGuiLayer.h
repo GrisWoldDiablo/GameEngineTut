@@ -16,5 +16,10 @@ namespace Hazel
 
 		void Begin(); // Start a new frame.
 		void End(); // Send the new frame
+
+		void BlockEvents(bool block) { _isBlockingEvents = block; }
+
+	private:
+		bool _isBlockingEvents = true;
 	};
 }

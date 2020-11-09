@@ -35,6 +35,9 @@ namespace Hazel
 
 		glm::vec2 _viewportSize = { 0,0 };
 
+		bool _isViewportFocused = false;
+		bool _isViewportHovered = false;
+
 		// FPS
 		int _frameCount = 0;
 		int _currentFPS = 60;
@@ -42,5 +45,4 @@ namespace Hazel
 		int _lowFrames = 0;
 		InstrumentationTimer _updateTimer;
 	};
-
 }

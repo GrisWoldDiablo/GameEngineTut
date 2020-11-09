@@ -63,11 +63,12 @@ namespace Hazel
 
 	void ImGuiLayer::OnEvent(Event& event)
 	{
-		ImGuiIO& io = ImGui::GetIO();
-		event.Handled |= event.IsInCategory(EventCategoryKeyboard) & io.WantCaptureKeyboard;
-
-		// Temp disable
-		//event.Handled |= event.IsInCategory(EventCategoryMouse) & io.WantCaptureMouse;
+		if (_isBlockingEvents)
+		{
+			ImGuiIO& io = ImGui::GetIO();
+			event.Handled |= event.IsInCategory(EventCategoryKeyboard) & io.WantCaptureKeyboard;
+			event.Handled |= event.IsInCategory(EventCategoryMouse) & io.WantCaptureMouse;
+		}
 	}
 
 	void ImGuiLayer::Begin()

@@ -30,7 +30,18 @@ namespace Hazel
 		HZ_PROFILE_FUNCTION();
 		_updateTimer.Start();
 
-		_cameraController.OnUpdate(timestep);
+		auto frameBufferSpec = _framebuffer->GetSpecification();
+		if (_viewportSize.x > 0.0f && _viewportSize.y > 0.0f &&
+			(frameBufferSpec.Width != _viewportSize.x || frameBufferSpec.Height != _viewportSize.y))
+		{
+			_framebuffer->Resize((uint32_t)_viewportSize.x, (uint32_t)_viewportSize.y);
+			_cameraController.Resize(_viewportSize.x, _viewportSize.y);
+		}
+
+		if (_isViewportFocused)
+		{
+			_cameraController.OnUpdate(timestep);
+		}
 
 		CalculateFPS(timestep);
 
@@ -160,13 +171,12 @@ namespace Hazel
 
 		ImGui::Begin("Viewport");
 
+		_isViewportFocused = ImGui::IsWindowFocused();
+		_isViewportHovered = ImGui::IsWindowHovered();
+		Application::Get().GetImGuiLayer()->BlockEvents(!_isViewportFocused || !_isViewportHovered);
+
 		auto viewportPanelSize = ImGui::GetContentRegionAvail();
-		if (_viewportSize != (*(glm::vec2*) & viewportPanelSize))
-		{
-			_framebuffer->Resize((uint32_t)viewportPanelSize.x, (uint32_t)viewportPanelSize.y);
-			_viewportSize = { viewportPanelSize.x,viewportPanelSize.y };
-			_cameraController.Resize(viewportPanelSize.x, viewportPanelSize.y);
-		}
+		_viewportSize = { viewportPanelSize.x,viewportPanelSize.y };
 
 		auto textureID = _framebuffer->GetColorAttachmentRenderID();
 		ImGui::Image((void*)textureID, { _viewportSize.x,_viewportSize.y }, ImVec2{ 0,1 }, ImVec2{ 1,0 });

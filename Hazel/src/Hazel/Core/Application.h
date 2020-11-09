@@ -28,6 +28,8 @@ namespace Hazel
 		void PushLayer(Layer* layer);
 		void PushOverlay(Layer* overlay);
 
+		ImGuiLayer* GetImGuiLayer() { return _imGuiLayer; }
+
 		Window& GetWindow() { return *_window; }
 		// Get the Singleton
 		static Application& Get() { return *_sInstance; }
@@ -44,7 +46,7 @@ namespace Hazel
 		bool _running = true;
 		bool _minimized = false;
 		float _lastFrameTime = 0.0f;
-		
+
 	private:
 		// Singleton related.
 		static Application* _sInstance;
