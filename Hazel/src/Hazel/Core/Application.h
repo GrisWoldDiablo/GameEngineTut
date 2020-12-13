@@ -34,8 +34,8 @@ namespace Hazel
 		// Get the Singleton
 		static Application& Get() { return *_sInstance; }
 
-	private:
 		void Run();
+	private:
 		bool OnWindowClose(WindowCloseEvent& event);
 		bool OnWindowResize(WindowResizeEvent& event);
 

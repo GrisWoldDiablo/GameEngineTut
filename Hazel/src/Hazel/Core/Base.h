@@ -14,10 +14,10 @@
 #	endif
 #elif defined(__APPLE__) || defined(__MACH__)
 #	include <TargetConditionals.h>
-/* TARGET_OS_MAC exists on all the platforms
- * so we must check all of them (in this order)
- * to ensure that we're running on MAC
- * and not some other Apple platform */
+	/* TARGET_OS_MAC exists on all the platforms
+	 * so we must check all of them (in this order)
+	 * to ensure that we're running on MAC
+	 * and not some other Apple platform */
 #	if TARGET_IPHONE_SIMULATOR == 1
 #		error "IOS simulator is not supported!"
 #	elif TARGET_OS_IPHONE == 1
@@ -52,6 +52,7 @@
 #	define HZ_ENABLE_ASSERTS  
 #endif // HZ_DEBUG
 
+// TODO: Make no arguments version of this macro.
 #ifdef HZ_ENABLE_ASSERTS // This is a if function
 #	define HZ_CORE_ASSERT(x, ...) { if(!(x)) { HZ_CORE_LERROR("Assertion Failed: {0}", __VA_ARGS__); HZ_DEBUG_BREAK();} }
 #	define HZ_ASSERT(x, ...) { if(!(x)) { HZ_LERROR("Assertion Failed: {0}", __VA_ARGS__); HZ_DEBUG_BREAK();} }

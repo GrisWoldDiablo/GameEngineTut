@@ -18,10 +18,14 @@ namespace Hazel
 		static void Init();
 		static std::shared_ptr<spdlog::logger>& GetCoreLogger() { return _sCoreLogger; }
 		static std::shared_ptr<spdlog::logger>& GetClientLogger() { return _sClientLogger; }
+		static std::string GetOSSCore() { return _sOSSCore.str(); }
+		static std::string GetOSSClient() { return _sOSSClient.str(); }
 
 	private:
 		static std::shared_ptr<spdlog::logger> _sCoreLogger;
 		static std::shared_ptr<spdlog::logger> _sClientLogger;
+		static std::ostringstream _sOSSCore;
+		static std::ostringstream _sOSSClient;
 	};
 }
 
