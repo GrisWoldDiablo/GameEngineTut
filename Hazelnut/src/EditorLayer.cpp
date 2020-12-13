@@ -65,10 +65,6 @@ namespace Hazel
 
 		Renderer2D::EndScene();
 
-		if (Input::IsMouseButtonPressed(MouseCode::ButtonLeft))
-		{
-			HZ_LTRACE("Left Button {0},{1}", Input::GetMouseX(), Input::GetMouseY());
-		}
 		_framebuffer->Unbind();
 		_updateTimer.Stop();
 	}
@@ -103,7 +99,7 @@ namespace Hazel
 	void EditorLayer::OnImGuiRender(Timestep timestep)
 	{
 		HZ_PROFILE_FUNCTION();
-		ImGui::ShowDemoWindow(nullptr);
+		//ImGui::ShowDemoWindow(nullptr);
 
 		static bool dockSpaceOpen = true;
 		static bool opt_fullscreen_persistant = true;
@@ -162,7 +158,6 @@ namespace Hazel
 
 		DrawStats(timestep);
 		DrawViewport();
-		DrawConsole();
 
 		ImGui::End();
 	}
@@ -202,31 +197,6 @@ namespace Hazel
 		ImGui::Text("Indices: %d", stats.GetTotalIndexCount());
 		auto cycle = (glm::sin(Platform::GetTime()) + 1.0f) * 0.5f;
 		ImGui::Text("Ms per frame: %d", _updateTimer.GetProfileResult().ElapsedTime.count() / 1000);
-
-		ImGui::End();
-	}
-
-	void EditorLayer::DrawConsole()
-	{
-		ImGui::Begin("Console");
-
-		auto content = ImGui::GetContentRegionAvail();
-		ImGui::BeginChild("Core", ImVec2(content.x, content.y / 2.0f));
-		{
-			ImGui::TextUnformatted(Log::GetOSSCore()._Unchecked_begin(), Log::GetOSSCore()._Unchecked_end());
-			ImGui::SetScrollHereY(1.0f);
-			ImGui::EndChild();
-		}
-
-		ImGui::Separator();
-
-		ImGui::BeginChild("Client");
-		{
-
-			ImGui::TextUnformatted(Log::GetOSSClient()._Unchecked_begin(), Log::GetOSSClient()._Unchecked_end());
-			ImGui::SetScrollHereY(1.0f);
-			ImGui::EndChild();
-		}
 
 		ImGui::End();
 	}

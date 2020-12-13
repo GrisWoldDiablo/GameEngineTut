@@ -23,7 +23,6 @@ namespace Hazel
 		void CalculateFPS(Timestep timestep);
 		void DrawViewport();
 		void DrawStats(Timestep timestep);
-		void DrawConsole();
 
 	private:
 		OrthographicCameraController _cameraController;
