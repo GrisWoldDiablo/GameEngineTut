@@ -23,6 +23,7 @@ namespace Hazel
 		void CalculateFPS(Timestep timestep);
 		void DrawViewport();
 		void DrawStats(Timestep timestep);
+		void DrawConfig();
 
 	private:
 		OrthographicCameraController _cameraController;
@@ -30,13 +31,15 @@ namespace Hazel
 		Color _clearColor = { 0.13f, 0.13f, 0.13f, 1.0f };
 
 		Ref<Framebuffer> _framebuffer;
-
 		Ref<Texture2D> _unwrapTexture;
 
 		glm::vec2 _viewportSize = { 0,0 };
 
 		bool _isViewportFocused = false;
 		bool _isViewportHovered = false;
+
+		entt::entity _squareEntity;
+		Ref<Scene> _activeScene;
 
 		// FPS
 		int _frameCount = 0;

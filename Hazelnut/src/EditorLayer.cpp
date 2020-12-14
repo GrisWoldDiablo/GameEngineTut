@@ -18,6 +18,11 @@ namespace Hazel
 		_unwrapTexture = Texture2D::Create("assets/textures/unwrap_helper.png");
 
 		_framebuffer = Framebuffer::Create({ 1280,720 });
+
+		_activeScene = CreateRef<Scene>();
+		_squareEntity = _activeScene->CreateEntity();
+		_activeScene->Reg().emplace<TransformComponent>(_squareEntity);
+		_activeScene->Reg().emplace<SpriteRendererComponent>(_squareEntity, Color::Green);
 	}
 
 	void EditorLayer::OnDetach()
@@ -50,22 +55,20 @@ namespace Hazel
 #endif // !HZ_PROFILE
 
 		Renderer2D::ResetStats();
-
-		{
-			HZ_PROFILE_SCOPE("Renderer Prep");
-			_framebuffer->Bind();
-			// Render
-			RenderCommand::SetClearColor(_clearColor);
-			RenderCommand::Clear();
-		}
+		// Render
+		_framebuffer->Bind();
+		RenderCommand::SetClearColor(_clearColor);
+		RenderCommand::Clear();
 
 		Renderer2D::BeginScene(_cameraController.GetCamera());
 
-		Renderer2D::DrawQuad({ 0.0f,0.0f }, { 5.0f,5.0f }, _unwrapTexture);
+		// Update Scene
+		_activeScene->OnUpdate(timestep);
 
 		Renderer2D::EndScene();
 
 		_framebuffer->Unbind();
+
 		_updateTimer.Stop();
 	}
 
@@ -158,7 +161,7 @@ namespace Hazel
 
 		DrawStats(timestep);
 		DrawViewport();
-
+		DrawConfig();
 		ImGui::End();
 	}
 
@@ -198,6 +201,14 @@ namespace Hazel
 		auto cycle = (glm::sin(Platform::GetTime()) + 1.0f) * 0.5f;
 		ImGui::Text("Ms per frame: %d", _updateTimer.GetProfileResult().ElapsedTime.count() / 1000);
 
+		ImGui::End();
+	}
+
+	void EditorLayer::DrawConfig()
+	{
+		ImGui::Begin("Config");
+		auto& squareColor = _activeScene->Reg().get<SpriteRendererComponent>(_squareEntity).Color;
+		ImGui::ColorEdit4("Square Color", squareColor.GetValuePtr());
 		ImGui::End();
 	}
 
