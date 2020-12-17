@@ -3,18 +3,10 @@
 #include "components.h"
 #include "Hazel/Renderer/Renderer2D.h"
 
+#include "Entity.h"
+
 namespace Hazel
 {
-	static void DoMaths(const glm::mat4& transform)
-	{
-
-	}
-
-	static void OnTransformContruct(entt::registry& registry, entt::entity entity)
-	{
-
-	}
-
 	Scene::Scene()
 	{
 		
@@ -25,9 +17,16 @@ namespace Hazel
 		_registry.clear();
 	}
 
-	entt::entity Scene::CreateEntity()
+	Entity Scene::CreateEntity(std::string name)
 	{
-		return _registry.create();
+		Entity entity = { _registry.create(), this };
+
+		entity.AddComponent<TransformComponent>();
+
+		auto& tagComponent = entity.AddComponent<TagComponent>();
+		tagComponent.Tag = name.empty() ? "Entity" : std::move(name);
+
+		return entity;
 	}
 
 	void Scene::OnUpdate(Timestep timestep)

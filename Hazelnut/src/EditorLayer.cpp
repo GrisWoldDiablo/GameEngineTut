@@ -19,10 +19,10 @@ namespace Hazel
 
 		_framebuffer = Framebuffer::Create({ 1280,720 });
 
+		// Entity
 		_activeScene = CreateRef<Scene>();
-		_squareEntity = _activeScene->CreateEntity();
-		_activeScene->Reg().emplace<TransformComponent>(_squareEntity);
-		_activeScene->Reg().emplace<SpriteRendererComponent>(_squareEntity, Color::Green);
+		_squareEntity = _activeScene->CreateEntity("Square");
+		_squareEntity.AddComponent<SpriteRendererComponent>(Color::Green);
 	}
 
 	void EditorLayer::OnDetach()
@@ -207,8 +207,11 @@ namespace Hazel
 	void EditorLayer::DrawConfig()
 	{
 		ImGui::Begin("Config");
-		auto& squareColor = _activeScene->Reg().get<SpriteRendererComponent>(_squareEntity).Color;
+		ImGui::Separator();
+		ImGui::Text(_squareEntity.GetComponent<TagComponent>().Tag.c_str());
+		auto& squareColor = _squareEntity.GetComponent<SpriteRendererComponent>().Color;
 		ImGui::ColorEdit4("Square Color", squareColor.GetValuePtr());
+		ImGui::Separator();
 		ImGui::End();
 	}
 

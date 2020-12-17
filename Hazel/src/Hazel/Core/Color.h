@@ -120,7 +120,7 @@ namespace Hazel
 		~Color() = default;
 
 		/// <summary>
-		/// Return the Grayscale value of the color.
+		/// Return the Grayscale value of the color. (ITU-R BT.601 conversion)
 		/// (0.299 * r) + (0.587 * g) + (0.114 * b)
 		/// </summary>
 		float GetGrayscaleValue() const;
