@@ -3,6 +3,7 @@
 #include "OrthographicCamera.h"
 #include "Hazel/Renderer/Texture.h"
 #include "Hazel/Renderer/SubTexture2D.h"
+#include "Hazel/Renderer/Camera.h"
 #include "Hazel/Core/Color.h"
 
 #include <glm/gtc/matrix_transform.hpp>
@@ -15,10 +16,12 @@ namespace Hazel
 		static constexpr glm::mat4 _sIdentityMatrix = glm::identity<glm::mat4>();
 
 	public:
+
 		static void Init();
 		static void Shutdown();
 
-		static void BeginScene(OrthographicCamera& camera, bool isGrayscale = false);
+		static void BeginScene(Camera& camera, const glm::mat4& transform);
+		static void BeginScene(OrthographicCamera& camera, bool isGrayscale = false); // TODO to remove
 		static void EndScene();
 		static void Flush();
 		static void Reset();

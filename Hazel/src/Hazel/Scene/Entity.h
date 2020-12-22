@@ -19,17 +19,17 @@ namespace Hazel
 		}
 
 		template<typename T>
-		T& GetComponent()
-		{
-			HZ_CORE_ASSERT(HasComponent<T>(), "Entity does not have component!");
-			return _scene->_registry.get<T>(_entityHandle);
-		}
-
-		template<typename T>
 		void RemoveComponent()
 		{
 			HZ_CORE_ASSERT(HasComponent<T>(), "Entity does not have component!");
 			_scene->_registry.remove<T>(_entityHandle);
+		}
+
+		template<typename T>
+		T& GetComponent()
+		{
+			HZ_CORE_ASSERT(HasComponent<T>(), "Entity does not have component!");
+			return _scene->_registry.get<T>(_entityHandle);
 		}
 
 		template<typename T>

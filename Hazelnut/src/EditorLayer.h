@@ -39,6 +39,8 @@ namespace Hazel
 		bool _isViewportHovered = false;
 
 		Entity _squareEntity;
+		Entity _cameraEntity;
+
 		Ref<Scene> _activeScene;
 
 		// FPS

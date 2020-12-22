@@ -1,6 +1,7 @@
 #pragma once
 #include <glm/glm.hpp>
 #include "Hazel/Core/Color.h"
+#include "SceneCamera.h"
 
 namespace Hazel
 {
@@ -41,5 +42,15 @@ namespace Hazel
 			:Color(color)
 		{
 		}
+	};
+
+	struct CameraComponent
+	{
+		SceneCamera Camera;
+		bool IsPrimary = true; // TODO Think about moving to scene.
+		bool IsFixedAspectRatio = false;
+
+		CameraComponent() = default;
+		CameraComponent(const CameraComponent&) = default;
 	};
 }

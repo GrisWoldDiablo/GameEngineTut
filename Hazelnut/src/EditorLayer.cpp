@@ -23,6 +23,11 @@ namespace Hazel
 		_activeScene = CreateRef<Scene>();
 		_squareEntity = _activeScene->CreateEntity("Square");
 		_squareEntity.AddComponent<SpriteRendererComponent>(Color::Green);
+
+		_cameraEntity = _activeScene->CreateEntity("Camera");
+		auto cameraEntity2 = _activeScene->CreateEntity("Camera2");
+		_cameraEntity.AddComponent<CameraComponent>();
+		cameraEntity2.AddComponent<CameraComponent>().IsPrimary = false;
 	}
 
 	void EditorLayer::OnDetach()
@@ -40,6 +45,7 @@ namespace Hazel
 			(frameBufferSpec.Width != _viewportSize.x || frameBufferSpec.Height != _viewportSize.y))
 		{
 			_cameraController.Resize(_viewportSize.x, _viewportSize.y);
+			_activeScene->OnViewportResize((uint32_t)_viewportSize.x,(uint32_t)_viewportSize.y);
 		}
 		_framebuffer->Resize((uint32_t)_viewportSize.x, (uint32_t)_viewportSize.y);
 
@@ -60,12 +66,12 @@ namespace Hazel
 		RenderCommand::SetClearColor(_clearColor);
 		RenderCommand::Clear();
 
-		Renderer2D::BeginScene(_cameraController.GetCamera());
+		//Renderer2D::BeginScene(_cameraController.GetCamera());
 
 		// Update Scene
 		_activeScene->OnUpdate(timestep);
 
-		Renderer2D::EndScene();
+		//Renderer2D::EndScene();
 
 		_framebuffer->Unbind();
 
@@ -212,6 +218,13 @@ namespace Hazel
 		auto& squareColor = _squareEntity.GetComponent<SpriteRendererComponent>().Color;
 		ImGui::ColorEdit4("Square Color", squareColor.GetValuePtr());
 		ImGui::Separator();
+		
+		auto& camera = _cameraEntity.GetComponent<CameraComponent>().Camera;
+		float orthoSize = camera.GetOrthographicSize();
+		if (ImGui::DragFloat("Second Camera Ortho Size", &orthoSize))
+		{
+			camera.SetOrthographicSize(orthoSize);
+		}
 		ImGui::End();
 	}
 
