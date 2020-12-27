@@ -31,6 +31,28 @@ namespace Hazel
 
 	void Scene::OnUpdate(Timestep timestep)
 	{
+		// Update Scripts
+		{
+			_registry.view<NativeScriptComponent>().each([=](auto entity, auto& nsc)
+				{
+					auto& instance = nsc.Instance;
+					if (instance == nullptr)
+					{
+						nsc.InstantiateFunction();
+						instance->_entity = { entity, this };
+						if (nsc.OnCreateFunction)
+						{
+							nsc.OnCreateFunction(instance);
+						}
+					}
+
+					if (nsc.OnUpdateFunction)
+					{
+						nsc.OnUpdateFunction(instance, timestep);
+					}
+				});
+		}
+
 		// Render 2D
 		Camera* mainCamera = nullptr;
 		glm::mat4* cameraTransform = nullptr;
@@ -68,7 +90,7 @@ namespace Hazel
 	{
 		_viewportWidth = width;
 		_viewportHeight = height;
-		
+
 		// Resize our non-FixedAspectRation cameras
 		auto view = _registry.view<CameraComponent>();
 		for (auto entity : view)

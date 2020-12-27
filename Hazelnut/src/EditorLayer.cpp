@@ -28,6 +28,44 @@ namespace Hazel
 		_secondaryCamera = _activeScene->CreateEntity("Secondary Camera");
 		_mainCamera.AddComponent<CameraComponent>();
 		_secondaryCamera.AddComponent<CameraComponent>().IsPrimary = false;
+
+		class CameraController : public ScriptableEntity
+		{
+		public:
+			void OnCreate()
+			{
+				HZ_CORE_LINFO("Create");
+			}
+
+			void OnDestroy()
+			{
+
+			}
+
+			void OnUpdate(Timestep timestep)
+			{
+				auto& transform = GetComponent<TransformComponent>().Transform;
+				float speed = 5.0f;
+
+				if (Input::IsKeyPressed(KeyCode::A))
+				{
+					transform[3][0] -= speed * timestep;
+				}
+				if (Input::IsKeyPressed(KeyCode::D))
+				{
+					transform[3][0] += speed * timestep;
+				}
+				if (Input::IsKeyPressed(KeyCode::W))
+				{
+					transform[3][1] += speed * timestep;
+				}
+				if (Input::IsKeyPressed(KeyCode::S))
+				{
+					transform[3][1] -= speed * timestep;
+				}
+			}
+		};
+		_mainCamera.AddComponent<NativeScriptComponent>().Bind<CameraController>();
 	}
 
 	void EditorLayer::OnDetach()
@@ -45,7 +83,7 @@ namespace Hazel
 			(frameBufferSpec.Width != _viewportSize.x || frameBufferSpec.Height != _viewportSize.y))
 		{
 			_cameraController.Resize(_viewportSize.x, _viewportSize.y);
-			_activeScene->OnViewportResize((uint32_t)_viewportSize.x,(uint32_t)_viewportSize.y);
+			_activeScene->OnViewportResize((uint32_t)_viewportSize.x, (uint32_t)_viewportSize.y);
 		}
 		_framebuffer->Resize((uint32_t)_viewportSize.x, (uint32_t)_viewportSize.y);
 
@@ -218,11 +256,11 @@ namespace Hazel
 		auto& squareColor = _squareEntity.GetComponent<SpriteRendererComponent>().Color;
 		ImGui::ColorEdit4("Square Color", squareColor.GetValuePtr());
 		ImGui::Separator();
-		
+
 		auto& mainCamera = _mainCamera.GetComponent<CameraComponent>();
 		auto& secondaryCamera = _secondaryCamera.GetComponent<CameraComponent>();
 		float orthoSize = mainCamera.Camera.GetOrthographicSize();
-		if (ImGui::DragFloat("Camera Ortho Size", &orthoSize,0.1f))
+		if (ImGui::DragFloat("Camera Ortho Size", &orthoSize, 0.1f))
 		{
 			mainCamera.Camera.SetOrthographicSize(orthoSize);
 		}
