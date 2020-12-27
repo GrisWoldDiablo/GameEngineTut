@@ -43,6 +43,7 @@ namespace Hazel
 						cameraTransform = &transform.Transform;
 						return false;
 					}
+					return true;
 				});
 		}
 

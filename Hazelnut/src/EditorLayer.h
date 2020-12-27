@@ -37,9 +37,11 @@ namespace Hazel
 
 		bool _isViewportFocused = false;
 		bool _isViewportHovered = false;
+		bool _isOnSecondCamera = false;
 
 		Entity _squareEntity;
-		Entity _cameraEntity;
+		Entity _mainCamera;
+		Entity _secondaryCamera;
 
 		Ref<Scene> _activeScene;
 

@@ -24,10 +24,10 @@ namespace Hazel
 		_squareEntity = _activeScene->CreateEntity("Square");
 		_squareEntity.AddComponent<SpriteRendererComponent>(Color::Green);
 
-		_cameraEntity = _activeScene->CreateEntity("Camera");
-		auto cameraEntity2 = _activeScene->CreateEntity("Camera2");
-		_cameraEntity.AddComponent<CameraComponent>();
-		cameraEntity2.AddComponent<CameraComponent>().IsPrimary = false;
+		_mainCamera = _activeScene->CreateEntity("Main Camera");
+		_secondaryCamera = _activeScene->CreateEntity("Secondary Camera");
+		_mainCamera.AddComponent<CameraComponent>();
+		_secondaryCamera.AddComponent<CameraComponent>().IsPrimary = false;
 	}
 
 	void EditorLayer::OnDetach()
@@ -219,12 +219,20 @@ namespace Hazel
 		ImGui::ColorEdit4("Square Color", squareColor.GetValuePtr());
 		ImGui::Separator();
 		
-		auto& camera = _cameraEntity.GetComponent<CameraComponent>().Camera;
-		float orthoSize = camera.GetOrthographicSize();
-		if (ImGui::DragFloat("Second Camera Ortho Size", &orthoSize))
+		auto& mainCamera = _mainCamera.GetComponent<CameraComponent>();
+		auto& secondaryCamera = _secondaryCamera.GetComponent<CameraComponent>();
+		float orthoSize = mainCamera.Camera.GetOrthographicSize();
+		if (ImGui::DragFloat("Camera Ortho Size", &orthoSize,0.1f))
 		{
-			camera.SetOrthographicSize(orthoSize);
+			mainCamera.Camera.SetOrthographicSize(orthoSize);
 		}
+
+		if (ImGui::Checkbox("Second Camera", &_isOnSecondCamera))
+		{
+			mainCamera.IsPrimary = !_isOnSecondCamera;
+			secondaryCamera.IsPrimary = _isOnSecondCamera;
+		}
+
 		ImGui::End();
 	}
 
