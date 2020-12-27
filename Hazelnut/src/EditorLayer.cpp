@@ -34,7 +34,10 @@ namespace Hazel
 		public:
 			void OnCreate()
 			{
-				HZ_CORE_LINFO("Create");
+				HZ_CORE_LINFO("Create {0}", GetComponent<TagComponent>().Tag);
+				auto& transform = GetComponent<TransformComponent>().Transform;
+				transform[3][0] = Random::Range(-3.0f, 3.0f);
+				transform[3][1] = Random::Range(-3.0f, 3.0f);
 			}
 
 			void OnDestroy()
@@ -44,6 +47,10 @@ namespace Hazel
 
 			void OnUpdate(Timestep timestep)
 			{
+				if (!GetComponent<CameraComponent>().IsPrimary)
+				{
+					return;
+				}
 				auto& transform = GetComponent<TransformComponent>().Transform;
 				float speed = 5.0f;
 
@@ -66,6 +73,7 @@ namespace Hazel
 			}
 		};
 		_mainCamera.AddComponent<NativeScriptComponent>().Bind<CameraController>();
+		_secondaryCamera.AddComponent<NativeScriptComponent>().Bind<CameraController>();
 	}
 
 	void EditorLayer::OnDetach()

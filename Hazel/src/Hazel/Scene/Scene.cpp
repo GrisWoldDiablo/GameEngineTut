@@ -35,21 +35,18 @@ namespace Hazel
 		{
 			_registry.view<NativeScriptComponent>().each([=](auto entity, auto& nsc)
 				{
+
 					auto& instance = nsc.Instance;
+					// TODO Move to OnScenePlay
 					if (instance == nullptr)
 					{
-						nsc.InstantiateFunction();
+						instance = nsc.InstantiateScript();
 						instance->_entity = { entity, this };
-						if (nsc.OnCreateFunction)
-						{
-							nsc.OnCreateFunction(instance);
-						}
+						instance->OnCreate();
 					}
 
-					if (nsc.OnUpdateFunction)
-					{
-						nsc.OnUpdateFunction(instance, timestep);
-					}
+					instance->OnUpdate(timestep);
+
 				});
 		}
 
@@ -79,7 +76,7 @@ namespace Hazel
 		auto group = _registry.group<TransformComponent>(entt::get<SpriteRendererComponent>);
 		for (auto entity : group)
 		{
-			auto& [transform, sprite] = group.get<TransformComponent, SpriteRendererComponent>(entity);
+			auto [transform, sprite] = group.get<TransformComponent, SpriteRendererComponent>(entity);
 			Renderer2D::DrawQuad(transform, sprite.Color);
 		}
 
