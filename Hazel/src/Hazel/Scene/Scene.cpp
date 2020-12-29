@@ -7,11 +7,6 @@
 
 namespace Hazel
 {
-	Scene::Scene()
-	{
-
-	}
-
 	Scene::~Scene()
 	{
 		_registry.clear();
@@ -34,20 +29,20 @@ namespace Hazel
 		// Update Scripts
 		{
 			_registry.view<NativeScriptComponent>().each([=](auto entity, auto& nsc)
+			{
+
+				auto& instance = nsc.Instance;
+				// TODO Move to OnScenePlay
+				if (instance == nullptr)
 				{
+					instance = nsc.InstantiateScript();
+					instance->_entity = { entity, this };
+					instance->OnCreate();
+				}
 
-					auto& instance = nsc.Instance;
-					// TODO Move to OnScenePlay
-					if (instance == nullptr)
-					{
-						instance = nsc.InstantiateScript();
-						instance->_entity = { entity, this };
-						instance->OnCreate();
-					}
+				instance->OnUpdate(timestep);
 
-					instance->OnUpdate(timestep);
-
-				});
+			});
 		}
 
 		// Render 2D
@@ -55,15 +50,15 @@ namespace Hazel
 		glm::mat4* cameraTransform = nullptr;
 		{
 			_registry.view<CameraComponent, TransformComponent>().each([&](auto entity, auto& camera, auto& transform)
+			{
+				if (camera.IsPrimary)
 				{
-					if (camera.IsPrimary)
-					{
-						mainCamera = &camera.Camera;
-						cameraTransform = &transform.Transform;
-						return false;
-					}
-					return true;
-				});
+					mainCamera = &camera.Camera;
+					cameraTransform = &transform.Transform;
+					return false;
+				}
+				return true;
+			});
 		}
 
 		if (mainCamera == nullptr)
@@ -99,5 +94,4 @@ namespace Hazel
 			}
 		}
 	}
-
 }

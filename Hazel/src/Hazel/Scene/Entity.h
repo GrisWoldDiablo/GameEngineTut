@@ -6,6 +6,9 @@ namespace Hazel
 	class Entity
 	{
 	public:
+		static const Entity Null;
+
+	public:
 		Entity() = default;
 		Entity(entt::entity handle, Scene* scene);
 		Entity(const Entity& other) = default;
@@ -56,6 +59,7 @@ namespace Hazel
 		{
 			return !(*this == other);
 		}
+
 	private:
 		entt::entity _entityHandle{ entt::null };
 		Scene* _scene = nullptr;

@@ -264,10 +264,6 @@ namespace Hazel
 	{
 		ImGui::Begin("Config");
 		ImGui::Separator();
-		ImGui::Text(_squareEntity.GetComponent<TagComponent>().Tag.c_str());
-		auto& squareColor = _squareEntity.GetComponent<SpriteRendererComponent>().Color;
-		ImGui::ColorEdit4("Square Color", squareColor.GetValuePtr());
-		ImGui::Separator();
 
 		auto& mainCamera = _mainCamera.GetComponent<CameraComponent>();
 		auto& secondaryCamera = _secondaryCamera.GetComponent<CameraComponent>();
@@ -282,7 +278,13 @@ namespace Hazel
 			mainCamera.IsPrimary = !_isOnSecondCamera;
 			secondaryCamera.IsPrimary = _isOnSecondCamera;
 		}
-
+		
+		if (ImGui::Button("Create square"))
+		{
+			auto& newEntity = _activeScene->CreateEntity("Square");
+			newEntity.AddComponent<SpriteRendererComponent>(Color::Random());
+			newEntity.GetComponent<TransformComponent>().Transform[3] = Random::Vec4();
+		}
 		ImGui::End();
 	}
 

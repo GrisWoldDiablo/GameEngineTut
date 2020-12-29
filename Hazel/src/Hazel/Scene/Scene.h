@@ -10,13 +10,10 @@ namespace Hazel
 	class Scene
 	{
 	public:
-		Scene();
+		Scene() = default;
 		~Scene();
 
 		Entity CreateEntity(std::string name = std::string());
-
-		// TEMP
-		entt::registry& Reg() { return _registry; }
 
 		void OnUpdate(Timestep timestep);
 

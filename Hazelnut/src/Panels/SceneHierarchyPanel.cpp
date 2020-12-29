@@ -22,12 +22,23 @@ namespace Hazel
 		ImGui::Begin("Scene Hierarchy");
 
 		_context->_registry.each([&](auto entityID)
-			{
-				Entity entity{ entityID,_context.get() };
-				DrawEntityNode(entity);
+		{
+			Entity entity{ entityID,_context.get() };
+			DrawEntityNode(entity);
+		});
 
-			});
+		if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
+		{
+			_selectionContext = {};
+		}
 
+		ImGui::End();
+
+		ImGui::Begin("Properties");
+		if (_selectionContext != Entity::Null)
+		{
+			DrawComponents(_selectionContext);
+		}
 
 		ImGui::End();
 	}
@@ -45,15 +56,58 @@ namespace Hazel
 
 		if (expanded)
 		{
-			auto& transform = entity.GetComponent<TransformComponent>().Transform;
-			ImGui::DragFloat3("", glm::value_ptr(transform[3]));
-
-			auto colorComponent = entity.TryGetComponent<SpriteRendererComponent>();
-			if (colorComponent != nullptr)
-			{
-				ImGui::ColorEdit4("Color", colorComponent->Color.GetValuePtr());
-			}
 			ImGui::TreePop();
 		}
+	}
+
+	void SceneHierarchyPanel::DrawComponents(Entity entity)
+	{
+#pragma region TagComponent
+		if (auto tagComponent = entity.TryGetComponent<TagComponent>(); tagComponent != nullptr)
+		{
+			auto& tag = tagComponent->Tag;
+			char buffer[256];
+			memset(buffer, 0, sizeof(buffer));
+			strcpy_s(buffer, sizeof(buffer), tag.c_str());
+			if (ImGui::InputText(":Tag", buffer, sizeof(buffer)))
+			{
+				tag = std::string(buffer);
+			}
+		}
+#pragma endregion
+
+#pragma region TransformComponent
+		if (auto tranformComponent = entity.TryGetComponent<TransformComponent>(); tranformComponent != nullptr)
+		{
+			if (ImGui::TreeNodeEx((void*)typeid(TransformComponent).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Transform"))
+			{
+				auto& transform = tranformComponent->Transform;
+				auto newTransform = transform[3];
+				if (ImGui::DragFloat3(":Position", glm::value_ptr(newTransform), 0.5f))
+				{
+					transform[3] = newTransform;
+				}
+
+				ImGui::TreePop();
+			}
+		}
+#pragma endregion
+
+#pragma region SpriteRendererComponent
+		if (auto spriteRendererComponent = entity.TryGetComponent<SpriteRendererComponent>(); spriteRendererComponent != nullptr)
+		{
+			if (ImGui::TreeNodeEx((void*)typeid(SpriteRendererComponent).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Sprite Renderer"))
+			{
+				auto& color = spriteRendererComponent->Color;
+				auto newColor = color;
+				if (ImGui::ColorEdit4("Color", newColor.GetValuePtr()))
+				{
+					color = newColor;
+				}
+
+				ImGui::TreePop();
+			}
+		}
+#pragma endregion
 	}
 }
