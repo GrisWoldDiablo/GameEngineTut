@@ -1,5 +1,6 @@
 #pragma once
 #include "Hazel.h"
+#include "Panels/SceneHierarchyPanel.h"
 
 namespace Hazel
 {
@@ -51,5 +52,8 @@ namespace Hazel
 		float _oneSecondCountDown = 1.0f;
 		int _lowFrames = 0;
 		InstrumentationTimer _updateTimer;
+
+		// Panels
+		SceneHierarchyPanel _sceneHierarchyPanel;
 	};
 }

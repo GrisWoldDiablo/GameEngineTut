@@ -74,6 +74,7 @@ namespace Hazel
 		};
 		_mainCamera.AddComponent<NativeScriptComponent>().Bind<CameraController>();
 		_secondaryCamera.AddComponent<NativeScriptComponent>().Bind<CameraController>();
+		_sceneHierarchyPanel.SetContext(_activeScene);
 	}
 
 	void EditorLayer::OnDetach()
@@ -214,6 +215,9 @@ namespace Hazel
 		DrawStats(timestep);
 		DrawViewport();
 		DrawConfig();
+
+		_sceneHierarchyPanel.OnImGuiRender(timestep);
+
 		ImGui::End();
 	}
 

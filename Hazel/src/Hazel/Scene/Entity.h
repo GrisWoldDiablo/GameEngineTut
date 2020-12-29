@@ -33,12 +33,29 @@ namespace Hazel
 		}
 
 		template<typename T>
+		T* TryGetComponent()
+		{
+			return _scene->_registry.try_get<T>(_entityHandle);
+		}
+
+		template<typename T>
 		bool HasComponent()
 		{
 			return _scene->_registry.has<T>(_entityHandle);
 		}
 
 		operator bool() const { return _entityHandle != entt::null; }
+		operator uint32_t() const { return (uint32_t)_entityHandle; }
+
+		bool operator==(const Entity& other) const
+		{
+			return _entityHandle == other._entityHandle && _scene == other._scene;
+		}
+
+		bool operator!=(const Entity& other) const
+		{
+			return !(*this == other);
+		}
 	private:
 		entt::entity _entityHandle{ entt::null };
 		Scene* _scene = nullptr;
