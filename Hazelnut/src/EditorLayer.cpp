@@ -113,12 +113,8 @@ namespace Hazel
 		RenderCommand::SetClearColor(_clearColor);
 		RenderCommand::Clear();
 
-		//Renderer2D::BeginScene(_cameraController.GetCamera());
-
 		// Update Scene
 		_activeScene->OnUpdate(timestep);
-
-		//Renderer2D::EndScene();
 
 		_framebuffer->Unbind();
 

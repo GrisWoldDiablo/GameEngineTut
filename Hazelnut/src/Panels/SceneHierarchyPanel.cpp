@@ -82,10 +82,22 @@ namespace Hazel
 			if (ImGui::TreeNodeEx((void*)typeid(TransformComponent).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Transform"))
 			{
 				auto& transform = tranformComponent->Transform;
-				auto newTransform = transform[3];
-				if (ImGui::DragFloat3(":Position", glm::value_ptr(newTransform), 0.5f))
+				auto newTransformX = transform[3][0];
+				auto newTransformY = transform[3][1];
+				auto newTransformZ = transform[3][2];
+				ImGui::PushItemWidth(50.0f);
+				ImGui::DragFloat("X", &newTransformX, 0.25f);
+				ImGui::SameLine();
+				ImGui::DragFloat("Y", &newTransformY, 0.25f);
+				ImGui::SameLine();
+				ImGui::DragFloat("Z", &newTransformZ, 0.01f, -0.999f, 1.0f);
+				ImGui::PopItemWidth();
+				if (newTransformX != transform[3][0] ||
+					newTransformY != transform[3][1] ||
+					newTransformZ != transform[3][2])
 				{
-					transform[3] = newTransform;
+					transform[3] = { newTransformX, newTransformY, newTransformZ, transform[3][3] };
+					_context->SortSpriteRendererGroup(true);
 				}
 
 				ImGui::TreePop();
@@ -99,8 +111,8 @@ namespace Hazel
 			if (ImGui::TreeNodeEx((void*)typeid(SpriteRendererComponent).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Sprite Renderer"))
 			{
 				auto& color = spriteRendererComponent->Color;
-				auto newColor = color;
-				if (ImGui::ColorEdit4("Color", newColor.GetValuePtr()))
+				auto& newColor = color;
+				if (ImGui::ColorEdit4("Color", newColor.GetValuePtr(), ImGuiColorEditFlags_InputRGB))
 				{
 					color = newColor;
 				}

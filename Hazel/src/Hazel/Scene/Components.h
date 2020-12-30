@@ -14,8 +14,7 @@ namespace Hazel
 		TagComponent(const TagComponent&) = default;
 		TagComponent(std::string tag)
 			:Tag(std::move(tag))
-		{
-		}
+		{}
 	};
 
 	struct TransformComponent
@@ -26,8 +25,7 @@ namespace Hazel
 		TransformComponent(const TransformComponent&) = default;
 		TransformComponent(const glm::mat4& transform)
 			:Transform(transform)
-		{
-		}
+		{}
 
 		operator glm::mat4& () { return Transform; }
 		operator const glm::mat4& () const { return Transform; }
@@ -41,8 +39,7 @@ namespace Hazel
 		SpriteRendererComponent(const SpriteRendererComponent&) = default;
 		SpriteRendererComponent(const Hazel::Color& color)
 			:Color(color)
-		{
-		}
+		{}
 	};
 
 	struct CameraComponent
