@@ -8,8 +8,7 @@ namespace Hazel
 	public:
 		Platform(Ref<RendererAPI> renderAPI)
 			:_rendererAPI(renderAPI)
-		{
-		}
+		{}
 
 		static float GetTime() { return _sInstance->GetTimeImpl(); }
 

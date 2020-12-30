@@ -91,7 +91,7 @@ namespace Hazel
 		for (auto entity : view)
 		{
 			auto& cameraComponent = view.get<CameraComponent>(entity);
-			if (!cameraComponent.IsFixedAspectRatio)
+			if (!cameraComponent.IsFixedAspectRatio || cameraComponent.Camera.GetProjectionType() == SceneCamera::ProjectionType::Perspective)
 			{
 				cameraComponent.Camera.SetViewportSize(width, height);
 			}
@@ -104,7 +104,6 @@ namespace Hazel
 
 		if (forced || _spriteAmount != group.size())
 		{
-			HZ_CORE_LINFO("Sorting");
 			group.sort<TransformComponent>([](const auto& lhs, const auto& rhs)
 			{
 				return lhs.Transform[3][2] < rhs.Transform[3][2];

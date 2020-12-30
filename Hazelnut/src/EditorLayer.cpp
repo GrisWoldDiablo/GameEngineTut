@@ -32,20 +32,12 @@ namespace Hazel
 		class CameraController : public ScriptableEntity
 		{
 		public:
-			void OnCreate()
+			void OnCreate() override
 			{
 				HZ_CORE_LINFO("Create {0}", GetComponent<TagComponent>().Tag);
-				auto& transform = GetComponent<TransformComponent>().Transform;
-				transform[3][0] = Random::Range(-3.0f, 3.0f);
-				transform[3][1] = Random::Range(-3.0f, 3.0f);
 			}
 
-			void OnDestroy()
-			{
-
-			}
-
-			void OnUpdate(Timestep timestep)
+			void OnUpdate(Timestep timestep) override
 			{
 				if (!GetComponent<CameraComponent>().IsPrimary)
 				{
@@ -210,7 +202,7 @@ namespace Hazel
 
 		DrawStats(timestep);
 		DrawViewport();
-		DrawConfig();
+		DrawTools();
 
 		_sceneHierarchyPanel.OnImGuiRender(timestep);
 
@@ -256,31 +248,29 @@ namespace Hazel
 		ImGui::End();
 	}
 
-	void EditorLayer::DrawConfig()
+	void EditorLayer::DrawTools()
 	{
-		ImGui::Begin("Config");
-		ImGui::Separator();
+		ImGui::Begin("Tools");
 
 		auto& mainCamera = _mainCamera.GetComponent<CameraComponent>();
 		auto& secondaryCamera = _secondaryCamera.GetComponent<CameraComponent>();
-		float orthoSize = mainCamera.Camera.GetOrthographicSize();
-		if (ImGui::DragFloat("Camera Ortho Size", &orthoSize, 0.1f))
-		{
-			mainCamera.Camera.SetOrthographicSize(orthoSize);
-		}
 
-		if (ImGui::Checkbox("Second Camera", &_isOnSecondCamera))
+		if (ImGui::Checkbox("Secondary Camera", &_isOnSecondCamera))
 		{
 			mainCamera.IsPrimary = !_isOnSecondCamera;
 			secondaryCamera.IsPrimary = _isOnSecondCamera;
 		}
+
+		ImGui::Separator();
 		
 		if (ImGui::Button("Create square"))
 		{
-			auto& newEntity = _activeScene->CreateEntity("Square");
-			newEntity.AddComponent<SpriteRendererComponent>(Color::Random());
+			auto color = Color::Random();
+			auto& newEntity = _activeScene->CreateEntity("Square " + color.GetHexValue());
+			newEntity.AddComponent<SpriteRendererComponent>(color);
 			newEntity.GetComponent<TransformComponent>().Transform[3] = Random::Vec4();
 		}
+
 		ImGui::End();
 	}
 
