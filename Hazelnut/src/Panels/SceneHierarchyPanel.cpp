@@ -60,6 +60,19 @@ namespace Hazel
 		}
 	}
 
+	template<typename T, typename Func>
+	void Hazel::SceneHierarchyPanel::DrawComponent(Entity entity, const std::string& name, Func func)
+	{
+		if (auto component = entity.TryGetComponent<T>(); component != nullptr)
+		{
+			if (ImGui::TreeNodeEx((void*)typeid(T).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, name.c_str()))
+			{
+				func(component);
+				ImGui::TreePop();
+			}
+		}
+	}
+
 	void SceneHierarchyPanel::DrawComponents(Entity entity)
 	{
 #pragma region TagComponent
@@ -77,135 +90,118 @@ namespace Hazel
 #pragma endregion
 
 #pragma region TransformComponent
-		if (auto tranformComponent = entity.TryGetComponent<TransformComponent>(); tranformComponent != nullptr)
+		DrawComponent<TransformComponent>(entity, "Transform", [&](TransformComponent* component)
 		{
-			if (ImGui::TreeNodeEx((void*)typeid(TransformComponent).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Transform"))
+			auto& transform = component->Transform;
+			auto newTransformX = transform[3][0];
+			auto newTransformY = transform[3][1];
+			auto newTransformZ = transform[3][2];
+			ImGui::PushItemWidth(50.0f);
+			ImGui::DragFloat("X", &newTransformX, 0.25f);
+			ImGui::SameLine();
+			ImGui::DragFloat("Y", &newTransformY, 0.25f);
+			ImGui::SameLine();
+			ImGui::DragFloat("Z", &newTransformZ, 0.01f);
+			ImGui::PopItemWidth();
+			if (newTransformX != transform[3][0] ||
+				newTransformY != transform[3][1] ||
+				newTransformZ != transform[3][2])
 			{
-				auto& transform = tranformComponent->Transform;
-				auto newTransformX = transform[3][0];
-				auto newTransformY = transform[3][1];
-				auto newTransformZ = transform[3][2];
-				ImGui::PushItemWidth(50.0f);
-				ImGui::DragFloat("X", &newTransformX, 0.25f);
-				ImGui::SameLine();
-				ImGui::DragFloat("Y", &newTransformY, 0.25f);
-				ImGui::SameLine();
-				ImGui::DragFloat("Z", &newTransformZ, 0.01f);
-				ImGui::PopItemWidth();
-				if (newTransformX != transform[3][0] ||
-					newTransformY != transform[3][1] ||
-					newTransformZ != transform[3][2])
-				{
-					transform[3] = { newTransformX, newTransformY, newTransformZ, transform[3][3] };
-					_context->SortSpriteRendererGroup(true);
-				}
-
-				ImGui::TreePop();
+				transform[3] = { newTransformX, newTransformY, newTransformZ, transform[3][3] };
+				_context->SortSpriteRendererGroup(true);
 			}
-		}
+		});
 #pragma endregion
 
 #pragma region SpriteRendererComponent
-		if (auto spriteRendererComponent = entity.TryGetComponent<SpriteRendererComponent>(); spriteRendererComponent != nullptr)
+		DrawComponent<SpriteRendererComponent>(entity, "Sprite Renderer", [](SpriteRendererComponent* component)
 		{
-			if (ImGui::TreeNodeEx((void*)typeid(SpriteRendererComponent).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Sprite Renderer"))
+			auto& color = component->Color;
+			auto& newColor = color;
+			if (ImGui::ColorEdit4("Color", newColor.GetValuePtr()))
 			{
-				auto& color = spriteRendererComponent->Color;
-				auto& newColor = color;
-				if (ImGui::ColorEdit4("Color", newColor.GetValuePtr(), ImGuiColorEditFlags_InputRGB))
-				{
-					color = newColor;
-				}
-
-				ImGui::TreePop();
+				color = newColor;
 			}
-		}
+		});
 #pragma endregion
 
 #pragma region CameraComponent
-		if (auto cameraComponent = entity.TryGetComponent<CameraComponent>(); cameraComponent != nullptr)
+		DrawComponent<CameraComponent>(entity, "Camera", [&](CameraComponent* component)
 		{
-			auto& camera = cameraComponent->Camera;
-
-			ImGui::Checkbox("Primary", &cameraComponent->IsPrimary);
-
-			if (ImGui::TreeNodeEx((void*)typeid(CameraComponent).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Camera"))
+			auto& camera = component->Camera;
+			ImGui::Checkbox("Primary", &component->IsPrimary);
+			const char* projectionTypeStrings[] = { "Perspective","Orthographic" };
+			const char* currentProjectionTypeString = projectionTypeStrings[(int)camera.GetProjectionType()];
+			if (ImGui::BeginCombo("Projection", currentProjectionTypeString))
 			{
-				const char* projectionTypeStrings[] = { "Perspective","Orthographic" };
-				const char* currentProjectionTypeString = projectionTypeStrings[(int)camera.GetProjectionType()];
-				if (ImGui::BeginCombo("Projection", currentProjectionTypeString))
+				for (int i = 0; i < 2; i++)
 				{
-					for (int i = 0; i < 2; i++)
+					bool isSelected = currentProjectionTypeString == projectionTypeStrings[i];
+					if (ImGui::Selectable(projectionTypeStrings[i], isSelected))
 					{
-						bool isSelected = currentProjectionTypeString == projectionTypeStrings[i];
-						if (ImGui::Selectable(projectionTypeStrings[i], isSelected))
-						{
-							currentProjectionTypeString = projectionTypeStrings[i];
-							camera.SetProjectionType((SceneCamera::ProjectionType)i);
-						}
-
-						if (isSelected)
-						{
-							ImGui::SetItemDefaultFocus();
-						}
+						currentProjectionTypeString = projectionTypeStrings[i];
+						camera.SetProjectionType((SceneCamera::ProjectionType)i);
 					}
-					ImGui::EndCombo();
+
+					if (isSelected)
+					{
+						ImGui::SetItemDefaultFocus();
+					}
 				}
-
-				switch (camera.GetProjectionType())
-				{
-				case SceneCamera::ProjectionType::Perspective:
-				{
-					float perspectiveFOV = glm::degrees(camera.GetPerspectiveVerticalFOV());
-					if (ImGui::DragFloat("FOV", &perspectiveFOV))
-					{
-						camera.SetPerspectiveVerticalFOV(glm::radians(perspectiveFOV));
-					}
-
-					float perspectiveNearClip = camera.GetPerspectiveNearClip();
-					if (ImGui::DragFloat("NearClip", &perspectiveNearClip))
-					{
-						camera.SetPerspectiveNearClip(perspectiveNearClip);
-					}
-
-					float perspectiveFarClip = camera.GetPerspectiveFarClip();
-					if (ImGui::DragFloat("FarClip", &perspectiveFarClip))
-					{
-						camera.SetPerspectiveFarClip(perspectiveFarClip);
-					}
-
-				}	break;
-				case SceneCamera::ProjectionType::Orthographic:
-				{
-					float orthographicSize = camera.GetOrthographicSize();
-					if (ImGui::DragFloat("Size", &orthographicSize))
-					{
-						camera.SetOrthographicSize(orthographicSize);
-					}
-
-					float orthographicNearClip = camera.GetOrthographicNearClip();
-					if (ImGui::DragFloat("NearClip", &orthographicNearClip))
-					{
-						camera.SetOrthographicNearClip(orthographicNearClip);
-					}
-
-					float orthographicFarClip = camera.GetOrthographicFarClip();
-					if (ImGui::DragFloat("FarClip", &orthographicFarClip))
-					{
-						camera.SetOrthographicFarClip(orthographicFarClip);
-					}
-
-				}	break;
-				}
-
-				if (ImGui::Checkbox("Fixed Aspect Ratio", &cameraComponent->IsFixedAspectRatio) && !cameraComponent->IsFixedAspectRatio)
-				{
-					camera.SetViewportSize(_context->_viewportWidth, _context->_viewportHeight);
-				}
-
-				ImGui::TreePop();
+				ImGui::EndCombo();
 			}
-		}
+
+			switch (camera.GetProjectionType())
+			{
+			case SceneCamera::ProjectionType::Perspective:
+			{
+				float perspectiveFOV = glm::degrees(camera.GetPerspectiveVerticalFOV());
+				if (ImGui::DragFloat("FOV", &perspectiveFOV))
+				{
+					camera.SetPerspectiveVerticalFOV(glm::radians(perspectiveFOV));
+				}
+
+				float perspectiveNearClip = camera.GetPerspectiveNearClip();
+				if (ImGui::DragFloat("NearClip", &perspectiveNearClip))
+				{
+					camera.SetPerspectiveNearClip(perspectiveNearClip);
+				}
+
+				float perspectiveFarClip = camera.GetPerspectiveFarClip();
+				if (ImGui::DragFloat("FarClip", &perspectiveFarClip))
+				{
+					camera.SetPerspectiveFarClip(perspectiveFarClip);
+				}
+
+			}	break;
+			case SceneCamera::ProjectionType::Orthographic:
+			{
+				float orthographicSize = camera.GetOrthographicSize();
+				if (ImGui::DragFloat("Size", &orthographicSize))
+				{
+					camera.SetOrthographicSize(orthographicSize);
+				}
+
+				float orthographicNearClip = camera.GetOrthographicNearClip();
+				if (ImGui::DragFloat("NearClip", &orthographicNearClip))
+				{
+					camera.SetOrthographicNearClip(orthographicNearClip);
+				}
+
+				float orthographicFarClip = camera.GetOrthographicFarClip();
+				if (ImGui::DragFloat("FarClip", &orthographicFarClip))
+				{
+					camera.SetOrthographicFarClip(orthographicFarClip);
+				}
+
+			}	break;
+			}
+
+			if (ImGui::Checkbox("Fixed Aspect Ratio", &component->IsFixedAspectRatio) && !component->IsFixedAspectRatio)
+			{
+				camera.SetViewportSize(_context->_viewportWidth, _context->_viewportHeight);
+			}
+		});
 #pragma endregion
 	}
 }

@@ -242,6 +242,7 @@ namespace Hazel
 		ImGui::Text("Quad Count: %d", stats.QuadCount);
 		ImGui::Text("Vertices: %d", stats.GetTotalVertexCount());
 		ImGui::Text("Indices: %d", stats.GetTotalIndexCount());
+		ImGui::Separator();
 		auto cycle = (glm::sin(Platform::GetTime()) + 1.0f) * 0.5f;
 		ImGui::Text("Ms per frame: %d", _updateTimer.GetProfileResult().ElapsedTime.count() / 1000);
 

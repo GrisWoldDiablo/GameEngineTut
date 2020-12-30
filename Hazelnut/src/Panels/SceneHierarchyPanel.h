@@ -19,7 +19,10 @@ namespace Hazel
 
 	private:
 		void DrawEntityNode(Entity entity);
+		template<typename T, typename Func>
+		void DrawComponent(Entity entity, const std::string& name, Func func);
 		void DrawComponents(Entity entity);
+		
 	private:
 		Ref<Scene> _context;
 		Entity _selectionContext;
