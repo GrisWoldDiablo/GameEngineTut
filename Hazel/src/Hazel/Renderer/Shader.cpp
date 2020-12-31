@@ -11,18 +11,16 @@ namespace Hazel
 		switch (Renderer::GetAPI())
 		{
 		case RendererAPI::API::None:
-			HZ_CORE_ASSERT(false, "RendererAPI::None is currently not supported.");
+			HZ_CORE_ASSERT(false, "RendererAPI::None is currently not supported."); return nullptr;
 		case RendererAPI::API::OpenGL:
 			return CreateRef<OpenGLShader>(filePath);
 		case RendererAPI::API::DirectX:
-			HZ_CORE_ASSERT(false, "RendererAPI::DirectX is currently not supported.");
+			HZ_CORE_ASSERT(false, "RendererAPI::DirectX is currently not supported."); return nullptr;
 		case RendererAPI::API::Vulkan:
-			HZ_CORE_ASSERT(false, "RendererAPI::Vulkan is currently not supported.");
-		default:;
+			HZ_CORE_ASSERT(false, "RendererAPI::Vulkan is currently not supported."); return nullptr;
+		default:
+			HZ_CORE_ASSERT(false, "Unknow RendererAPI, Shader::Create"); return nullptr;
 		}
-
-		HZ_CORE_ASSERT(false, "Unknow RendererAPI, Shader::Create");
-		return nullptr;
 	}
 
 	Ref<Shader> Shader::Create(const std::string& name, const std::string& vertexSrc, const std::string& fragmentSrc)
@@ -30,18 +28,16 @@ namespace Hazel
 		switch (Renderer::GetAPI())
 		{
 		case RendererAPI::API::None:
-			HZ_CORE_ASSERT(false, "RendererAPI::None is currently not supported.");
+			HZ_CORE_ASSERT(false, "RendererAPI::None is currently not supported."); return nullptr;
 		case RendererAPI::API::OpenGL:
 			return CreateRef<OpenGLShader>(name, vertexSrc, fragmentSrc);
 		case RendererAPI::API::DirectX:
-			HZ_CORE_ASSERT(false, "RendererAPI::DirectX is currently not supported.");
+			HZ_CORE_ASSERT(false, "RendererAPI::DirectX is currently not supported."); return nullptr;
 		case RendererAPI::API::Vulkan:
-			HZ_CORE_ASSERT(false, "RendererAPI::Vulkan is currently not supported.");
-		default:;
+			HZ_CORE_ASSERT(false, "RendererAPI::Vulkan is currently not supported."); return nullptr;
+		default:
+			HZ_CORE_ASSERT(false, "Unknow RendererAPI, Shader::Create"); return nullptr;
 		}
-
-		HZ_CORE_ASSERT(false, "Unknow RendererAPI, Shader::Create");
-		return nullptr;
 	}
 
 	void ShaderLibrary::Add(const std::string& name, const Ref<Shader>& shader)

@@ -1,15 +1,14 @@
 #include "EditorLayer.h"
+#include "Script/CameraController.h"
 
 #include <imgui/imgui.h>
-
 #include <glm/gtc/type_ptr.hpp>
 
 namespace Hazel
 {
 	EditorLayer::EditorLayer()
 		: Layer("Hazel Editor"), _cameraController(1280.0f / 720.0f, true)
-	{
-	}
+	{}
 
 	void EditorLayer::OnAttach()
 	{
@@ -29,41 +28,7 @@ namespace Hazel
 		_mainCamera.AddComponent<CameraComponent>();
 		_secondaryCamera.AddComponent<CameraComponent>().IsPrimary = false;
 
-		class CameraController : public ScriptableEntity
-		{
-		public:
-			void OnCreate() override
-			{
-				HZ_CORE_LINFO("Create {0}", GetComponent<TagComponent>().Tag);
-			}
 
-			void OnUpdate(Timestep timestep) override
-			{
-				if (!GetComponent<CameraComponent>().IsPrimary)
-				{
-					return;
-				}
-				auto& transform = GetComponent<TransformComponent>().Transform;
-				float speed = 5.0f;
-
-				if (Input::IsKeyPressed(KeyCode::A))
-				{
-					transform[3][0] -= speed * timestep;
-				}
-				if (Input::IsKeyPressed(KeyCode::D))
-				{
-					transform[3][0] += speed * timestep;
-				}
-				if (Input::IsKeyPressed(KeyCode::W))
-				{
-					transform[3][1] += speed * timestep;
-				}
-				if (Input::IsKeyPressed(KeyCode::S))
-				{
-					transform[3][1] -= speed * timestep;
-				}
-			}
-		};
 		_mainCamera.AddComponent<NativeScriptComponent>().Bind<CameraController>();
 		_secondaryCamera.AddComponent<NativeScriptComponent>().Bind<CameraController>();
 		_sceneHierarchyPanel.SetContext(_activeScene);
@@ -143,7 +108,6 @@ namespace Hazel
 	void EditorLayer::OnImGuiRender(Timestep timestep)
 	{
 		HZ_PROFILE_FUNCTION();
-		//ImGui::ShowDemoWindow(nullptr);
 
 		static bool dockSpaceOpen = true;
 		static bool opt_fullscreen_persistant = true;
@@ -171,7 +135,7 @@ namespace Hazel
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 
-		ImGui::Begin("DockSpace Demo", &dockSpaceOpen, window_flags);
+		ImGui::Begin("DockSpace", &dockSpaceOpen, window_flags);
 		ImGui::PopStyleVar();
 
 		if (opt_fullscreen)
@@ -263,7 +227,7 @@ namespace Hazel
 		}
 
 		ImGui::Separator();
-		
+
 		if (ImGui::Button("Create square"))
 		{
 			auto color = Color::Random();

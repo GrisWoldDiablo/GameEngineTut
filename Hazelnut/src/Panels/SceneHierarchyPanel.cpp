@@ -5,6 +5,8 @@
 #include "Hazel/Scene/Components.h"
 #include "glm/gtc/type_ptr.hpp"
 
+#include <fstream>
+
 namespace Hazel
 {
 	SceneHierarchyPanel::SceneHierarchyPanel(const Ref<Scene>& context)
@@ -203,5 +205,22 @@ namespace Hazel
 			}
 		});
 #pragma endregion
+
+		DrawComponent<NativeScriptComponent>(entity, "Native Script", [](NativeScriptComponent* component)
+		{
+			std::string result;
+			std::ifstream inputFileStream(component->Instance->GetClassFilePath(), std::ios::in);
+			if (!inputFileStream.bad())
+			{
+				inputFileStream.seekg(0, std::ios::end);
+				result.resize(inputFileStream.tellg());
+				inputFileStream.seekg(0, std::ios::beg);
+				inputFileStream.read(&result[0], result.size());
+				inputFileStream.close();
+				ImGui::BeginChild("Source", ImVec2(ImGui::GetWindowWidth()-50, 500), true, ImGuiWindowFlags_HorizontalScrollbar);
+				ImGui::Text(result.c_str());
+				ImGui::EndChild();
+			}
+		});
 	}
 }

@@ -13,10 +13,11 @@ namespace Hazel
 		{
 			return _entity.GetComponent<T>();
 		}
-	protected:
+
 		virtual void OnCreate() {}
 		virtual void OnDestroy() {}
 		virtual void OnUpdate(Timestep timestep) {}
+		virtual std::string GetClassFilePath() = 0;
 
 	private:
 		Entity _entity;
