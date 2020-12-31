@@ -27,46 +27,41 @@ namespace Hazel
 	void Scene::OnUpdate(Timestep timestep)
 	{
 		// Update Scripts
+		_registry.view<NativeScriptComponent>().each([=](auto entity, auto& nsc)
 		{
-			_registry.view<NativeScriptComponent>().each([=](auto entity, auto& nsc)
+			auto& instance = nsc.Instance;
+
+			// TODO Move to OnScenePlay
+			if (instance == nullptr)
 			{
+				instance = nsc.InstantiateScript();
+				instance->_entity = { entity, this };
+				instance->OnCreate();
+			}
 
-				auto& instance = nsc.Instance;
-				// TODO Move to OnScenePlay
-				if (instance == nullptr)
-				{
-					instance = nsc.InstantiateScript();
-					instance->_entity = { entity, this };
-					instance->OnCreate();
-				}
-
-				instance->OnUpdate(timestep);
-
-			});
-		}
+			instance->OnUpdate(timestep);
+		});
 
 		// Render 2D
 		Camera* mainCamera = nullptr;
-		glm::mat4* cameraTransform = nullptr;
+		glm::mat4 cameraTransform;
+		_registry.view<CameraComponent, TransformComponent>().each([&](auto entity, auto& camera, auto& transform)
 		{
-			_registry.view<CameraComponent, TransformComponent>().each([&](auto entity, auto& camera, auto& transform)
+			if (camera.IsPrimary)
 			{
-				if (camera.IsPrimary)
-				{
-					mainCamera = &camera.Camera;
-					cameraTransform = &transform.Transform;
-					return false;
-				}
-				return true;
-			});
-		}
+				mainCamera = &camera.Camera;
+				cameraTransform = transform.GetTransform();
+				return false;
+			}
+			return true;
+		});
 
 		if (mainCamera == nullptr)
 		{
 			return;
 		}
 
-		Renderer2D::BeginScene(*mainCamera, *cameraTransform);
+		Renderer2D::BeginScene(*mainCamera, cameraTransform);
 
 		SortSpriteRendererGroup();
 		auto group = _registry.group<TransformComponent>(entt::get<SpriteRendererComponent>);
@@ -74,13 +69,13 @@ namespace Hazel
 		for (auto entity : group)
 		{
 			auto [transform, sprite] = group.get<TransformComponent, SpriteRendererComponent>(entity);
-			Renderer2D::DrawQuad(transform, sprite.Color);
+			Renderer2D::DrawQuad(transform.GetTransform(), sprite.Color);
 		}
 
 		Renderer2D::EndScene();
 	}
 
-	
+
 	void Scene::OnViewportResize(uint32_t width, uint32_t height)
 	{
 		_viewportWidth = width;
@@ -106,7 +101,7 @@ namespace Hazel
 		{
 			group.sort<TransformComponent>([](const auto& lhs, const auto& rhs)
 			{
-				return lhs.Transform[3][2] < rhs.Transform[3][2];
+				return lhs.Position.z < rhs.Position.z;
 			});
 			_spriteAmount = group.size();
 		}

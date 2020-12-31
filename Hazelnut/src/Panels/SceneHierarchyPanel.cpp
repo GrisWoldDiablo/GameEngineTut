@@ -1,6 +1,7 @@
 #include "SceneHierarchyPanel.h"
 
 #include <imgui/imgui.h>
+#include <imgui/imgui_internal.h>
 
 #include "Hazel/Scene/Components.h"
 #include "glm/gtc/type_ptr.hpp"
@@ -75,6 +76,106 @@ namespace Hazel
 		}
 	}
 
+	static void DrawVec3Controls(const std::string& label, glm::vec3& values, float resetValue = 0.0f, float columnWidth = 100.0f)
+	{
+		ImGui::PushID(label.c_str());
+
+		ImGui::Columns(2, "vec3", false);
+		ImGui::SetColumnWidth(0, columnWidth);
+		ImGui::Text(label.c_str());
+		ImGui::NextColumn();
+
+		ImGui::PushMultiItemsWidths(3, ImGui::CalcItemWidth());
+		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 0.0f, 0.0f });
+
+		float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
+		ImVec2 buttonSize = { lineHeight + 3.0f, lineHeight };
+
+#pragma region ValueX
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.8f, 0.1f, 0.15f, 1.0f });
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.9f, 0.2f, 0.2f, 1.0f });
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.8f, 0.1f, 0.15f, 1.0f });
+		if (ImGui::Button("X", buttonSize))
+		{
+			values.x = resetValue;
+		}
+		ImGui::PopStyleColor(3);
+
+		ImGui::SameLine();
+		ImGui::DragFloat("##X", &values.x, 0.1f, 0.0f, 0.0f, "%.2f");
+		ImGui::PopItemWidth();
+#pragma endregion
+
+#pragma region ValueY
+		ImGui::SameLine();
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.2f, 0.7f, 0.3f, 1.0f });
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.3f, 0.8f, 0.3f, 1.0f });
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.2f, 0.7f, 0.3f, 1.0f });
+		if (ImGui::Button("Y", buttonSize))
+		{
+			values.y = resetValue;
+		}
+		ImGui::PopStyleColor(3);
+
+		ImGui::SameLine();
+		ImGui::DragFloat("##Y", &values.y, 0.1f, 0.0f, 0.0f, "%.2f");
+		ImGui::PopItemWidth();
+#pragma endregion
+
+#pragma region ValueZ
+		ImGui::SameLine();
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.1f ,0.25f, 0.8f, 1.0f });
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.2f, 0.35f, 0.9f, 1.0f });
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.1f, 0.25f, 0.8f, 1.0f });
+		if (ImGui::Button("Z", buttonSize))
+		{
+			values.z = resetValue;
+		}
+		ImGui::PopStyleColor(3);
+
+		ImGui::SameLine();
+		ImGui::DragFloat("##Z", &values.z, 0.1f, 0.0f, 0.0f, "%.2f");
+		ImGui::PopItemWidth();
+#pragma endregion
+
+#pragma region ResetButton
+		ImGui::SameLine();
+		ImGui::PushStyleColor(ImGuiCol_Text, ImVec4{ 0.0f, 0.0f, 0.0f, 1.0f });
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 1.0f , 0.75f, 0.0f, 1.0f });
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 1.0f, 0.85f, 0.0f, 1.0f });
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 1.0f, 0.75f, 0.0f, 1.0f });
+		if (ImGui::Button("R", buttonSize))
+		{
+			ImGui::OpenPopup("reset");
+		}
+		ImGui::PopStyleColor(4);
+
+		if (ImGui::BeginPopup("reset"))
+		{
+			ImGui::Text("Reset %s?", label.c_str());
+			ImGui::Separator();
+			if (ImGui::Button("Yes"))
+			{
+				values = { resetValue, resetValue, resetValue };
+				ImGui::CloseCurrentPopup();
+			}
+			ImGui::SameLine();
+			ImGui::Text(" ");
+			ImGui::SameLine();
+			if (ImGui::Button("Cancel"))
+			{
+				ImGui::CloseCurrentPopup();
+			}
+			ImGui::EndPopup();
+		}
+#pragma endregion
+
+
+		ImGui::PopStyleVar();
+		ImGui::Columns(1);
+		ImGui::PopID();
+	}
+
 	void SceneHierarchyPanel::DrawComponents(Entity entity)
 	{
 #pragma region TagComponent
@@ -94,24 +195,13 @@ namespace Hazel
 #pragma region TransformComponent
 		DrawComponent<TransformComponent>(entity, "Transform", [&](TransformComponent* component)
 		{
-			auto& transform = component->Transform;
-			auto newTransformX = transform[3][0];
-			auto newTransformY = transform[3][1];
-			auto newTransformZ = transform[3][2];
-			ImGui::PushItemWidth(50.0f);
-			ImGui::DragFloat("X", &newTransformX, 0.25f);
-			ImGui::SameLine();
-			ImGui::DragFloat("Y", &newTransformY, 0.25f);
-			ImGui::SameLine();
-			ImGui::DragFloat("Z", &newTransformZ, 0.01f);
-			ImGui::PopItemWidth();
-			if (newTransformX != transform[3][0] ||
-				newTransformY != transform[3][1] ||
-				newTransformZ != transform[3][2])
-			{
-				transform[3] = { newTransformX, newTransformY, newTransformZ, transform[3][3] };
-				_context->SortSpriteRendererGroup(true);
-			}
+			DrawVec3Controls("Position", component->Position);
+
+			glm::vec3 rotation = glm::degrees(component->Rotation);
+			DrawVec3Controls("Rotation", rotation);
+			component->Rotation = glm::radians(rotation);
+
+			DrawVec3Controls("Scale", component->Scale, 1.0f);
 		});
 #pragma endregion
 
@@ -206,6 +296,7 @@ namespace Hazel
 		});
 #pragma endregion
 
+#pragma region NativeScriptComponent
 		DrawComponent<NativeScriptComponent>(entity, "Native Script", [](NativeScriptComponent* component)
 		{
 			std::string result;
@@ -217,10 +308,11 @@ namespace Hazel
 				inputFileStream.seekg(0, std::ios::beg);
 				inputFileStream.read(&result[0], result.size());
 				inputFileStream.close();
-				ImGui::BeginChild("Source", ImVec2(ImGui::GetWindowWidth()-50, 500), true, ImGuiWindowFlags_HorizontalScrollbar);
+				ImGui::BeginChild("Source", ImVec2(ImGui::GetWindowWidth() - 50, 500), true, ImGuiWindowFlags_HorizontalScrollbar);
 				ImGui::Text(result.c_str());
 				ImGui::EndChild();
 			}
 		});
+#pragma endregion
 	}
 }

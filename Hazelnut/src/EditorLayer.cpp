@@ -1,5 +1,5 @@
 #include "EditorLayer.h"
-#include "Script/CameraController.h"
+#include "Script/NativeScripts.h"
 
 #include <imgui/imgui.h>
 #include <glm/gtc/type_ptr.hpp>
@@ -27,7 +27,6 @@ namespace Hazel
 		_secondaryCamera = _activeScene->CreateEntity("Secondary Camera");
 		_mainCamera.AddComponent<CameraComponent>();
 		_secondaryCamera.AddComponent<CameraComponent>().IsPrimary = false;
-
 
 		_mainCamera.AddComponent<NativeScriptComponent>().Bind<CameraController>();
 		_secondaryCamera.AddComponent<NativeScriptComponent>().Bind<CameraController>();
@@ -217,6 +216,17 @@ namespace Hazel
 	{
 		ImGui::Begin("Tools");
 
+		if (ImGui::Button("Show Demo Window"))
+		{
+			_isDemoWidowOpen = !_isDemoWidowOpen;
+		}
+
+		if(_isDemoWidowOpen)
+		{
+			ImGui::ShowDemoWindow(&_isDemoWidowOpen);
+		}
+		ImGui::Separator();
+
 		auto& mainCamera = _mainCamera.GetComponent<CameraComponent>();
 		auto& secondaryCamera = _secondaryCamera.GetComponent<CameraComponent>();
 
@@ -225,7 +235,6 @@ namespace Hazel
 			mainCamera.IsPrimary = !_isOnSecondCamera;
 			secondaryCamera.IsPrimary = _isOnSecondCamera;
 		}
-
 		ImGui::Separator();
 
 		if (ImGui::Button("Create square"))
@@ -233,7 +242,7 @@ namespace Hazel
 			auto color = Color::Random();
 			auto& newEntity = _activeScene->CreateEntity("Square " + color.GetHexValue());
 			newEntity.AddComponent<SpriteRendererComponent>(color);
-			newEntity.GetComponent<TransformComponent>().Transform[3] = Random::Vec4();
+			newEntity.GetComponent<TransformComponent>().Position = Random::Vec3();
 		}
 
 		ImGui::End();

@@ -21,34 +21,34 @@ namespace Hazel
 				return;
 			}
 
-			auto& transform = GetComponent<TransformComponent>().Transform;
+			auto& position = GetComponent<TransformComponent>().Position;
 			float speed = 5.0f;
 
 			if (Input::IsKeyPressed(KeyCode::A))
 			{
-				transform[3][0] -= speed * timestep;
+				position.x -= speed * timestep;
 			}
 			if (Input::IsKeyPressed(KeyCode::D))
 			{
-				transform[3][0] += speed * timestep;
+				position.x += speed * timestep;
 			}
 
 			if (Input::IsKeyPressed(KeyCode::W))
 			{
-				transform[3][1] += speed * timestep;
+				position.y += speed * timestep;
 			}
 			if (Input::IsKeyPressed(KeyCode::S))
 			{
-				transform[3][1] -= speed * timestep;
+				position.y -= speed * timestep;
 			}
 
 			if (Input::IsKeyPressed(KeyCode::E))
 			{
-				transform[3][2] -= speed * timestep;
+				position.z -= speed * timestep;
 			}
 			if (Input::IsKeyPressed(KeyCode::Q))
 			{
-				transform[3][2] += speed * timestep;
+				position.z += speed * timestep;
 			}
 		}
 

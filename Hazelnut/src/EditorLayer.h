@@ -55,5 +55,9 @@ namespace Hazel
 
 		// Panels
 		SceneHierarchyPanel _sceneHierarchyPanel;
+
+		// Tools
+		bool _isDemoWidowOpen = false;
+
 	};
 }

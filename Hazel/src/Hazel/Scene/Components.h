@@ -1,8 +1,11 @@
 #pragma once
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
 #include "Hazel/Core/Color.h"
 #include "SceneCamera.h"
 #include "ScriptableEntity.h"
+
 
 namespace Hazel
 {
@@ -19,16 +22,27 @@ namespace Hazel
 
 	struct TransformComponent
 	{
-		glm::mat4 Transform{ 1.0f };
+		glm::vec3 Position = { 0.0f, 0.0f, 0.0f };
+		glm::vec3 Rotation = { 0.0f, 0.0f, 0.0f };
+		glm::vec3 Scale = { 1.0f, 1.0f, 1.0f };
 
 		TransformComponent() = default;
 		TransformComponent(const TransformComponent&) = default;
-		TransformComponent(const glm::mat4& transform)
-			:Transform(transform)
+		TransformComponent(const glm::vec3& position)
+			:Position(position)
 		{}
 
-		operator glm::mat4& () { return Transform; }
-		operator const glm::mat4& () const { return Transform; }
+		glm::mat4 GetTransform() const
+		{
+			auto identityMatrix = glm::mat4(1.0f);
+			auto rotation = glm::rotate(identityMatrix, Rotation.x, { 1, 0, 0 })
+				* glm::rotate(identityMatrix, Rotation.y, { 0, 1, 0 })
+				* glm::rotate(identityMatrix, Rotation.z, { 0, 0, 1 });
+			
+			return glm::translate(identityMatrix, Position)
+				* rotation
+				* glm::scale(identityMatrix, Scale);
+		}
 	};
 
 	struct SpriteRendererComponent
