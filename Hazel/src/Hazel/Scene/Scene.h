@@ -6,7 +6,7 @@
 namespace Hazel
 {
 	class Entity;
-	
+
 	class Scene
 	{
 	public:
@@ -14,12 +14,15 @@ namespace Hazel
 		~Scene();
 
 		Entity CreateEntity(std::string name = std::string());
+		void DestroyEntity(Entity entity);
 
 		void OnUpdate(Timestep timestep);
 		void OnViewportResize(uint32_t  width, uint32_t height);
 
 	private:
 		void SortSpriteRendererGroup(bool forced = false);
+		template<typename T>
+		void OnComponentAdded(Entity entity, T& component);
 
 	private:
 		entt::registry _registry;

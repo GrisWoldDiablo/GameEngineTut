@@ -227,14 +227,14 @@ namespace Hazel
 		}
 		ImGui::Separator();
 
-		auto& mainCamera = _mainCamera.GetComponent<CameraComponent>();
+		/*auto& mainCamera = _mainCamera.GetComponent<CameraComponent>();
 		auto& secondaryCamera = _secondaryCamera.GetComponent<CameraComponent>();
-
+		
 		if (ImGui::Checkbox("Secondary Camera", &_isOnSecondCamera))
 		{
 			mainCamera.IsPrimary = !_isOnSecondCamera;
 			secondaryCamera.IsPrimary = _isOnSecondCamera;
-		}
+		}*/
 		ImGui::Separator();
 
 		if (ImGui::Button("Create square"))
