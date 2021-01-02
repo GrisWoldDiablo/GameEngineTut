@@ -43,6 +43,11 @@ namespace Hazel
 				instance->OnCreate();
 			}
 
+			if (!instance->IsEnable)
+			{
+				return;
+			}
+
 			instance->OnUpdate(timestep);
 		});
 

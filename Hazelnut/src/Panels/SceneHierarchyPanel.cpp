@@ -1,9 +1,9 @@
 #include "SceneHierarchyPanel.h"
+#include "Hazel/Scene/Components.h"
 
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
 
-#include "Hazel/Scene/Components.h"
 #include "glm/gtc/type_ptr.hpp"
 
 #include <fstream>
@@ -119,8 +119,7 @@ namespace Hazel
 	{
 		if (auto component = entity.TryGetComponent<T>(); component != nullptr)
 		{
-
-			ImGuiTreeNodeFlags treeNodeFlags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_Framed;
+			auto treeNodeFlags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_Framed;
 			bool isTreeOpened = ImGui::TreeNodeEx((void*)typeid(T).hash_code(), treeNodeFlags, name.c_str());
 
 			ImGui::PushID(name.c_str());
@@ -128,7 +127,7 @@ namespace Hazel
 			if (typeid(T) != typeid(TransformComponent))
 			{
 				ImGui::SameLine(ImGui::GetWindowContentRegionWidth() - 10.0f);
-				if (ImGui::Button("+", ImVec2{ 20, 20 }))
+				if (ImGui::Button("+", ImVec2{ 20, ImGui::GetItemRectSize().y }))
 				{
 					ImGui::OpenPopup("ComponentSettings");
 				}
@@ -381,8 +380,15 @@ namespace Hazel
 #pragma region NativeScriptComponent
 		DrawComponent<NativeScriptComponent>(entity, "Native Script", [](NativeScriptComponent* component)
 		{
+			ImGui::Checkbox("Active", &component->Instance->IsEnable);
+			std::string classFilePath = component->Instance->GetClassFilePath();
+			auto lastSlash = classFilePath.find("\\src\\");
+			auto count = classFilePath.size() - lastSlash;
+			auto fileName = classFilePath.substr(lastSlash, count);
+			ImGui::SameLine();
+			ImGui::TextDisabled(fileName.c_str());
 			std::string result;
-			std::ifstream inputFileStream(component->Instance->GetClassFilePath(), std::ios::in);
+			std::ifstream inputFileStream(classFilePath, std::ios::in);
 			if (!inputFileStream.bad())
 			{
 				inputFileStream.seekg(0, std::ios::end);

@@ -1,5 +1,5 @@
 #include "EditorLayer.h"
-#include "Script/NativeScripts.h"
+#include "NativeScripts.h"
 
 #include <imgui/imgui.h>
 #include <glm/gtc/type_ptr.hpp>
@@ -72,6 +72,10 @@ namespace Hazel
 
 		// Update Scene
 		_activeScene->OnUpdate(timestep);
+
+		Renderer2D::BeginScene(_cameraController.GetCamera());
+		Renderer2D::DrawQuad({ 0,0 }, { 5,5 }, _unwrapTexture);
+		Renderer2D::EndScene();
 
 		_framebuffer->Unbind();
 

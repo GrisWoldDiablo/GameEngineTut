@@ -6,6 +6,9 @@ namespace Hazel
 	class ScriptableEntity
 	{
 	public:
+		bool IsEnable = true;
+
+	public:
 		virtual ~ScriptableEntity() {}
 
 		template<typename T>
