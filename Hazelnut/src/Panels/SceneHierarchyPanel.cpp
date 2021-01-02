@@ -119,35 +119,41 @@ namespace Hazel
 	{
 		if (auto component = entity.TryGetComponent<T>(); component != nullptr)
 		{
+
 			ImGuiTreeNodeFlags treeNodeFlags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_Framed;
-			if (ImGui::TreeNodeEx((void*)typeid(T).hash_code(),treeNodeFlags, name.c_str()))
+			bool isTreeOpened = ImGui::TreeNodeEx((void*)typeid(T).hash_code(), treeNodeFlags, name.c_str());
+
+			ImGui::PushID(name.c_str());
+			bool shouldRemoveComponent = false;
+			if (typeid(T) != typeid(TransformComponent))
 			{
-				bool shouldRemoveComponent = false;
-				if (typeid(T).hash_code() != typeid(TransformComponent).hash_code())
+				ImGui::SameLine(ImGui::GetWindowContentRegionWidth() - 10.0f);
+				if (ImGui::Button("+", ImVec2{ 20, 20 }))
 				{
-					ImGui::SameLine(ImGui::GetWindowWidth() - 25.0f);
-					if (ImGui::Button("+", ImVec2{ 20, 20}))
-					{
-						ImGui::OpenPopup("ComponentSettings");
-					}
-
-					if (ImGui::BeginPopup("ComponentSettings"))
-					{
-						if (ImGui::MenuItem("Remove Component"))
-						{
-							shouldRemoveComponent = true;
-						}
-
-						ImGui::EndPopup();
-					}
+					ImGui::OpenPopup("ComponentSettings");
 				}
+
+				if (ImGui::BeginPopup("ComponentSettings"))
+				{
+					if (ImGui::MenuItem("Remove Component"))
+					{
+						shouldRemoveComponent = true;
+					}
+
+					ImGui::EndPopup();
+				}
+			}
+			ImGui::PopID();
+
+			if (isTreeOpened)
+			{
 				func(component);
 				ImGui::TreePop();
+			}
 
-				if (shouldRemoveComponent)
-				{
-					entity.RemoveComponent<T>();
-				}
+			if (shouldRemoveComponent)
+			{
+				entity.RemoveComponent<T>();
 			}
 		}
 	}

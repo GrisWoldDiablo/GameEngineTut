@@ -2,7 +2,6 @@
 #include "entt.hpp"
 #include "Hazel/Core/Timestep.h"
 
-
 namespace Hazel
 {
 	class Entity;

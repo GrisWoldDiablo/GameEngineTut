@@ -6,7 +6,6 @@
 #include "SceneCamera.h"
 #include "ScriptableEntity.h"
 
-
 namespace Hazel
 {
 	struct TagComponent

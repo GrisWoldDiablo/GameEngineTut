@@ -22,6 +22,7 @@ namespace Hazel
 		_activeScene = CreateRef<Scene>();
 		_squareEntity = _activeScene->CreateEntity("Square");
 		_squareEntity.AddComponent<SpriteRendererComponent>(Color::Green);
+		_squareEntity.AddComponent<NativeScriptComponent>().Bind<SquareJump>();
 
 		_mainCamera = _activeScene->CreateEntity("Main Camera");
 		_secondaryCamera = _activeScene->CreateEntity("Secondary Camera");
@@ -227,9 +228,10 @@ namespace Hazel
 		}
 		ImGui::Separator();
 
+		//Since we can remove and add component need to disable this for now, to revamp later.
 		/*auto& mainCamera = _mainCamera.GetComponent<CameraComponent>();
 		auto& secondaryCamera = _secondaryCamera.GetComponent<CameraComponent>();
-		
+
 		if (ImGui::Checkbox("Secondary Camera", &_isOnSecondCamera))
 		{
 			mainCamera.IsPrimary = !_isOnSecondCamera;
