@@ -22,6 +22,7 @@ namespace Hazel
 			}
 
 			auto& position = GetComponent<TransformComponent>().Position;
+			
 			float speed = 5.0f;
 
 			if (Input::IsKeyPressed(KeyCode::A))
@@ -42,13 +43,31 @@ namespace Hazel
 				position.y -= speed * timestep;
 			}
 
-			if (Input::IsKeyPressed(KeyCode::E))
+			auto& camera = GetComponent<CameraComponent>().Camera;
+			if (camera.GetProjectionType() == SceneCamera::ProjectionType::Perspective)
 			{
-				position.z -= speed * timestep;
+				if (Input::IsKeyPressed(KeyCode::E))
+				{
+					position.z -= speed * timestep;
+				}
+				if (Input::IsKeyPressed(KeyCode::Q))
+				{
+					position.z += speed * timestep;
+				}
 			}
-			if (Input::IsKeyPressed(KeyCode::Q))
+			else
 			{
-				position.z += speed * timestep;
+				auto orthographicSize = camera.GetOrthographicSize();
+				if (Input::IsKeyPressed(KeyCode::E))
+				{
+					 orthographicSize -= speed * timestep;
+					 camera.SetOrthographicSize(orthographicSize);
+				}
+				if (Input::IsKeyPressed(KeyCode::Q))
+				{
+					orthographicSize += speed * timestep;
+					camera.SetOrthographicSize(orthographicSize);
+				}
 			}
 		}
 
