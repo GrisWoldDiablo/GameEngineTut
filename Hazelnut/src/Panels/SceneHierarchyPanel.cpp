@@ -7,6 +7,7 @@
 #include "glm/gtc/type_ptr.hpp"
 
 #include <fstream>
+#include <filesystem>
 
 namespace Hazel
 {
@@ -157,6 +158,90 @@ namespace Hazel
 		}
 	}
 
+	static void DrawVec2Controls(const std::string& label, glm::vec2& values, float resetValue = 0.0f, float columnWidth = 100.0f)
+	{
+		ImGui::PushID(label.c_str());
+
+		ImGui::Columns(2, "vec2", false);
+		ImGui::SetColumnWidth(0, columnWidth);
+		ImGui::Text(label.c_str());
+		ImGui::NextColumn();
+
+		ImGui::PushMultiItemsWidths(2, ImGui::CalcItemWidth());
+		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 0.0f, 0.0f });
+
+		float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
+		ImVec2 buttonSize = { lineHeight + 3.0f, lineHeight };
+
+#pragma region ValueX
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.8f, 0.1f, 0.15f, 1.0f });
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.9f, 0.2f, 0.2f, 1.0f });
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.8f, 0.1f, 0.15f, 1.0f });
+		if (ImGui::Button("X", buttonSize))
+		{
+			values.x = resetValue;
+		}
+		ImGui::PopStyleColor(3);
+
+		ImGui::SameLine();
+		ImGui::DragFloat("##X", &values.x, 0.1f, 0.0f, 0.0f, "%.2f");
+		ImGui::PopItemWidth();
+#pragma endregion
+
+#pragma region ValueY
+		ImGui::SameLine();
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.2f, 0.7f, 0.3f, 1.0f });
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.3f, 0.8f, 0.3f, 1.0f });
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.2f, 0.7f, 0.3f, 1.0f });
+		if (ImGui::Button("Y", buttonSize))
+		{
+			values.y = resetValue;
+		}
+		ImGui::PopStyleColor(3);
+
+		ImGui::SameLine();
+		ImGui::DragFloat("##Y", &values.y, 0.1f, 0.0f, 0.0f, "%.2f");
+		ImGui::PopItemWidth();
+#pragma endregion
+
+#pragma region ResetButton
+		ImGui::SameLine();
+		ImGui::PushStyleColor(ImGuiCol_Text, ImVec4{ 0.0f, 0.0f, 0.0f, 1.0f });
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 1.0f , 0.75f, 0.0f, 1.0f });
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 1.0f, 0.85f, 0.0f, 1.0f });
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 1.0f, 0.75f, 0.0f, 1.0f });
+		if (ImGui::Button("R", buttonSize))
+		{
+			ImGui::OpenPopup("reset");
+		}
+		ImGui::PopStyleColor(4);
+
+		if (ImGui::BeginPopup("reset"))
+		{
+			ImGui::Text("Reset %s?", label.c_str());
+			ImGui::Separator();
+			if (ImGui::Button("Yes"))
+			{
+				values = glm::vec2(resetValue);
+				ImGui::CloseCurrentPopup();
+			}
+			ImGui::SameLine();
+			ImGui::Text(" ");
+			ImGui::SameLine();
+			if (ImGui::Button("Cancel"))
+			{
+				ImGui::CloseCurrentPopup();
+			}
+			ImGui::EndPopup();
+		}
+#pragma endregion
+
+
+		ImGui::PopStyleVar();
+		ImGui::Columns(1);
+		ImGui::PopID();
+	}
+
 	static void DrawVec3Controls(const std::string& label, glm::vec3& values, float resetValue = 0.0f, float columnWidth = 100.0f)
 	{
 		ImGui::PushID(label.c_str());
@@ -237,7 +322,7 @@ namespace Hazel
 			ImGui::Separator();
 			if (ImGui::Button("Yes"))
 			{
-				values = { resetValue, resetValue, resetValue };
+				values = glm::vec3(resetValue);
 				ImGui::CloseCurrentPopup();
 			}
 			ImGui::SameLine();
@@ -289,6 +374,59 @@ namespace Hazel
 #pragma region SpriteRendererComponent
 		DrawComponent<SpriteRendererComponent>(entity, "Sprite Renderer", [](SpriteRendererComponent* component)
 		{
+			ImGui::Text("Sprite");
+			ImGui::SameLine();
+			bool isSpritePressed = false;
+			if (component->Texture != nullptr)
+			{
+				isSpritePressed = ImGui::ImageButton((ImTextureID)(intptr_t)component->Texture->GetRendererID(), ImVec2(50.0f, 50.0f), ImVec2(0, 1), ImVec2(1, 0), 3);
+			}
+			else
+			{
+				isSpritePressed = ImGui::ImageButton(nullptr, ImVec2(50.0f, 50.0f), ImVec2(0, 1), ImVec2(1, 0), 3);
+			}
+			if (isSpritePressed)
+			{
+				ImGui::OpenPopup("browseFiles");
+			}
+
+			if (ImGui::BeginPopup("browseFiles"))
+			{
+				if (ImGui::MenuItem("None"))
+				{
+					component->Texture = nullptr;
+				}
+				ImGui::Separator();
+
+				std::string path;
+
+				// Goes thought all the subdirectories.
+				for (const auto& file : std::filesystem::recursive_directory_iterator("assets"))
+				{
+					auto extension = file.path().extension().string();
+
+					// TODO add more format support
+					if (extension != ".png") 
+					{
+						continue;
+					}
+
+					if (ImGui::MenuItem(file.path().string().c_str()))
+					{
+						component->Texture = Texture2D::Create(file.path().string());
+					}
+				}
+
+				ImGui::Separator();
+				if (ImGui::Button("Cancel"))
+				{
+					ImGui::CloseCurrentPopup();
+				}
+				ImGui::EndPopup();
+			}
+
+			DrawVec2Controls("Tiling", component->Tiling, 1.0f);
+
 			auto& color = component->Color;
 			auto& newColor = color;
 			if (ImGui::ColorEdit4("Color", newColor.GetValuePtr()))
@@ -350,7 +488,7 @@ namespace Hazel
 			case SceneCamera::ProjectionType::Orthographic:
 			{
 				float orthographicSize = camera.GetOrthographicSize();
-				if (ImGui::DragFloat("Size", &orthographicSize))
+				if (ImGui::DragFloat("Size", &orthographicSize, 0.1f))
 				{
 					camera.SetOrthographicSize(orthographicSize);
 				}

@@ -27,8 +27,6 @@ namespace Hazel
 		void DrawTools();
 
 	private:
-		OrthographicCameraController _cameraController;
-
 		Color _clearColor = { 0.13f, 0.13f, 0.13f, 1.0f };
 
 		Ref<Framebuffer> _framebuffer;

@@ -78,7 +78,14 @@ namespace Hazel
 		for (auto entity : group)
 		{
 			auto [transform, sprite] = group.get<TransformComponent, SpriteRendererComponent>(entity);
-			Renderer2D::DrawQuad(transform.GetTransform(), sprite.Color);
+			if (sprite.Texture == nullptr)
+			{
+				Renderer2D::DrawQuad(transform.GetTransform(), sprite.Color);
+			}
+			else
+			{
+				Renderer2D::DrawQuad(transform.GetTransform(), sprite.Texture, sprite.Tiling, sprite.Color);
+			}
 		}
 
 		Renderer2D::EndScene();
@@ -112,7 +119,7 @@ namespace Hazel
 			{
 				return lhs.Position.z < rhs.Position.z;
 			});
-			_spriteAmount = group.size();
+			_spriteAmount = (uint32_t)group.size();
 		}
 	}
 

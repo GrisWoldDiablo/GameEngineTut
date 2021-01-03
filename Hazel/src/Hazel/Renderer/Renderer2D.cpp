@@ -376,7 +376,7 @@ namespace Hazel
 		Reset();
 	}
 
-	void Renderer2D::UpdateData(const glm::mat4& transform, const Hazel::Color& color, const glm::vec2& tilingFactor, float textureIndex)
+	void Renderer2D::UpdateData(const glm::mat4& transform, const Color& color, const glm::vec2& tilingFactor, float textureIndex)
 	{
 		HZ_PROFILE_FUNCTION();
 

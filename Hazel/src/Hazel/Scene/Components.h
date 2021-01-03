@@ -5,6 +5,7 @@
 #include "Hazel/Core/Color.h"
 #include "SceneCamera.h"
 #include "ScriptableEntity.h"
+#include "Hazel/Renderer/Texture.h"
 
 namespace Hazel
 {
@@ -37,7 +38,7 @@ namespace Hazel
 			auto rotation = glm::rotate(identityMatrix, Rotation.x, { 1, 0, 0 })
 				* glm::rotate(identityMatrix, Rotation.y, { 0, 1, 0 })
 				* glm::rotate(identityMatrix, Rotation.z, { 0, 0, 1 });
-			
+
 			return glm::translate(identityMatrix, Position)
 				* rotation
 				* glm::scale(identityMatrix, Scale);
@@ -46,12 +47,18 @@ namespace Hazel
 
 	struct SpriteRendererComponent
 	{
+		Ref<Texture2D> Texture = nullptr;
+		glm::vec2 Tiling{ 1.0f, 1.0f };
 		Color Color{ Color::White };
 
 		SpriteRendererComponent() = default;
 		SpriteRendererComponent(const SpriteRendererComponent&) = default;
 		SpriteRendererComponent(const Hazel::Color& color)
 			:Color(color)
+		{}
+
+		SpriteRendererComponent(const Ref<Texture2D> texture)
+			:Texture(texture)
 		{}
 	};
 

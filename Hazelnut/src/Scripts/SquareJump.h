@@ -10,16 +10,10 @@ namespace Hazel
 		float speed = 20.0f;
 		bool isPressed = false;
 		float upward = 0.0f;
-		TransformComponent* transform;
-
-		void OnCreate() override
-		{
-			transform = &GetComponent<TransformComponent>();
-		}
 
 		void OnUpdate(Timestep timestep) override
 		{
-			auto& position = transform->Position;
+			auto& position = GetComponent<TransformComponent>().Position;
 			position.y -= gravity;
 			position.y += upward * timestep;
 			upward -= speed * timestep;

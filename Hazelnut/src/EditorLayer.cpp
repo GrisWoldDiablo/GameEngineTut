@@ -7,7 +7,7 @@
 namespace Hazel
 {
 	EditorLayer::EditorLayer()
-		: Layer("Hazel Editor"), _cameraController(1280.0f / 720.0f, true)
+		: Layer("Hazel Editor")
 	{}
 
 	void EditorLayer::OnAttach()
@@ -21,7 +21,7 @@ namespace Hazel
 		// Entity
 		_activeScene = CreateRef<Scene>();
 		_squareEntity = _activeScene->CreateEntity("Square");
-		_squareEntity.AddComponent<SpriteRendererComponent>(Color::Green);
+		_squareEntity.AddComponent<SpriteRendererComponent>(_unwrapTexture);
 		_squareEntity.AddComponent<NativeScriptComponent>().Bind<SquareJump>();
 
 		_mainCamera = _activeScene->CreateEntity("Main Camera");
@@ -48,15 +48,9 @@ namespace Hazel
 		if (_viewportSize.x > 0.0f && _viewportSize.y > 0.0f &&
 			(frameBufferSpec.Width != _viewportSize.x || frameBufferSpec.Height != _viewportSize.y))
 		{
-			_cameraController.Resize(_viewportSize.x, _viewportSize.y);
 			_activeScene->OnViewportResize((uint32_t)_viewportSize.x, (uint32_t)_viewportSize.y);
 		}
 		_framebuffer->Resize((uint32_t)_viewportSize.x, (uint32_t)_viewportSize.y);
-
-		if (_isViewportFocused)
-		{
-			_cameraController.OnUpdate(timestep);
-		}
 
 		CalculateFPS(timestep);
 
@@ -72,10 +66,6 @@ namespace Hazel
 
 		// Update Scene
 		_activeScene->OnUpdate(timestep);
-
-		Renderer2D::BeginScene(_cameraController.GetCamera());
-		Renderer2D::DrawQuad({ 0,0 }, { 5,5 }, _unwrapTexture);
-		Renderer2D::EndScene();
 
 		_framebuffer->Unbind();
 
@@ -256,11 +246,7 @@ namespace Hazel
 
 	void EditorLayer::OnEvent(Event& event)
 	{
-		// #HACK to remove. 
-		if (event.GetEventType() != EventType::WindowResize)
-		{
-			_cameraController.OnEvent(event);
-		}
+
 	}
 
 	void EditorLayer::CalculateFPS(Timestep timestep)
