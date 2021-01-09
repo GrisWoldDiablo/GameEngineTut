@@ -233,12 +233,15 @@ namespace Hazel
 		}*/
 		ImGui::Separator();
 
-		if (ImGui::Button("Create square"))
+		if (ImGui::Button("Create 50 squares"))
 		{
-			auto color = Color::Random();
-			auto& newEntity = _activeScene->CreateEntity("Square " + color.GetHexValue());
-			newEntity.AddComponent<SpriteRendererComponent>(color);
-			newEntity.GetComponent<TransformComponent>().Position = Random::Vec3();
+			for (int i = 50 - 1; i >= 0; i--)
+			{
+				auto color = Color::Random();
+				auto& newEntity = _activeScene->CreateEntity("Square " + std::to_string(i) + ":" + color.GetHexValue());
+				newEntity.AddComponent<SpriteRendererComponent>(color);
+				newEntity.GetComponent<TransformComponent>().Position = Random::Vec3();
+			}
 		}
 
 		ImGui::End();

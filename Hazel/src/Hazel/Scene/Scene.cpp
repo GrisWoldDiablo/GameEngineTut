@@ -72,8 +72,12 @@ namespace Hazel
 
 		Renderer2D::BeginScene(*mainCamera, cameraTransform);
 
-		SortSpriteRendererGroup();
 		auto group = _registry.group<TransformComponent>(entt::get<SpriteRendererComponent>);
+
+		group.sort<TransformComponent>([](const auto& lhs, const auto& rhs)
+		{
+			return lhs.Position.z < rhs.Position.z;
+		});
 
 		for (auto entity : group)
 		{
@@ -106,20 +110,6 @@ namespace Hazel
 			{
 				cameraComponent.Camera.SetViewportSize(width, height);
 			}
-		}
-	}
-
-	void Scene::SortSpriteRendererGroup(bool forced)
-	{
-		auto group = _registry.group<TransformComponent>(entt::get<SpriteRendererComponent>);
-
-		if (forced || _spriteAmount != group.size())
-		{
-			group.sort<TransformComponent>([](const auto& lhs, const auto& rhs)
-			{
-				return lhs.Position.z < rhs.Position.z;
-			});
-			_spriteAmount = (uint32_t)group.size();
 		}
 	}
 
