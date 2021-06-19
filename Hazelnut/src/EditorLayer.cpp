@@ -55,7 +55,7 @@ namespace Hazel
 		CalculateFPS(timestep);
 
 #if !HZ_PROFILE
-		SafetyShutdownCheck();
+		//SafetyShutdownCheck();
 #endif // !HZ_PROFILE
 
 		Renderer2D::ResetStats();
@@ -137,11 +137,17 @@ namespace Hazel
 
 		// DockSpace
 		ImGuiIO& io = ImGui::GetIO();
+		ImGuiStyle& style = ImGui::GetStyle();
+		auto originalWindowMinSize = style.WindowMinSize;
+		style.WindowMinSize.x = 370.0f;
+
 		if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable)
 		{
 			ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
 			ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
 		}
+
+		style.WindowMinSize = originalWindowMinSize;
 
 		if (ImGui::BeginMenuBar())
 		{

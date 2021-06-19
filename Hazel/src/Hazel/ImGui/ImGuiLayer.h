@@ -19,6 +19,7 @@ namespace Hazel
 
 		void BlockEvents(bool block) { _isBlockingEvents = block; }
 
+		void SetDarkThemeColors();
 	private:
 		bool _isBlockingEvents = true;
 	};

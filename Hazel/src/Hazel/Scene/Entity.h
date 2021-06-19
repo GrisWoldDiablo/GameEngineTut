@@ -17,7 +17,7 @@ namespace Hazel
 		T& AddComponent(Args&&... args)
 		{
 			HZ_CORE_ASSERT(!HasComponent<T>(), "Entity already has component!");
-			auto& component =  _scene->_registry.emplace<T>(_entityHandle, std::forward<Args>(args)...);
+			auto& component = _scene->_registry.emplace<T>(_entityHandle, std::forward<Args>(args)...);
 			_scene->OnComponentAdded<T>(*this, component);
 			return component;
 		}

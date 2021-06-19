@@ -11,6 +11,248 @@
 
 namespace Hazel
 {
+	template<typename T, typename UIFunction>
+	static void DrawComponent(Entity entity, const std::string& name, UIFunction uiFunction)
+	{
+		if (auto component = entity.TryGetComponent<T>(); component != nullptr)
+		{
+			const auto treeNodeFlags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_FramePadding;
+
+			auto contentRegionAvailable = ImGui::GetContentRegionAvail();
+
+			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{ 4,4 });
+			float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
+			ImGui::Separator();
+			bool isTreeOpened = ImGui::TreeNodeEx((void*)typeid(T).hash_code(), treeNodeFlags, name.c_str());
+			ImGui::PopStyleVar();
+
+			ImGui::PushID(name.c_str());
+			bool shouldRemoveComponent = false;
+			if (typeid(T) != typeid(TransformComponent))
+			{
+				ImGui::SameLine(contentRegionAvailable.x - lineHeight * 0.5f);
+				if (ImGui::Button("+", ImVec2{ lineHeight, lineHeight }))
+				{
+					ImGui::OpenPopup("ComponentSettings");
+				}
+
+				if (ImGui::BeginPopup("ComponentSettings"))
+				{
+					if (ImGui::MenuItem("Remove Component"))
+					{
+						shouldRemoveComponent = true;
+					}
+
+					ImGui::EndPopup();
+				}
+			}
+			ImGui::PopID();
+
+			if (isTreeOpened)
+			{
+				uiFunction(component);
+				ImGui::TreePop();
+			}
+
+			if (shouldRemoveComponent)
+			{
+				entity.RemoveComponent<T>();
+			}
+		}
+	}
+
+	static void DrawVec2Controls(const std::string& label, glm::vec2& values, float resetValue = 0.0f, float columnWidth = 100.0f)
+	{
+		auto& io = ImGui::GetIO();
+		auto boldFont = io.Fonts->Fonts[0];
+
+		ImGui::PushID(label.c_str());
+
+		ImGui::Columns(2, "vec2", false);
+		ImGui::SetColumnWidth(0, columnWidth);
+
+		float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
+
+#pragma region ResetButton
+		if (ImGui::Button(label.c_str(), {columnWidth,lineHeight}))
+		{
+			ImGui::OpenPopup("reset");
+		}
+
+		if (ImGui::BeginPopup("reset"))
+		{
+			ImGui::Text("Reset %s?", label.c_str());
+			ImGui::Separator();
+			if (ImGui::Button("Yes"))
+			{
+				values = glm::vec2(resetValue);
+				ImGui::CloseCurrentPopup();
+			}
+			ImGui::SameLine();
+			ImGui::Text(" ");
+			ImGui::SameLine();
+			if (ImGui::Button("Cancel"))
+			{
+				ImGui::CloseCurrentPopup();
+			}
+			ImGui::EndPopup();
+		}
+#pragma endregion
+
+		ImGui::NextColumn();
+
+		ImGui::PushMultiItemsWidths(2, ImGui::CalcItemWidth());
+		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 0.0f, 0.0f });
+
+		ImVec2 buttonSize = { lineHeight + 3.0f, lineHeight };
+
+#pragma region ValueX
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.8f, 0.1f, 0.15f, 1.0f });
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.9f, 0.2f, 0.2f, 1.0f });
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.8f, 0.1f, 0.15f, 1.0f });
+		ImGui::PushFont(boldFont);
+		if (ImGui::Button("X", buttonSize))
+		{
+			values.x = resetValue;
+		}
+		ImGui::PopFont();
+		ImGui::PopStyleColor(3);
+
+		ImGui::SameLine();
+		ImGui::DragFloat("##X", &values.x, 0.1f, 0.0f, 0.0f, "%.2f");
+		ImGui::PopItemWidth();
+#pragma endregion
+
+#pragma region ValueY
+		ImGui::SameLine();
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.2f, 0.7f, 0.3f, 1.0f });
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.3f, 0.8f, 0.3f, 1.0f });
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.2f, 0.7f, 0.3f, 1.0f });
+		ImGui::PushFont(boldFont);
+		if (ImGui::Button("Y", buttonSize))
+		{
+			values.y = resetValue;
+		}
+		ImGui::PopFont();
+		ImGui::PopStyleColor(3);
+
+		ImGui::SameLine();
+		ImGui::DragFloat("##Y", &values.y, 0.1f, 0.0f, 0.0f, "%.2f");
+		ImGui::PopItemWidth();
+#pragma endregion
+
+
+
+		ImGui::PopStyleVar();
+		ImGui::Columns(1);
+		ImGui::PopID();
+	}
+
+	static void DrawVec3Controls(const std::string& label, glm::vec3& values, float resetValue = 0.0f, float columnWidth = 100.0f)
+	{
+		auto& io = ImGui::GetIO();
+		auto boldFont = io.Fonts->Fonts[0];
+
+		ImGui::PushID(label.c_str());
+
+		ImGui::Columns(2, "vec3", false);
+		ImGui::SetColumnWidth(0, columnWidth);
+
+		float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
+#pragma region LabelResetButton
+		if (ImGui::Button(label.c_str(), { columnWidth,lineHeight }))
+		{
+			ImGui::OpenPopup("reset");
+		}
+
+		if (ImGui::BeginPopup("reset"))
+		{
+			ImGui::Text("Reset %s?", label.c_str());
+			ImGui::Separator();
+			if (ImGui::Button("Yes"))
+			{
+				values = glm::vec3(resetValue);
+				ImGui::CloseCurrentPopup();
+			}
+			ImGui::SameLine();
+			ImGui::Text(" ");
+			ImGui::SameLine();
+			if (ImGui::Button("Cancel"))
+			{
+				ImGui::CloseCurrentPopup();
+			}
+			ImGui::EndPopup();
+		}
+#pragma endregion
+
+		ImGui::NextColumn();
+
+		ImGui::PushMultiItemsWidths(3, ImGui::CalcItemWidth());
+		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 0.0f, 0.0f });
+
+		ImVec2 buttonSize = { lineHeight + 3.0f, lineHeight };
+
+#pragma region ValueX
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.8f, 0.1f, 0.15f, 1.0f });
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.9f, 0.2f, 0.2f, 1.0f });
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.8f, 0.1f, 0.15f, 1.0f });
+		ImGui::PushFont(boldFont);
+		if (ImGui::Button("X", buttonSize))
+		{
+			values.x = resetValue;
+		}
+		ImGui::PopFont();
+		ImGui::PopStyleColor(3);
+
+		ImGui::SameLine();
+		ImGui::DragFloat("##X", &values.x, 0.1f, 0.0f, 0.0f, "%.2f");
+		ImGui::PopItemWidth();
+#pragma endregion
+
+#pragma region ValueY
+		ImGui::SameLine();
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.2f, 0.7f, 0.3f, 1.0f });
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.3f, 0.8f, 0.3f, 1.0f });
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.2f, 0.7f, 0.3f, 1.0f });
+		ImGui::PushFont(boldFont);
+		if (ImGui::Button("Y", buttonSize))
+		{
+			values.y = resetValue;
+		}
+		ImGui::PopFont();
+		ImGui::PopStyleColor(3);
+
+		ImGui::SameLine();
+		ImGui::DragFloat("##Y", &values.y, 0.1f, 0.0f, 0.0f, "%.2f");
+		ImGui::PopItemWidth();
+#pragma endregion
+
+#pragma region ValueZ
+		ImGui::SameLine();
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.1f ,0.25f, 0.8f, 1.0f });
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.2f, 0.35f, 0.9f, 1.0f });
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.1f, 0.25f, 0.8f, 1.0f });
+		ImGui::PushFont(boldFont);
+		if (ImGui::Button("Z", buttonSize))
+		{
+			values.z = resetValue;
+		}
+		ImGui::PopFont();
+		ImGui::PopStyleColor(3);
+
+		ImGui::SameLine();
+		ImGui::DragFloat("##Z", &values.z, 0.1f, 0.0f, 0.0f, "%.2f");
+		ImGui::PopItemWidth();
+#pragma endregion
+
+
+
+
+		ImGui::PopStyleVar();
+		ImGui::Columns(1);
+		ImGui::PopID();
+	}
+
 	SceneHierarchyPanel::SceneHierarchyPanel(const Ref<Scene>& context)
 	{
 		SetContext(context);
@@ -52,28 +294,6 @@ namespace Hazel
 		if (_selectionContext != Entity::Null)
 		{
 			DrawComponents(_selectionContext);
-
-			if (ImGui::Button("Add Component"))
-			{
-				ImGui::OpenPopup("AddComponent");
-			}
-
-			if (ImGui::BeginPopup("AddComponent"))
-			{
-				if (ImGui::MenuItem("Camera"))
-				{
-					_selectionContext.AddComponent<CameraComponent>();
-					ImGui::CloseCurrentPopup();
-				}
-
-				if (ImGui::MenuItem("Sprite Renderer"))
-				{
-					_selectionContext.AddComponent<SpriteRendererComponent>();
-					ImGui::CloseCurrentPopup();
-				}
-
-				ImGui::EndPopup();
-			}
 		}
 
 		ImGui::End();
@@ -84,6 +304,7 @@ namespace Hazel
 		auto& tag = entity.GetComponent<TagComponent>().Tag;
 
 		ImGuiTreeNodeFlags flags = ((_selectionContext == entity) ? ImGuiTreeNodeFlags_Selected : 0) | ImGuiTreeNodeFlags_OpenOnArrow;
+		flags |= ImGuiTreeNodeFlags_SpanAvailWidth;
 		bool expanded = ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)entity, flags, tag.c_str());
 		if (ImGui::IsItemClicked())
 		{
@@ -115,233 +336,6 @@ namespace Hazel
 		}
 	}
 
-	template<typename T, typename Func>
-	void Hazel::SceneHierarchyPanel::DrawComponent(Entity entity, const std::string& name, Func func)
-	{
-		if (auto component = entity.TryGetComponent<T>(); component != nullptr)
-		{
-			auto treeNodeFlags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_Framed;
-			bool isTreeOpened = ImGui::TreeNodeEx((void*)typeid(T).hash_code(), treeNodeFlags, name.c_str());
-
-			ImGui::PushID(name.c_str());
-			bool shouldRemoveComponent = false;
-			if (typeid(T) != typeid(TransformComponent))
-			{
-				ImGui::SameLine(ImGui::GetWindowContentRegionWidth() - 10.0f);
-				if (ImGui::Button("+", ImVec2{ 20, ImGui::GetItemRectSize().y }))
-				{
-					ImGui::OpenPopup("ComponentSettings");
-				}
-
-				if (ImGui::BeginPopup("ComponentSettings"))
-				{
-					if (ImGui::MenuItem("Remove Component"))
-					{
-						shouldRemoveComponent = true;
-					}
-
-					ImGui::EndPopup();
-				}
-			}
-			ImGui::PopID();
-
-			if (isTreeOpened)
-			{
-				func(component);
-				ImGui::TreePop();
-			}
-
-			if (shouldRemoveComponent)
-			{
-				entity.RemoveComponent<T>();
-			}
-		}
-	}
-
-	static void DrawVec2Controls(const std::string& label, glm::vec2& values, float resetValue = 0.0f, float columnWidth = 100.0f)
-	{
-		ImGui::PushID(label.c_str());
-
-		ImGui::Columns(2, "vec2", false);
-		ImGui::SetColumnWidth(0, columnWidth);
-		ImGui::Text(label.c_str());
-		ImGui::NextColumn();
-
-		ImGui::PushMultiItemsWidths(2, ImGui::CalcItemWidth());
-		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 0.0f, 0.0f });
-
-		float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
-		ImVec2 buttonSize = { lineHeight + 3.0f, lineHeight };
-
-#pragma region ValueX
-		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.8f, 0.1f, 0.15f, 1.0f });
-		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.9f, 0.2f, 0.2f, 1.0f });
-		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.8f, 0.1f, 0.15f, 1.0f });
-		if (ImGui::Button("X", buttonSize))
-		{
-			values.x = resetValue;
-		}
-		ImGui::PopStyleColor(3);
-
-		ImGui::SameLine();
-		ImGui::DragFloat("##X", &values.x, 0.1f, 0.0f, 0.0f, "%.2f");
-		ImGui::PopItemWidth();
-#pragma endregion
-
-#pragma region ValueY
-		ImGui::SameLine();
-		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.2f, 0.7f, 0.3f, 1.0f });
-		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.3f, 0.8f, 0.3f, 1.0f });
-		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.2f, 0.7f, 0.3f, 1.0f });
-		if (ImGui::Button("Y", buttonSize))
-		{
-			values.y = resetValue;
-		}
-		ImGui::PopStyleColor(3);
-
-		ImGui::SameLine();
-		ImGui::DragFloat("##Y", &values.y, 0.1f, 0.0f, 0.0f, "%.2f");
-		ImGui::PopItemWidth();
-#pragma endregion
-
-#pragma region ResetButton
-		ImGui::SameLine();
-		ImGui::PushStyleColor(ImGuiCol_Text, ImVec4{ 0.0f, 0.0f, 0.0f, 1.0f });
-		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 1.0f , 0.75f, 0.0f, 1.0f });
-		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 1.0f, 0.85f, 0.0f, 1.0f });
-		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 1.0f, 0.75f, 0.0f, 1.0f });
-		if (ImGui::Button("R", buttonSize))
-		{
-			ImGui::OpenPopup("reset");
-		}
-		ImGui::PopStyleColor(4);
-
-		if (ImGui::BeginPopup("reset"))
-		{
-			ImGui::Text("Reset %s?", label.c_str());
-			ImGui::Separator();
-			if (ImGui::Button("Yes"))
-			{
-				values = glm::vec2(resetValue);
-				ImGui::CloseCurrentPopup();
-			}
-			ImGui::SameLine();
-			ImGui::Text(" ");
-			ImGui::SameLine();
-			if (ImGui::Button("Cancel"))
-			{
-				ImGui::CloseCurrentPopup();
-			}
-			ImGui::EndPopup();
-		}
-#pragma endregion
-
-
-		ImGui::PopStyleVar();
-		ImGui::Columns(1);
-		ImGui::PopID();
-	}
-
-	static void DrawVec3Controls(const std::string& label, glm::vec3& values, float resetValue = 0.0f, float columnWidth = 100.0f)
-	{
-		ImGui::PushID(label.c_str());
-
-		ImGui::Columns(2, "vec3", false);
-		ImGui::SetColumnWidth(0, columnWidth);
-		ImGui::Text(label.c_str());
-		ImGui::NextColumn();
-
-		ImGui::PushMultiItemsWidths(3, ImGui::CalcItemWidth());
-		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 0.0f, 0.0f });
-
-		float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
-		ImVec2 buttonSize = { lineHeight + 3.0f, lineHeight };
-
-#pragma region ValueX
-		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.8f, 0.1f, 0.15f, 1.0f });
-		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.9f, 0.2f, 0.2f, 1.0f });
-		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.8f, 0.1f, 0.15f, 1.0f });
-		if (ImGui::Button("X", buttonSize))
-		{
-			values.x = resetValue;
-		}
-		ImGui::PopStyleColor(3);
-
-		ImGui::SameLine();
-		ImGui::DragFloat("##X", &values.x, 0.1f, 0.0f, 0.0f, "%.2f");
-		ImGui::PopItemWidth();
-#pragma endregion
-
-#pragma region ValueY
-		ImGui::SameLine();
-		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.2f, 0.7f, 0.3f, 1.0f });
-		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.3f, 0.8f, 0.3f, 1.0f });
-		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.2f, 0.7f, 0.3f, 1.0f });
-		if (ImGui::Button("Y", buttonSize))
-		{
-			values.y = resetValue;
-		}
-		ImGui::PopStyleColor(3);
-
-		ImGui::SameLine();
-		ImGui::DragFloat("##Y", &values.y, 0.1f, 0.0f, 0.0f, "%.2f");
-		ImGui::PopItemWidth();
-#pragma endregion
-
-#pragma region ValueZ
-		ImGui::SameLine();
-		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.1f ,0.25f, 0.8f, 1.0f });
-		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.2f, 0.35f, 0.9f, 1.0f });
-		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.1f, 0.25f, 0.8f, 1.0f });
-		if (ImGui::Button("Z", buttonSize))
-		{
-			values.z = resetValue;
-		}
-		ImGui::PopStyleColor(3);
-
-		ImGui::SameLine();
-		ImGui::DragFloat("##Z", &values.z, 0.1f, 0.0f, 0.0f, "%.2f");
-		ImGui::PopItemWidth();
-#pragma endregion
-
-#pragma region ResetButton
-		ImGui::SameLine();
-		ImGui::PushStyleColor(ImGuiCol_Text, ImVec4{ 0.0f, 0.0f, 0.0f, 1.0f });
-		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 1.0f , 0.75f, 0.0f, 1.0f });
-		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 1.0f, 0.85f, 0.0f, 1.0f });
-		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 1.0f, 0.75f, 0.0f, 1.0f });
-		if (ImGui::Button("R", buttonSize))
-		{
-			ImGui::OpenPopup("reset");
-		}
-		ImGui::PopStyleColor(4);
-
-		if (ImGui::BeginPopup("reset"))
-		{
-			ImGui::Text("Reset %s?", label.c_str());
-			ImGui::Separator();
-			if (ImGui::Button("Yes"))
-			{
-				values = glm::vec3(resetValue);
-				ImGui::CloseCurrentPopup();
-			}
-			ImGui::SameLine();
-			ImGui::Text(" ");
-			ImGui::SameLine();
-			if (ImGui::Button("Cancel"))
-			{
-				ImGui::CloseCurrentPopup();
-			}
-			ImGui::EndPopup();
-		}
-#pragma endregion
-
-
-		ImGui::PopStyleVar();
-		ImGui::Columns(1);
-		ImGui::PopID();
-	}
-
 	void SceneHierarchyPanel::DrawComponents(Entity entity)
 	{
 #pragma region TagComponent
@@ -351,10 +345,25 @@ namespace Hazel
 			char buffer[256];
 			memset(buffer, 0, sizeof(buffer));
 			strcpy_s(buffer, sizeof(buffer), tag.c_str());
-			if (ImGui::InputText(":Tag", buffer, sizeof(buffer)))
+			if (ImGui::InputText("##:Tag", buffer, sizeof(buffer)))
 			{
 				tag = std::string(buffer);
 			}
+
+			ImGui::SameLine();
+			ImGui::PushItemWidth(-1);
+			if (ImGui::Button("Add Component"))
+			{
+				ImGui::OpenPopup("AddComponent");
+			}
+
+			if (ImGui::BeginPopup("AddComponent"))
+			{
+				AddComponentMenu<CameraComponent>();
+				AddComponentMenu<SpriteRendererComponent>();
+				ImGui::EndPopup();
+			}
+			ImGui::PopItemWidth();
 		}
 #pragma endregion
 
@@ -406,7 +415,7 @@ namespace Hazel
 					auto extension = file.path().extension().string();
 
 					// TODO add more format support
-					if (extension != ".png") 
+					if (extension != ".png")
 					{
 						continue;
 					}
@@ -541,4 +550,26 @@ namespace Hazel
 		});
 #pragma endregion
 	}
+
+	template<typename T>
+	void SceneHierarchyPanel::AddComponentMenu()
+	{
+		auto nameId = std::string(typeid(T).name());
+		nameId = nameId.erase(0, nameId.find_last_of(':') + 1);
+		nameId = nameId.erase(nameId.find("Component"), nameId.length());
+
+		if (!_selectionContext.HasComponent<T>())
+		{
+			if (ImGui::MenuItem(nameId.c_str()))
+			{
+				_selectionContext.AddComponent<T>();
+				ImGui::CloseCurrentPopup();
+			}
+		}
+		else
+		{
+			ImGui::TextDisabled(nameId.c_str());
+		}
+	}
+
 }
