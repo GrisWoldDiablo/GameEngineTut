@@ -2,6 +2,8 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+#include <glm/gtx/quaternion.hpp>
+
 #include "Hazel/Core/Color.h"
 #include "SceneCamera.h"
 #include "ScriptableEntity.h"
@@ -35,9 +37,7 @@ namespace Hazel
 		glm::mat4 GetTransform() const
 		{
 			auto identityMatrix = glm::mat4(1.0f);
-			auto rotation = glm::rotate(identityMatrix, Rotation.x, { 1, 0, 0 })
-				* glm::rotate(identityMatrix, Rotation.y, { 0, 1, 0 })
-				* glm::rotate(identityMatrix, Rotation.z, { 0, 0, 1 });
+			auto rotation = glm::toMat4(glm::quat(Rotation));
 
 			return glm::translate(identityMatrix, Position)
 				* rotation

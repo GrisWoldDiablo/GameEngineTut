@@ -25,12 +25,12 @@ namespace Hazel
 		_squareEntity.AddComponent<NativeScriptComponent>().Bind<SquareJump>();
 
 		_mainCamera = _activeScene->CreateEntity("Main Camera");
-		_secondaryCamera = _activeScene->CreateEntity("Secondary Camera");
+		//_secondaryCamera = _activeScene->CreateEntity("Secondary Camera");
 		_mainCamera.AddComponent<CameraComponent>();
-		_secondaryCamera.AddComponent<CameraComponent>().IsPrimary = false;
+		//_secondaryCamera.AddComponent<CameraComponent>().IsPrimary = false;
 
 		_mainCamera.AddComponent<NativeScriptComponent>().Bind<CameraController>();
-		_secondaryCamera.AddComponent<NativeScriptComponent>().Bind<CameraController>();
+		//_secondaryCamera.AddComponent<NativeScriptComponent>().Bind<CameraController>();
 		_sceneHierarchyPanel.SetContext(_activeScene);
 	}
 
@@ -222,7 +222,7 @@ namespace Hazel
 			_isDemoWidowOpen = !_isDemoWidowOpen;
 		}
 
-		if(_isDemoWidowOpen)
+		if (_isDemoWidowOpen)
 		{
 			ImGui::ShowDemoWindow(&_isDemoWidowOpen);
 		}

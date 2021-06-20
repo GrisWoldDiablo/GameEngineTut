@@ -74,7 +74,7 @@ namespace Hazel
 		float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
 
 #pragma region ResetButton
-		if (ImGui::Button(label.c_str(), {columnWidth,lineHeight}))
+		if (ImGui::Button(label.c_str(), { columnWidth,lineHeight }))
 		{
 			ImGui::OpenPopup("reset");
 		}

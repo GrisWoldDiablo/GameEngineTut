@@ -106,7 +106,7 @@ namespace Hazel
 		sData.QuadVertexPositions[1] = { 0.5f,-0.5f, 0.0f, 1.0f };
 		sData.QuadVertexPositions[2] = { 0.5f, 0.5f, 0.0f, 1.0f };
 		sData.QuadVertexPositions[3] = { -0.5f, 0.5f, 0.0f, 1.0f };
-		
+
 		sData.QuadTextureCoordinates = new glm::vec2[4];
 	}
 
@@ -195,7 +195,7 @@ namespace Hazel
 
 		DrawQuad(transform, color);
 	}
-	
+
 	void Renderer2D::DrawRotatedQuad(const glm::vec2& position, const glm::vec2& size, float rotation, const Color& color)
 	{
 		DrawRotatedQuad({ position.x, position.y, 0.0f }, size, rotation, color);
@@ -211,7 +211,7 @@ namespace Hazel
 
 		DrawQuad(transform, color);
 	}
-	
+
 	void Renderer2D::DrawQuad(const glm::mat4& transform, const Color& color)
 	{
 		HZ_PROFILE_FUNCTION();
@@ -233,7 +233,7 @@ namespace Hazel
 
 		DrawQuad(transform, texture, tilingFactor, tintColor);
 	}
-	
+
 	void Renderer2D::DrawRotatedQuad(const glm::vec2& position, const glm::vec2& size, float rotation, const Ref<Texture2D>& texture, const glm::vec2& tilingFactor, const Color& tintColor)
 	{
 		DrawRotatedQuad({ position.x, position.y, 0.0f }, size, rotation, texture, tilingFactor, tintColor);
@@ -249,7 +249,7 @@ namespace Hazel
 
 		DrawQuad(transform, texture, tilingFactor, tintColor);
 	}
-	
+
 	void Renderer2D::DrawQuad(const glm::mat4& transform, const Ref<Texture2D>& texture, const glm::vec2& tilingFactor, const Color& tintColor)
 	{
 		HZ_PROFILE_FUNCTION();
@@ -301,7 +301,7 @@ namespace Hazel
 
 		DrawQuad(transform, subTexture, tilingFactor, tintColor);
 	}
-	
+
 	void Renderer2D::DrawRotatedQuad(const glm::vec2& position, const glm::vec2& size, float rotation, const Ref<SubTexture2D>& subTexture, const glm::vec2& tilingFactor, const Color& tintColor)
 	{
 		DrawRotatedQuad({ position.x, position.y, 0.0f }, size, rotation, subTexture, tilingFactor, tintColor);
@@ -317,7 +317,7 @@ namespace Hazel
 
 		DrawQuad(transform, subTexture, tilingFactor, tintColor);
 	}
-	
+
 	void Renderer2D::DrawQuad(const glm::mat4& transform, const Ref<SubTexture2D>& subTexture, const glm::vec2& tilingFactor, const Color& tintColor)
 	{
 		HZ_PROFILE_FUNCTION();

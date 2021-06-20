@@ -22,7 +22,7 @@ namespace Hazel
 		void DrawComponents(Entity entity);
 		template<typename T>
 		void AddComponentMenu();
-		
+
 	private:
 		Ref<Scene> _context;
 		Entity _selectionContext;
