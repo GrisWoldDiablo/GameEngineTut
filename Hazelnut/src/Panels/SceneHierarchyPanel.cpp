@@ -422,6 +422,7 @@ namespace Hazel
 
 					if (ImGui::MenuItem(file.path().string().c_str()))
 					{
+						// TODO Look use texture assets
 						component->Texture = Texture2D::Create(file.path().string());
 					}
 				}

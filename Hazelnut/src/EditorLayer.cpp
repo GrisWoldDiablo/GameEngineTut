@@ -4,6 +4,8 @@
 #include <imgui/imgui.h>
 #include <glm/gtc/type_ptr.hpp>
 
+#include "Hazel/Scene/SceneSerializer.h"
+
 namespace Hazel
 {
 	EditorLayer::EditorLayer()
@@ -17,9 +19,10 @@ namespace Hazel
 		_unwrapTexture = Texture2D::Create("assets/textures/unwrap_helper.png");
 
 		_framebuffer = Framebuffer::Create({ 1280,720 });
-
-		// Entity
 		_activeScene = CreateRef<Scene>();
+
+#if 0
+		// Entity
 		_squareEntity = _activeScene->CreateEntity("Square");
 		_squareEntity.AddComponent<SpriteRendererComponent>(_unwrapTexture);
 		_squareEntity.AddComponent<NativeScriptComponent>().Bind<SquareJump>();
@@ -31,6 +34,9 @@ namespace Hazel
 
 		_mainCamera.AddComponent<NativeScriptComponent>().Bind<CameraController>();
 		//_secondaryCamera.AddComponent<NativeScriptComponent>().Bind<CameraController>();
+
+#endif // 0
+
 		_sceneHierarchyPanel.SetContext(_activeScene);
 	}
 
@@ -153,6 +159,18 @@ namespace Hazel
 		{
 			if (ImGui::BeginMenu("File"))
 			{
+				if (ImGui::MenuItem("Serialize"))
+				{
+					SceneSerializer serializer(_activeScene);
+					serializer.Serialize("assets/scenes/Example.hazel");
+				}
+
+				if (ImGui::MenuItem("Deseriliaze"))
+				{
+					SceneSerializer serializer(_activeScene);
+					serializer.Deserialize("assets/scenes/Example.hazel");
+				}
+
 				if (ImGui::MenuItem("Exit"))
 				{
 					HZ_LCRITICAL("Exiting application.");
@@ -189,7 +207,7 @@ namespace Hazel
 		_viewportSize = { viewportPanelSize.x,viewportPanelSize.y };
 
 		auto textureID = _framebuffer->GetColorAttachmentRenderID();
-		ImGui::Image((void*)textureID, { _viewportSize.x,_viewportSize.y }, ImVec2{ 0,1 }, ImVec2{ 1,0 });
+		ImGui::Image((void*)((uint64_t)textureID), { _viewportSize.x,_viewportSize.y }, ImVec2{ 0,1 }, ImVec2{ 1,0 });
 
 		ImGui::End();
 
