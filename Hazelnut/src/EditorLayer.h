@@ -1,6 +1,7 @@
 #pragma once
 #include "Hazel.h"
 #include "Panels/SceneHierarchyPanel.h"
+#include "Hazel/Events/KeyEvent.h"
 
 namespace Hazel
 {
@@ -14,17 +15,23 @@ namespace Hazel
 		void OnDetach() override;
 
 		void OnUpdate(Timestep timestep) override;
-
-		void SafetyShutdownCheck();
-
 		void OnImGuiRender(Timestep timestep) override;
 		void OnEvent(Event& event) override;
 
 	private:
-		void CalculateFPS(Timestep timestep);
+		bool OnKeyPressed(KeyPressedEvent& event);
+
+		void NewScene();
+		void OpenScene();
+		void SaveSceneAs();
+
+	private:
+		void DrawFileMenu();
 		void DrawViewport();
 		void DrawStats(Timestep timestep);
 		void DrawTools();
+		void SafetyShutdownCheck();
+		void CalculateFPS(Timestep timestep);
 
 	private:
 		Color _clearColor = { 0.13f, 0.13f, 0.13f, 1.0f };

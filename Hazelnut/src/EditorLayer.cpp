@@ -5,6 +5,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "Hazel/Scene/SceneSerializer.h"
+#include "Hazel/Utils/PlatformUtils.h"
 
 namespace Hazel
 {
@@ -78,33 +79,6 @@ namespace Hazel
 		_updateTimer.Stop();
 	}
 
-	/// <summary>
-	/// If FPS goes below 2, shutdown.
-	/// </summary>
-	void EditorLayer::SafetyShutdownCheck()
-	{
-		// Safety shutdown 
-		if (_currentFPS < 2)
-		{
-			if (_lowFrames == 0)
-			{
-				HZ_LERROR("Application will shutdown after 10 frames below 2 FPS.", _lowFrames);
-			}
-			_lowFrames++;
-			HZ_LERROR("Frame #{0}", _lowFrames);
-			if (_lowFrames >= 10)
-			{
-				HZ_LCRITICAL("Shuting down.");
-				Application::Get().Stop();
-			}
-		}
-		else if (_lowFrames != 0)
-		{
-			HZ_LINFO("Back to 2 FPS or above.");
-			_lowFrames = 0;
-		}
-	}
-
 	void EditorLayer::OnImGuiRender(Timestep timestep)
 	{
 		HZ_PROFILE_FUNCTION();
@@ -155,21 +129,117 @@ namespace Hazel
 
 		style.WindowMinSize = originalWindowMinSize;
 
+		DrawFileMenu();
+		DrawStats(timestep);
+		DrawViewport();
+		DrawTools();
+
+		_sceneHierarchyPanel.OnImGuiRender(timestep);
+
+		ImGui::End();
+	}
+
+	void EditorLayer::OnEvent(Event& event)
+	{
+		EventDispatcher dispatcher(event);
+		dispatcher.Dispatch<KeyPressedEvent>(HZ_BIND_EVENT_FN(OnKeyPressed));
+	}
+
+	bool EditorLayer::OnKeyPressed(KeyPressedEvent& event)
+	{
+		if (event.GetRepeatCount() > 0)
+		{
+			return false;
+		}
+
+		bool isControlPressed = Input::IsKeyPressed(KeyCode::LeftControl) || Input::IsKeyPressed(KeyCode::RightControl);
+		bool isShiftPressed = Input::IsKeyPressed(KeyCode::LeftShift) || Input::IsKeyPressed(KeyCode::RightShift);
+		switch (event.GetKeyCode())
+		{
+		case KeyCode::N:
+			if (isControlPressed)
+			{
+				NewScene();
+			}
+			break;
+		case KeyCode::O:
+			if (isControlPressed)
+			{
+				OpenScene();
+			}
+			break;
+		case KeyCode::S:
+			if (isControlPressed && isShiftPressed)
+			{
+				SaveSceneAs();
+			}
+			break;
+		}
+	}
+
+	void EditorLayer::NewScene()
+	{
+		_activeScene = CreateRef<Scene>();
+		_activeScene->OnViewportResize((uint32_t)_viewportSize.x, (uint32_t)_viewportSize.y);
+		_sceneHierarchyPanel.SetContext(_activeScene);
+	}
+
+	void EditorLayer::OpenScene()
+	{
+		auto filePath = FileDialogs::OpenFile("Hazel Scene (*.hazel)\0*.hazel\0");
+		if (!filePath.empty())
+		{
+			NewScene();
+
+			SceneSerializer serializer(_activeScene);
+			serializer.Deserialize(filePath);
+		}
+	}
+
+	void EditorLayer::SaveSceneAs()
+	{
+		auto filePath = FileDialogs::SaveFile("Hazel Scene (*.hazel)\0*.hazel\0");
+
+		if (!filePath.empty())
+		{
+			if (strstr(filePath.c_str(),".hazel") == nullptr)
+			{
+				filePath.append(".hazel");
+			}
+
+			SceneSerializer serializer(_activeScene);
+			serializer.Serialize(filePath);
+		}
+	}
+
+	void EditorLayer::DrawFileMenu()
+	{
 		if (ImGui::BeginMenuBar())
 		{
 			if (ImGui::BeginMenu("File"))
 			{
-				if (ImGui::MenuItem("Serialize"))
+				if (ImGui::MenuItem("New", "Ctrl+N"))
 				{
-					SceneSerializer serializer(_activeScene);
-					serializer.Serialize("assets/scenes/Example.hazel");
+					NewScene();
 				}
 
-				if (ImGui::MenuItem("Deseriliaze"))
+				if (ImGui::MenuItem("Open...", "Ctrl+O"))
 				{
-					SceneSerializer serializer(_activeScene);
-					serializer.Deserialize("assets/scenes/Example.hazel");
+					OpenScene();
 				}
+
+				//if (ImGui::MenuItem("Save", "Ctrl+S"))
+				//{
+				//	SceneSerializer serializer(_activeScene);
+				//	serializer.Serialize("assets/scenes/Example.hazel");
+				//}
+
+				if (ImGui::MenuItem("Save As...", "Ctrl+Shift+S"))
+				{
+					SaveSceneAs();
+				}
+
+				ImGui::Separator();
 
 				if (ImGui::MenuItem("Exit"))
 				{
@@ -181,14 +251,6 @@ namespace Hazel
 			ImGui::Text("\tFPS : %i", _currentFPS);
 			ImGui::EndMenuBar();
 		}
-
-		DrawStats(timestep);
-		DrawViewport();
-		DrawTools();
-
-		_sceneHierarchyPanel.OnImGuiRender(timestep);
-
-		ImGui::End();
 	}
 
 	void EditorLayer::DrawViewport()
@@ -271,9 +333,31 @@ namespace Hazel
 		ImGui::End();
 	}
 
-	void EditorLayer::OnEvent(Event& event)
+	/// <summary>
+	/// If FPS goes below 2, shutdown.
+	/// </summary>
+	void EditorLayer::SafetyShutdownCheck()
 	{
-
+		// Safety shutdown 
+		if (_currentFPS < 2)
+		{
+			if (_lowFrames == 0)
+			{
+				HZ_LERROR("Application will shutdown after 10 frames below 2 FPS.", _lowFrames);
+			}
+			_lowFrames++;
+			HZ_LERROR("Frame #{0}", _lowFrames);
+			if (_lowFrames >= 10)
+			{
+				HZ_LCRITICAL("Shuting down.");
+				Application::Get().Stop();
+			}
+		}
+		else if (_lowFrames != 0)
+		{
+			HZ_LINFO("Back to 2 FPS or above.");
+			_lowFrames = 0;
+		}
 	}
 
 	void EditorLayer::CalculateFPS(Timestep timestep)

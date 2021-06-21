@@ -4,7 +4,7 @@ Entities:
     TagComponent:
       Tag: Square
     TransformComponent:
-      Position: [-2.5, 0, 0]
+      Position: [0, 0, 0]
       Rotation: [0, 0, 0]
       Scale: [1, 1, 1]
     SpriteRendererComponent:
@@ -15,23 +15,23 @@ Entities:
     TagComponent:
       Tag: Triangle
     TransformComponent:
-      Position: [1.70000005, 0, 0]
+      Position: [1.79999995, 0, 8.69999981]
       Rotation: [0, 0, 1.05243349]
       Scale: [1, 1, 1]
     SpriteRendererComponent:
-      TexturePath: assets\textures\Triangle.png
-      Color: [1, 1, 1, 1]
+      TexturePath: ""
+      Color: [0.803088784, 0, 0, 1]
       Tiling: [1, 1]
   - Entity: 1657643249657
     TagComponent:
       Tag: Main Camera
     TransformComponent:
-      Position: [0, 0, 0]
+      Position: [0.899999976, 0, 14.3000002]
       Rotation: [0, 0, 0]
       Scale: [1, 1, 1]
     CameraComponent:
       Camera:
-        ProjectionType: 1
+        ProjectionType: 0
         PerspectiveVerticalFOV: 0.785398185
         PerspectiveNearClip: 0.00999999978
         PerspectiveFarClip: 1000

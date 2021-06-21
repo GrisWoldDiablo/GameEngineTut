@@ -261,6 +261,7 @@ namespace Hazel
 	void SceneHierarchyPanel::SetContext(const Ref<Scene>& context)
 	{
 		_context = context;
+		_selectionContext = {};
 	}
 
 	void SceneHierarchyPanel::OnImGuiRender(Timestep timestep)
@@ -392,8 +393,10 @@ namespace Hazel
 			}
 			else
 			{
-				isSpritePressed = ImGui::ImageButton(nullptr, ImVec2(50.0f, 50.0f), ImVec2(0, 1), ImVec2(1, 0), 3);
+				auto& color = component->Color;
+				isSpritePressed = ImGui::ColorButton("None", ImVec4(color.r, color.g, color.b, color.a), 0, ImVec2(56.0f, 56.0f));
 			}
+
 			if (isSpritePressed)
 			{
 				ImGui::OpenPopup("browseFiles");
@@ -435,7 +438,10 @@ namespace Hazel
 				ImGui::EndPopup();
 			}
 
-			DrawVec2Controls("Tiling", component->Tiling, 1.0f);
+			if (component->Texture != nullptr)
+			{
+				DrawVec2Controls("Tiling", component->Tiling, 1.0f);
+			}
 
 			auto& color = component->Color;
 			auto& newColor = color;
@@ -475,47 +481,47 @@ namespace Hazel
 			switch (camera.GetProjectionType())
 			{
 			case SceneCamera::ProjectionType::Perspective:
-			{
-				float perspectiveFOV = glm::degrees(camera.GetPerspectiveVerticalFOV());
-				if (ImGui::DragFloat("FOV", &perspectiveFOV))
 				{
-					camera.SetPerspectiveVerticalFOV(glm::radians(perspectiveFOV));
-				}
+					float perspectiveFOV = glm::degrees(camera.GetPerspectiveVerticalFOV());
+					if (ImGui::DragFloat("FOV", &perspectiveFOV))
+					{
+						camera.SetPerspectiveVerticalFOV(glm::radians(perspectiveFOV));
+					}
 
-				float perspectiveNearClip = camera.GetPerspectiveNearClip();
-				if (ImGui::DragFloat("NearClip", &perspectiveNearClip))
-				{
-					camera.SetPerspectiveNearClip(perspectiveNearClip);
-				}
+					float perspectiveNearClip = camera.GetPerspectiveNearClip();
+					if (ImGui::DragFloat("NearClip", &perspectiveNearClip))
+					{
+						camera.SetPerspectiveNearClip(perspectiveNearClip);
+					}
 
-				float perspectiveFarClip = camera.GetPerspectiveFarClip();
-				if (ImGui::DragFloat("FarClip", &perspectiveFarClip))
-				{
-					camera.SetPerspectiveFarClip(perspectiveFarClip);
-				}
+					float perspectiveFarClip = camera.GetPerspectiveFarClip();
+					if (ImGui::DragFloat("FarClip", &perspectiveFarClip))
+					{
+						camera.SetPerspectiveFarClip(perspectiveFarClip);
+					}
 
-			}	break;
+				}	break;
 			case SceneCamera::ProjectionType::Orthographic:
-			{
-				float orthographicSize = camera.GetOrthographicSize();
-				if (ImGui::DragFloat("Size", &orthographicSize, 0.1f))
 				{
-					camera.SetOrthographicSize(orthographicSize);
-				}
+					float orthographicSize = camera.GetOrthographicSize();
+					if (ImGui::DragFloat("Size", &orthographicSize, 0.1f))
+					{
+						camera.SetOrthographicSize(orthographicSize);
+					}
 
-				float orthographicNearClip = camera.GetOrthographicNearClip();
-				if (ImGui::DragFloat("NearClip", &orthographicNearClip))
-				{
-					camera.SetOrthographicNearClip(orthographicNearClip);
-				}
+					float orthographicNearClip = camera.GetOrthographicNearClip();
+					if (ImGui::DragFloat("NearClip", &orthographicNearClip))
+					{
+						camera.SetOrthographicNearClip(orthographicNearClip);
+					}
 
-				float orthographicFarClip = camera.GetOrthographicFarClip();
-				if (ImGui::DragFloat("FarClip", &orthographicFarClip))
-				{
-					camera.SetOrthographicFarClip(orthographicFarClip);
-				}
+					float orthographicFarClip = camera.GetOrthographicFarClip();
+					if (ImGui::DragFloat("FarClip", &orthographicFarClip))
+					{
+						camera.SetOrthographicFarClip(orthographicFarClip);
+					}
 
-			}	break;
+				}	break;
 			}
 
 			if (ImGui::Checkbox("Fixed Aspect Ratio", &component->IsFixedAspectRatio) && !component->IsFixedAspectRatio)
@@ -572,5 +578,4 @@ namespace Hazel
 			ImGui::TextDisabled(nameId.c_str());
 		}
 	}
-
 }

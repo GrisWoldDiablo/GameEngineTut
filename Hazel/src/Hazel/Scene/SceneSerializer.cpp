@@ -172,7 +172,7 @@ namespace Hazel
 			out << YAML::Key << "SpriteRendererComponent";
 			out << YAML::BeginMap; // SpriteRendererComponent
 
-			out << YAML::Key << "TexturePath" << YAML::Value << component->Texture->GetPath(); // TODO not use path but actual texture asset.
+			out << YAML::Key << "TexturePath" << YAML::Value << (component->Texture != nullptr ? component->Texture->GetPath() : ""); // TODO not use path but actual texture asset.
 			out << YAML::Key << "Color" << YAML::Value << component->Color;
 			out << YAML::Key << "Tiling" << YAML::Value << component->Tiling;
 
@@ -278,8 +278,13 @@ namespace Hazel
 				auto spriteRendererComponent = entity["SpriteRendererComponent"];
 				if (spriteRendererComponent)
 				{
-					auto texture = Texture2D::Create(spriteRendererComponent["TexturePath"].as<std::string>()); // TODO not use path.
-					auto& component = deserializedEntity.AddComponent<SpriteRendererComponent>(texture);
+					auto& component = deserializedEntity.AddComponent<SpriteRendererComponent>();
+					auto texturePath = spriteRendererComponent["TexturePath"].as<std::string>();
+					if (!texturePath.empty())
+					{
+						auto texture = Texture2D::Create(texturePath); // TODO not use path.
+						component.Texture = texture;
+					}
 
 					component.Color = spriteRendererComponent["Color"].as<glm::vec4>();
 					component.Tiling = spriteRendererComponent["Tiling"].as<glm::vec2>();
