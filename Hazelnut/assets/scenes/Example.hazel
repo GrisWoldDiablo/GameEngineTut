@@ -19,9 +19,7 @@ Entities:
       Rotation: [0, 0, 1.05243349]
       Scale: [1, 1, 1]
     SpriteRendererComponent:
-      TexturePath: ""
       Color: [0.803088784, 0, 0, 1]
-      Tiling: [1, 1]
   - Entity: 1657643249657
     TagComponent:
       Tag: Main Camera

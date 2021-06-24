@@ -261,13 +261,12 @@ namespace Hazel
 	void SceneHierarchyPanel::SetContext(const Ref<Scene>& context)
 	{
 		_context = context;
-		_selectionContext = {};
+		_selectionContext = Entity::Null;
 	}
 
 	void SceneHierarchyPanel::OnImGuiRender(Timestep timestep)
 	{
 		ImGui::Begin("Scene Hierarchy");
-
 		_context->_registry.each([&](auto entityID)
 		{
 			Entity entity{ entityID,_context.get() };
@@ -276,7 +275,7 @@ namespace Hazel
 
 		if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
 		{
-			_selectionContext = {};
+			_selectionContext = Entity::Null;
 		}
 
 		// Right-Click on blank space.

@@ -9,10 +9,23 @@
 
 namespace Hazel
 {
+	bool FileDialogs::NewFile()
+	{
+		auto result = MessageBoxA
+		(
+			glfwGetWin32Window((GLFWwindow*)Application::Get().GetWindow().GetNativeWindow()),
+			(LPCSTR)"You will lose current scene's unsaved progress.\nDo you want to continue?",
+			(LPCSTR)"Warning!",
+			MB_ICONWARNING | MB_YESNO
+		);
+		
+		return result == IDYES;
+	}
+
 	std::string FileDialogs::OpenFile(const char* filter)
 	{
 		OPENFILENAMEA ofn;
-		CHAR szFile[260] = { 0 }; 
+		CHAR szFile[260] = { 0 };
 
 		// Initialize OPENFILENAME
 		ZeroMemory(&ofn, sizeof(OPENFILENAME));
@@ -29,6 +42,7 @@ namespace Hazel
 			return ofn.lpstrFile;
 		}
 
+
 		return std::string();
 	}
 
@@ -44,8 +58,9 @@ namespace Hazel
 		ofn.lpstrFile = szFile;
 		ofn.nMaxFile = sizeof(szFile);
 		ofn.lpstrFilter = filter;
+		ofn.lpstrDefExt = std::strchr(filter, '\0') + 1;
 		ofn.nFilterIndex = 1;
-		ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR;
+		ofn.Flags = OFN_PATHMUSTEXIST | OFN_OVERWRITEPROMPT | OFN_NOCHANGEDIR;
 
 		if (GetSaveFileNameA(&ofn) == TRUE)
 		{

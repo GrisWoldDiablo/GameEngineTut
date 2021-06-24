@@ -172,9 +172,12 @@ namespace Hazel
 			out << YAML::Key << "SpriteRendererComponent";
 			out << YAML::BeginMap; // SpriteRendererComponent
 
-			out << YAML::Key << "TexturePath" << YAML::Value << (component->Texture != nullptr ? component->Texture->GetPath() : ""); // TODO not use path but actual texture asset.
 			out << YAML::Key << "Color" << YAML::Value << component->Color;
-			out << YAML::Key << "Tiling" << YAML::Value << component->Tiling;
+			if (component->Texture != nullptr)
+			{
+				out << YAML::Key << "TexturePath" << YAML::Value << component->Texture->GetPath(); // TODO not use path but actual texture asset.
+				out << YAML::Key << "Tiling" << YAML::Value << component->Tiling;
+			}
 
 			out << YAML::EndMap; // SpriteRendererComponent
 		}
@@ -215,11 +218,7 @@ namespace Hazel
 
 	bool SceneSerializer::Deserialize(const std::string& filepath)
 	{
-		std::ifstream stream(filepath);
-		std::stringstream strStream;
-		strStream << stream.rdbuf();
-
-		YAML::Node data = YAML::Load(strStream.str());
+		YAML::Node data = YAML::LoadFile(filepath);
 		if (!data["Scene"])
 		{
 			return false;
@@ -279,15 +278,15 @@ namespace Hazel
 				if (spriteRendererComponent)
 				{
 					auto& component = deserializedEntity.AddComponent<SpriteRendererComponent>();
-					auto texturePath = spriteRendererComponent["TexturePath"].as<std::string>();
-					if (!texturePath.empty())
+					auto texture = spriteRendererComponent["TexturePath"];
+
+					if (texture)
 					{
-						auto texture = Texture2D::Create(texturePath); // TODO not use path.
-						component.Texture = texture;
+						component.Texture= Texture2D::Create(texture.as<std::string>()); // TODO not use path.
+						component.Tiling = spriteRendererComponent["Tiling"].as<glm::vec2>();
 					}
 
 					component.Color = spriteRendererComponent["Color"].as<glm::vec4>();
-					component.Tiling = spriteRendererComponent["Tiling"].as<glm::vec2>();
 				}
 			}
 		}

@@ -2,6 +2,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+#define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
 
 #include "Hazel/Core/Color.h"
@@ -36,14 +37,16 @@ namespace Hazel
 
 		glm::mat4 GetTransform() const
 		{
-			auto identityMatrix = glm::mat4(1.0f);
-			auto rotation = glm::rotate(identityMatrix, Rotation.x, { 1, 0, 0 })
+			const auto kIdentityMatrix = glm::mat4(1.0f);
+			glm::mat4 rotation = glm::toMat4(glm::quat(Rotation));
+			// This give different outcome.
+			/*auto rotation = glm::rotate(identityMatrix, Rotation.x, { 1, 0, 0 })
 				* glm::rotate(identityMatrix, Rotation.y, { 0, 1, 0 })
-				* glm::rotate(identityMatrix, Rotation.z, { 0, 0, 1 });
+				* glm::rotate(identityMatrix, Rotation.z, { 0, 0, 1 });*/
 
-			return glm::translate(identityMatrix, Position)
+			return glm::translate(kIdentityMatrix, Position)
 				* rotation
-				* glm::scale(identityMatrix, Scale);
+				* glm::scale(kIdentityMatrix, Scale);
 		}
 	};
 

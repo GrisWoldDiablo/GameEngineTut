@@ -16,11 +16,12 @@ project "Hazelnut"
 
 	includedirs
 	{
-		"../Hazel/vendor/spdlog/include",
-		"../Hazel/src",
-		"../Hazel/vendor",
-		"../%{IncludeDir.glm}",
-		"../%{IncludeDir.entt}",
+		"%{wks.location}/Hazel/vendor/spdlog/include",
+		"%{wks.location}/Hazel/src",
+		"%{wks.location}/Hazel/vendor",
+		"%{IncludeDir.glm}",
+		"%{IncludeDir.entt}",
+		"%{IncludeDir.ImGuizmo}",
 	}
 
 	links

@@ -21,7 +21,7 @@ namespace Hazel
 	private:
 		bool OnKeyPressed(KeyPressedEvent& event);
 
-		void NewScene();
+		bool NewScene();
 		void OpenScene();
 		void SaveSceneAs();
 
@@ -60,6 +60,10 @@ namespace Hazel
 
 		// Panels
 		SceneHierarchyPanel _sceneHierarchyPanel;
+
+		// Viewport
+		int _gizmoType = -1;
+		int _gizmoSpace = 0;
 
 		// Tools
 		bool _isDemoWidowOpen = false;

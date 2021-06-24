@@ -7,6 +7,9 @@
 #include "Hazel/Scene/SceneSerializer.h"
 #include "Hazel/Utils/PlatformUtils.h"
 
+#include "ImGuizmo.h"
+#include "Hazel/Math/Math.h"
+
 namespace Hazel
 {
 	EditorLayer::EditorLayer()
@@ -152,36 +155,78 @@ namespace Hazel
 			return false;
 		}
 
-		bool isControlPressed = Input::IsKeyPressed(KeyCode::LeftControl) || Input::IsKeyPressed(KeyCode::RightControl);
-		bool isShiftPressed = Input::IsKeyPressed(KeyCode::LeftShift) || Input::IsKeyPressed(KeyCode::RightShift);
+		bool isImGuizmoInUse = ImGuizmo::IsUsing();
+		bool isControlPressed = Input::IsKeyPressed(Key::LeftControl) || Input::IsKeyPressed(Key::RightControl);
+		bool isShiftPressed = Input::IsKeyPressed(Key::LeftShift) || Input::IsKeyPressed(Key::RightShift);
 		switch (event.GetKeyCode())
 		{
-		case KeyCode::N:
+		case Key::N:
 			if (isControlPressed)
 			{
 				NewScene();
 			}
 			break;
-		case KeyCode::O:
+		case Key::O:
 			if (isControlPressed)
 			{
 				OpenScene();
 			}
 			break;
-		case KeyCode::S:
+		case Key::S:
 			if (isControlPressed && isShiftPressed)
 			{
 				SaveSceneAs();
 			}
 			break;
+			// Gizmos 
+		case Key::Q:
+			if (!isImGuizmoInUse)
+			{
+				_gizmoType = -1;
+			}
+			break;
+		case Key::W:
+			if (!isImGuizmoInUse)
+			{
+				_gizmoType = ImGuizmo::TRANSLATE;
+			}
+			break;
+		case Key::E:
+			if (!isImGuizmoInUse)
+			{
+				_gizmoType = ImGuizmo::SCALE;
+				_gizmoSpace = ImGuizmo::LOCAL;
+			}
+			break;
+		case Key::R:
+			if (!isImGuizmoInUse)
+			{
+				_gizmoType = ImGuizmo::ROTATE;
+			}
+			break;
+		case Key::Z:
+			if (!isImGuizmoInUse)
+			{
+				_gizmoSpace = _gizmoSpace == ImGuizmo::LOCAL ? ImGuizmo::WORLD : ImGuizmo::LOCAL;
+			}
+			break;
 		}
+
+
+		return true;
 	}
 
-	void EditorLayer::NewScene()
+	bool EditorLayer::NewScene()
 	{
-		_activeScene = CreateRef<Scene>();
-		_activeScene->OnViewportResize((uint32_t)_viewportSize.x, (uint32_t)_viewportSize.y);
-		_sceneHierarchyPanel.SetContext(_activeScene);
+		if (FileDialogs::NewFile())
+		{
+			_activeScene = CreateRef<Scene>();
+			_activeScene->OnViewportResize((uint32_t)_viewportSize.x, (uint32_t)_viewportSize.y);
+			_sceneHierarchyPanel.SetContext(_activeScene);
+			return true;
+		}
+
+		return false;
 	}
 
 	void EditorLayer::OpenScene()
@@ -189,7 +234,10 @@ namespace Hazel
 		auto filePath = FileDialogs::OpenFile("Hazel Scene (*.hazel)\0*.hazel\0");
 		if (!filePath.empty())
 		{
-			NewScene();
+			if (!NewScene())
+			{
+				return;
+			}
 
 			SceneSerializer serializer(_activeScene);
 			serializer.Deserialize(filePath);
@@ -202,11 +250,6 @@ namespace Hazel
 
 		if (!filePath.empty())
 		{
-			if (strstr(filePath.c_str(),".hazel") == nullptr)
-			{
-				filePath.append(".hazel");
-			}
-
 			SceneSerializer serializer(_activeScene);
 			serializer.Serialize(filePath);
 		}
@@ -263,7 +306,7 @@ namespace Hazel
 
 		_isViewportFocused = ImGui::IsWindowFocused();
 		_isViewportHovered = ImGui::IsWindowHovered();
-		Application::Get().GetImGuiLayer()->BlockEvents(!_isViewportFocused || !_isViewportHovered);
+		Application::Get().GetImGuiLayer()->BlockEvents(!_isViewportFocused && !_isViewportHovered);
 
 		auto viewportPanelSize = ImGui::GetContentRegionAvail();
 		_viewportSize = { viewportPanelSize.x,viewportPanelSize.y };
@@ -271,8 +314,61 @@ namespace Hazel
 		auto textureID = _framebuffer->GetColorAttachmentRenderID();
 		ImGui::Image((void*)((uint64_t)textureID), { _viewportSize.x,_viewportSize.y }, ImVec2{ 0,1 }, ImVec2{ 1,0 });
 
-		ImGui::End();
+		// Gizmos
 
+
+		if (auto selectedEntity = _sceneHierarchyPanel.GetSelectedEntity();
+			selectedEntity != Entity::Null && _gizmoType != -1)
+		{
+			if (auto cameraEntity = _activeScene->GetPrimaryCameraEntity();
+				cameraEntity != Entity::Null)
+			{
+				ImGuizmo::SetOrthographic(false);
+				ImGuizmo::SetDrawlist();
+
+				auto windowWidth = (float)ImGui::GetWindowWidth();
+				auto windowHeight = (float)ImGui::GetWindowHeight();
+				ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, windowWidth, windowHeight);
+				
+				const auto& camera = cameraEntity.GetComponent<CameraComponent>().Camera;
+				const auto& cameraProjection = camera.GetProjection();
+				glm::mat4 cameraView = glm::inverse(cameraEntity.GetComponent<TransformComponent>().GetTransform());
+
+				// Entity transform
+				auto& transformComponent = selectedEntity.GetComponent<TransformComponent>();
+				auto transform = transformComponent.GetTransform();
+
+				// Snapping
+				bool snap = Input::IsKeyPressed(Key::LeftControl);
+				float snapValue = 0.5f; // Snap to 0.5m for position and scale.
+
+				// Snap to 45 degrees for rotation.
+				if (_gizmoType == ImGuizmo::ROTATE)
+				{
+					snapValue = 45.0f;
+				}
+
+				float snapValues[3] = { snapValue,snapValue,snapValue };
+
+				ImGuizmo::Manipulate(glm::value_ptr(cameraView), glm::value_ptr(cameraProjection),
+					(ImGuizmo::OPERATION)_gizmoType, (ImGuizmo::MODE)_gizmoSpace, glm::value_ptr(transform),
+					nullptr, snap ? snapValues : nullptr);
+
+				if (ImGuizmo::IsUsing())
+				{
+					glm::vec3 position, rotation, scale;
+					if (Math::DecomposeTransform(transform, position, rotation, scale))
+					{
+						transformComponent.Position = position;
+						auto rotationDelta = rotation - transformComponent.Rotation;
+						transformComponent.Rotation += rotationDelta;
+						transformComponent.Scale = scale;
+					}
+				}
+			}
+		}
+
+		ImGui::End();
 		ImGui::PopStyleVar();
 	}
 
