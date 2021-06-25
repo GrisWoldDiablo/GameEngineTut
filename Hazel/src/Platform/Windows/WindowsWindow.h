@@ -18,11 +18,13 @@ namespace Hazel
 
 		unsigned int GetWidth() const override { return _data.Width; }
 		unsigned int GetHeight() const override { return _data.Height; }
+		std::string GetTitle() const override { return _data.Title; }
 
 		//Window attributes
 		void SetEventCallback(const EventCallbackFn& callback) override { _data.EventCallback = callback; }
 		void SetVSync(bool enable) override;
-		bool IsVSync() const override;
+		bool IsVSync() const override { return _data.VSync; }
+		void SetTitle(const std::string& title) override;
 
 		void* GetNativeWindow() const override { return _window; }
 

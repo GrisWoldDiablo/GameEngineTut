@@ -1,4 +1,4 @@
-Scene: Untitled
+Scene: 3D Example Blue
 Entities:
   - Entity: 1657643249657
     TagComponent:
@@ -8,7 +8,7 @@ Entities:
       Rotation: [1.57079637, 0.785398185, 0]
       Scale: [1, 1, 1]
     SpriteRendererComponent:
-      Color: [0.588235319, 0.392156869, 1, 1]
+      Color: [0.392156869, 0.392156869, 1, 1]
   - Entity: 1657643249657
     TagComponent:
       Tag: Camera
@@ -35,7 +35,7 @@ Entities:
       Rotation: [0, -0.785398185, 0]
       Scale: [1, 1, 1]
     SpriteRendererComponent:
-      Color: [0.588235319, 0.588235319, 1, 1]
+      Color: [0.392156869, 0.588235319, 1, 1]
   - Entity: 1657643249657
     TagComponent:
       Tag: Right
@@ -44,4 +44,4 @@ Entities:
       Rotation: [0, 0.785398185, 0]
       Scale: [1, 1, 1]
     SpriteRendererComponent:
-      Color: [0.392156869, 0.392156869, 1, 1]
+      Color: [0, 0.392156869, 1, 1]

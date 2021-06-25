@@ -21,6 +21,7 @@ project "Hazelnut"
 		"%{wks.location}/Hazel/vendor",
 		"%{IncludeDir.glm}",
 		"%{IncludeDir.entt}",
+		"%{IncludeDir.yaml_cpp}",
 		"%{IncludeDir.ImGuizmo}",
 	}
 

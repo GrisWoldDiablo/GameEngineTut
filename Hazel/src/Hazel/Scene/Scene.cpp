@@ -3,8 +3,6 @@
 #include "components.h"
 #include "Hazel/Renderer/Renderer2D.h"
 
-#include "Entity.h"
-
 namespace Hazel
 {
 	Scene::~Scene()

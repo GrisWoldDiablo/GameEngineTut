@@ -19,7 +19,9 @@ namespace Hazel
 
 		void BlockEvents(bool block) { _isBlockingEvents = block; }
 
+		void SetFonts(const std::string& normalFontPath, std::initializer_list<std::string> extraFontsPath);
 		void SetDarkThemeColors();
+
 	private:
 		bool _isBlockingEvents = true;
 	};

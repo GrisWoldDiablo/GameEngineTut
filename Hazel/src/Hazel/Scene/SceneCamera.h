@@ -11,6 +11,7 @@ namespace Hazel
 			Perspective = 0,
 			Orthographic = 1,
 		};
+
 	public:
 		SceneCamera();
 		virtual ~SceneCamera() = default;
@@ -49,7 +50,6 @@ namespace Hazel
 		float _orthographicSize = 10.0f;
 		float _orthographicNear = -1.0f;
 		float _orthographicFar = 1.0f;
-
 
 		float _aspectRatio = 0.0f;
 	};

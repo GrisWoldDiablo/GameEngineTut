@@ -181,6 +181,11 @@ namespace Hazel
 		glfwTerminate();
 	}
 
+	void WindowsWindow::SetTitle(const std::string& title)
+	{
+		glfwSetWindowTitle(_window, title.c_str());
+	}
+
 	void WindowsWindow::OnUpdate()
 	{
 		HZ_PROFILE_FUNCTION();
@@ -207,12 +212,5 @@ namespace Hazel
 			glfwSwapInterval(0);
 		}
 		_data.VSync = enable;
-	}
-
-	bool WindowsWindow::IsVSync() const
-	{
-		HZ_PROFILE_FUNCTION();
-
-		return _data.VSync;
 	}
 }

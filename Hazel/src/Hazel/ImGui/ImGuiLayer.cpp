@@ -32,8 +32,6 @@ namespace Hazel
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable; // Enable docking
 		io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; // Enable Multi-Viewport / Platform Windows
 
-		io.Fonts->AddFontFromFileTTF("assets/fonts/opensans/OpenSans-ExtraBold.ttf", 18.0f);
-		io.FontDefault = io.Fonts->AddFontFromFileTTF("assets/fonts/opensans/OpenSans-SemiBold.ttf", 18.0f);
 		// Setup Dear ImGui style
 		ImGui::StyleColorsDark();
 		//ImGui::StyleColorsClassic();
@@ -104,6 +102,18 @@ namespace Hazel
 			ImGui::UpdatePlatformWindows();
 			ImGui::RenderPlatformWindowsDefault();
 			glfwMakeContextCurrent(backupCurrentContext);
+		}
+	}
+
+	void ImGuiLayer::SetFonts(const std::string& normalFontPath, std::initializer_list<std::string> extraFontsPath)
+	{
+		auto& io = ImGui::GetIO();
+
+		io.FontDefault = io.Fonts->AddFontFromFileTTF(normalFontPath.c_str(), 18.0f);
+
+		for (auto&& fontPath : extraFontsPath)
+		{
+			io.Fonts->AddFontFromFileTTF(fontPath.c_str(), 18.0f);
 		}
 	}
 

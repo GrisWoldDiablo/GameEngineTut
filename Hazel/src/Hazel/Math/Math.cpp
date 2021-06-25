@@ -34,7 +34,7 @@ namespace Hazel::Math
 		outPosition = vec3(LocalMatrix[3]);
 		LocalMatrix[3] = vec4(0.0f, 0.0f, 0.0f, LocalMatrix[3].w);
 
-		vec3 Row[3], Pdum3;
+		vec3 Row[3];// , Pdum3;
 
 		// Now get scale and shear. *(shear not used in this method mod)
 		for (int i = 0; i < 3; i++)

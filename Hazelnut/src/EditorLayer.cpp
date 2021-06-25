@@ -20,26 +20,19 @@ namespace Hazel
 	{
 		HZ_PROFILE_FUNCTION();
 
+		// Set Fonts
+		auto imGuiLayer = Application::Get().GetImGuiLayer();
+		auto normalFontPath = "assets/fonts/opensans/OpenSans-SemiBold.ttf";
+		auto boldFontPath = "assets/fonts/opensans/OpenSans-ExtraBold.ttf";
+		imGuiLayer->SetFonts(normalFontPath, { boldFontPath });
+
 		_unwrapTexture = Texture2D::Create("assets/textures/unwrap_helper.png");
 
 		_framebuffer = Framebuffer::Create({ 1280,720 });
+		
+		// Create an empty scene.
 		_activeScene = CreateRef<Scene>();
-
-#if 0
-		// Entity
-		_squareEntity = _activeScene->CreateEntity("Square");
-		_squareEntity.AddComponent<SpriteRendererComponent>(_unwrapTexture);
-		_squareEntity.AddComponent<NativeScriptComponent>().Bind<SquareJump>();
-
-		_mainCamera = _activeScene->CreateEntity("Main Camera");
-		//_secondaryCamera = _activeScene->CreateEntity("Secondary Camera");
-		_mainCamera.AddComponent<CameraComponent>();
-		//_secondaryCamera.AddComponent<CameraComponent>().IsPrimary = false;
-
-		_mainCamera.AddComponent<NativeScriptComponent>().Bind<CameraController>();
-		//_secondaryCamera.AddComponent<NativeScriptComponent>().Bind<CameraController>();
-
-#endif // 0
+		_activeScene->SetName(_kNewSceneName);
 
 		_sceneHierarchyPanel.SetContext(_activeScene);
 	}
@@ -54,13 +47,13 @@ namespace Hazel
 		HZ_PROFILE_FUNCTION();
 		_updateTimer.Start();
 
-		auto frameBufferSpec = _framebuffer->GetSpecification();
-		if (_viewportSize.x > 0.0f && _viewportSize.y > 0.0f &&
-			(frameBufferSpec.Width != _viewportSize.x || frameBufferSpec.Height != _viewportSize.y))
+		auto& frameBufferSpec = _framebuffer->GetSpecification();
+		if (_sceneViewportSize.x > 0.0f && _sceneViewportSize.y > 0.0f &&
+			(frameBufferSpec.Width != _sceneViewportSize.x || frameBufferSpec.Height != _sceneViewportSize.y))
 		{
-			_activeScene->OnViewportResize((uint32_t)_viewportSize.x, (uint32_t)_viewportSize.y);
+			_activeScene->OnViewportResize((uint32_t)_sceneViewportSize.x, (uint32_t)_sceneViewportSize.y);
 		}
-		_framebuffer->Resize((uint32_t)_viewportSize.x, (uint32_t)_viewportSize.y);
+		_framebuffer->Resize((uint32_t)_sceneViewportSize.x, (uint32_t)_sceneViewportSize.y);
 
 		CalculateFPS(timestep);
 
@@ -134,7 +127,7 @@ namespace Hazel
 
 		DrawFileMenu();
 		DrawStats(timestep);
-		DrawViewport();
+		DrawSceneViewport();
 		DrawTools();
 
 		_sceneHierarchyPanel.OnImGuiRender(timestep);
@@ -216,13 +209,27 @@ namespace Hazel
 		return true;
 	}
 
-	bool EditorLayer::NewScene()
+	bool EditorLayer::NewScene(const std::string& newSceneName)
 	{
 		if (FileDialogs::NewFile())
 		{
 			_activeScene = CreateRef<Scene>();
-			_activeScene->OnViewportResize((uint32_t)_viewportSize.x, (uint32_t)_viewportSize.y);
+
+			if (newSceneName.empty() || std::all_of(newSceneName.begin(), newSceneName.end(), [](char c)
+			{
+				return std::isspace(static_cast<unsigned char>(c));
+			}))
+			{
+				_activeScene->SetName(newSceneName);
+			}
+			else
+			{
+				_activeScene->SetName(_kNewSceneName);
+			}
+
+			_activeScene->OnViewportResize((uint32_t)_sceneViewportSize.x, (uint32_t)_sceneViewportSize.y);
 			_sceneHierarchyPanel.SetContext(_activeScene);
+
 			return true;
 		}
 
@@ -238,6 +245,10 @@ namespace Hazel
 			{
 				return;
 			}
+			auto& window = Application::Get().GetWindow();
+			std::stringstream ss;
+			ss << window.GetTitle() << " " << filePath;
+			window.SetTitle(ss.str());
 
 			SceneSerializer serializer(_activeScene);
 			serializer.Deserialize(filePath);
@@ -246,7 +257,8 @@ namespace Hazel
 
 	void EditorLayer::SaveSceneAs()
 	{
-		auto filePath = FileDialogs::SaveFile("Hazel Scene (*.hazel)\0*.hazel\0");
+		auto sceneName = _activeScene->GetName();
+		auto filePath = FileDialogs::SaveFile("Hazel Scene (*.hazel)\0*.hazel\0", !sceneName.empty() ? sceneName.c_str() : nullptr);
 
 		if (!filePath.empty())
 		{
@@ -296,23 +308,23 @@ namespace Hazel
 		}
 	}
 
-	void EditorLayer::DrawViewport()
+	void EditorLayer::DrawSceneViewport()
 	{
 		HZ_PROFILE_FUNCTION();
 
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0,0 });
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0.0f, 0.0f });
 
-		ImGui::Begin("Viewport");
+		ImGui::Begin("SceneViewport");
 
-		_isViewportFocused = ImGui::IsWindowFocused();
-		_isViewportHovered = ImGui::IsWindowHovered();
-		Application::Get().GetImGuiLayer()->BlockEvents(!_isViewportFocused && !_isViewportHovered);
+		_isSceneViewportFocused = ImGui::IsWindowFocused();
+		_isSceneViewportHovered = ImGui::IsWindowHovered();
+		Application::Get().GetImGuiLayer()->BlockEvents(!_isSceneViewportFocused && !_isSceneViewportHovered);
 
-		auto viewportPanelSize = ImGui::GetContentRegionAvail();
-		_viewportSize = { viewportPanelSize.x,viewportPanelSize.y };
+		auto sceneViewportPanelSize = ImGui::GetContentRegionAvail();
+		_sceneViewportSize = { sceneViewportPanelSize.x, sceneViewportPanelSize.y };
 
 		auto textureID = _framebuffer->GetColorAttachmentRenderID();
-		ImGui::Image((void*)((uint64_t)textureID), { _viewportSize.x,_viewportSize.y }, ImVec2{ 0,1 }, ImVec2{ 1,0 });
+		ImGui::Image((void*)((uint64_t)textureID), { _sceneViewportSize.x, _sceneViewportSize.y }, ImVec2{ 0.0f, 1.0f }, ImVec2{ 1.0f, 0.0f });
 
 		// Gizmos
 
@@ -329,7 +341,7 @@ namespace Hazel
 				auto windowWidth = (float)ImGui::GetWindowWidth();
 				auto windowHeight = (float)ImGui::GetWindowHeight();
 				ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, windowWidth, windowHeight);
-				
+
 				const auto& camera = cameraEntity.GetComponent<CameraComponent>().Camera;
 				const auto& cameraProjection = camera.GetProjection();
 				glm::mat4 cameraView = glm::inverse(cameraEntity.GetComponent<TransformComponent>().GetTransform());

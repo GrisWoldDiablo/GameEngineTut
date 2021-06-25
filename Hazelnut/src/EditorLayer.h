@@ -5,6 +5,7 @@
 
 namespace Hazel
 {
+	constexpr char* _kNewSceneName = "Untitled";
 
 	class EditorLayer final : public Layer
 	{
@@ -21,13 +22,13 @@ namespace Hazel
 	private:
 		bool OnKeyPressed(KeyPressedEvent& event);
 
-		bool NewScene();
+		bool NewScene(const std::string& newSceneName = _kNewSceneName);
 		void OpenScene();
 		void SaveSceneAs();
 
 	private:
 		void DrawFileMenu();
-		void DrawViewport();
+		void DrawSceneViewport();
 		void DrawStats(Timestep timestep);
 		void DrawTools();
 		void SafetyShutdownCheck();
@@ -39,10 +40,10 @@ namespace Hazel
 		Ref<Framebuffer> _framebuffer;
 		Ref<Texture2D> _unwrapTexture;
 
-		glm::vec2 _viewportSize = { 0,0 };
+		glm::vec2 _sceneViewportSize = { 0,0 };
 
-		bool _isViewportFocused = false;
-		bool _isViewportHovered = false;
+		bool _isSceneViewportFocused = false;
+		bool _isSceneViewportHovered = false;
 		bool _isOnSecondCamera = false;
 
 		Entity _squareEntity;
@@ -61,12 +62,11 @@ namespace Hazel
 		// Panels
 		SceneHierarchyPanel _sceneHierarchyPanel;
 
-		// Viewport
+		// SceneViewport
 		int _gizmoType = -1;
 		int _gizmoSpace = 0;
 
 		// Tools
 		bool _isDemoWidowOpen = false;
-
 	};
 }

@@ -1,25 +1,5 @@
-Scene: Untitled
+Scene: Example
 Entities:
-  - Entity: 1657643249657
-    TagComponent:
-      Tag: Square
-    TransformComponent:
-      Position: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    SpriteRendererComponent:
-      TexturePath: assets/textures/unwrap_helper.png
-      Color: [1, 1, 1, 1]
-      Tiling: [1, 1]
-  - Entity: 1657643249657
-    TagComponent:
-      Tag: Triangle
-    TransformComponent:
-      Position: [1.79999995, 0, 8.69999981]
-      Rotation: [0, 0, 1.05243349]
-      Scale: [1, 1, 1]
-    SpriteRendererComponent:
-      Color: [0.803088784, 0, 0, 1]
   - Entity: 1657643249657
     TagComponent:
       Tag: Main Camera
@@ -38,3 +18,23 @@ Entities:
         OrthographicFarClip: 1
       IsPrimary: true
       IsFixedAspectRatio: false
+  - Entity: 1657643249657
+    TagComponent:
+      Tag: Triangle
+    TransformComponent:
+      Position: [1.79999995, 0, 8.69999981]
+      Rotation: [0, 0, 1.05243349]
+      Scale: [1, 1, 1]
+    SpriteRendererComponent:
+      Color: [0.803088784, 0, 0, 1]
+  - Entity: 1657643249657
+    TagComponent:
+      Tag: Square
+    TransformComponent:
+      Position: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 1]
+      TexturePath: assets/textures/unwrap_helper.png
+      Tiling: [1, 1]

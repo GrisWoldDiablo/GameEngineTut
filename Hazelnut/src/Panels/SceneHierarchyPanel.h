@@ -20,6 +20,7 @@ namespace Hazel
 		Entity GetSelectedEntity() const { return _selectionContext; }
 
 	private:
+		void DrawSceneName();
 		void DrawEntityNode(Entity entity);
 		void DrawComponents(Entity entity);
 		template<typename T>

@@ -12,6 +12,6 @@ namespace Hazel
 		// Returns empty string if canceled.
 		static std::string OpenFile(const char* filter);
 		// Returns empty string if canceled.
-		static std::string SaveFile(const char* filter);
+		static std::string SaveFile(const char* filter, const char* defaultFileName = nullptr);
 	};
 }

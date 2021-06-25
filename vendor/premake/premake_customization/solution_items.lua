@@ -7,7 +7,7 @@ premake.api.register {
     kind = "list:string",
 }
 
-premake.override(premake.vstudio.sln2005, "projects", 
+premake.override(premake.vstudio.sln2005, "projects",
 function(base, wks)
     if wks.solution_items and #wks.solution_items > 0 then
         local solution_folder_GUID = "{2150E333-8FDC-42A3-9474-1A3956D46DE8}" -- See https://www.codeproject.com/Reference/720512/List-of-Visual-Studio-Project-Type-GUIDs

@@ -46,10 +46,18 @@ namespace Hazel
 		return std::string();
 	}
 
-	std::string FileDialogs::SaveFile(const char* filter)
+	std::string FileDialogs::SaveFile(const char* filter, const char* defaultFileName)
 	{
 		OPENFILENAMEA ofn;
 		CHAR szFile[260] = { 0 };
+
+		if (defaultFileName != nullptr)
+		{
+			//"Hazel Scene (*.hazel)\0*.hazel\0"
+			std::stringstream ss;
+			ss << defaultFileName << std::strchr(filter, '\0') + 1;
+			std::strcpy(szFile, ss.str().c_str());
+		}
 
 		// Initialize OPENFILENAME
 		ZeroMemory(&ofn, sizeof(OPENFILENAME));

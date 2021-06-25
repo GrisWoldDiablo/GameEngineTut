@@ -245,9 +245,6 @@ namespace Hazel
 		ImGui::PopItemWidth();
 #pragma endregion
 
-
-
-
 		ImGui::PopStyleVar();
 		ImGui::Columns(1);
 		ImGui::PopID();
@@ -267,6 +264,9 @@ namespace Hazel
 	void SceneHierarchyPanel::OnImGuiRender(Timestep timestep)
 	{
 		ImGui::Begin("Scene Hierarchy");
+
+		DrawSceneName();
+
 		_context->_registry.each([&](auto entityID)
 		{
 			Entity entity{ entityID,_context.get() };
@@ -297,6 +297,22 @@ namespace Hazel
 		}
 
 		ImGui::End();
+	}
+
+	void SceneHierarchyPanel::DrawSceneName()
+	{
+		char buffer[256];
+		memset(buffer, 0, sizeof(buffer));
+		strcpy_s(buffer, sizeof(buffer), _context->_name.c_str());
+		if (ImGui::InputText(" : Scene", buffer, sizeof(buffer), ImGuiInputTextFlags_EnterReturnsTrue))
+		{
+			auto newName = std::string(buffer);
+			if (!newName.empty())
+			{
+				_context->SetName(std::string(buffer));
+			}
+		}
+		ImGui::Separator();
 	}
 
 	void SceneHierarchyPanel::DrawEntityNode(Entity entity)

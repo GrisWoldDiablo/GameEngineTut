@@ -17,8 +17,8 @@ namespace Hazel
 		uint32_t Height;
 
 		WindowProps(std::string title = "Hazel Engine",
-		            uint32_t width = 1280,
-		            uint32_t height = 720)
+		            uint32_t width = 1600,
+		            uint32_t height = 900)
 			: Title(std::move(title)), Width(width), Height(height) {}
 	};
 
@@ -39,8 +39,10 @@ namespace Hazel
 		virtual void SetEventCallback(const EventCallbackFn& callback) = 0;
 		virtual void SetVSync(bool enabled) = 0;
 		virtual bool IsVSync() const = 0;
+		virtual void SetTitle(const std::string& title) = 0;
 
 		virtual void* GetNativeWindow() const = 0;
+		virtual std::string GetTitle() const = 0;
 
 		// This has to be implemented per platforms. (Window/Linux/Mac)
 		static Window* Create(const WindowProps& props = WindowProps());
