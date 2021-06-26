@@ -11,9 +11,9 @@ public:
 	void OnAttach() override;
 	void OnDetach() override;
 	
-	void OnUpdate(Hazel::Timestep timestep) override;
+	void OnUpdate() override;
 
-	void OnImGuiRender(Hazel::Timestep timestep) override;
+	void OnImGuiRender() override;
 	void OnEvent(Hazel::Event& event) override;
 
 private:

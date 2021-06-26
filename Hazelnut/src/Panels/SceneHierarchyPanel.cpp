@@ -261,7 +261,7 @@ namespace Hazel
 		_selectionContext = Entity::Null;
 	}
 
-	void SceneHierarchyPanel::OnImGuiRender(Timestep timestep)
+	void SceneHierarchyPanel::OnImGuiRender()
 	{
 		ImGui::Begin("Scene Hierarchy");
 

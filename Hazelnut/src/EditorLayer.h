@@ -2,6 +2,7 @@
 #include "Hazel.h"
 #include "Panels/SceneHierarchyPanel.h"
 #include "Hazel/Events/KeyEvent.h"
+#include "Hazel/Events/MouseEvent.h"
 
 namespace Hazel
 {
@@ -15,11 +16,12 @@ namespace Hazel
 		void OnAttach() override;
 		void OnDetach() override;
 
-		void OnUpdate(Timestep timestep) override;
-		void OnImGuiRender(Timestep timestep) override;
+		void OnUpdate() override;
+		void OnImGuiRender() override;
 		void OnEvent(Event& event) override;
 
 	private:
+		bool OnMouseMoved(MouseMovedEvent& event);
 		bool OnKeyPressed(KeyPressedEvent& event);
 
 		bool NewScene(const std::string& newSceneName = _kNewSceneName);
@@ -27,13 +29,15 @@ namespace Hazel
 		void SaveSceneAs();
 
 	private:
-		void DrawToolsBar();
+		void DrawToolbar();
 		void DrawFileMenu();
 		void DrawSceneViewport();
-		void DrawStats(Timestep timestep);
+		void DrawStats();
 		void DrawTools();
 		void SafetyShutdownCheck();
-		void CalculateFPS(Timestep timestep);
+		void CalculateFPS();
+
+		void AddTooltip(const std::string& tooltipMessage);
 
 	private:
 		Color _clearColor = { 0.13f, 0.13f, 0.13f, 1.0f };
@@ -71,9 +75,15 @@ namespace Hazel
 		bool _isDemoWidowOpen = false;
 
 		// Gizmos Icons
+		Ref<Texture2D> _panIconTexture;
 		Ref<Texture2D> _nothingGizmoIconTexture;
 		Ref<Texture2D> _positionGizmoIconTexture;
 		Ref<Texture2D> _rotationGizmoIconTexture;
 		Ref<Texture2D> _scaleGizmoIconTexture;
+		Ref<Texture2D> _localGizmoIconTexture;
+		Ref<Texture2D> _globalGizmoIconTexture;
+
+		// Hover Timer
+		float timeSpentHovering = 0;
 	};
 }

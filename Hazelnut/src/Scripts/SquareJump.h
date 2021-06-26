@@ -11,8 +11,9 @@ namespace Hazel
 		bool isPressed = false;
 		float upward = 0.0f;
 
-		void OnUpdate(Timestep timestep) override
+		void OnUpdate() override
 		{
+			float timestep = Time::GetTimestep();
 			auto& position = GetComponent<TransformComponent>().Position;
 			position.y -= gravity;
 			position.y += upward * timestep;

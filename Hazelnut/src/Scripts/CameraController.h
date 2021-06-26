@@ -14,7 +14,7 @@ namespace Hazel
 			HZ_CORE_LINFO("Create {0}", GetComponent<TagComponent>().Tag);
 		}
 
-		void OnUpdate(Timestep timestep) override
+		void OnUpdate() override
 		{
 			if (!GetComponent<CameraComponent>().IsPrimary)
 			{
@@ -24,6 +24,7 @@ namespace Hazel
 			auto& position = GetComponent<TransformComponent>().Position;
 			
 			float speed = 5.0f;
+			float timestep = Time::GetTimestep();
 
 			if (Input::IsKeyPressed(KeyCode::A))
 			{

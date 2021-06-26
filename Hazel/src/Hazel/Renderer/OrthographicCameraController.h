@@ -25,7 +25,7 @@ namespace Hazel
 		OrthographicCameraController(float aspectRatio, bool rotation = false);
 		~OrthographicCameraController() = default;
 
-		virtual void OnUpdate(Timestep timestep);
+		virtual void OnUpdate();
 		virtual void OnEvent(Event& event);
 		
 		void Resize(float width, float height);

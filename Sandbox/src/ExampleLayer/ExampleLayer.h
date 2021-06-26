@@ -54,11 +54,11 @@ public:
 		// -- Texture
 	}
 
-	void OnUpdate(Hazel::Timestep timestep) override
+	void OnUpdate() override
 	{
 		// Update
-		_cameraController.OnUpdate(timestep);
-		CalculateFPS(timestep);
+		_cameraController.OnUpdate();
+		CalculateFPS();
 
 		// Render
 		Hazel::RenderCommand::SetClearColor(_clearColorA);
@@ -100,7 +100,7 @@ public:
 		Hazel::Renderer::EndScene();
 	}
 
-	void OnImGuiRender(Hazel::Timestep timestep) override
+	void OnImGuiRender() override
 	{
 		ImGui::Begin("Title", nullptr, ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoTitleBar);
 		if (ImGui::BeginMenuBar())
@@ -131,8 +131,9 @@ public:
 		ImGui::End();
 	}
 
-	void CalculateFPS(Hazel::Timestep timestep)
+	void CalculateFPS()
 	{
+		float timestep = Hazel::Time::GetTimestep();
 		_oneSecondCountDown -= timestep;
 		_frameCount++;
 		if (_oneSecondCountDown <= 0.0f)

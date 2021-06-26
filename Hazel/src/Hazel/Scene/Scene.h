@@ -15,7 +15,7 @@ namespace Hazel
 		Entity CreateEntity(std::string name = std::string());
 		void DestroyEntity(Entity entity);
 
-		void OnUpdate(Timestep timestep);
+		void OnUpdate();
 		void OnViewportResize(uint32_t  width, uint32_t height);
 
 		std::string GetName() const { return _name; }

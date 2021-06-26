@@ -12,10 +12,10 @@ namespace Hazel
 	{
 	}
 
-	void OrthographicCameraController::OnUpdate(Timestep timestep)
+	void OrthographicCameraController::OnUpdate()
 	{
 		HZ_PROFILE_FUNCTION();
-		
+		float timestep = Time::GetTimestep();
 		if (Input::IsKeyPressed(HZ_KEY_W))
 		{
 			_cameraPosition.x += -sin(glm::radians(_cameraRotation)) * _cameraTranslationSpeed * timestep;

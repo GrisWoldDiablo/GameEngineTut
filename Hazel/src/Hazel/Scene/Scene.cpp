@@ -26,7 +26,7 @@ namespace Hazel
 		_registry.destroy(entity);
 	}
 
-	void Scene::OnUpdate(Timestep timestep)
+	void Scene::OnUpdate()
 	{
 		// Update Scripts
 		_registry.view<NativeScriptComponent>().each([=](auto entity, auto& nsc)
@@ -46,7 +46,7 @@ namespace Hazel
 				return;
 			}
 
-			instance->OnUpdate(timestep);
+			instance->OnUpdate();
 		});
 
 		// Render 2D

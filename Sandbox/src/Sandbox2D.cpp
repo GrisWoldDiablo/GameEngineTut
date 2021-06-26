@@ -81,14 +81,14 @@ void Sandbox2D::OnDetach()
 	HZ_PROFILE_FUNCTION();
 }
 
-void Sandbox2D::OnUpdate(Hazel::Timestep timestep)
+void Sandbox2D::OnUpdate()
 {
 	HZ_PROFILE_FUNCTION();
 	_updateTimer.Start();
 
-	_cameraController.OnUpdate(timestep);
+	_cameraController.OnUpdate();
 
-	CalculateFPS(timestep);
+	CalculateFPS();
 
 #if !HZ_PROFILE
 	SafetyShutdownCheck();
@@ -169,7 +169,7 @@ void Sandbox2D::OnUpdate(Hazel::Timestep timestep)
 
 	Hazel::Renderer2D::EndScene();
 
-	_particleSystem.OnUpdate(timestep);
+	_particleSystem.OnUpdate(Hazel::Time::GetTimestep());
 	_particleSystem.OnRender(_cameraController.GetCamera());
 	_updateTimer.Stop();
 }
@@ -201,13 +201,13 @@ void Sandbox2D::SafetyShutdownCheck()
 	}
 }
 
-void Sandbox2D::OnImGuiRender(Hazel::Timestep timestep)
+void Sandbox2D::OnImGuiRender()
 {
 	HZ_PROFILE_FUNCTION();
 	//ImGui::ShowDemoWindow(nullptr);
 
 	DrawMainGui();
-	DrawStats(timestep);
+	DrawStats();
 	DrawParticlesGui();
 
 }
@@ -237,7 +237,7 @@ void Sandbox2D::DrawMainGui()
 	ImGui::End();
 }
 
-void Sandbox2D::DrawStats(Hazel::Timestep timestep)
+void Sandbox2D::DrawStats()
 {
 	auto stats = Hazel::Renderer2D::GetStats();
 
@@ -281,10 +281,10 @@ void Sandbox2D::OnEvent(Hazel::Event& event)
 	_cameraController.OnEvent(event);
 }
 
-void Sandbox2D::CalculateFPS(Hazel::Timestep timestep)
+void Sandbox2D::CalculateFPS()
 {
 	HZ_PROFILE_FUNCTION();
-	_oneSecondCountDown -= timestep;
+	_oneSecondCountDown -= Hazel::Time::GetTimestep();
 	_frameCount++;
 	if (_oneSecondCountDown <= 0.0f)
 	{

@@ -40,48 +40,49 @@ namespace Hazel
 		switch (floorHprime)
 		{
 		case 0:
-		{
-			R = C;
-			G = X;
-			B = 0;
-			break;
-		}
+			{
+				R = C;
+				G = X;
+				B = 0;
+				break;
+			}
 		case 1:
-		{
-			R = X;
-			G = C;
-			B = 0;
-			break;
-		}
+			{
+				R = X;
+				G = C;
+				B = 0;
+				break;
+			}
 		case 2:
-		{
-			R = 0;
-			G = C;
-			B = X;
-			break;
-		}
+			{
+				R = 0;
+				G = C;
+				B = X;
+				break;
+			}
 		case 3:
-		{
-			R = 0;
-			G = X;
-			B = C;
-			break;
-		}
+			{
+				R = 0;
+				G = X;
+				B = C;
+				break;
+			}
 		case 4:
-		{
-			R = X;
-			G = 0;
-			B = C;
-			break;
-		}
+			{
+				R = X;
+				G = 0;
+				B = C;
+				break;
+			}
 		default:
-		{
-			R = C;
-			G = 0;
-			B = X;
-			break;
+			{
+				R = C;
+				G = 0;
+				B = X;
+				break;
+			}
 		}
-		}
+
 		return Color((float)(R + m), (float)(G + m), (float)(B + m), hsv.a);
 	}
 
@@ -278,23 +279,19 @@ namespace Hazel
 
 	Color::Color(float value)
 		:Color(value, value, value)
-	{
-	}
+	{}
 
 	Color::Color(glm::vec4 value)
 		: Color(value.r, value.g, value.b, value.a)
-	{
-	}
+	{}
 
 	Color::Color(int red, int green, int blue, float alpha)
 		: Color(red / 255.0f, green / 255.0f, blue / 255.0f, alpha)
-	{
-	}
+	{}
 
 	Color::Color(float red, float green, float blue, float alpha)
 		: r(red), g(green), b(blue), a(alpha)
-	{
-	}
+	{}
 
 	float Color::GetGrayscaleValue() const
 	{
@@ -342,11 +339,33 @@ namespace Hazel
 			break;
 		}
 
-		HZ_CORE_ASSERT(0, "Index [" + std::to_string(index) + "] out of range!");
+		HZ_CORE_ASSERT(0, "Color index [" + std::to_string(index) + "] out of range!");
 		throw nullptr;
 	}
 
-	Color Color::operator+(const Color other)
+	float Color::operator[](int index) const
+	{
+		switch (index)
+		{
+		case 0:
+			return r;
+			break;
+		case 1:
+			return g;
+			break;
+		case 2:
+			return b;
+			break;
+		case 3:
+			return a;
+			break;
+		}
+
+		HZ_CORE_ASSERT(0, "Color index [" + std::to_string(index) + "] out of range!");
+		throw nullptr;
+	}
+
+	Color Color::operator+(const Color& other) const
 	{
 		auto red = glm::clamp(this->r + other.r, 0.0f, 1.0f);
 		auto green = glm::clamp(this->g + other.g, 0.0f, 1.0f);
@@ -355,7 +374,7 @@ namespace Hazel
 		return Color(red, green, blue, alpha);
 	}
 
-	Color Color::operator-(const Color other)
+	Color Color::operator-(const Color& other)const
 	{
 		auto red = glm::clamp(this->r - other.r, 0.0f, 1.0f);
 		auto green = glm::clamp(this->g - other.g, 0.0f, 1.0f);
@@ -364,7 +383,7 @@ namespace Hazel
 		return Color(red, green, blue, alpha);
 	}
 
-	Color Color::operator*(const Color other)
+	Color Color::operator*(const Color& other)const
 	{
 		auto red = this->r * other.r;
 		auto green = this->g * other.g;
@@ -373,7 +392,7 @@ namespace Hazel
 		return Color(red, green, blue, alpha);
 	}
 
-	Color Color::operator/(float value)
+	Color Color::operator/(float value)const
 	{
 		HZ_CORE_ASSERT(value, "Cannot divive by Zero!");
 		auto red = this->r / value;
@@ -383,7 +402,7 @@ namespace Hazel
 		return Color(red, green, blue, alpha);
 	}
 
-	Color& Color::operator+=(const Color other)
+	Color& Color::operator+=(const Color& other)
 	{
 		this->r = glm::clamp(this->r + other.r, 0.0f, 1.0f);
 		this->g = glm::clamp(this->g + other.g, 0.0f, 1.0f);
@@ -392,7 +411,7 @@ namespace Hazel
 		return *this;
 	}
 
-	Color& Color::operator-=(const Color other)
+	Color& Color::operator-=(const Color& other)
 	{
 		this->r = glm::clamp(this->r - other.r, 0.0f, 1.0f);
 		this->g = glm::clamp(this->g - other.g, 0.0f, 1.0f);
@@ -401,7 +420,7 @@ namespace Hazel
 		return *this;
 	}
 
-	Color& Color::operator*=(const Color other)
+	Color& Color::operator*=(const Color& other)
 	{
 		this->r *= other.r;
 		this->g *= other.g;
@@ -420,7 +439,7 @@ namespace Hazel
 		return *this;
 	}
 
-	bool Color::operator==(const Color other)
+	bool Color::operator==(const Color& other) const
 	{
 		return (this->r == other.r && this->g == other.g &&
 			this->b == other.b && this->a == other.a);

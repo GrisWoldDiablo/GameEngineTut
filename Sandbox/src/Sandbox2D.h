@@ -11,17 +11,17 @@ public:
 	void OnAttach() override;
 	void OnDetach() override;
 
-	void OnUpdate(Hazel::Timestep timestep) override;
+	void OnUpdate() override;
 
 	void SafetyShutdownCheck();
 
-	void OnImGuiRender(Hazel::Timestep timestep) override;
+	void OnImGuiRender() override;
 	void OnEvent(Hazel::Event& event) override;
 
 private:
-	void CalculateFPS(Hazel::Timestep timestep);
+	void CalculateFPS();
 	void DrawMainGui();
-	void DrawStats(Hazel::Timestep timestep);
+	void DrawStats();
 	void DrawParticlesGui();
 
 private:

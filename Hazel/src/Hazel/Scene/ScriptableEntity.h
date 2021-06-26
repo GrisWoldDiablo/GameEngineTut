@@ -9,7 +9,7 @@ namespace Hazel
 		bool IsEnable = true;
 
 	public:
-		virtual ~ScriptableEntity() {}
+		virtual ~ScriptableEntity() = default;
 
 		template<typename T>
 		T& GetComponent()
@@ -19,7 +19,7 @@ namespace Hazel
 
 		virtual void OnCreate() {}
 		virtual void OnDestroy() {}
-		virtual void OnUpdate(Timestep timestep) {}
+		virtual void OnUpdate() {}
 		virtual std::string GetClassFilePath() = 0;
 
 	private:

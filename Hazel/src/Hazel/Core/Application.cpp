@@ -8,6 +8,7 @@ namespace Hazel
 {
 	// Static singleton access
 	Application* Application::_sInstance = nullptr;
+	Time* Time::_sInstance = nullptr;
 
 	Application::Application(std::string name)
 	{
@@ -17,10 +18,11 @@ namespace Hazel
 		HZ_CORE_LINFO("There is {0} cores on this machine.", std::thread::hardware_concurrency());
 #endif // HZ_DEBUG
 
-			// Initialize the singleton.
+		// Initialize the singleton.
 		HZ_CORE_ASSERT(!_sInstance, "Application already exist!")
 		{
 			_sInstance = this;
+			Time::_sInstance = new Time();
 		}
 
 		_window = Scope<Window>(Window::Create(WindowProps(std::move(name))));
@@ -43,6 +45,7 @@ namespace Hazel
 
 			auto time = Platform::GetTime();
 			auto timestep = Timestep(time - _lastFrameTime);
+			Time::_sInstance->_timestep = timestep;
 			_lastFrameTime = time;
 
 			// if minimized do not bother updating
@@ -54,7 +57,7 @@ namespace Hazel
 					// Go through the layers from bottom to top
 					for (auto* layer : _layerStack)
 					{
-						layer->OnUpdate(timestep);
+						layer->OnUpdate();
 					}
 				}
 
@@ -65,7 +68,7 @@ namespace Hazel
 					// Render the ImGui layer.			
 					for (auto* layer : _layerStack)
 					{
-						layer->OnImGuiRender(timestep);
+						layer->OnImGuiRender();
 					}
 				}
 				_imGuiLayer->End();

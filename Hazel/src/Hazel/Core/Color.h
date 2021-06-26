@@ -148,45 +148,50 @@ namespace Hazel
 		/// </summary>
 		operator glm::vec4() const;
 
+		///// <summary>
+		///// Returns r, g, b, a using [0], [1], [2], [3] respectively.
+		///// </summary>
+		float& operator[](int index);
+
 		/// <summary>
 		/// Returns r, g, b, a using [0], [1], [2], [3] respectively.
 		/// </summary>
-		float& operator[] (int index);
+		float operator[](int index) const;
 
 		/// <summary>
 		/// Add each components separately.
 		/// </summary>
-		Color operator +(const Color other);
+		Color operator +(const Color& other) const;
 
 		/// <summary>
 		/// Subtract each components separately.
 		/// </summary>
-		Color operator -(const Color other);
+		Color operator -(const Color& other) const;
 
 		/// <summary>
 		/// Multiply each components separately.
 		/// </summary>
-		Color operator *(const Color other);
+		Color operator *(const Color& other) const;
 
 		/// <summary>
 		/// Divide each components by a value.
 		/// </summary>
-		Color operator /(float value);
+		Color operator /(float value) const;
 
 		/// <summary>
 		/// Add each components separately.
 		/// </summary>
-		Color& operator +=(const Color other);
+		Color& operator +=(const Color& other);
 
 		/// <summary>
 		/// Subtract each components separately.
 		/// </summary>
-		Color& operator -=(const Color other);
+		Color& operator -=(const Color& other);
 
 		/// <summary>
 		/// Multiply each components separately.
 		/// </summary>
-		Color& operator *=(const Color other);
+		Color& operator *=(const Color& other);
 
 		/// <summary>
 		/// Divide each components by a value.
@@ -196,7 +201,7 @@ namespace Hazel
 		/// <summary>
 		/// Compare each components separately.
 		/// </summary>
-		bool operator ==(const Color other);
+		bool operator ==(const Color& other) const;
 	};
 }
 
