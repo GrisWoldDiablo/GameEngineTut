@@ -27,6 +27,7 @@ namespace Hazel
 		void SaveSceneAs();
 
 	private:
+		void DrawToolsBar();
 		void DrawFileMenu();
 		void DrawSceneViewport();
 		void DrawStats(Timestep timestep);
@@ -68,5 +69,11 @@ namespace Hazel
 
 		// Tools
 		bool _isDemoWidowOpen = false;
+
+		// Gizmos Icons
+		Ref<Texture2D> _nothingGizmoIconTexture;
+		Ref<Texture2D> _positionGizmoIconTexture;
+		Ref<Texture2D> _rotationGizmoIconTexture;
+		Ref<Texture2D> _scaleGizmoIconTexture;
 	};
 }

@@ -144,7 +144,7 @@ namespace Hazel
 
 	public:
 		/// <summary>
-		/// Explicity convert to glm::vec4.
+		/// Explicitly convert to glm::vec4.
 		/// </summary>
 		operator glm::vec4() const;
 

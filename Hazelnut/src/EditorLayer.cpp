@@ -26,10 +26,16 @@ namespace Hazel
 		auto boldFontPath = "assets/fonts/opensans/OpenSans-ExtraBold.ttf";
 		imGuiLayer->SetFonts(normalFontPath, { boldFontPath });
 
+		// Create Gizmo Icons texture.
+		_nothingGizmoIconTexture = Texture2D::Create("assets/icons/NothingGizmo256White.png");
+		_positionGizmoIconTexture = Texture2D::Create("assets/icons/PositionGizmo256White.png");
+		_rotationGizmoIconTexture = Texture2D::Create("assets/icons/RotationGizmo256White.png");
+		_scaleGizmoIconTexture = Texture2D::Create("assets/icons/ScaleGizmo256White.png");
+
 		_unwrapTexture = Texture2D::Create("assets/textures/unwrap_helper.png");
 
 		_framebuffer = Framebuffer::Create({ 1280,720 });
-		
+
 		// Create an empty scene.
 		_activeScene = CreateRef<Scene>();
 		_activeScene->SetName(_kNewSceneName);
@@ -108,8 +114,12 @@ namespace Hazel
 		ImGui::Begin("DockSpace", &dockSpaceOpen, window_flags);
 		ImGui::PopStyleVar();
 
+		DrawToolsBar();
+
 		if (opt_fullscreen)
+		{
 			ImGui::PopStyleVar(2);
+		}
 
 		// DockSpace
 		ImGuiIO& io = ImGui::GetIO();
@@ -264,6 +274,45 @@ namespace Hazel
 		{
 			SceneSerializer serializer(_activeScene);
 			serializer.Serialize(filePath);
+		}
+	}
+
+	void EditorLayer::DrawToolsBar()
+	{
+		auto size = ImVec2(25.0f, 25.0f);
+		auto uv0 = ImVec2(0.0f, 1.0f);
+		auto uv1 = ImVec2(1.0f, 0.0f);
+
+		auto selectedColor = ImVec4(0.196f, 0.196f, 0.5f, 1.0f);
+		auto tintColor = ImVec4(0.396f, 0.396f, 0.8f, 1.0f);
+		auto normalColor = ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
+		auto whiteColor = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
+
+		bool isNothing = _gizmoType == -1;
+		if (ImGui::ImageButton((ImTextureID)(intptr_t)_nothingGizmoIconTexture->GetRendererID(), size, uv0, uv1, 3, isNothing ? selectedColor : normalColor, isNothing ? tintColor : whiteColor))
+		{
+			_gizmoType = -1;
+		}
+
+		ImGui::SameLine();
+		bool isTranslate = _gizmoType == ImGuizmo::TRANSLATE;
+		if (ImGui::ImageButton((ImTextureID)(intptr_t)_positionGizmoIconTexture->GetRendererID(), size, uv0, uv1, 3, isTranslate ? selectedColor : normalColor, isTranslate ? tintColor : whiteColor))
+		{
+			_gizmoType = ImGuizmo::TRANSLATE;
+		}
+
+		ImGui::SameLine();
+		bool isScale = _gizmoType == ImGuizmo::SCALE;
+		if (ImGui::ImageButton((ImTextureID)(intptr_t)_scaleGizmoIconTexture->GetRendererID(), size, uv0, uv1, 3, isScale ? selectedColor : normalColor, isScale ? tintColor : whiteColor))
+		{
+			_gizmoType = ImGuizmo::SCALE;
+		}
+
+		ImGui::SameLine();
+		bool isRotate = _gizmoType == ImGuizmo::ROTATE;
+		if (ImGui::ImageButton((ImTextureID)(intptr_t)_rotationGizmoIconTexture->GetRendererID(), size, uv0, uv1, 3, isRotate ? selectedColor : normalColor, isRotate ? tintColor : whiteColor))
+		{
+			_gizmoType = ImGuizmo::ROTATE;
 		}
 	}
 

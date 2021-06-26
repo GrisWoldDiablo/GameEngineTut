@@ -53,9 +53,8 @@ namespace Hazel
 
 		if (defaultFileName != nullptr)
 		{
-			//"Hazel Scene (*.hazel)\0*.hazel\0"
 			std::stringstream ss;
-			ss << defaultFileName << std::strchr(filter, '\0') + 1;
+			ss << defaultFileName << std::strchr(filter, '\0');
 			std::strcpy(szFile, ss.str().c_str());
 		}
 

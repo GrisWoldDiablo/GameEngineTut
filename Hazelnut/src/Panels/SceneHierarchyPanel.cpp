@@ -279,7 +279,7 @@ namespace Hazel
 		}
 
 		// Right-Click on blank space.
-		if (ImGui::BeginPopupContextWindow(0, 1, false))
+		if (ImGui::BeginPopupContextWindow(nullptr, 1, false))
 		{
 			if (ImGui::MenuItem("Create empty Entity"))
 			{
@@ -404,7 +404,7 @@ namespace Hazel
 			bool isSpritePressed = false;
 			if (component->Texture != nullptr)
 			{
-				isSpritePressed = ImGui::ImageButton((ImTextureID)(intptr_t)component->Texture->GetRendererID(), ImVec2(50.0f, 50.0f), ImVec2(0, 1), ImVec2(1, 0), 3);
+				isSpritePressed = ImGui::ImageButton((ImTextureID)(intptr_t)component->Texture->GetRendererID(), ImVec2(50.0f, 50.0f), ImVec2(0.0f, 1.0f), ImVec2(1.0f, 0.0f), 3);
 			}
 			else
 			{
