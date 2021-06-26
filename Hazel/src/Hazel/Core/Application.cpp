@@ -45,7 +45,7 @@ namespace Hazel
 
 			auto time = Platform::GetTime();
 			auto timestep = Timestep(time - _lastFrameTime);
-			Time::_sInstance->_timestep = timestep;
+			Time::SetTimestep(timestep);
 			_lastFrameTime = time;
 
 			// if minimized do not bother updating

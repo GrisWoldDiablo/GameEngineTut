@@ -26,7 +26,9 @@ namespace Hazel
 	private:
 		Time() = default;
 		Timestep _timestep;
+
 		static Time* _sInstance;
+		static void SetTimestep(const Timestep& timestep) { _sInstance->_timestep = timestep; }
 
 		friend class Application;
 	};
