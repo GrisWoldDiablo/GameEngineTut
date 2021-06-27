@@ -41,7 +41,7 @@ namespace Hazel
 		void RecalculateProjection();
 
 	private:
-		ProjectionType _projectionType = ProjectionType::Orthographic;
+		ProjectionType _projectionType = ProjectionType::Perspective;
 
 		float _perspectiveFOV = glm::radians(45.0f);
 		float _perspectiveNear = 0.01f;

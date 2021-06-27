@@ -16,7 +16,8 @@ namespace Hazel
 
 		void OnUpdate() override
 		{
-			if (!GetComponent<CameraComponent>().IsPrimary)
+			if (!GetComponent<CameraComponent>().IsPrimary
+				|| !Input::IsMouseButtonPressed(MouseCode::ButtonRight))
 			{
 				return;
 			}

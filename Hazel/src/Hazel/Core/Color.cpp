@@ -40,47 +40,47 @@ namespace Hazel
 		switch (floorHprime)
 		{
 		case 0:
-			{
-				R = C;
-				G = X;
-				B = 0;
-				break;
-			}
+		{
+			R = C;
+			G = X;
+			B = 0;
+			break;
+		}
 		case 1:
-			{
-				R = X;
-				G = C;
-				B = 0;
-				break;
-			}
+		{
+			R = X;
+			G = C;
+			B = 0;
+			break;
+		}
 		case 2:
-			{
-				R = 0;
-				G = C;
-				B = X;
-				break;
-			}
+		{
+			R = 0;
+			G = C;
+			B = X;
+			break;
+		}
 		case 3:
-			{
-				R = 0;
-				G = X;
-				B = C;
-				break;
-			}
+		{
+			R = 0;
+			G = X;
+			B = C;
+			break;
+		}
 		case 4:
-			{
-				R = X;
-				G = 0;
-				B = C;
-				break;
-			}
+		{
+			R = X;
+			G = 0;
+			B = C;
+			break;
+		}
 		default:
-			{
-				R = C;
-				G = 0;
-				B = X;
-				break;
-			}
+		{
+			R = C;
+			G = 0;
+			B = X;
+			break;
+		}
 		}
 
 		return Color((float)(R + m), (float)(G + m), (float)(B + m), hsv.a);

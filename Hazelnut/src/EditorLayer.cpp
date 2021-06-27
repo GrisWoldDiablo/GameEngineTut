@@ -37,13 +37,16 @@ namespace Hazel
 
 		_unwrapTexture = Texture2D::Create("assets/textures/unwrap_helper.png");
 
-		_framebuffer = Framebuffer::Create({ 1280,720 });
+		uint32_t width = 1280, height = 720;
+		_framebuffer = Framebuffer::Create({ width, height });
 
 		// Create an empty scene.
 		_activeScene = CreateRef<Scene>();
 		_activeScene->SetName(_kNewSceneName);
-
+		_activeScene->OnViewportResize(width, height);
 		_sceneHierarchyPanel.SetContext(_activeScene);
+
+		SetupMainCamera(width, height);
 	}
 
 	void EditorLayer::OnDetach()
@@ -157,8 +160,6 @@ namespace Hazel
 
 	bool EditorLayer::OnMouseMoved(MouseMovedEvent& event)
 	{
-		HZ_CORE_LINFO(event);
-
 		if (_gizmoType == -1)
 		{
 			auto camera = _activeScene->GetPrimaryCameraEntity();
@@ -180,7 +181,7 @@ namespace Hazel
 
 	bool EditorLayer::OnKeyPressed(KeyPressedEvent& event)
 	{
-		if (event.GetRepeatCount() > 0)
+		if (event.GetRepeatCount() > 0 || Input::IsMouseButtonPressed(MouseCode::ButtonRight))
 		{
 			return false;
 		}
@@ -189,6 +190,7 @@ namespace Hazel
 		bool isControlPressed = Input::IsKeyPressed(Key::LeftControl) || Input::IsKeyPressed(Key::RightControl);
 		bool isShiftPressed = Input::IsKeyPressed(Key::LeftShift) || Input::IsKeyPressed(Key::RightShift);
 		bool isModiferPressed = isControlPressed || isShiftPressed;
+
 		switch (event.GetKeyCode())
 		{
 		case Key::N:
@@ -222,17 +224,17 @@ namespace Hazel
 				_gizmoType = ImGuizmo::TRANSLATE;
 			}
 			break;
-		case Key::E: // Scale
+		case Key::E: // Rotation
+			if (!isModiferPressed && !isImGuizmoInUse)
+			{
+				_gizmoType = ImGuizmo::ROTATE;
+			}
+			break;
+		case Key::R: // Scale
 			if (!isModiferPressed && !isImGuizmoInUse)
 			{
 				_gizmoType = ImGuizmo::SCALE;
 				_gizmoSpace = ImGuizmo::LOCAL;
-			}
-			break;
-		case Key::R: // Rotation
-			if (!isModiferPressed && !isImGuizmoInUse)
-			{
-				_gizmoType = ImGuizmo::ROTATE;
 			}
 			break;
 		case Key::X: // space toggle, Local or Global
@@ -244,6 +246,16 @@ namespace Hazel
 		}
 
 		return true;
+	}
+
+	void EditorLayer::SetupMainCamera(uint32_t width, uint32_t height)
+	{
+		// Set main camera entity
+
+		_mainCamera = _activeScene->CreateEntity("Main Camera");
+		auto& cameraComponent = _mainCamera.AddComponent<CameraComponent>();
+		cameraComponent.Camera.SetViewportSize(width, height);
+		_mainCamera.AddComponent<NativeScriptComponent>().Bind<CameraController>();
 	}
 
 	bool EditorLayer::NewScene(const std::string& newSceneName)
@@ -266,6 +278,7 @@ namespace Hazel
 
 			_activeScene->OnViewportResize((uint32_t)_sceneViewportSize.x, (uint32_t)_sceneViewportSize.y);
 			_sceneHierarchyPanel.SetContext(_activeScene);
+			SetupMainCamera((uint32_t)_sceneViewportSize.x, (uint32_t)_sceneViewportSize.y);
 
 			return true;
 		}
@@ -327,6 +340,7 @@ namespace Hazel
 			{
 				_gizmoType = -1;
 			}
+			AddTooltip("Pan Camera");
 
 			ImGui::SameLine();
 
@@ -335,6 +349,15 @@ namespace Hazel
 			{
 				_gizmoType = ImGuizmo::TRANSLATE;
 			}
+			AddTooltip("Translate");
+
+			ImGui::SameLine();
+			bool isRotate = _gizmoType == ImGuizmo::ROTATE;
+			if (ImGui::ImageButton((ImTextureID)(intptr_t)_rotationGizmoIconTexture->GetRendererID(), size, uv0, uv1, 3, isRotate ? selectedColor : normalColor, isRotate ? tintColor : whiteColor))
+			{
+				_gizmoType = ImGuizmo::ROTATE;
+			}
+			AddTooltip("Rotate");
 
 			ImGui::SameLine();
 			bool isScale = _gizmoType == ImGuizmo::SCALE;
@@ -343,15 +366,7 @@ namespace Hazel
 				_gizmoType = ImGuizmo::SCALE;
 				_gizmoSpace = ImGuizmo::LOCAL;
 			}
-
-			AddTooltip("Local Space Only");
-
-			ImGui::SameLine();
-			bool isRotate = _gizmoType == ImGuizmo::ROTATE;
-			if (ImGui::ImageButton((ImTextureID)(intptr_t)_rotationGizmoIconTexture->GetRendererID(), size, uv0, uv1, 3, isRotate ? selectedColor : normalColor, isRotate ? tintColor : whiteColor))
-			{
-				_gizmoType = ImGuizmo::ROTATE;
-			}
+			AddTooltip("Scale\nLocal Space Only");
 
 			ImGui::TableNextColumn();
 			bool isLocal = _gizmoSpace == ImGuizmo::LOCAL;
@@ -365,6 +380,8 @@ namespace Hazel
 					}
 				}
 
+				AddTooltip("Change to Global");
+
 				ImGui::SameLine();
 				ImGui::AlignTextToFramePadding();
 				ImGui::Text("Local");
@@ -375,6 +392,8 @@ namespace Hazel
 				{
 					_gizmoSpace = ImGuizmo::LOCAL;
 				}
+
+				AddTooltip("Change to Local");
 
 				ImGui::SameLine();
 				ImGui::AlignTextToFramePadding();
@@ -460,9 +479,7 @@ namespace Hazel
 
 				const auto& camera = cameraEntity.GetComponent<CameraComponent>().Camera;
 				const auto& cameraProjection = camera.GetProjection();
-				auto& cameraTC = cameraEntity.GetComponent<TransformComponent>();
-				glm::mat4 cameraView = glm::inverse(cameraTC.GetTransform());
-
+				glm::mat4 cameraView = glm::inverse(cameraEntity.GetComponent<TransformComponent>().GetTransform());
 
 				// Entity transform
 				auto& transformComponent = selectedEntity.GetComponent<TransformComponent>();
@@ -494,10 +511,6 @@ namespace Hazel
 						transformComponent.Scale = scale;
 					}
 				}
-
-				float viewManipulateRight = ImGui::GetWindowPos().x + windowWidth;
-				float viewManipulateTop = ImGui::GetWindowPos().y;
-				ImGuizmo::ViewManipulate(glm::value_ptr(cameraView), 8, ImVec2(viewManipulateRight - 100, viewManipulateTop + 10), ImVec2(100, 100), 0x10101010);
 			}
 		}
 
@@ -607,15 +620,16 @@ namespace Hazel
 		const float kRequiredTime = 0.5f;
 		if (ImGui::IsItemHovered())
 		{
-			timeSpentHovering += Time::GetTimestep();
-			if (timeSpentHovering >= kRequiredTime)
+			_timeSpentHovering += Time::GetTimestep();
+			if (_timeSpentHovering >= kRequiredTime)
 			{
 				ImGui::SetTooltip(tooltipMessage.c_str());
 			}
 		}
-		else
+
+		if (!ImGui::IsAnyItemHovered())
 		{
-			timeSpentHovering = 0.0f;
+			_timeSpentHovering = 0.0f;
 		}
 	}
 }

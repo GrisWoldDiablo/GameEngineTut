@@ -14,6 +14,8 @@ namespace Hazel
 		EditorLayer();
 		~EditorLayer() = default;
 		void OnAttach() override;
+
+
 		void OnDetach() override;
 
 		void OnUpdate() override;
@@ -24,6 +26,7 @@ namespace Hazel
 		bool OnMouseMoved(MouseMovedEvent& event);
 		bool OnKeyPressed(KeyPressedEvent& event);
 
+		void SetupMainCamera(uint32_t width, uint32_t height);
 		bool NewScene(const std::string& newSceneName = _kNewSceneName);
 		void OpenScene();
 		void SaveSceneAs();
@@ -49,12 +52,9 @@ namespace Hazel
 
 		bool _isSceneViewportFocused = false;
 		bool _isSceneViewportHovered = false;
-		bool _isOnSecondCamera = false;
-
-		Entity _squareEntity;
+		
+		// Basics
 		Entity _mainCamera;
-		Entity _secondaryCamera;
-
 		Ref<Scene> _activeScene;
 
 		// FPS
@@ -84,6 +84,6 @@ namespace Hazel
 		Ref<Texture2D> _globalGizmoIconTexture;
 
 		// Hover Timer
-		float timeSpentHovering = 0;
+		float _timeSpentHovering = 0;
 	};
 }
