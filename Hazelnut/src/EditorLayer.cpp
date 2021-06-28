@@ -305,11 +305,11 @@ namespace Hazel
 			ImGui::TableNextColumn();
 
 			bool isNothing = _gizmoType == -1;
-			if (ImGui::ImageButton((ImTextureID)(intptr_t)_panIconTexture->GetRendererID(), size, uv0, uv1, 3, isNothing ? selectedColor : normalColor, isNothing ? tintColor : whiteColor))
+			if (ImGui::ImageButton((ImTextureID)(intptr_t)_nothingGizmoIconTexture->GetRendererID(), size, uv0, uv1, 3, isNothing ? selectedColor : normalColor, isNothing ? tintColor : whiteColor))
 			{
 				_gizmoType = -1;
 			}
-			AddTooltip("Pan Camera");
+			AddTooltip("Nothing");
 
 			ImGui::SameLine();
 
