@@ -25,13 +25,13 @@ namespace Hazel
 	{
 		None = 0,
 		EventCategoryApplication = BIT(0),
-		EventCategoryInput		 = BIT(1),
-		EventCategoryKeyboard	 = BIT(2),
-		EventCategoryMouse		 = BIT(3),
+		EventCategoryInput = BIT(1),
+		EventCategoryKeyboard = BIT(2),
+		EventCategoryMouse = BIT(3),
 		EventCategoryMouseButton = BIT(4)
 	};
 
-// This macro is to simplify the definition of event classes.
+	// This macro is to simplify the definition of event classes.
 #define EVENT_CLASS_TYPE(type) static EventType GetStaticType() { return EventType::type;}\
 								virtual EventType GetEventType() const override { return GetStaticType(); }\
 								virtual const char* GetName() const override { return #type; }
@@ -48,10 +48,10 @@ namespace Hazel
 
 	public:
 		virtual ~Event() = default;
-		
+
 		bool Handled = false;
 
-		virtual EventType GetEventType() const  = 0;
+		virtual EventType GetEventType() const = 0;
 		virtual const char* GetName() const = 0;
 		virtual int GetCategoryFlags() const = 0;
 		virtual std::string ToString() const { return GetName(); }
@@ -71,9 +71,10 @@ namespace Hazel
 		using EventFn = std::function<bool(T&)>;
 	public:
 		virtual ~EventDispatcher() = default;
-		
-		EventDispatcher(Event & event)
-			: _event(event) {}
+
+		EventDispatcher(Event& event)
+			: _event(event)
+		{}
 
 		template<typename T>
 		bool Dispatch(EventFn<T> func)

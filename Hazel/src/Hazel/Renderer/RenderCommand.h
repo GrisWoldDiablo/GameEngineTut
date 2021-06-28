@@ -9,14 +9,14 @@ namespace Hazel
 		static void Init()
 		{
 			HZ_PROFILE_FUNCTION();
-			
+
 			_sRendererAPI->Init();
 		}
 
 		static void SetViewport(uint32_t x, uint32_t y, uint32_t width, uint32_t height)
 		{
 			HZ_PROFILE_FUNCTION();
-			
+
 			_sRendererAPI->SetViewport(x, y, width, height);
 		}
 
@@ -33,7 +33,7 @@ namespace Hazel
 
 			_sRendererAPI->SetClearColor(color);
 		}
-		
+
 		static void Clear()
 		{
 			HZ_PROFILE_FUNCTION();
@@ -54,7 +54,7 @@ namespace Hazel
 
 			_sRendererAPI->SetDepthMaskReadOnly();
 		}
-		
+
 	private:
 		static Ref<RendererAPI> _sRendererAPI;
 	};

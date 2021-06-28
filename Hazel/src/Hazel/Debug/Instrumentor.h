@@ -138,8 +138,7 @@ namespace Hazel
 	private:
 		Instrumentor()
 			:_currentSession(nullptr)
-		{
-		}
+		{}
 
 		~Instrumentor()
 		{

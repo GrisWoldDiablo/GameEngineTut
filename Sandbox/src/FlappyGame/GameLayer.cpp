@@ -17,8 +17,7 @@ void GameLayer::OnAttach()
 }
 
 void GameLayer::OnDetach()
-{
-}
+{}
 
 void GameLayer::OnUpdate()
 {
@@ -49,10 +48,10 @@ void GameLayer::OnImGuiRender()
 
 	ImGui::End();
 
-	
+
 	uint32_t playerScore = _level.GetPlayer().GetScore();
 	std::string scoreStr = std::string("Score: ") + std::to_string(playerScore);
-	ImGui::GetForegroundDrawList()->AddText(ImGui::GetFont(),48.0f,ImGui::GetWindowPos(), 0xff1111ff, scoreStr.c_str());
+	ImGui::GetForegroundDrawList()->AddText(ImGui::GetFont(), 48.0f, ImGui::GetWindowPos(), 0xff1111ff, scoreStr.c_str());
 }
 
 void GameLayer::OnEvent(Hazel::Event& event)

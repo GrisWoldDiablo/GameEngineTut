@@ -20,7 +20,7 @@ namespace Hazel
 		glfwMakeContextCurrent(_windowHandle);
 		auto status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress); // Glad setup/initialization
 		HZ_CORE_ASSERT(status, "Failed to initialize Glad!");
-		
+
 #if HZ_DEBUG
 		HZ_CORE_LINFO("OpenGL Info:");
 		HZ_CORE_LINFO("  Vendor: {0}", glGetString(GL_VENDOR));

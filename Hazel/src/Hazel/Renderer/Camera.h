@@ -11,7 +11,7 @@ namespace Hazel
 
 		virtual ~Camera() = default;
 		const glm::mat4& GetProjection() const { return _projection; }
-	
+
 	protected:
 		glm::mat4 _projection = glm::mat4(1.0f);
 	};

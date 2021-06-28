@@ -16,7 +16,7 @@ namespace Hazel
 	void OrthographicCamera::SetProjection(float left, float right, float bottom, float top)
 	{
 		HZ_PROFILE_FUNCTION();
-		
+
 		_projectionMatrix = glm::ortho(left, right, bottom, top, -1.0f, 1.0f);
 		_viewProjectionMatrix = _projectionMatrix * _viewMatrix;
 	}
@@ -24,7 +24,7 @@ namespace Hazel
 	void OrthographicCamera::RecalculateViewMatrix()
 	{
 		HZ_PROFILE_FUNCTION();
-		
+
 		auto identityMatrix = glm::identity<glm::mat4>();
 		auto transform = glm::translate(identityMatrix, _position) *
 			glm::rotate(identityMatrix, glm::radians(_rotation), glm::vec3(0, 0, 1));

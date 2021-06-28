@@ -8,9 +8,8 @@ namespace Hazel
 {
 
 	OrthographicCameraController::OrthographicCameraController(float aspectRatio, bool rotation)
-		:_aspectRatio(aspectRatio), _bounds({ -_aspectRatio * _zoomLevel, _aspectRatio * _zoomLevel, -_zoomLevel, _zoomLevel }), _camera(_bounds.Left,_bounds.Right,_bounds.Bottom,_bounds.Top), _rotation(rotation)
-	{
-	}
+		:_aspectRatio(aspectRatio), _bounds({ -_aspectRatio * _zoomLevel, _aspectRatio * _zoomLevel, -_zoomLevel, _zoomLevel }), _camera(_bounds.Left, _bounds.Right, _bounds.Bottom, _bounds.Top), _rotation(rotation)
+	{}
 
 	void OrthographicCameraController::OnUpdate()
 	{
@@ -48,7 +47,7 @@ namespace Hazel
 			{
 				_cameraRotation -= _cameraRotationSpeed * timestep;
 			}
-			
+
 			if (_cameraRotation > 180.0f)
 			{
 				_cameraRotation -= 360.0f;
@@ -72,7 +71,7 @@ namespace Hazel
 	void OrthographicCameraController::OnEvent(Event& event)
 	{
 		HZ_PROFILE_FUNCTION();
-		
+
 		EventDispatcher dispatcher(event);
 		dispatcher.Dispatch<MouseScrolledEvent>(HZ_BIND_EVENT_FN(OnMouseScrolled));
 		dispatcher.Dispatch<WindowResizeEvent>(HZ_BIND_EVENT_FN(OnWindowResized));
@@ -87,7 +86,7 @@ namespace Hazel
 	void OrthographicCameraController::SetZoomLevel(float level)
 	{
 		HZ_PROFILE_FUNCTION();
-		
+
 		_zoomLevel = level;
 		_zoomLevel = std::max(_zoomLevel, _zoomLevelMinimum);
 		CalculateView();
@@ -117,7 +116,7 @@ namespace Hazel
 	bool OrthographicCameraController::OnMouseScrolled(MouseScrolledEvent& event)
 	{
 		HZ_PROFILE_FUNCTION();
-		
+
 		SetZoomLevel(_zoomLevel - event.GetYOffset() * _zoomLevelSpeed);
 		return false;
 	}
@@ -125,9 +124,9 @@ namespace Hazel
 	bool OrthographicCameraController::OnWindowResized(WindowResizeEvent& event)
 	{
 		HZ_PROFILE_FUNCTION();
-		
+
 		Resize((float)event.GetWidth(), (float)event.GetHeight());
-		
+
 		return false;
 	}
 

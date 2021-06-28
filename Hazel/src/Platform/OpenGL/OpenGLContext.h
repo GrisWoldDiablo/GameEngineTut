@@ -9,7 +9,7 @@ namespace Hazel
 	{
 	public:
 		OpenGLContext(GLFWwindow* windowHandle);
-		
+
 	public:
 		void Init() override;
 		void SwapBuffers() override;

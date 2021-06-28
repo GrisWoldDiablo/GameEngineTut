@@ -10,7 +10,7 @@ public:
 
 	void OnAttach() override;
 	void OnDetach() override;
-	
+
 	void OnUpdate() override;
 
 	void OnImGuiRender() override;

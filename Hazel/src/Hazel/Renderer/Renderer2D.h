@@ -55,7 +55,7 @@ namespace Hazel
 		// Final Draw
 		static void DrawQuad(const glm::mat4& transform, const Ref<SubTexture2D>& subTexture, const glm::vec2& tilingFactor = glm::vec2(1.0f), const Color& tintColor = Color::White);
 		// --- ----------- --- //
-		
+
 		struct Statistics
 		{
 			uint32_t DrawCalls = 0;

@@ -45,7 +45,7 @@ void Level::OnUpdate(Hazel::Timestep ts)
 	}
 
 	_pillarHSV.x += 0.1f * ts;
-	if(_pillarHSV.x > 1.0f)
+	if (_pillarHSV.x > 1.0f)
 	{
 		_pillarHSV.x = 0.0f;
 	}
@@ -164,7 +164,7 @@ bool Level::CollisionTest()
 		{
 			if (PointInTriangle({ vert.x,vert.y }, tri[0], tri[1], tri[2]))
 			{
- 				return true;
+				return true;
 			}
 		}
 

@@ -18,7 +18,7 @@ namespace Hazel
 			(LPCSTR)"Warning!",
 			MB_ICONWARNING | MB_YESNO
 		);
-		
+
 		return result == IDYES;
 	}
 

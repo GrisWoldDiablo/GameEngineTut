@@ -7,7 +7,7 @@
 namespace Hazel
 {
 	Scope<Renderer::SceneData> Renderer::_sSceneData = CreateScope<SceneData>();
-	
+
 	void Renderer::Init()
 	{
 		HZ_PROFILE_FUNCTION();
@@ -31,8 +31,7 @@ namespace Hazel
 	}
 
 	void Renderer::EndScene()
-	{
-	}
+	{}
 
 	void Renderer::Submit(const Ref<Shader>& shader, const Ref<VertexArray>& vertexArray, const glm::mat4& transform)
 	{
@@ -41,7 +40,7 @@ namespace Hazel
 		shader->Bind();
 		std::dynamic_pointer_cast<OpenGLShader>(shader)->UploadUniformMat4("u_ViewProjection", _sSceneData->ViewProjectionMatrix);
 		std::dynamic_pointer_cast<OpenGLShader>(shader)->UploadUniformMat4("u_Transform", transform);
-		
+
 		vertexArray->Bind();
 		RenderCommand::DrawIndexed(vertexArray);
 	}

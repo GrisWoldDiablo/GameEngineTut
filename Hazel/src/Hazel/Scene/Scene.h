@@ -16,7 +16,7 @@ namespace Hazel
 
 		Entity CreateEntity(std::string name = std::string());
 		void DestroyEntity(Entity entity);
-		
+
 		void OnUpdateRuntime();
 		void OnUpdateEditor(EditorCamera& camera);
 		void OnViewportResize(uint32_t  width, uint32_t height);

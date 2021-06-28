@@ -15,7 +15,7 @@ namespace Hazel
 
 			PushLayer(new EditorLayer());
 		}
-		
+
 		~Hazelnut() = default;
 	};
 

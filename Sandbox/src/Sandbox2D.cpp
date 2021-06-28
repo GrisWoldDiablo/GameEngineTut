@@ -24,8 +24,7 @@ static const char* sMapTiles =
 
 Sandbox2D::Sandbox2D()
 	: Layer("Sandbox 2D"), _cameraController(1280.0f / 720.0f, true)
-{
-}
+{}
 
 void Sandbox2D::OnAttach()
 {

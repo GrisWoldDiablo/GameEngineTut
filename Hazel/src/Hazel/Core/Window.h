@@ -16,10 +16,9 @@ namespace Hazel
 		uint32_t Width;
 		uint32_t Height;
 
-		WindowProps(std::string title = "Hazel Engine",
-		            uint32_t width = 1600,
-		            uint32_t height = 900)
-			: Title(std::move(title)), Width(width), Height(height) {}
+		WindowProps(std::string title = "Hazel Engine", uint32_t width = 1600, uint32_t height = 900)
+			: Title(std::move(title)), Width(width), Height(height)
+		{}
 	};
 
 	// Interface representing a desktop system based Window

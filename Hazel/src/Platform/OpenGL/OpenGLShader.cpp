@@ -32,7 +32,7 @@ namespace Hazel
 		auto source = ReadFile(glslFilePath);
 		auto shaderSources = PreProcess(source);
 		Compile(shaderSources);
-		
+
 		auto lastSlash = glslFilePath.find_last_of("/\\");
 		lastSlash = lastSlash == std::string::npos ? 0 : lastSlash + 1;
 		auto lastDot = glslFilePath.rfind('.');
@@ -102,8 +102,8 @@ namespace Hazel
 			HZ_CORE_ASSERT(nextLinePosition != std::string::npos, "Syntax error!");
 
 			position = source.find(typeToken, nextLinePosition);
-			shaderSources[ShaderTypeFromString(type)] = (position == std::string::npos) ? 
-				source.substr(nextLinePosition) : source.substr(nextLinePosition,position - nextLinePosition);
+			shaderSources[ShaderTypeFromString(type)] = (position == std::string::npos) ?
+				source.substr(nextLinePosition) : source.substr(nextLinePosition, position - nextLinePosition);
 		}
 
 		return shaderSources;
@@ -200,7 +200,7 @@ namespace Hazel
 
 		glUseProgram(0);
 	}
-	
+
 	void OpenGLShader::SetInt(std::string name, int value)
 	{
 		HZ_PROFILE_FUNCTION();

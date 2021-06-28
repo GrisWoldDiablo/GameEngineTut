@@ -27,7 +27,7 @@ namespace Hazel
 
 		virtual void OnUpdate();
 		virtual void OnEvent(Event& event);
-		
+
 		void Resize(float width, float height);
 
 		OrthographicCamera& GetCamera() { return _camera; }

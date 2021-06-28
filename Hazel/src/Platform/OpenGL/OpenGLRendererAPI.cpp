@@ -10,7 +10,7 @@ namespace Hazel
 	void OpenGLRendererAPI::Init()
 	{
 		HZ_PROFILE_FUNCTION();
-		 
+
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnable(GL_DEPTH_TEST);
@@ -43,7 +43,7 @@ namespace Hazel
 
 	void OpenGLRendererAPI::DrawIndexed(const Ref<VertexArray>& vertexArray, uint32_t count)
 	{
-		uint32_t indexCount = count ?  count : vertexArray->GetIndexBuffer()->GetCount() ;
+		uint32_t indexCount = count ? count : vertexArray->GetIndexBuffer()->GetCount();
 		glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, nullptr);
 	}
 

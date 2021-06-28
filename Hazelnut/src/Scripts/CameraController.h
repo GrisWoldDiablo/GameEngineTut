@@ -23,7 +23,7 @@ namespace Hazel
 			}
 
 			auto& position = GetComponent<TransformComponent>().Position;
-			
+
 			float speed = 5.0f;
 			float timestep = Time::GetTimestep();
 
@@ -62,8 +62,8 @@ namespace Hazel
 				auto orthographicSize = camera.GetOrthographicSize();
 				if (Input::IsKeyPressed(KeyCode::E))
 				{
-					 orthographicSize -= speed * timestep;
-					 camera.SetOrthographicSize(orthographicSize);
+					orthographicSize -= speed * timestep;
+					camera.SetOrthographicSize(orthographicSize);
 				}
 				if (Input::IsKeyPressed(KeyCode::Q))
 				{

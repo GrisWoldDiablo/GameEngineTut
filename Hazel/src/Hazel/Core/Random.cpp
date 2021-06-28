@@ -8,8 +8,7 @@ namespace Hazel
 
 	Random::Random(int seed)
 		:_mersenneTwister(seed)
-	{
-	}
+	{}
 
 	void Random::Init(int seed)
 	{
@@ -88,7 +87,7 @@ namespace Hazel
 
 		return { RangeImpl(x.x,x.y), RangeImpl(y.x,y.y), RangeImpl(z.x,z.y) };
 	}
-	
+
 	glm::vec4 Random::RangeVec4Impl(const glm::vec2& x, const glm::vec2& y, const glm::vec2& z, const glm::vec2& w)
 	{
 		HZ_PROFILE_FUNCTION();

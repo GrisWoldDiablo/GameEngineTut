@@ -15,7 +15,7 @@ namespace Hazel
 		void Unbind() override;
 
 		void Resize(uint32_t width, uint32_t height) override;
-		
+
 		uint32_t GetColorAttachmentRenderID() const override { return _colorAttachment; }
 		const FramebufferSpecification& GetSpecification() const override { return _specification; }
 
