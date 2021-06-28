@@ -4,6 +4,8 @@
 #include "Hazel/Events/KeyEvent.h"
 #include "Hazel/Events/MouseEvent.h"
 
+#include "Hazel/Renderer/EditorCamera.h"
+
 namespace Hazel
 {
 	constexpr char* _kNewSceneName = "Untitled";
@@ -23,10 +25,8 @@ namespace Hazel
 		void OnEvent(Event& event) override;
 
 	private:
-		bool OnMouseMoved(MouseMovedEvent& event);
 		bool OnKeyPressed(KeyPressedEvent& event);
 
-		void SetupMainCamera(uint32_t width, uint32_t height);
 		bool NewScene(const std::string& newSceneName = _kNewSceneName);
 		void OpenScene();
 		void SaveSceneAs();
@@ -52,9 +52,9 @@ namespace Hazel
 
 		bool _isSceneViewportFocused = false;
 		bool _isSceneViewportHovered = false;
-		
+
 		// Basics
-		Entity _mainCamera;
+		EditorCamera _editorCamera;
 		Ref<Scene> _activeScene;
 
 		// FPS

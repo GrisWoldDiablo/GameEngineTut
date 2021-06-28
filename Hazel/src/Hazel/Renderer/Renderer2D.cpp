@@ -117,7 +117,7 @@ namespace Hazel
 		delete[] sData.QuadVertexBufferBase;
 	}
 
-	void Renderer2D::BeginScene(Camera& camera, const glm::mat4& transform)
+	void Renderer2D::BeginScene(const Camera& camera, const glm::mat4& transform)
 	{
 		HZ_PROFILE_FUNCTION();
 
@@ -130,12 +130,23 @@ namespace Hazel
 		Reset();
 	}
 
-	void Renderer2D::BeginScene(OrthographicCamera& camera, bool isGrayscale)
+	void Renderer2D::BeginScene(const OrthographicCamera& camera, bool isGrayscale)
 	{
 		HZ_PROFILE_FUNCTION();
 
 		sData.TextureShader->Bind();
 		sData.TextureShader->SetMat4("u_ViewProjection", camera.GetViewProjectionMatrix());
+		sData.TextureShader->SetBool("u_IsGrayscale", isGrayscale);
+
+		Reset();
+	}
+
+	void Renderer2D::BeginScene(const EditorCamera& camera, bool isGrayscale)
+	{
+		HZ_PROFILE_FUNCTION();
+
+		sData.TextureShader->Bind();
+		sData.TextureShader->SetMat4("u_ViewProjection", camera.GetViewProjection());
 		sData.TextureShader->SetBool("u_IsGrayscale", isGrayscale);
 
 		Reset();

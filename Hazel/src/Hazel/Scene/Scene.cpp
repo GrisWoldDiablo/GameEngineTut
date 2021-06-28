@@ -26,10 +26,10 @@ namespace Hazel
 		_registry.destroy(entity);
 	}
 
-	void Scene::OnUpdate()
+	void Scene::OnUpdateRuntime()
 	{
 		// Update Scripts
-		_registry.view<NativeScriptComponent>().each([=](auto entity, auto& nsc)
+		_registry.view<NativeScriptComponent>().each([=](const auto entity, auto& nsc)
 		{
 			auto& instance = nsc.Instance;
 
@@ -52,7 +52,7 @@ namespace Hazel
 		// Render 2D
 		Camera* mainCamera = nullptr;
 		glm::mat4 cameraTransform;
-		_registry.view<CameraComponent, TransformComponent>().each([&](auto entity, auto& camera, auto& transform)
+		_registry.view<CameraComponent, TransformComponent>().each([&](const auto entity, auto& camera, auto& transform)
 		{
 			if (camera.IsPrimary)
 			{
@@ -77,7 +77,7 @@ namespace Hazel
 			return lhs.Position.z < rhs.Position.z;
 		});
 
-		for (auto entity : group)
+		for (const auto entity : group)
 		{
 			auto [transform, sprite] = group.get<TransformComponent, SpriteRendererComponent>(entity);
 			if (sprite.Texture == nullptr)
@@ -93,6 +93,32 @@ namespace Hazel
 		Renderer2D::EndScene();
 	}
 
+	void Scene::OnUpdateEditor(EditorCamera& camera)
+	{
+		Renderer2D::BeginScene(camera);
+
+		auto group = _registry.group<TransformComponent>(entt::get<SpriteRendererComponent>);
+
+		group.sort<TransformComponent>([](const auto& lhs, const auto& rhs)
+		{
+			return lhs.Position.z < rhs.Position.z;
+		});
+
+		for (const auto entity : group)
+		{
+			auto [transform, sprite] = group.get<TransformComponent, SpriteRendererComponent>(entity);
+			if (sprite.Texture == nullptr)
+			{
+				Renderer2D::DrawQuad(transform.GetTransform(), sprite.Color);
+			}
+			else
+			{
+				Renderer2D::DrawQuad(transform.GetTransform(), sprite.Texture, sprite.Tiling, sprite.Color);
+			}
+		}
+
+		Renderer2D::EndScene();
+	}
 
 	void Scene::OnViewportResize(uint32_t width, uint32_t height)
 	{
@@ -101,7 +127,7 @@ namespace Hazel
 
 		// Resize our non-FixedAspectRation cameras
 		auto view = _registry.view<CameraComponent>();
-		for (auto entity : view)
+		for (const auto entity : view)
 		{
 			auto& cameraComponent = view.get<CameraComponent>(entity);
 			if (!cameraComponent.IsFixedAspectRatio || cameraComponent.Camera.GetProjectionType() == SceneCamera::ProjectionType::Perspective)
@@ -114,7 +140,7 @@ namespace Hazel
 	Entity Scene::GetPrimaryCameraEntity()
 	{
 		auto view = _registry.view<CameraComponent>();
-		for (auto entity : view)
+		for (const auto entity : view)
 		{
 			const auto& camera = view.get<CameraComponent>(entity);
 			if (camera.IsPrimary)

@@ -10,24 +10,24 @@ namespace Hazel
 		MouseMovedEvent(float x, float y)
 			: _mouseX(x), _mouseY(y)
 		{
-			_sDeltaX = _sPreviousMouseX - _mouseX;
+			_deltaX = _sPreviousMouseX - _mouseX;
 			_sPreviousMouseX = _mouseX;
 
-			_sDeltaY = _sPreviousMouseY - _mouseY;
+			_deltaY = _sPreviousMouseY - _mouseY;
 			_sPreviousMouseY = _mouseY;
 		}
 
 		float GetX() const { return _mouseX; }
 		float GetY() const { return _mouseY; }
 
-		float GetDeltaX() const { return _sDeltaX; }
-		float GetDeltaY() const { return _sDeltaY; }
+		float GetDeltaX() const { return _deltaX; }
+		float GetDeltaY() const { return _deltaY; }
 
 		std::string ToString() const override
 		{
 			std::stringstream ss;
 			ss << "MouseMovedEvent : (" << _mouseX << "," << _mouseY << ")";
-			ss << ", Delta(" << _sDeltaX << "," << _sDeltaY << ")";
+			ss << ", Delta(" << _deltaX << "," << _deltaY << ")";
 			return ss.str();
 		}
 
@@ -38,8 +38,8 @@ namespace Hazel
 		inline static float _sPreviousMouseX;
 		inline static float _sPreviousMouseY;
 
-		float _sDeltaX;
-		float _sDeltaY;
+		float _deltaX;
+		float _deltaY;
 		float _mouseX;
 		float _mouseY;
 	};

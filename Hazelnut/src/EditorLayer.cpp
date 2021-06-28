@@ -37,16 +37,13 @@ namespace Hazel
 
 		_unwrapTexture = Texture2D::Create("assets/textures/unwrap_helper.png");
 
-		uint32_t width = 1280, height = 720;
-		_framebuffer = Framebuffer::Create({ width, height });
+		_framebuffer = Framebuffer::Create({ 1280, 720 });
 
 		// Create an empty scene.
 		_activeScene = CreateRef<Scene>();
 		_activeScene->SetName(_kNewSceneName);
-		_activeScene->OnViewportResize(width, height);
 		_sceneHierarchyPanel.SetContext(_activeScene);
-
-		SetupMainCamera(width, height);
+		_editorCamera = EditorCamera(30.0f, 1.778f, 0.1f, 1000.0f);
 	}
 
 	void EditorLayer::OnDetach()
@@ -63,15 +60,19 @@ namespace Hazel
 		if (_sceneViewportSize.x > 0.0f && _sceneViewportSize.y > 0.0f &&
 			(frameBufferSpec.Width != _sceneViewportSize.x || frameBufferSpec.Height != _sceneViewportSize.y))
 		{
+			_framebuffer->Resize((uint32_t)_sceneViewportSize.x, (uint32_t)_sceneViewportSize.y);
+
+			_editorCamera.SetViewpostSize(_sceneViewportSize.x, _sceneViewportSize.y);
 			_activeScene->OnViewportResize((uint32_t)_sceneViewportSize.x, (uint32_t)_sceneViewportSize.y);
 		}
-		_framebuffer->Resize((uint32_t)_sceneViewportSize.x, (uint32_t)_sceneViewportSize.y);
 
 		CalculateFPS();
 
 #if !HZ_PROFILE
 		//SafetyShutdownCheck();
 #endif // !HZ_PROFILE
+
+		_editorCamera.OnUpdate();
 
 		Renderer2D::ResetStats();
 		// Render
@@ -80,7 +81,7 @@ namespace Hazel
 		RenderCommand::Clear();
 
 		// Update Scene
-		_activeScene->OnUpdate();
+		_activeScene->OnUpdateEditor(_editorCamera);
 
 		_framebuffer->Unbind();
 
@@ -153,30 +154,10 @@ namespace Hazel
 
 	void EditorLayer::OnEvent(Event& event)
 	{
+		_editorCamera.OnEvent(event);
+
 		EventDispatcher dispatcher(event);
 		dispatcher.Dispatch<KeyPressedEvent>(HZ_BIND_EVENT_FN(OnKeyPressed));
-		dispatcher.Dispatch<MouseMovedEvent>(HZ_BIND_EVENT_FN(OnMouseMoved));
-	}
-
-	bool EditorLayer::OnMouseMoved(MouseMovedEvent& event)
-	{
-		if (_gizmoType == -1)
-		{
-			auto camera = _activeScene->GetPrimaryCameraEntity();
-			if (camera != Entity::Null)
-			{
-				if (Input::IsMouseButtonPressed(MouseCode::ButtonLeft))
-				{
-					if (auto tc = camera.TryGetComponent<TransformComponent>(); tc != nullptr)
-					{
-						tc->Position.x += event.GetDeltaX() * 0.01f;
-						tc->Position.y -= event.GetDeltaY() * 0.01f;
-					}
-				}
-			}
-		}
-
-		return true;
 	}
 
 	bool EditorLayer::OnKeyPressed(KeyPressedEvent& event)
@@ -248,16 +229,6 @@ namespace Hazel
 		return true;
 	}
 
-	void EditorLayer::SetupMainCamera(uint32_t width, uint32_t height)
-	{
-		// Set main camera entity
-
-		_mainCamera = _activeScene->CreateEntity("Main Camera");
-		auto& cameraComponent = _mainCamera.AddComponent<CameraComponent>();
-		cameraComponent.Camera.SetViewportSize(width, height);
-		_mainCamera.AddComponent<NativeScriptComponent>().Bind<CameraController>();
-	}
-
 	bool EditorLayer::NewScene(const std::string& newSceneName)
 	{
 		if (FileDialogs::NewFile())
@@ -278,8 +249,6 @@ namespace Hazel
 
 			_activeScene->OnViewportResize((uint32_t)_sceneViewportSize.x, (uint32_t)_sceneViewportSize.y);
 			_sceneHierarchyPanel.SetContext(_activeScene);
-			SetupMainCamera((uint32_t)_sceneViewportSize.x, (uint32_t)_sceneViewportSize.y);
-
 			return true;
 		}
 
@@ -467,49 +436,55 @@ namespace Hazel
 		if (auto selectedEntity = _sceneHierarchyPanel.GetSelectedEntity();
 			selectedEntity != Entity::Null && _gizmoType != -1)
 		{
-			if (auto cameraEntity = _activeScene->GetPrimaryCameraEntity();
-				cameraEntity != Entity::Null)
+			//// Runtime Camera;
+			//if (auto cameraEntity = _activeScene->GetPrimaryCameraEntity();
+			//	cameraEntity != Entity::Null)
+			//{
+			//	const auto& camera = cameraEntity.GetComponent<CameraComponent>().Camera;
+			//	const auto& cameraProjection = camera.GetProjection();
+			//	glm::mat4 cameraView = glm::inverse(cameraEntity.GetComponent<TransformComponent>().GetTransform());
+			//}
+
+			// Editor Camera
+			const auto& cameraProjection = _editorCamera.GetProjection();
+			glm::mat4 cameraView = _editorCamera.GetViewMatrix();
+
+			ImGuizmo::SetOrthographic(false);
+			ImGuizmo::SetDrawlist();
+
+			auto windowWidth = (float)ImGui::GetWindowWidth();
+			auto windowHeight = (float)ImGui::GetWindowHeight();
+			ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, windowWidth, windowHeight);
+
+
+			// Entity transform
+			auto& transformComponent = selectedEntity.GetComponent<TransformComponent>();
+			auto transform = transformComponent.GetTransform();
+
+			// Snapping
+			bool snap = Input::IsKeyPressed(Key::LeftControl);
+			float snapValue = 0.5f; // Snap to 0.5m for position and scale.
+
+			// Snap to 45 degrees for rotation.
+			if (_gizmoType == ImGuizmo::ROTATE)
 			{
-				ImGuizmo::SetOrthographic(false);
-				ImGuizmo::SetDrawlist();
+				snapValue = 45.0f;
+			}
 
-				auto windowWidth = (float)ImGui::GetWindowWidth();
-				auto windowHeight = (float)ImGui::GetWindowHeight();
-				ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, windowWidth, windowHeight);
+			float snapValues[3] = { snapValue,snapValue,snapValue };
+			ImGuizmo::Manipulate(glm::value_ptr(cameraView), glm::value_ptr(cameraProjection),
+				(ImGuizmo::OPERATION)_gizmoType, (ImGuizmo::MODE)_gizmoSpace, glm::value_ptr(transform),
+				nullptr, snap ? snapValues : nullptr);
 
-				const auto& camera = cameraEntity.GetComponent<CameraComponent>().Camera;
-				const auto& cameraProjection = camera.GetProjection();
-				glm::mat4 cameraView = glm::inverse(cameraEntity.GetComponent<TransformComponent>().GetTransform());
-
-				// Entity transform
-				auto& transformComponent = selectedEntity.GetComponent<TransformComponent>();
-				auto transform = transformComponent.GetTransform();
-
-				// Snapping
-				bool snap = Input::IsKeyPressed(Key::LeftControl);
-				float snapValue = 0.5f; // Snap to 0.5m for position and scale.
-
-				// Snap to 45 degrees for rotation.
-				if (_gizmoType == ImGuizmo::ROTATE)
+			if (ImGuizmo::IsUsing())
+			{
+				glm::vec3 position, rotation, scale;
+				if (Math::DecomposeTransform(transform, position, rotation, scale))
 				{
-					snapValue = 45.0f;
-				}
-
-				float snapValues[3] = { snapValue,snapValue,snapValue };
-				ImGuizmo::Manipulate(glm::value_ptr(cameraView), glm::value_ptr(cameraProjection),
-					(ImGuizmo::OPERATION)_gizmoType, (ImGuizmo::MODE)_gizmoSpace, glm::value_ptr(transform),
-					nullptr, snap ? snapValues : nullptr);
-
-				if (ImGuizmo::IsUsing())
-				{
-					glm::vec3 position, rotation, scale;
-					if (Math::DecomposeTransform(transform, position, rotation, scale))
-					{
-						transformComponent.Position = position;
-						auto rotationDelta = rotation - transformComponent.Rotation;
-						transformComponent.Rotation += rotationDelta;
-						transformComponent.Scale = scale;
-					}
+					transformComponent.Position = position;
+					auto rotationDelta = rotation - transformComponent.Rotation;
+					transformComponent.Rotation += rotationDelta;
+					transformComponent.Scale = scale;
 				}
 			}
 		}

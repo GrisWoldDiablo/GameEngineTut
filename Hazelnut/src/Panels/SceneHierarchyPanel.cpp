@@ -9,8 +9,38 @@
 #include <fstream>
 #include <filesystem>
 
+#include "Hazel/Utils/PlatformUtils.h"
+
 namespace Hazel
 {
+	template<typename T>
+	static void ResetButton(const std::string& label, T& values, float resetValue, ImVec2 size)
+	{
+		if (ImGui::Button(label.c_str(), size))
+		{
+			ImGui::OpenPopup("reset");
+		}
+
+		if (ImGui::BeginPopup("reset"))
+		{
+			ImGui::Text("Reset %s?", label.c_str());
+			ImGui::Separator();
+			if (ImGui::Button("Yes"))
+			{
+				values = T(resetValue);
+				ImGui::CloseCurrentPopup();
+			}
+			ImGui::SameLine();
+			ImGui::Text(" ");
+			ImGui::SameLine();
+			if (ImGui::Button("Cancel"))
+			{
+				ImGui::CloseCurrentPopup();
+			}
+			ImGui::EndPopup();
+		}
+	}
+
 	template<typename T, typename UIFunction>
 	static void DrawComponent(Entity entity, const std::string& name, UIFunction uiFunction)
 	{
@@ -74,29 +104,7 @@ namespace Hazel
 		float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
 
 #pragma region ResetButton
-		if (ImGui::Button(label.c_str(), { columnWidth,lineHeight }))
-		{
-			ImGui::OpenPopup("reset");
-		}
-
-		if (ImGui::BeginPopup("reset"))
-		{
-			ImGui::Text("Reset %s?", label.c_str());
-			ImGui::Separator();
-			if (ImGui::Button("Yes"))
-			{
-				values = glm::vec2(resetValue);
-				ImGui::CloseCurrentPopup();
-			}
-			ImGui::SameLine();
-			ImGui::Text(" ");
-			ImGui::SameLine();
-			if (ImGui::Button("Cancel"))
-			{
-				ImGui::CloseCurrentPopup();
-			}
-			ImGui::EndPopup();
-		}
+		ResetButton(label, values, resetValue, ImVec2{ columnWidth,lineHeight });
 #pragma endregion
 
 		ImGui::NextColumn();
@@ -141,14 +149,13 @@ namespace Hazel
 		ImGui::PopItemWidth();
 #pragma endregion
 
-
-
 		ImGui::PopStyleVar();
 		ImGui::Columns(1);
 		ImGui::PopID();
 	}
 
-	static void DrawVec3Controls(const std::string& label, glm::vec3& values, float resetValue = 0.0f, float columnWidth = 100.0f)
+	template<typename T>
+	static void DrawVec3Controls(const std::string& label, T& values, float resetValue = 0.0f, float columnWidth = 100.0f)
 	{
 		auto& io = ImGui::GetIO();
 		auto boldFont = io.Fonts->Fonts[0];
@@ -159,30 +166,9 @@ namespace Hazel
 		ImGui::SetColumnWidth(0, columnWidth);
 
 		float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
-#pragma region LabelResetButton
-		if (ImGui::Button(label.c_str(), { columnWidth,lineHeight }))
-		{
-			ImGui::OpenPopup("reset");
-		}
 
-		if (ImGui::BeginPopup("reset"))
-		{
-			ImGui::Text("Reset %s?", label.c_str());
-			ImGui::Separator();
-			if (ImGui::Button("Yes"))
-			{
-				values = glm::vec3(resetValue);
-				ImGui::CloseCurrentPopup();
-			}
-			ImGui::SameLine();
-			ImGui::Text(" ");
-			ImGui::SameLine();
-			if (ImGui::Button("Cancel"))
-			{
-				ImGui::CloseCurrentPopup();
-			}
-			ImGui::EndPopup();
-		}
+#pragma region ResetButton
+		ResetButton(label, values, resetValue, ImVec2{ columnWidth, lineHeight });
 #pragma endregion
 
 		ImGui::NextColumn();
@@ -412,45 +398,40 @@ namespace Hazel
 				isSpritePressed = ImGui::ColorButton("None", ImVec4(color.r, color.g, color.b, color.a), 0, ImVec2(56.0f, 56.0f));
 			}
 
+			std::string filePath;
 			if (isSpritePressed)
 			{
-				ImGui::OpenPopup("browseFiles");
+				filePath = FileDialogs::OpenFile("Sprite texture (*.png)\0*.png\0");
 			}
 
-			if (ImGui::BeginPopup("browseFiles"))
+			if (component->Texture != nullptr && ImGui::BeginPopupContextItem())
 			{
-				if (ImGui::MenuItem("None"))
+				ImGui::Text("Clear Texture?");
+				ImGui::Separator();
+				if (ImGui::Button("Yes"))
 				{
 					component->Texture = nullptr;
+					ImGui::CloseCurrentPopup();
 				}
-				ImGui::Separator();
-
-				std::string path;
-
-				// Goes thought all the subdirectories.
-				for (const auto& file : std::filesystem::recursive_directory_iterator("assets"))
-				{
-					auto extension = file.path().extension().string();
-
-					// TODO add more format support
-					if (extension != ".png")
-					{
-						continue;
-					}
-
-					if (ImGui::MenuItem(file.path().string().c_str()))
-					{
-						// TODO Look use texture assets
-						component->Texture = Texture2D::Create(file.path().string());
-					}
-				}
-
-				ImGui::Separator();
-				if (ImGui::Button("Cancel"))
+				ImGui::SameLine();
+				ImGui::Text(" ");
+				ImGui::SameLine();
+				if (ImGui::Button("No"))
 				{
 					ImGui::CloseCurrentPopup();
 				}
 				ImGui::EndPopup();
+			}
+			// Added clear right click
+			/*if (ImGui::MenuItem("None"))
+			{
+				component->Texture = nullptr;
+			}*/
+
+			if (!filePath.empty())
+			{
+				// TODO Look use texture assets
+				component->Texture = Texture2D::Create(filePath);
 			}
 
 			if (component->Texture != nullptr)
@@ -496,47 +477,47 @@ namespace Hazel
 			switch (camera.GetProjectionType())
 			{
 			case SceneCamera::ProjectionType::Perspective:
+			{
+				float perspectiveFOV = glm::degrees(camera.GetPerspectiveVerticalFOV());
+				if (ImGui::DragFloat("FOV", &perspectiveFOV))
 				{
-					float perspectiveFOV = glm::degrees(camera.GetPerspectiveVerticalFOV());
-					if (ImGui::DragFloat("FOV", &perspectiveFOV))
-					{
-						camera.SetPerspectiveVerticalFOV(glm::radians(perspectiveFOV));
-					}
+					camera.SetPerspectiveVerticalFOV(glm::radians(perspectiveFOV));
+				}
 
-					float perspectiveNearClip = camera.GetPerspectiveNearClip();
-					if (ImGui::DragFloat("NearClip", &perspectiveNearClip))
-					{
-						camera.SetPerspectiveNearClip(perspectiveNearClip);
-					}
+				float perspectiveNearClip = camera.GetPerspectiveNearClip();
+				if (ImGui::DragFloat("NearClip", &perspectiveNearClip))
+				{
+					camera.SetPerspectiveNearClip(perspectiveNearClip);
+				}
 
-					float perspectiveFarClip = camera.GetPerspectiveFarClip();
-					if (ImGui::DragFloat("FarClip", &perspectiveFarClip))
-					{
-						camera.SetPerspectiveFarClip(perspectiveFarClip);
-					}
+				float perspectiveFarClip = camera.GetPerspectiveFarClip();
+				if (ImGui::DragFloat("FarClip", &perspectiveFarClip))
+				{
+					camera.SetPerspectiveFarClip(perspectiveFarClip);
+				}
 
-				}	break;
+			}	break;
 			case SceneCamera::ProjectionType::Orthographic:
+			{
+				float orthographicSize = camera.GetOrthographicSize();
+				if (ImGui::DragFloat("Size", &orthographicSize, 0.1f))
 				{
-					float orthographicSize = camera.GetOrthographicSize();
-					if (ImGui::DragFloat("Size", &orthographicSize, 0.1f))
-					{
-						camera.SetOrthographicSize(orthographicSize);
-					}
+					camera.SetOrthographicSize(orthographicSize);
+				}
 
-					float orthographicNearClip = camera.GetOrthographicNearClip();
-					if (ImGui::DragFloat("NearClip", &orthographicNearClip))
-					{
-						camera.SetOrthographicNearClip(orthographicNearClip);
-					}
+				float orthographicNearClip = camera.GetOrthographicNearClip();
+				if (ImGui::DragFloat("NearClip", &orthographicNearClip))
+				{
+					camera.SetOrthographicNearClip(orthographicNearClip);
+				}
 
-					float orthographicFarClip = camera.GetOrthographicFarClip();
-					if (ImGui::DragFloat("FarClip", &orthographicFarClip))
-					{
-						camera.SetOrthographicFarClip(orthographicFarClip);
-					}
+				float orthographicFarClip = camera.GetOrthographicFarClip();
+				if (ImGui::DragFloat("FarClip", &orthographicFarClip))
+				{
+					camera.SetOrthographicFarClip(orthographicFarClip);
+				}
 
-				}	break;
+			}	break;
 			}
 
 			if (ImGui::Checkbox("Fixed Aspect Ratio", &component->IsFixedAspectRatio) && !component->IsFixedAspectRatio)
