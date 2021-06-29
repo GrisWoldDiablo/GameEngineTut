@@ -91,72 +91,13 @@ namespace Hazel
 		}
 	}
 
-	static void DrawVec2Controls(const std::string& label, glm::vec2& values, float resetValue = 0.0f, float columnWidth = 100.0f)
-	{
-		auto& io = ImGui::GetIO();
-		auto boldFont = io.Fonts->Fonts[0];
-
-		ImGui::PushID(label.c_str());
-
-		ImGui::Columns(2, "vec2", false);
-		ImGui::SetColumnWidth(0, columnWidth);
-
-		float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
-
-#pragma region ResetButton
-		ResetButton(label, values, resetValue, ImVec2{ columnWidth,lineHeight });
-#pragma endregion
-
-		ImGui::NextColumn();
-
-		ImGui::PushMultiItemsWidths(2, ImGui::CalcItemWidth());
-		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 0.0f, 0.0f });
-
-		ImVec2 buttonSize = { lineHeight + 3.0f, lineHeight };
-
-#pragma region ValueX
-		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.8f, 0.1f, 0.15f, 1.0f });
-		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.9f, 0.2f, 0.2f, 1.0f });
-		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.8f, 0.1f, 0.15f, 1.0f });
-		ImGui::PushFont(boldFont);
-		if (ImGui::Button("X", buttonSize))
-		{
-			values.x = resetValue;
-		}
-		ImGui::PopFont();
-		ImGui::PopStyleColor(3);
-
-		ImGui::SameLine();
-		ImGui::DragFloat("##X", &values.x, 0.1f, 0.0f, 0.0f, "%.2f");
-		ImGui::PopItemWidth();
-#pragma endregion
-
-#pragma region ValueY
-		ImGui::SameLine();
-		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.2f, 0.7f, 0.3f, 1.0f });
-		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.3f, 0.8f, 0.3f, 1.0f });
-		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.2f, 0.7f, 0.3f, 1.0f });
-		ImGui::PushFont(boldFont);
-		if (ImGui::Button("Y", buttonSize))
-		{
-			values.y = resetValue;
-		}
-		ImGui::PopFont();
-		ImGui::PopStyleColor(3);
-
-		ImGui::SameLine();
-		ImGui::DragFloat("##Y", &values.y, 0.1f, 0.0f, 0.0f, "%.2f");
-		ImGui::PopItemWidth();
-#pragma endregion
-
-		ImGui::PopStyleVar();
-		ImGui::Columns(1);
-		ImGui::PopID();
-	}
-
 	template<typename T>
-	static void DrawVec3Controls(const std::string& label, T& values, float resetValue = 0.0f, float columnWidth = 100.0f)
+	static void DrawVecControls(const std::string& label, T& values, float resetValue = 0.0f, float columnWidth = 100.0f)
 	{
+		const int sizeOfVec2 = sizeof(glm::vec2);
+		const int sizeOfVec3 = sizeof(glm::vec3);
+		auto valuesSize = sizeof(T);
+
 		auto& io = ImGui::GetIO();
 		auto boldFont = io.Fonts->Fonts[0];
 
@@ -178,59 +119,64 @@ namespace Hazel
 
 		ImVec2 buttonSize = { lineHeight + 3.0f, lineHeight };
 
-#pragma region ValueX
-		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.8f, 0.1f, 0.15f, 1.0f });
-		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.9f, 0.2f, 0.2f, 1.0f });
-		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.8f, 0.1f, 0.15f, 1.0f });
-		ImGui::PushFont(boldFont);
-		if (ImGui::Button("X", buttonSize))
+		if (valuesSize == sizeOfVec2 || valuesSize == sizeOfVec3)
 		{
-			values.x = resetValue;
-		}
-		ImGui::PopFont();
-		ImGui::PopStyleColor(3);
+#pragma region ValueX
+			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.8f, 0.1f, 0.15f, 1.0f });
+			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.9f, 0.2f, 0.2f, 1.0f });
+			ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.8f, 0.1f, 0.15f, 1.0f });
+			ImGui::PushFont(boldFont);
+			if (ImGui::Button("X", buttonSize))
+			{
+				values[0] = resetValue;
+			}
+			ImGui::PopFont();
+			ImGui::PopStyleColor(3);
 
-		ImGui::SameLine();
-		ImGui::DragFloat("##X", &values.x, 0.1f, 0.0f, 0.0f, "%.2f");
-		ImGui::PopItemWidth();
+			ImGui::SameLine();
+			ImGui::DragFloat("##X", &values[0], 0.1f, 0.0f, 0.0f, "%.2f");
+			ImGui::PopItemWidth();
 #pragma endregion
 
 #pragma region ValueY
-		ImGui::SameLine();
-		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.2f, 0.7f, 0.3f, 1.0f });
-		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.3f, 0.8f, 0.3f, 1.0f });
-		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.2f, 0.7f, 0.3f, 1.0f });
-		ImGui::PushFont(boldFont);
-		if (ImGui::Button("Y", buttonSize))
-		{
-			values.y = resetValue;
-		}
-		ImGui::PopFont();
-		ImGui::PopStyleColor(3);
+			ImGui::SameLine();
+			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.2f, 0.7f, 0.3f, 1.0f });
+			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.3f, 0.8f, 0.3f, 1.0f });
+			ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.2f, 0.7f, 0.3f, 1.0f });
+			ImGui::PushFont(boldFont);
+			if (ImGui::Button("Y", buttonSize))
+			{
+				values[1] = resetValue;
+			}
+			ImGui::PopFont();
+			ImGui::PopStyleColor(3);
 
-		ImGui::SameLine();
-		ImGui::DragFloat("##Y", &values.y, 0.1f, 0.0f, 0.0f, "%.2f");
-		ImGui::PopItemWidth();
+			ImGui::SameLine();
+			ImGui::DragFloat("##Y", &values[1], 0.1f, 0.0f, 0.0f, "%.2f");
+			ImGui::PopItemWidth();
 #pragma endregion
 
+			if (valuesSize == sizeOfVec3)
+			{
 #pragma region ValueZ
-		ImGui::SameLine();
-		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.1f ,0.25f, 0.8f, 1.0f });
-		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.2f, 0.35f, 0.9f, 1.0f });
-		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.1f, 0.25f, 0.8f, 1.0f });
-		ImGui::PushFont(boldFont);
-		if (ImGui::Button("Z", buttonSize))
-		{
-			values.z = resetValue;
-		}
-		ImGui::PopFont();
-		ImGui::PopStyleColor(3);
+				ImGui::SameLine();
+				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.1f ,0.25f, 0.8f, 1.0f });
+				ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.2f, 0.35f, 0.9f, 1.0f });
+				ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.1f, 0.25f, 0.8f, 1.0f });
+				ImGui::PushFont(boldFont);
+				if (ImGui::Button("Z", buttonSize))
+				{
+					values[2] = resetValue;
+				}
+				ImGui::PopFont();
+				ImGui::PopStyleColor(3);
 
-		ImGui::SameLine();
-		ImGui::DragFloat("##Z", &values.z, 0.1f, 0.0f, 0.0f, "%.2f");
-		ImGui::PopItemWidth();
+				ImGui::SameLine();
+				ImGui::DragFloat("##Z", &values[2], 0.1f, 0.0f, 0.0f, "%.2f");
+				ImGui::PopItemWidth();
 #pragma endregion
-
+			}
+		}
 		ImGui::PopStyleVar();
 		ImGui::Columns(1);
 		ImGui::PopID();
@@ -265,7 +211,7 @@ namespace Hazel
 		}
 
 		// Right-Click on blank space.
-		if (ImGui::BeginPopupContextWindow(nullptr, 1, false))
+		if (ImGui::BeginPopupContextWindow(nullptr, ImGuiPopupFlags_MouseButtonRight | ImGuiPopupFlags_NoOpenOverItems))
 		{
 			if (ImGui::MenuItem("Create empty Entity"))
 			{
@@ -372,13 +318,13 @@ namespace Hazel
 #pragma region TransformComponent
 		DrawComponent<TransformComponent>(entity, "Transform", [&](TransformComponent* component)
 		{
-			DrawVec3Controls("Position", component->Position);
+			DrawVecControls("Position", component->Position);
 
 			glm::vec3 rotation = glm::degrees(component->Rotation);
-			DrawVec3Controls("Rotation", rotation);
+			DrawVecControls("Rotation", rotation);
 			component->Rotation = glm::radians(rotation);
 
-			DrawVec3Controls("Scale", component->Scale, 1.0f);
+			DrawVecControls("Scale", component->Scale, 1.0f);
 		});
 #pragma endregion
 
@@ -436,7 +382,7 @@ namespace Hazel
 
 			if (component->Texture != nullptr)
 			{
-				DrawVec2Controls("Tiling", component->Tiling, 1.0f);
+				DrawVecControls("Tiling", component->Tiling, 1.0f);
 			}
 
 			auto& color = component->Color;

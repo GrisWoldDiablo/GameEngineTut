@@ -6,6 +6,7 @@
 
 #include "Hazel/Renderer/EditorCamera.h"
 
+#include "imgui/imgui.h"
 namespace Hazel
 {
 	constexpr char* _kNewSceneName = "Untitled";
@@ -70,20 +71,23 @@ namespace Hazel
 		// SceneViewport
 		int _gizmoType = -1;
 		int _gizmoSpace = 0;
+		int _previousGizmoType = -1;
+		bool _hasStoredPreviousGizmoType = false;
 
 		// Tools
 		bool _isDemoWidowOpen = false;
 
-		// Gizmos Icons
+		// Hover Timer
+		float _timeSpentHovering = 0;
+
+		// Toolbar Icons
 		Ref<Texture2D> _panIconTexture;
+		Ref<Texture2D> _eyeIconTexture;
 		Ref<Texture2D> _nothingGizmoIconTexture;
 		Ref<Texture2D> _positionGizmoIconTexture;
 		Ref<Texture2D> _rotationGizmoIconTexture;
 		Ref<Texture2D> _scaleGizmoIconTexture;
 		Ref<Texture2D> _localGizmoIconTexture;
 		Ref<Texture2D> _globalGizmoIconTexture;
-
-		// Hover Timer
-		float _timeSpentHovering = 0;
 	};
 }

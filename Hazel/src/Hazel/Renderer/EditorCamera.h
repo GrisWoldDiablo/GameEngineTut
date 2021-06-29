@@ -15,10 +15,13 @@ namespace Hazel
 		EditorCamera(float fov, float aspectRation, float nearClip, float farClip);
 
 		void OnUpdate();
+		glm::vec2 UpdateMouseDelta();
+
 		void OnEvent(Event& event);
 
 		inline float GetDistance() const { return _distance; }
 		inline void SetDistance(float distance) { _distance = distance; }
+		inline void SetCanMousePan(bool status) { _canMousePan = status; }
 
 		inline void SetViewpostSize(float width, float height) { _viewportWidth = width; _viewportHeight = height; UpdateProjection(); }
 
@@ -33,6 +36,7 @@ namespace Hazel
 
 		float GetPitch() const { return _pitch; }
 		float GetYaw() const { return _yaw; }
+		bool IsAdjusting() const{ return _isAdjusting; }
 
 	private:
 		void UpdateProjection();
@@ -69,5 +73,8 @@ namespace Hazel
 
 		float _viewportWidth = 1280.0f;
 		float _viewportHeight = 720.0f;
+
+		bool _isAdjusting = true;
+		bool _canMousePan = false;
 	};
 }

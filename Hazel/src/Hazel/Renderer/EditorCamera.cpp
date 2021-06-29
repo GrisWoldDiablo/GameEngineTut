@@ -58,14 +58,11 @@ namespace Hazel
 
 	void EditorCamera::OnUpdate()
 	{
-		auto [mouseX, mouseY] = Input::GetMousePosition();
-		const glm::vec2& mousePosition{ mouseX, mouseY };
-		glm::vec2 delta = (mousePosition - _initialMousePosition) * 0.003f;
-		_initialMousePosition = mousePosition;
+		glm::vec2 delta = UpdateMouseDelta();
 
+		_isAdjusting = false;
 		if (Input::IsKeyPressed(Key::LeftAlt))
 		{
-
 			if (Input::IsMouseButtonPressed(Mouse::ButtonMiddle))
 			{
 				MousePan(delta);
@@ -79,16 +76,25 @@ namespace Hazel
 				MouseZoom(delta.y);
 			}
 		}
-		else
+		else if (_canMousePan)
 		{
-
-			if (Input::IsMouseButtonPressed(Mouse::ButtonRight))
+			if (Input::IsMouseButtonPressed(Mouse::ButtonLeft))
 			{
-				MouseRotateAroundFocalPoint(delta);
+				MousePan(delta);
 			}
 		}
 
 		UpdateView();
+	}
+
+	glm::vec2 EditorCamera::UpdateMouseDelta()
+	{
+		auto [mouseX, mouseY] = Input::GetMousePosition();
+		const glm::vec2& mousePosition{ mouseX, mouseY };
+		glm::vec2 delta = (mousePosition - _initialMousePosition) * 0.003f;
+		_initialMousePosition = mousePosition;
+
+		return delta;
 	}
 
 	void EditorCamera::OnEvent(Event& event)
@@ -111,6 +117,8 @@ namespace Hazel
 		auto [xSpeed, ySpeed] = PanSpeed();
 		_focalPoint += -GetRightDirection() * delta.x * xSpeed * _distance;
 		_focalPoint += GetUpDirection() * delta.y * ySpeed * _distance;
+
+		_isAdjusting = true;
 	}
 
 	void EditorCamera::MouseRotateAroundFocalPoint(const glm::vec2& delta)
@@ -118,6 +126,8 @@ namespace Hazel
 		float yawSign = GetUpDirection().y < 0.0f ? 1.0f : -1.0f;
 		_yaw += yawSign * delta.x * RotationSpeed();
 		_pitch += delta.y * RotationSpeed();
+
+		_isAdjusting = true;
 	}
 
 	void EditorCamera::MouseRotateLookAt(const glm::vec2& delta)
@@ -125,6 +135,8 @@ namespace Hazel
 		float yawSign = GetUpDirection().y < 0.0f ? 1.0f : -1.0f;
 		_yaw += yawSign * delta.x * RotationSpeed();
 		_pitch += delta.y * RotationSpeed();
+
+		_isAdjusting = true;
 	}
 
 	void EditorCamera::MouseZoom(float delta)
@@ -135,6 +147,8 @@ namespace Hazel
 			_focalPoint += GetForwardDirection();
 			_distance = 1.0f;
 		}
+
+		_isAdjusting = true;
 	}
 
 	glm::vec3 EditorCamera::GetUpDirection() const

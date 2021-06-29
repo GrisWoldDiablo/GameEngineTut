@@ -28,6 +28,7 @@ namespace Hazel
 
 		// Create Gizmo Icons texture.
 		_panIconTexture = Texture2D::Create("assets/icons/PanIcon256White.png");
+		_eyeIconTexture = Texture2D::Create("assets/icons/EyeIcon256White.png");
 		_nothingGizmoIconTexture = Texture2D::Create("assets/icons/NothingGizmo256White.png");
 		_positionGizmoIconTexture = Texture2D::Create("assets/icons/PositionGizmo256White.png");
 		_rotationGizmoIconTexture = Texture2D::Create("assets/icons/RotationGizmo256White.png");
@@ -72,7 +73,15 @@ namespace Hazel
 		//SafetyShutdownCheck();
 #endif // !HZ_PROFILE
 
-		_editorCamera.OnUpdate();
+		if ((_isSceneViewportHovered && _isSceneViewportFocused)
+			|| _editorCamera.IsAdjusting())
+		{
+			_editorCamera.OnUpdate();
+		}
+		else
+		{
+			_editorCamera.UpdateMouseDelta();
+		}
 
 		Renderer2D::ResetStats();
 		// Render
@@ -118,7 +127,7 @@ namespace Hazel
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 
-		ImGui::Begin("DockSpace", &dockSpaceOpen, window_flags);
+		ImGui::Begin("DockSpace", &dockSpaceOpen, window_flags | ImGuiWindowFlags_NoNavInputs);
 		ImGui::PopStyleVar();
 
 		DrawToolbar();
@@ -304,8 +313,29 @@ namespace Hazel
 			ImGui::TableNextColumn();
 			ImGui::TableNextColumn();
 
+			ImTextureID toolbarButtonOneTexture;
+			if (_editorCamera.IsAdjusting())
+			{
+				toolbarButtonOneTexture = (ImTextureID)(intptr_t)_eyeIconTexture->GetRendererID();
+				if (!_hasStoredPreviousGizmoType)
+				{
+					_previousGizmoType = _gizmoType;
+					_hasStoredPreviousGizmoType = true;
+				}
+				_gizmoType = -1;
+			}
+			else
+			{
+				toolbarButtonOneTexture = (ImTextureID)(intptr_t)_nothingGizmoIconTexture->GetRendererID();
+				if (_hasStoredPreviousGizmoType)
+				{
+					_gizmoType = _previousGizmoType;
+					_hasStoredPreviousGizmoType = false;
+				}
+			}
+
 			bool isNothing = _gizmoType == -1;
-			if (ImGui::ImageButton((ImTextureID)(intptr_t)_nothingGizmoIconTexture->GetRendererID(), size, uv0, uv1, 3, isNothing ? selectedColor : normalColor, isNothing ? tintColor : whiteColor))
+			if (ImGui::ImageButton(toolbarButtonOneTexture, size, uv0, uv1, 3, isNothing ? selectedColor : normalColor, isNothing ? tintColor : whiteColor))
 			{
 				_gizmoType = -1;
 			}
@@ -424,6 +454,10 @@ namespace Hazel
 
 		_isSceneViewportFocused = ImGui::IsWindowFocused();
 		_isSceneViewportHovered = ImGui::IsWindowHovered();
+		if (_isSceneViewportHovered && (ImGui::GetIO().MouseClicked[1] || ImGui::GetIO().MouseClicked[2]))
+		{
+			ImGui::SetWindowFocus();
+		}
 		Application::Get().GetImGuiLayer()->BlockEvents(!_isSceneViewportFocused && !_isSceneViewportHovered);
 
 		auto sceneViewportPanelSize = ImGui::GetContentRegionAvail();
