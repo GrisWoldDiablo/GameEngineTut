@@ -73,15 +73,10 @@ namespace Hazel
 		//SafetyShutdownCheck();
 #endif // !HZ_PROFILE
 
-		if ((_isSceneViewportHovered && _isSceneViewportFocused)
-			|| _editorCamera.IsAdjusting())
-		{
-			_editorCamera.OnUpdate();
-		}
-		else
-		{
-			_editorCamera.UpdateMouseDelta();
-		}
+
+		_editorCamera.IsEnable() = (_isSceneViewportHovered && _isSceneViewportFocused && !ImGuizmo::IsUsing())
+			|| _editorCamera.IsAdjusting();
+		_editorCamera.OnUpdate();
 
 		Renderer2D::ResetStats();
 		// Render
@@ -258,6 +253,9 @@ namespace Hazel
 
 			_activeScene->OnViewportResize((uint32_t)_sceneViewportSize.x, (uint32_t)_sceneViewportSize.y);
 			_sceneHierarchyPanel.SetContext(_activeScene);
+			// TODO save camera position in scene and reload it.
+			_editorCamera.Reset();
+
 			return true;
 		}
 
@@ -331,6 +329,7 @@ namespace Hazel
 				{
 					_gizmoType = _previousGizmoType;
 					_hasStoredPreviousGizmoType = false;
+					_previousGizmoType = -1;
 				}
 			}
 
@@ -467,8 +466,8 @@ namespace Hazel
 		ImGui::Image((void*)((uint64_t)textureID), { _sceneViewportSize.x, _sceneViewportSize.y }, ImVec2{ 0.0f, 1.0f }, ImVec2{ 1.0f, 0.0f });
 
 		// Gizmos
-		if (auto selectedEntity = _sceneHierarchyPanel.GetSelectedEntity();
-			selectedEntity != Entity::Null && _gizmoType != -1)
+		if (auto selectedEntity = _sceneHierarchyPanel.GetSelectedEntity();	selectedEntity != Entity::Null
+			&& (_gizmoType != -1 || (_hasStoredPreviousGizmoType && _previousGizmoType != -1)))
 		{
 			//// Runtime Camera;
 			//if (auto cameraEntity = _activeScene->GetPrimaryCameraEntity();
@@ -506,11 +505,12 @@ namespace Hazel
 			}
 
 			float snapValues[3] = { snapValue,snapValue,snapValue };
+			int gizmoType = _hasStoredPreviousGizmoType ? _previousGizmoType : _gizmoType;
 			ImGuizmo::Manipulate(glm::value_ptr(cameraView), glm::value_ptr(cameraProjection),
-				(ImGuizmo::OPERATION)_gizmoType, (ImGuizmo::MODE)_gizmoSpace, glm::value_ptr(transform),
+				(ImGuizmo::OPERATION)gizmoType, (ImGuizmo::MODE)_gizmoSpace, glm::value_ptr(transform),
 				nullptr, snap ? snapValues : nullptr);
 
-			if (ImGuizmo::IsUsing())
+			if (ImGuizmo::IsUsing() && !_hasStoredPreviousGizmoType)
 			{
 				glm::vec3 position, rotation, scale;
 				if (Math::DecomposeTransform(transform, position, rotation, scale))
@@ -521,6 +521,33 @@ namespace Hazel
 					transformComponent.Scale = scale;
 				}
 			}
+		}
+
+		// TODO Draw Magnifying and Hand cursor when zooming and panning
+		// Draw Eye cursor and move speed when driving the camera
+		if (_editorCamera.IsDriving() && ImGui::IsItemHovered())
+		{
+			ImGui::SetMouseCursor(ImGuiMouseCursor_None);
+
+			auto mousePos = ImGui::GetMousePos();
+
+			// Cursor
+			auto upperLeftPos = mousePos;
+			upperLeftPos.y -= 10.0f;
+			upperLeftPos.x -= 10.0f;
+			auto lowerRightPos = upperLeftPos;
+			lowerRightPos.y += 25.0f;
+			lowerRightPos.x += 25.0f;
+			auto uv0 = ImVec2(0.0f, 1.0f);
+			auto uv1 = ImVec2(1.0f, 0.0f);
+			ImGui::GetForegroundDrawList()->AddImage((ImTextureID)(intptr_t)_eyeIconTexture->GetRendererID(), upperLeftPos, lowerRightPos, uv0, uv1, IM_COL32_WHITE);
+
+			// Move Speed
+			std::stringstream ss;
+			ss << _editorCamera.GetDrivingSpeed();
+			mousePos.y += 10.0f;
+			mousePos.x += 10.0f;
+			ImGui::GetForegroundDrawList()->AddText(mousePos, IM_COL32_WHITE, ss.str().c_str());
 		}
 
 		ImGui::End();

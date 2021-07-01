@@ -1,3 +1,6 @@
+# Temp Debugging files
+enc_temp_folder/
+
 # Binaries
 **/bin/
 !vendor/premake/bin/
