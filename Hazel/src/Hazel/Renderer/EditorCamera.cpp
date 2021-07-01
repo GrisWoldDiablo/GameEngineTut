@@ -15,7 +15,11 @@ namespace Hazel
 
 	void EditorCamera::OnUpdate()
 	{
-		glm::vec2 delta = UpdateMouseDelta();
+		auto [mouseX, mouseY] = Input::GetMousePosition();
+		const glm::vec2& mousePosition{ mouseX, mouseY };
+		glm::vec2 delta = (mousePosition - _initialMousePosition) * 0.003f;
+		_initialMousePosition = mousePosition;
+
 		_canScrollZoom = true;
 		_isAdjusting = false;
 		_isDriving = false;
@@ -53,16 +57,6 @@ namespace Hazel
 		}
 
 		UpdateView();
-	}
-
-	glm::vec2 EditorCamera::UpdateMouseDelta()
-	{
-		auto [mouseX, mouseY] = Input::GetMousePosition();
-		const glm::vec2& mousePosition{ mouseX, mouseY };
-		glm::vec2 delta = (mousePosition - _initialMousePosition) * 0.003f;
-		_initialMousePosition = mousePosition;
-
-		return delta;
 	}
 
 	void EditorCamera::UpdateView()
