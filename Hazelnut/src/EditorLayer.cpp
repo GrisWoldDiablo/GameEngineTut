@@ -73,8 +73,8 @@ namespace Hazel
 		//SafetyShutdownCheck();
 #endif // !HZ_PROFILE
 
-
-		_editorCamera.IsEnable() = (_isSceneViewportHovered && _isSceneViewportFocused && !ImGuizmo::IsUsing())
+		_editorCamera.IsEnable() =
+			(_isSceneViewportHovered && _isSceneViewportFocused && !ImGuizmo::IsUsing())
 			|| _editorCamera.IsAdjusting();
 		_editorCamera.OnUpdate();
 

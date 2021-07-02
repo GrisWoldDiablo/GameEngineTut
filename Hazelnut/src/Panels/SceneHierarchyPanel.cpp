@@ -92,18 +92,43 @@ namespace Hazel
 	}
 
 	template<typename T>
+	static void DrawFloatField(const char* label, T& value, float resetValue, const Color& color)
+	{
+		auto boldFont = ImGui::GetIO().Fonts->Fonts[0];
+		float lineHeight = boldFont->FontSize + GImGui->Style.FramePadding.y * 2.0f;
+
+		auto buttonSize = ImVec2{ lineHeight + 3.0f, lineHeight };
+
+		auto buttonColor = ImVec4(color.r, color.g, color.b, color.a);
+		auto buttonHoveredColor = buttonColor;
+		buttonHoveredColor.x *= 1.125f;
+		buttonHoveredColor.y *= 2.0f;
+		buttonHoveredColor.z *= 1.333f;
+
+		ImGui::PushStyleColor(ImGuiCol_Button, buttonColor);
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, buttonHoveredColor);
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, buttonColor);
+		ImGui::PushFont(boldFont);
+		if (ImGui::Button(label, buttonSize))
+		{
+			value = resetValue;
+		}
+		ImGui::PopFont();
+		ImGui::PopStyleColor(3);
+
+		ImGui::SameLine();
+		auto floatLabel = std::string("##") + label;
+		ImGui::DragFloat(floatLabel.c_str(), &value, 0.1f, 0.0f, 0.0f, "%.2f");
+	}
+
+	template<typename T>
 	static void DrawVecControls(const std::string& label, T& values, float resetValue = 0.0f, float columnWidth = 100.0f)
 	{
-		const int sizeOfVec2 = sizeof(glm::vec2);
-		const int sizeOfVec3 = sizeof(glm::vec3);
-		auto valuesSize = sizeof(T);
-
-		auto& io = ImGui::GetIO();
-		auto boldFont = io.Fonts->Fonts[0];
+		int valuesSize = sizeof(T) / 4;
 
 		ImGui::PushID(label.c_str());
 
-		ImGui::Columns(2, "vec3", false);
+		ImGui::Columns(2, label.c_str(), false);
 		ImGui::SetColumnWidth(0, columnWidth);
 
 		float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
@@ -114,70 +139,30 @@ namespace Hazel
 
 		ImGui::NextColumn();
 
-		ImGui::PushMultiItemsWidths(3, ImGui::CalcItemWidth());
+#pragma region FloatField
+		const char* vecLabels[4] = { {"X"}, {"Y"}, {"Z"}, {"W"}, };
+		const Color vecColors[4] =
+		{
+			{ 0.8f, 0.1f, 0.15f, 1.0f }, // Red
+			{ 0.2f, 0.7f, 0.3f, 1.0f }, // Green
+			{ 0.1f ,0.25f, 0.8f, 1.0f }, // Blue
+			{ 0.666f ,0.745f, 0.098f, 1.0f }, // Yellow
+		};
+
+		ImGui::PushMultiItemsWidths(valuesSize, ImGui::CalcItemWidth());
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 0.0f, 0.0f });
 
-		ImVec2 buttonSize = { lineHeight + 3.0f, lineHeight };
-
-		if (valuesSize == sizeOfVec2 || valuesSize == sizeOfVec3)
+		for (int i = 0; i < valuesSize; i++)
 		{
-#pragma region ValueX
-			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.8f, 0.1f, 0.15f, 1.0f });
-			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.9f, 0.2f, 0.2f, 1.0f });
-			ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.8f, 0.1f, 0.15f, 1.0f });
-			ImGui::PushFont(boldFont);
-			if (ImGui::Button("X", buttonSize))
-			{
-				values[0] = resetValue;
-			}
-			ImGui::PopFont();
-			ImGui::PopStyleColor(3);
-
 			ImGui::SameLine();
-			ImGui::DragFloat("##X", &values[0], 0.1f, 0.0f, 0.0f, "%.2f");
+			DrawFloatField(vecLabels[i], values[i], resetValue, vecColors[i]);
 			ImGui::PopItemWidth();
-#pragma endregion
-
-#pragma region ValueY
-			ImGui::SameLine();
-			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.2f, 0.7f, 0.3f, 1.0f });
-			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.3f, 0.8f, 0.3f, 1.0f });
-			ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.2f, 0.7f, 0.3f, 1.0f });
-			ImGui::PushFont(boldFont);
-			if (ImGui::Button("Y", buttonSize))
-			{
-				values[1] = resetValue;
-			}
-			ImGui::PopFont();
-			ImGui::PopStyleColor(3);
-
-			ImGui::SameLine();
-			ImGui::DragFloat("##Y", &values[1], 0.1f, 0.0f, 0.0f, "%.2f");
-			ImGui::PopItemWidth();
-#pragma endregion
-
-			if (valuesSize == sizeOfVec3)
-			{
-#pragma region ValueZ
-				ImGui::SameLine();
-				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.1f ,0.25f, 0.8f, 1.0f });
-				ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.2f, 0.35f, 0.9f, 1.0f });
-				ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.1f, 0.25f, 0.8f, 1.0f });
-				ImGui::PushFont(boldFont);
-				if (ImGui::Button("Z", buttonSize))
-				{
-					values[2] = resetValue;
-				}
-				ImGui::PopFont();
-				ImGui::PopStyleColor(3);
-
-				ImGui::SameLine();
-				ImGui::DragFloat("##Z", &values[2], 0.1f, 0.0f, 0.0f, "%.2f");
-				ImGui::PopItemWidth();
-#pragma endregion
-			}
 		}
+
 		ImGui::PopStyleVar();
+
+#pragma endregion
+
 		ImGui::Columns(1);
 		ImGui::PopID();
 	}

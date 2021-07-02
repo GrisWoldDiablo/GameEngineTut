@@ -132,7 +132,7 @@ namespace Hazel
 		{
 			for (auto entity : entities)
 			{
-				auto uuid = entity["Entity"].as<uint64_t>(); // TODO
+				auto uuid = entity["Entity"].as<uint64_t>(); // TODO Entity ID
 
 				std::string name;
 				auto tagComponent = entity["TagComponent"];
