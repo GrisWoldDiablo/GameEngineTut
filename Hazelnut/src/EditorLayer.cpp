@@ -38,7 +38,13 @@ namespace Hazel
 
 		_unwrapTexture = Texture2D::Create("assets/textures/unwrap_helper.png");
 
-		_framebuffer = Framebuffer::Create({ 1280, 720 });
+		auto framebufferSpecification = FramebufferSpecification
+		{
+			{ FramebufferTextureFormat::RGBA8, FramebufferTextureFormat::RGBA8, FramebufferTextureFormat::Depth },
+			1280,
+			720
+		};
+		_framebuffer = Framebuffer::Create(framebufferSpecification);
 
 		// Create an empty scene.
 		_activeScene = CreateRef<Scene>();
@@ -559,13 +565,14 @@ namespace Hazel
 		auto stats = Renderer2D::GetStats();
 
 		ImGui::Begin("Stats");
+
 		ImGui::Text("Renderer 2D Stats:");
 		ImGui::Text("Draw Calls: %d", stats.DrawCalls);
 		ImGui::Text("Quad Count: %d", stats.QuadCount);
 		ImGui::Text("Vertices: %d", stats.GetTotalVertexCount());
 		ImGui::Text("Indices: %d", stats.GetTotalIndexCount());
+
 		ImGui::Separator();
-		auto cycle = (glm::sin(Platform::GetTime()) + 1.0f) * 0.5f;
 		ImGui::Text("Ms per frame: %d", _updateTimer.GetProfileResult().ElapsedTime.count() / 1000);
 
 		ImGui::End();

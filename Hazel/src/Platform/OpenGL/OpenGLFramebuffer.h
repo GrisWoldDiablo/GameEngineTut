@@ -16,7 +16,7 @@ namespace Hazel
 
 		void Resize(uint32_t width, uint32_t height) override;
 
-		uint32_t GetColorAttachmentRenderID() const override { return _colorAttachment; }
+		uint32_t GetColorAttachmentRenderID(uint32_t index = 0) const override { HZ_CORE_ASSERT(index < _colorAttachments.size(), "Index out of range"); return _colorAttachments[index]; }
 		const FramebufferSpecification& GetSpecification() const override { return _specification; }
 
 	private:
@@ -24,8 +24,12 @@ namespace Hazel
 
 	private:
 		uint32_t _rendererID = 0;
-		uint32_t _colorAttachment = 0;
-		uint32_t _depthAttachment = 0;
 		FramebufferSpecification _specification;
+
+		std::vector<FramebufferTextureSpecification> _colorAttachmentSpecifications;
+		std::vector<uint32_t> _colorAttachments;
+
+		FramebufferTextureSpecification _depthAttachmentSpecification = FramebufferTextureFormat::None;
+		uint32_t _depthAttachment = 0;
 	};
 }
