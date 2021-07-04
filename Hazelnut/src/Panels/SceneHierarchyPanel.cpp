@@ -186,7 +186,7 @@ namespace Hazel
 
 		_context->_registry.each([&](auto entityID)
 		{
-			Entity entity{ entityID,_context.get() };
+			Entity entity{ entityID, _context.get() };
 			DrawEntityNode(entity);
 		});
 

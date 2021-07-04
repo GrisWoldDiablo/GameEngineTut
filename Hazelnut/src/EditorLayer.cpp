@@ -40,7 +40,7 @@ namespace Hazel
 
 		auto framebufferSpecification = FramebufferSpecification
 		{
-			{ FramebufferTextureFormat::RGBA8, FramebufferTextureFormat::RGBA8, FramebufferTextureFormat::Depth },
+			{ FramebufferTextureFormat::RGBA8, FramebufferTextureFormat::RED_INTEGER, FramebufferTextureFormat::Depth },
 			1280,
 			720
 		};
@@ -90,8 +90,29 @@ namespace Hazel
 		RenderCommand::SetClearColor(_clearColor);
 		RenderCommand::Clear();
 
+		// Clear our entity ID attachment to -1
+		_framebuffer->ClearAttachment(1, -1);
+
 		// Update Scene
 		_activeScene->OnUpdateEditor(_editorCamera);
+
+		auto [imMouseX, imMouseY] = ImGui::GetMousePos();
+		imMouseX -= _sceneViewportBounds[0].x;
+		imMouseY -= _sceneViewportBounds[0].y;
+
+		glm::vec2 sceneViewpostSize = _sceneViewportBounds[1] - _sceneViewportBounds[0];
+		imMouseY = sceneViewpostSize.y - imMouseY;
+		auto mouseX = (int)imMouseX;
+		auto mouseY = (int)imMouseY;
+
+		if (mouseX >= 0 && mouseY >= 0 && mouseX < (int)sceneViewpostSize.x && mouseY < (int)sceneViewpostSize.y)
+		{
+			if (Input::IsMouseButtonPressed(Mouse::ButtonLeft))
+			{
+				auto pixelData = _framebuffer->ReadPixel(1, mouseX, mouseY);
+				HZ_CORE_LINFO("Pixel Data ({0})", pixelData);
+			}
+		}
 
 		_framebuffer->Unbind();
 
@@ -457,6 +478,8 @@ namespace Hazel
 
 		ImGui::Begin("SceneViewport");
 
+		auto sceneViewportOffset = ImGui::GetCursorPos(); // Include tab bar.
+
 		_isSceneViewportFocused = ImGui::IsWindowFocused();
 		_isSceneViewportHovered = ImGui::IsWindowHovered();
 		if (_isSceneViewportHovered && (ImGui::GetIO().MouseClicked[1] || ImGui::GetIO().MouseClicked[2]))
@@ -471,9 +494,18 @@ namespace Hazel
 		auto textureID = _framebuffer->GetColorAttachmentRenderID();
 		ImGui::Image((void*)((uint64_t)textureID), { _sceneViewportSize.x, _sceneViewportSize.y }, ImVec2{ 0.0f, 1.0f }, ImVec2{ 1.0f, 0.0f });
 
-		// Gizmos
+		auto windowSize = ImGui::GetWindowSize();
+		auto minBound = ImGui::GetWindowPos();
+		auto maxBound = ImVec2{ minBound.x + windowSize.x, minBound.y + windowSize.y };
+		minBound.x += sceneViewportOffset.x;
+		minBound.y += sceneViewportOffset.y;
+
+		_sceneViewportBounds[0] = { minBound.x, minBound.y };
+		_sceneViewportBounds[1] = { maxBound.x, maxBound.y };
+
+#pragma region Gizmo
 		if (auto selectedEntity = _sceneHierarchyPanel.GetSelectedEntity();	selectedEntity != Entity::Null
-			&& (_gizmoType != -1 || (_hasStoredPreviousGizmoType && _previousGizmoType != -1)))
+&& (_gizmoType != -1 || (_hasStoredPreviousGizmoType && _previousGizmoType != -1)))
 		{
 			//// Runtime Camera;
 			//if (auto cameraEntity = _activeScene->GetPrimaryCameraEntity();
@@ -528,9 +560,11 @@ namespace Hazel
 				}
 			}
 		}
+#pragma endregion
 
+#pragma region CameraDriving
 		// TODO Draw Magnifying and Hand cursor when zooming and panning
-		// Draw Eye cursor and move speed when driving the camera
+// Draw Eye cursor and move speed when driving the camera
 		if (_editorCamera.IsDriving() && ImGui::IsItemHovered())
 		{
 			ImGui::SetMouseCursor(ImGuiMouseCursor_None);
@@ -555,6 +589,7 @@ namespace Hazel
 			mousePos.x += 10.0f;
 			ImGui::GetForegroundDrawList()->AddText(mousePos, IM_COL32_WHITE, ss.str().c_str());
 		}
+#pragma endregion
 
 		ImGui::End();
 		ImGui::PopStyleVar();

@@ -21,14 +21,22 @@ namespace Hazel
 
 	class Time
 	{
-	public:
-		static const Timestep GetTimestep() { return _sInstance->_timestep; };
 	private:
 		Time() = default;
 		Timestep _timestep;
 
-		static Time* _sInstance;
+	public:
+		static const Timestep GetTimestep() { return _sInstance->_timestep; };
+		static const float GetTimeElapsed() { return _sInstance->_sTimeElapsed; };
+
+	private:
+
 		static void SetTimestep(const Timestep& timestep) { _sInstance->_timestep = timestep; }
+		static void SetTimeElapsed(float time) { _sTimeElapsed = time; }
+
+	private:
+		inline static Time* _sInstance;
+		inline static float _sTimeElapsed;
 
 		friend class Application;
 	};

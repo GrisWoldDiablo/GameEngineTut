@@ -8,7 +8,6 @@ namespace Hazel
 {
 	// Static singleton access
 	Application* Application::_sInstance = nullptr;
-	Time* Time::_sInstance = nullptr;
 
 	Application::Application(std::string name)
 	{
@@ -45,8 +44,10 @@ namespace Hazel
 
 			auto time = Platform::GetTime();
 			auto timestep = Timestep(time - _lastFrameTime);
-			Time::SetTimestep(timestep);
 			_lastFrameTime = time;
+
+			Time::SetTimestep(timestep);
+			Time::SetTimeElapsed(time);
 
 			// if minimized do not bother updating
 			if (!_minimized)

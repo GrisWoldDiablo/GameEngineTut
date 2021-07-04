@@ -34,7 +34,7 @@ namespace Hazel
 			glBindTexture(TextureTarget(multisampled), id);
 		}
 
-		static void AttachColorTexture(uint32_t id, int samples, GLenum format, uint32_t width, uint32_t height, int index)
+		static void AttachColorTexture(uint32_t id, int samples, GLenum internalFormat, GLenum format, uint32_t width, uint32_t height, int index)
 		{
 			bool multisampled = samples > 1;
 
@@ -44,7 +44,7 @@ namespace Hazel
 			}
 			else
 			{
-				glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+				glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, GL_UNSIGNED_BYTE, nullptr);
 
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -76,6 +76,19 @@ namespace Hazel
 			}
 
 			glFramebufferTexture2D(GL_FRAMEBUFFER, attachmentType, TextureTarget(multisampled), id, 0);
+		}
+
+		static GLenum HazelTextureFormatToGL(FramebufferTextureFormat format)
+		{
+			switch (format)
+			{
+			case FramebufferTextureFormat::RGBA8: return GL_RGBA8;
+			case FramebufferTextureFormat::RED_INTEGER: return GL_RED_INTEGER;
+			}
+
+			HZ_CORE_ASSERT(false, "Unknown TextureFormat");
+
+			return GL_NONE;
 		}
 	}
 
@@ -141,10 +154,11 @@ namespace Hazel
 				switch (_colorAttachmentSpecifications[i].TextureFormat)
 				{
 				case FramebufferTextureFormat::RGBA8:
-				{
-					Utils::AttachColorTexture(_colorAttachments[i], _specification.Samples, GL_RGBA8, _specification.Width, _specification.Height, i);
+					Utils::AttachColorTexture(_colorAttachments[i], _specification.Samples, GL_RGBA8, GL_RGBA, _specification.Width, _specification.Height, i);
 					break;
-				}
+				case FramebufferTextureFormat::RED_INTEGER:
+					Utils::AttachColorTexture(_colorAttachments[i], _specification.Samples, GL_R32I, GL_RED_INTEGER, _specification.Width, _specification.Height, i);
+					break;
 				}
 			}
 		}
@@ -200,5 +214,27 @@ namespace Hazel
 		_specification.Height = height;
 
 		Invalidate();
+	}
+
+	int OpenGLFramebuffer::ReadPixel(uint32_t attachmentIndex, int x, int y)
+	{
+		HZ_CORE_ASSERT(attachmentIndex < _colorAttachments.size(), "Index out of range.");
+
+		glReadBuffer(GL_COLOR_ATTACHMENT0 + attachmentIndex);
+		int pixelData;
+		glReadPixels(x, y, 1, 1, GL_RED_INTEGER, GL_INT, &pixelData);
+
+		return pixelData;
+	};
+
+	void OpenGLFramebuffer::ClearAttachment(uint32_t attachmentIndex, int value)
+	{
+		HZ_CORE_ASSERT(attachmentIndex < _colorAttachments.size(), "Index out of range.");
+
+		auto& specification = _colorAttachmentSpecifications[attachmentIndex];
+		specification.TextureFormat;
+
+		glClearTexImage(_colorAttachments[attachmentIndex], 0, 
+			Utils::HazelTextureFormatToGL(specification.TextureFormat), GL_INT, &value);
 	}
 }

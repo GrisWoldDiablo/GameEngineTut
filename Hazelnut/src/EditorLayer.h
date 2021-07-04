@@ -73,6 +73,7 @@ namespace Hazel
 		int _gizmoSpace = 0;
 		int _previousGizmoType = -1;
 		bool _hasStoredPreviousGizmoType = false;
+		glm::vec2 _sceneViewportBounds[2];
 
 		// Tools
 		bool _isDemoWidowOpen = false;

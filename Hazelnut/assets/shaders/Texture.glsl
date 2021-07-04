@@ -29,7 +29,7 @@ void main()
 #version 450
 
 layout(location = 0) out vec4 color;
-layout(location = 1) out vec4 color2;
+layout(location = 1) out int color2; // -1 is not an entity
 
 in vec4 v_Color;
 in vec2 v_TextureCoord;
@@ -85,6 +85,7 @@ void main()
 		color.y = grayScalevalue;
 		color.z = grayScalevalue;
 	}
-
-	color2 = vec4(0.9, 0.2, 0.3, 1.0);
+	
+	//Testing
+	color2 = 50; // placeholder for our entity ID
 }

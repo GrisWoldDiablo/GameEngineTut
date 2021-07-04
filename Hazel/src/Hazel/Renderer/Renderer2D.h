@@ -18,7 +18,6 @@ namespace Hazel
 		static constexpr glm::mat4 _sIdentityMatrix = glm::identity<glm::mat4>();
 
 	public:
-
 		static void Init();
 		static void Shutdown();
 

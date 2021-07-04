@@ -38,6 +38,8 @@ namespace Hazel
 		bool IsDriving()const { return _isDriving; }
 		bool& IsEnable() { return _isEnable; }
 
+		float GetNearClip() const { return _nearClip; }
+		float GetFarClip() const { return _farClip; }
 		void Reset();
 	private:
 		void UpdateProjection();
@@ -58,18 +60,18 @@ namespace Hazel
 		float DrivingSpeed() const { return 0.2f * _drivingSpeed; } // Small adjustment value so speed at 1.0f feels right
 		float ZoomSpeed() const;
 
-		bool _isEnable;
+		bool _isEnable = false;
 	private:
 		float _FOV = 30.0f;
 		float _aspectRatio = 1.778f;
 		float _nearClip = 0.1f;
 		float _farClip = 1000.0f;
 
-		glm::mat4 _viewMatrix;
+		glm::mat4 _viewMatrix = {};
 		glm::vec3 _position = { 0.0f, 0.0f, 10.0f };
 		glm::vec3 _focalPoint = { 0.0f, 0.0f, 0.0f };
 
-		glm::vec2 _initialMousePosition;
+		glm::vec2 _initialMousePosition = {};
 
 		float _distance = 10.0f;
 		glm::vec3 _rotation = { 0.0f, 0.0f, 0.0f };
