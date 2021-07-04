@@ -9,6 +9,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "Hazel/Renderer/EditorCamera.h"
+#include "Hazel/Scene/Components.h"
 
 namespace Hazel
 {
@@ -34,7 +35,7 @@ namespace Hazel
 		static void DrawRotatedQuad(const glm::vec2& position, const glm::vec2& size, float rotation, const Color& color);
 		static void DrawRotatedQuad(const glm::vec3& position, const glm::vec2& size, float rotation, const Color& color);
 		// Final Draw
-		static void DrawQuad(const glm::mat4& transform, const Color& color);
+		static void DrawQuad(const glm::mat4& transform, const Color& color, int entityID = -1);
 		// --- ---------- --- //
 
 		// --- Textures --- //
@@ -43,7 +44,7 @@ namespace Hazel
 		static void DrawRotatedQuad(const glm::vec2& position, const glm::vec2& size, float rotation, const Ref<Texture2D>& texture, const glm::vec2& tilingFactor = glm::vec2(1.0f), const Color& tintColor = Color::White);
 		static void DrawRotatedQuad(const glm::vec3& position, const glm::vec2& size, float rotation, const Ref<Texture2D>& texture, const glm::vec2& tilingFactor = glm::vec2(1.0f), const Color& tintColor = Color::White);
 		// Final Draw
-		static void DrawQuad(const glm::mat4& transform, const Ref<Texture2D>& texture, const glm::vec2& tilingFactor = glm::vec2(1.0f), const Color& tintColor = Color::White);
+		static void DrawQuad(const glm::mat4& transform, const Ref<Texture2D>& texture, const glm::vec2& tilingFactor = glm::vec2(1.0f), const Color& tintColor = Color::White, int entityID = -1);
 		// --- -------- --- //
 
 		// --- SubTextures --- //
@@ -54,6 +55,10 @@ namespace Hazel
 		// Final Draw
 		static void DrawQuad(const glm::mat4& transform, const Ref<SubTexture2D>& subTexture, const glm::vec2& tilingFactor = glm::vec2(1.0f), const Color& tintColor = Color::White);
 		// --- ----------- --- //
+
+		// --- Sprite --- //
+		static void DrawSprite(const glm::mat4& transform, SpriteRendererComponent& spriteRenderComponent, int entityID);
+		// Final Draw
 
 		struct Statistics
 		{
@@ -69,6 +74,6 @@ namespace Hazel
 
 	private:
 		static void FlushAndReset();
-		static void UpdateData(const glm::mat4& transform, const Color& color, const glm::vec2& tilingFactor = glm::vec2(1.0f), float textureIndex = 0.0f);
+		static void UpdateData(const glm::mat4& transform, const Color& color, int entityID = -1, const glm::vec2& tilingFactor = glm::vec2(1.0f), float textureIndex = 0.0f);
 	};
 }

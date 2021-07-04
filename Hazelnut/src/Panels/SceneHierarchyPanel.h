@@ -18,6 +18,7 @@ namespace Hazel
 		void OnImGuiRender();
 
 		Entity GetSelectedEntity() const { return _selectionContext; }
+		void SetSelectedEntity(Entity entity) { _selectionContext = entity; }
 
 	private:
 		void DrawSceneName();

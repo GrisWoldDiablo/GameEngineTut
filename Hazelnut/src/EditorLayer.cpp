@@ -51,6 +51,9 @@ namespace Hazel
 		_activeScene->SetName(_kNewSceneName);
 		_sceneHierarchyPanel.SetContext(_activeScene);
 		_editorCamera = EditorCamera(30.0f, 1.778f, 0.1f, 1000.0f);
+
+		SceneSerializer serializer(_activeScene);
+		serializer.Deserialize(R"(C:\Visual Studio Project\GameEngineTut\Hazelnut\assets\scenes\Base.hazel)");
 	}
 
 	void EditorLayer::OnDetach()
@@ -107,11 +110,8 @@ namespace Hazel
 
 		if (mouseX >= 0 && mouseY >= 0 && mouseX < (int)sceneViewpostSize.x && mouseY < (int)sceneViewpostSize.y)
 		{
-			if (Input::IsMouseButtonPressed(Mouse::ButtonLeft))
-			{
-				auto pixelData = _framebuffer->ReadPixel(1, mouseX, mouseY);
-				HZ_CORE_LINFO("Pixel Data ({0})", pixelData);
-			}
+			int pixelData = _framebuffer->ReadPixel(1, mouseX, mouseY);
+			_hoveredEntity = pixelData == -1 ? Entity::Null : Entity((entt::entity)pixelData, _activeScene.get());
 		}
 
 		_framebuffer->Unbind();
@@ -189,11 +189,12 @@ namespace Hazel
 
 		EventDispatcher dispatcher(event);
 		dispatcher.Dispatch<KeyPressedEvent>(HZ_BIND_EVENT_FN(OnKeyPressed));
+		dispatcher.Dispatch<MouseButtonPressedEvent>(HZ_BIND_EVENT_FN(OnMouseButtonPressed));
 	}
 
 	bool EditorLayer::OnKeyPressed(KeyPressedEvent& event)
 	{
-		if (event.GetRepeatCount() > 0 || Input::IsMouseButtonPressed(MouseCode::ButtonRight))
+		if (ImGui::GetIO().WantTextInput || event.GetRepeatCount() > 0 || Input::IsMouseButtonPressed(MouseCode::ButtonRight))
 		{
 			return false;
 		}
@@ -260,6 +261,20 @@ namespace Hazel
 		return true;
 	}
 
+	bool EditorLayer::OnMouseButtonPressed(MouseButtonPressedEvent& event)
+	{
+		// Mouse picking
+		if (event.GetMouseButton() == Mouse::ButtonLeft)
+		{
+			if (_isSceneViewportHovered && !ImGuizmo::IsOver() && !Input::IsKeyPressed(Key::LeftAlt))
+			{
+				_sceneHierarchyPanel.SetSelectedEntity(_hoveredEntity);
+			}
+		}
+
+		return false;
+	}
+
 	bool EditorLayer::NewScene(const std::string& newSceneName)
 	{
 		if (FileDialogs::NewFile())
@@ -315,6 +330,11 @@ namespace Hazel
 
 		if (!filePath.empty())
 		{
+			auto& window = Application::Get().GetWindow();
+			std::stringstream ss;
+			ss << window.GetTitle() << " " << filePath;
+			window.SetTitle(ss.str());
+
 			SceneSerializer serializer(_activeScene);
 			serializer.Serialize(filePath);
 		}
@@ -601,6 +621,14 @@ namespace Hazel
 
 		ImGui::Begin("Stats");
 
+		std::string name = "None";
+		if (_hoveredEntity)
+		{
+			name = _hoveredEntity.GetComponent<TagComponent>().Tag;
+		}
+		ImGui::Text("Hovered Entity: %s", name.c_str());
+
+		ImGui::Separator();
 		ImGui::Text("Renderer 2D Stats:");
 		ImGui::Text("Draw Calls: %d", stats.DrawCalls);
 		ImGui::Text("Quad Count: %d", stats.QuadCount);

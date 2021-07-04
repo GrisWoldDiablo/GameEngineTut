@@ -14,6 +14,9 @@ namespace Hazel
 		glm::vec2 TextureCoord;
 		float TextureIndex;
 		glm::vec2 TilingFactor;
+
+		// Editor-Only
+		int EntityID;
 	};
 
 	struct Renderer2DData
@@ -54,11 +57,12 @@ namespace Hazel
 		sData.QuadVertexBuffer = VertexBuffer::Create(sData.MaxVertices * sizeof(QuadVertex));
 		sData.QuadVertexBuffer->SetLayout(
 			{
-				{ ShaderDataType::Float3, "a_Position" },
-				{ ShaderDataType::Float4, "a_Color" },
-				{ ShaderDataType::Float2, "a_TextureCoord" },
-				{ ShaderDataType::Float, "a_TextureIndex" },
-				{ ShaderDataType::Float2, "a_TilingFactor" },
+				{ ShaderDataType::Float3, "a_Position"		},
+				{ ShaderDataType::Float4, "a_Color"			},
+				{ ShaderDataType::Float2, "a_TextureCoord"	},
+				{ ShaderDataType::Float,  "a_TextureIndex"	},
+				{ ShaderDataType::Float2, "a_TilingFactor"	},
+				{ ShaderDataType::Int, "a_EntityID"		},
 			});
 		sData.QuadVertexArray->AddVertexBuffer(sData.QuadVertexBuffer);
 
@@ -192,6 +196,7 @@ namespace Hazel
 		sData.Stats.DrawCalls++;
 	}
 
+#pragma region Primitive
 	void Renderer2D::DrawQuad(const glm::vec2& position, const glm::vec2& size, const Color& color)
 	{
 		DrawQuad({ position.x, position.y, 0.0f }, size, color);
@@ -223,13 +228,15 @@ namespace Hazel
 		DrawQuad(transform, color);
 	}
 
-	void Renderer2D::DrawQuad(const glm::mat4& transform, const Color& color)
+	void Renderer2D::DrawQuad(const glm::mat4& transform, const Color& color, int entityID)
 	{
 		HZ_PROFILE_FUNCTION();
 
-		UpdateData(transform, color);
+		UpdateData(transform, color, entityID);
 	}
+#pragma endregion
 
+#pragma region Texture
 	void Renderer2D::DrawQuad(const glm::vec2& position, const glm::vec2& size, const Ref<Texture2D>& texture, const glm::vec2& tilingFactor, const Color& tintColor)
 	{
 		DrawQuad({ position.x, position.y, 0.0f }, size, texture, tilingFactor, tintColor);
@@ -261,7 +268,7 @@ namespace Hazel
 		DrawQuad(transform, texture, tilingFactor, tintColor);
 	}
 
-	void Renderer2D::DrawQuad(const glm::mat4& transform, const Ref<Texture2D>& texture, const glm::vec2& tilingFactor, const Color& tintColor)
+	void Renderer2D::DrawQuad(const glm::mat4& transform, const Ref<Texture2D>& texture, const glm::vec2& tilingFactor, const Color& tintColor, int entityID)
 	{
 		HZ_PROFILE_FUNCTION();
 
@@ -295,9 +302,11 @@ namespace Hazel
 		sData.QuadTextureCoordinates[2] = { 1.0f, 1.0f };
 		sData.QuadTextureCoordinates[3] = { 0.0f, 1.0f };
 
-		UpdateData(transform, tintColor, tilingFactor, textureIndex);
+		UpdateData(transform, tintColor, entityID, tilingFactor, textureIndex);
 	}
+#pragma endregion
 
+#pragma region SubTexture
 	void Renderer2D::DrawQuad(const glm::vec2& position, const glm::vec2& size, const Ref<SubTexture2D>& subTexture, const glm::vec2& tilingFactor, const Color& tintColor)
 	{
 		DrawQuad({ position.x, position.y, 0.0f }, size, subTexture, tilingFactor, tintColor);
@@ -366,7 +375,20 @@ namespace Hazel
 			sData.TextureSlotIndex++;
 		}
 
-		UpdateData(transform, tintColor, tilingFactor, textureIndex);
+		UpdateData(transform, tintColor, -1, tilingFactor, textureIndex);
+	}
+#pragma endregion
+
+	void Renderer2D::DrawSprite(const glm::mat4& transform, SpriteRendererComponent& spriteRenderComponent, int entityID)
+	{
+		if (spriteRenderComponent.Texture != nullptr)
+		{
+			DrawQuad(transform, spriteRenderComponent.Texture, spriteRenderComponent.Tiling, spriteRenderComponent.Color, entityID);
+		}
+		else
+		{
+			DrawQuad(transform, spriteRenderComponent.Color, entityID);
+		}
 	}
 
 	void Renderer2D::ResetStats()
@@ -387,7 +409,7 @@ namespace Hazel
 		Reset();
 	}
 
-	void Renderer2D::UpdateData(const glm::mat4& transform, const Color& color, const glm::vec2& tilingFactor, float textureIndex)
+	void Renderer2D::UpdateData(const glm::mat4& transform, const Color& color, int entityID, const glm::vec2& tilingFactor, float textureIndex)
 	{
 		HZ_PROFILE_FUNCTION();
 
@@ -403,6 +425,7 @@ namespace Hazel
 			sData.QuadVertexBufferPtr->TextureCoord = sData.QuadTextureCoordinates[i];
 			sData.QuadVertexBufferPtr->TextureIndex = textureIndex;
 			sData.QuadVertexBufferPtr->TilingFactor = tilingFactor;
+			sData.QuadVertexBufferPtr->EntityID = entityID;
 			sData.QuadVertexBufferPtr++;
 		}
 

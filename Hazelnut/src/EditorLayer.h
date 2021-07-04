@@ -27,6 +27,7 @@ namespace Hazel
 
 	private:
 		bool OnKeyPressed(KeyPressedEvent& event);
+		bool OnMouseButtonPressed(MouseButtonPressedEvent& event);
 
 		bool NewScene(const std::string& newSceneName = _kNewSceneName);
 		void OpenScene();
@@ -74,6 +75,8 @@ namespace Hazel
 		int _previousGizmoType = -1;
 		bool _hasStoredPreviousGizmoType = false;
 		glm::vec2 _sceneViewportBounds[2];
+		Entity _hoveredEntity;
+		
 
 		// Tools
 		bool _isDemoWidowOpen = false;

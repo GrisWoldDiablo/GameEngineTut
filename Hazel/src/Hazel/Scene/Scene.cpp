@@ -70,25 +70,7 @@ namespace Hazel
 
 		Renderer2D::BeginScene(*mainCamera, cameraTransform);
 
-		auto group = _registry.group<TransformComponent>(entt::get<SpriteRendererComponent>);
-
-		group.sort<TransformComponent>([](const auto& lhs, const auto& rhs)
-		{
-			return lhs.Position.z < rhs.Position.z;
-		});
-
-		for (const auto entity : group)
-		{
-			auto [transform, sprite] = group.get<TransformComponent, SpriteRendererComponent>(entity);
-			if (sprite.Texture == nullptr)
-			{
-				Renderer2D::DrawQuad(transform.GetTransform(), sprite.Color);
-			}
-			else
-			{
-				Renderer2D::DrawQuad(transform.GetTransform(), sprite.Texture, sprite.Tiling, sprite.Color);
-			}
-		}
+		DrawSpriteRenderComponent();
 
 		Renderer2D::EndScene();
 	}
@@ -97,6 +79,13 @@ namespace Hazel
 	{
 		Renderer2D::BeginScene(camera);
 
+		DrawSpriteRenderComponent();
+		
+		Renderer2D::EndScene();
+	}
+
+	void Scene::DrawSpriteRenderComponent()
+	{
 		auto group = _registry.group<TransformComponent>(entt::get<SpriteRendererComponent>);
 
 		group.sort<TransformComponent>([](const auto& lhs, const auto& rhs)
@@ -107,17 +96,8 @@ namespace Hazel
 		for (const auto entity : group)
 		{
 			auto [transform, sprite] = group.get<TransformComponent, SpriteRendererComponent>(entity);
-			if (sprite.Texture == nullptr)
-			{
-				Renderer2D::DrawQuad(transform.GetTransform(), sprite.Color);
-			}
-			else
-			{
-				Renderer2D::DrawQuad(transform.GetTransform(), sprite.Texture, sprite.Tiling, sprite.Color);
-			}
+			Renderer2D::DrawSprite(transform.GetTransform(), sprite, (int)entity);
 		}
-
-		Renderer2D::EndScene();
 	}
 
 	void Scene::OnViewportResize(uint32_t width, uint32_t height)
