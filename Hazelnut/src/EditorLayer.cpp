@@ -52,8 +52,13 @@ namespace Hazel
 		_sceneHierarchyPanel.SetContext(_activeScene);
 		_editorCamera = EditorCamera(30.0f, 1.778f, 0.1f, 1000.0f);
 
+
 		SceneSerializer serializer(_activeScene);
-		serializer.Deserialize(R"(C:\Visual Studio Project\GameEngineTut\Hazelnut\assets\scenes\Base.hazel)");
+		std::string filePath = "C:\\Visual Studio Project\\GameEngineTut\\Hazelnut\\assets\\scenes\\Base.hazel";
+		if (serializer.Deserialize(filePath))
+		{
+			SetWindowTitle(filePath);
+		}
 	}
 
 	void EditorLayer::OnDetach()
@@ -189,7 +194,7 @@ namespace Hazel
 
 		EventDispatcher dispatcher(event);
 		dispatcher.Dispatch<KeyPressedEvent>(HZ_BIND_EVENT_FN(OnKeyPressed));
-		dispatcher.Dispatch<MouseButtonPressedEvent>(HZ_BIND_EVENT_FN(OnMouseButtonPressed));
+		dispatcher.Dispatch<MouseButtonReleasedEvent>(HZ_BIND_EVENT_FN(OnMouseButtonReleased));
 	}
 
 	bool EditorLayer::OnKeyPressed(KeyPressedEvent& event)
@@ -261,12 +266,12 @@ namespace Hazel
 		return true;
 	}
 
-	bool EditorLayer::OnMouseButtonPressed(MouseButtonPressedEvent& event)
+	bool EditorLayer::OnMouseButtonReleased(MouseButtonReleasedEvent& event)
 	{
 		// Mouse picking
 		if (event.GetMouseButton() == Mouse::ButtonLeft)
 		{
-			if (_isSceneViewportHovered && !ImGuizmo::IsOver() && !Input::IsKeyPressed(Key::LeftAlt))
+			if (_isSceneViewportHovered && (!_sceneHierarchyPanel.GetSelectedEntity() || !ImGuizmo::IsOver()) && !Input::IsKeyPressed(Key::LeftAlt))
 			{
 				_sceneHierarchyPanel.SetSelectedEntity(_hoveredEntity);
 			}
@@ -313,13 +318,12 @@ namespace Hazel
 			{
 				return;
 			}
-			auto& window = Application::Get().GetWindow();
-			std::stringstream ss;
-			ss << window.GetTitle() << " " << filePath;
-			window.SetTitle(ss.str());
 
 			SceneSerializer serializer(_activeScene);
-			serializer.Deserialize(filePath);
+			if (serializer.Deserialize(filePath))
+			{
+				SetWindowTitle(filePath);
+			}
 		}
 	}
 
@@ -330,14 +334,19 @@ namespace Hazel
 
 		if (!filePath.empty())
 		{
-			auto& window = Application::Get().GetWindow();
-			std::stringstream ss;
-			ss << window.GetTitle() << " " << filePath;
-			window.SetTitle(ss.str());
+			SetWindowTitle(filePath);
 
 			SceneSerializer serializer(_activeScene);
 			serializer.Serialize(filePath);
 		}
+	}
+
+	void EditorLayer::SetWindowTitle(const std::string& filePath)
+	{
+		auto& window = Application::Get().GetWindow();
+		std::stringstream ss;
+		ss << window.GetTitle() << " " << filePath;
+		window.SetTitle(ss.str());
 	}
 
 	void EditorLayer::DrawToolbar()

@@ -27,11 +27,12 @@ namespace Hazel
 
 	private:
 		bool OnKeyPressed(KeyPressedEvent& event);
-		bool OnMouseButtonPressed(MouseButtonPressedEvent& event);
+		bool OnMouseButtonReleased(MouseButtonReleasedEvent& event);
 
 		bool NewScene(const std::string& newSceneName = _kNewSceneName);
 		void OpenScene();
 		void SaveSceneAs();
+
 
 	private:
 		void DrawToolbar();
@@ -42,6 +43,7 @@ namespace Hazel
 		void SafetyShutdownCheck();
 		void CalculateFPS();
 
+		void SetWindowTitle(const std::string& filePath);
 		void AddTooltip(const std::string& tooltipMessage);
 
 	private:
