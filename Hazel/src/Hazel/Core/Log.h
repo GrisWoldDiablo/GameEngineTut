@@ -124,4 +124,3 @@ struct fmt::formatter<glm::vec4>
 		return format_to(ctx.out(), "(x:{:.3f}, y:{:.3f}, z:{:.3f}, w:{:.3f})", vec4.x, vec4.y, vec4.z, vec4.w);
 	}
 };
-

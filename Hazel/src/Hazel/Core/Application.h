@@ -13,13 +13,25 @@ int main(int argc, char** argv);
 
 namespace Hazel
 {
+	struct ApplicationCommandLineArgs
+	{
+		int Count = 0;
+		char** Args = nullptr;
+
+		const char* operator[](int index) const
+		{
+			HZ_CORE_ASSERT(index < Count, "Index out of range");
+			return Args[index];
+		}
+	};
+
 	/// <summary>
 	/// The application class with the main run loop.
 	/// </summary>
 	class Application
 	{
 	public:
-		Application(std::string name = "Hazel App");
+		Application(std::string name = "Hazel App", ApplicationCommandLineArgs args = ApplicationCommandLineArgs());
 		virtual ~Application() = default;
 
 		void Stop();
@@ -34,12 +46,15 @@ namespace Hazel
 		// Get the Singleton
 		static Application& Get() { return *_sInstance; }
 
-		void Run();
+		ApplicationCommandLineArgs GetCommandLineArgs() const { return _commandLineArgs; }
+
 	private:
+		void Run();
 		bool OnWindowClose(WindowCloseEvent& event);
 		bool OnWindowResize(WindowResizeEvent& event);
 
 	private:
+		ApplicationCommandLineArgs _commandLineArgs;
 		Scope<Window> _window;
 		ImGuiLayer* _imGuiLayer;
 		LayerStack _layerStack;
@@ -54,5 +69,5 @@ namespace Hazel
 	};
 
 	// To be define by the client.
-	Application* CreateApplication();
+	Application* CreateApplication(ApplicationCommandLineArgs args);
 }

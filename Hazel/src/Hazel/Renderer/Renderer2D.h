@@ -6,7 +6,6 @@
 #include "Hazel/Renderer/Camera.h"
 #include "Hazel/Core/Color.h"
 
-#include <glm/gtc/matrix_transform.hpp>
 
 #include "Hazel/Renderer/EditorCamera.h"
 #include "Hazel/Scene/Components.h"

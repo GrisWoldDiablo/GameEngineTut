@@ -1,5 +1,6 @@
 #pragma once
 
+#include <filesystem>
 #include <iostream>
 #include <memory>
 #include <utility>
@@ -12,6 +13,8 @@
 #include <vector>
 #include <unordered_map>
 #include <unordered_set>
+
+#include "Hazel/Core/Base.h"
 
 #include "Hazel/Core/Log.h"
 

@@ -3,7 +3,11 @@
 
 #include "VertexArray.h"
 #include "Shader.h"
+#include "UniformBuffer.h"
 #include "RenderCommand.h"
+
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 namespace Hazel
 {
@@ -44,6 +48,13 @@ namespace Hazel
 		glm::vec2* QuadTextureCoordinates;
 
 		Renderer2D::Statistics Stats;
+
+		struct CameraData
+		{
+			glm::mat4 ViewProjection;
+		};
+		CameraData CameraBuffer;
+		Ref<UniformBuffer> CameraUniformBuffer;
 	};
 
 	static Renderer2DData sData;
@@ -101,8 +112,6 @@ namespace Hazel
 
 		// -- Shaders
 		sData.TextureShader = Shader::Create("assets/shaders/Texture.glsl");
-		sData.TextureShader->Bind();
-		sData.TextureShader->SetIntArray("u_Texture", samplers, sData.MaxTextureSlots);
 
 		sData.TextureSlots[0] = sData.WhiteTexture;
 
@@ -112,6 +121,8 @@ namespace Hazel
 		sData.QuadVertexPositions[3] = { -0.5f, 0.5f, 0.0f, 1.0f };
 
 		sData.QuadTextureCoordinates = new glm::vec2[4];
+
+		sData.CameraUniformBuffer = UniformBuffer::Create(sizeof(Renderer2DData::CameraData), 0);
 	}
 
 	void Renderer2D::Shutdown()
@@ -125,12 +136,9 @@ namespace Hazel
 	{
 		HZ_PROFILE_FUNCTION();
 
-		auto viewProjection = camera.GetProjection() * glm::inverse(transform);
-
-		sData.TextureShader->Bind();
-		sData.TextureShader->SetMat4("u_ViewProjection", viewProjection);
-		sData.TextureShader->SetBool("u_IsGrayscale", false);
-
+		sData.CameraBuffer.ViewProjection = camera.GetProjection() * glm::inverse(transform);
+		sData.CameraUniformBuffer->SetData(&sData.CameraBuffer, sizeof(Renderer2DData::CameraData));
+		
 		Reset();
 	}
 
@@ -138,9 +146,8 @@ namespace Hazel
 	{
 		HZ_PROFILE_FUNCTION();
 
-		sData.TextureShader->Bind();
-		sData.TextureShader->SetMat4("u_ViewProjection", camera.GetViewProjectionMatrix());
-		sData.TextureShader->SetBool("u_IsGrayscale", isGrayscale);
+		sData.CameraBuffer.ViewProjection = camera.GetViewProjectionMatrix();
+		sData.CameraUniformBuffer->SetData(&sData.CameraBuffer, sizeof(Renderer2DData::CameraData));
 
 		Reset();
 	}
@@ -149,9 +156,8 @@ namespace Hazel
 	{
 		HZ_PROFILE_FUNCTION();
 
-		sData.TextureShader->Bind();
-		sData.TextureShader->SetMat4("u_ViewProjection", camera.GetViewProjection());
-		sData.TextureShader->SetBool("u_IsGrayscale", isGrayscale);
+		sData.CameraBuffer.ViewProjection = camera.GetViewProjection();
+		sData.CameraUniformBuffer->SetData(&sData.CameraBuffer, sizeof(Renderer2DData::CameraData));
 
 		Reset();
 	}
@@ -191,6 +197,7 @@ namespace Hazel
 			sData.TextureSlots[i]->Bind(i);
 		}
 
+		sData.TextureShader->Bind();
 		RenderCommand::DrawIndexed(sData.QuadVertexArray, sData.QuadIndexCount);
 
 		sData.Stats.DrawCalls++;

@@ -33,10 +33,7 @@ namespace Hazel
 
 	void SceneCamera::SetViewportSize(uint32_t width, uint32_t height)
 	{
-		if (width == 0 || height == 0)
-		{
-			return;
-		}
+		HZ_CORE_ASSERT(width > 0 && height > 0, "Viewport Size invalid!")
 		_aspectRatio = (float)width / (float)height;
 		RecalculateProjection();
 	}

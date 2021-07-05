@@ -1,19 +1,21 @@
 #include "hzpch.h"
-#include "Framebuffer.h"
-#include "Renderer.h"
+#include "UniformBuffer.h"
 
-#include "Platform/OpenGL/OpenGLFramebuffer.h"
+#include "Hazel/Renderer/Renderer.h"
+#include "Platform/OpenGL/OpenGLUniformBuffer.h"
+
 
 namespace Hazel
 {
-	Ref<Framebuffer> Framebuffer::Create(const FramebufferSpecification& spec)
+
+	Ref<UniformBuffer> UniformBuffer::Create(uint32_t side, uint32_t binding)
 	{
 		switch (Renderer::GetAPI())
 		{
 		case RendererAPI::API::None:
 			HZ_CORE_ASSERT(false, "RendererAPI::None is currently not supported.") { return nullptr; }
 		case RendererAPI::API::OpenGL:
-			return CreateRef<OpenGLFramebuffer>(spec);
+			return CreateRef<OpenGLUniformBuffer>(side, binding);
 		case RendererAPI::API::DirectX:
 			HZ_CORE_ASSERT(false, "RendererAPI::DirectX is currently not supported.") { return nullptr; }
 		case RendererAPI::API::Vulkan:
@@ -22,4 +24,5 @@ namespace Hazel
 			HZ_CORE_ASSERT(false, "Unknown RendererAPI, VertexBuffer::Create") { return nullptr; }
 		}
 	}
+
 }

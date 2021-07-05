@@ -19,7 +19,7 @@ namespace Hazel
 		case RendererAPI::API::Vulkan:
 			HZ_CORE_ASSERT(false, "RendererAPI::Vulkan is currently not supported."); return nullptr;
 		default:
-			HZ_CORE_ASSERT(false, "Unknow RendererAPI, VertexArray::Create"); return nullptr;
+			HZ_CORE_ASSERT(false, "Unknown RendererAPI, VertexArray::Create"); return nullptr;
 		}
 	}
 }

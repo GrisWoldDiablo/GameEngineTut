@@ -153,7 +153,10 @@ namespace Hazel
 	template<>
 	void Scene::OnComponentAdded<CameraComponent>(Entity entity, CameraComponent& component)
 	{
-		component.Camera.SetViewportSize(_viewportWidth, _viewportHeight);
+		if (_viewportWidth > 0 && _viewportHeight > 0)
+		{
+			component.Camera.SetViewportSize(_viewportWidth, _viewportHeight);
+		}
 	}
 
 	template<>

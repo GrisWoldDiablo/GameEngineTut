@@ -118,7 +118,7 @@ namespace Hazel
 	void OpenGLFramebuffer::Clean()
 	{
 		glDeleteFramebuffers(1, &_rendererID);
-		glDeleteTextures(_colorAttachments.size(), _colorAttachments.data());
+		glDeleteTextures((GLsizei)_colorAttachments.size(), _colorAttachments.data());
 		glDeleteTextures(1, &_depthAttachment);
 	}
 
@@ -146,9 +146,9 @@ namespace Hazel
 		if (!_colorAttachmentSpecifications.empty())
 		{
 			_colorAttachments.resize(_colorAttachmentSpecifications.size());
-			Utils::CreateTextures(multisampled, _colorAttachments.data(), _colorAttachments.size());
+			Utils::CreateTextures(multisampled, _colorAttachments.data(),(uint32_t)_colorAttachments.size());
 
-			for (size_t i = 0; i < _colorAttachments.size(); i++)
+			for (int i = 0; i < _colorAttachments.size(); i++)
 			{
 				Utils::BindTexture(multisampled, _colorAttachments[i]);
 				switch (_colorAttachmentSpecifications[i].TextureFormat)
@@ -179,7 +179,7 @@ namespace Hazel
 		{
 			HZ_CORE_ASSERT(_colorAttachments.size() <= 4, "Do not support more than 4 color attachments.");
 			GLenum buffers[4] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3 };
-			glDrawBuffers(_colorAttachments.size(), buffers);
+			glDrawBuffers((GLsizei)_colorAttachments.size(), buffers);
 		}
 		else if (_colorAttachments.empty())
 		{

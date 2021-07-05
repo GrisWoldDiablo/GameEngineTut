@@ -9,7 +9,8 @@ namespace Hazel
 	// Static singleton access
 	Application* Application::_sInstance = nullptr;
 
-	Application::Application(std::string name)
+	Application::Application(std::string name, ApplicationCommandLineArgs args)
+		:_commandLineArgs(args)
 	{
 		HZ_PROFILE_FUNCTION();
 

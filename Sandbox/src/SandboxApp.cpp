@@ -21,7 +21,7 @@ public:
 };
 
 
-Hazel::Application* Hazel::CreateApplication()
+Hazel::Application* Hazel::CreateApplication(ApplicationCommandLineArgs args)
 {
 	HZ_PROFILE_FUNCTION();
 

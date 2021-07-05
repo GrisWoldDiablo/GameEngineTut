@@ -3,7 +3,7 @@
 #include <glm/glm.hpp>
 
 // #TODO: Remove!
-typedef unsigned int GLenum;
+using GLenum = unsigned int;
 
 namespace Hazel
 {
@@ -44,10 +44,19 @@ namespace Hazel
 	private:
 		std::string ReadFile(const std::string& filePath);
 		std::unordered_map<GLenum, std::string> PreProcess(const std::string& source);
-		void Compile(const std::unordered_map<GLenum, std::string>& shaderSources);
+		void CompileOrGetVulkanBinaries(const std::unordered_map<GLenum, std::string>& shaderSources);
+		void CompileOrGetOpenGLBinaries();
+		void CreateProgram();
+		void Reflect(GLenum stage, const std::vector<uint32_t>& shaderData);
 
 	private:
 		uint32_t _rendererID;
+		std::string _filePath;
 		std::string _name;
+
+		std::unordered_map<GLenum, std::vector<uint32_t>> _vulkanSPIRV;
+		std::unordered_map<GLenum, std::vector<uint32_t>> _openGLSPIRV;
+
+		std::unordered_map<GLenum, std::string> _openGLSourceCode;
 	};
 }

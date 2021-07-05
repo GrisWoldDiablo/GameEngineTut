@@ -20,7 +20,7 @@ namespace Hazel
 		case RendererAPI::API::Vulkan:
 			HZ_CORE_ASSERT(false, "RendererAPI::Vulkan is currently not supported."); return nullptr;
 		default:
-			HZ_CORE_ASSERT(false, "Unknow RendererAPI, VertexBuffer::Create"); return nullptr;
+			HZ_CORE_ASSERT(false, "Unknown RendererAPI, VertexBuffer::Create"); return nullptr;
 		}
 	}
 
@@ -37,7 +37,7 @@ namespace Hazel
 		case RendererAPI::API::Vulkan:
 			HZ_CORE_ASSERT(false, "RendererAPI::Vulkan is currently not supported."); return nullptr;
 		default:
-			HZ_CORE_ASSERT(false, "Unknow RendererAPI, VertexBuffer::Create"); return nullptr;
+			HZ_CORE_ASSERT(false, "Unknown RendererAPI, VertexBuffer::Create"); return nullptr;
 		}
 	}
 
@@ -54,7 +54,7 @@ namespace Hazel
 		case RendererAPI::API::Vulkan:
 			HZ_CORE_ASSERT(false, "RendererAPI::Vulkan is currently not supported."); return nullptr;
 		default:
-			HZ_CORE_ASSERT(false, "Unknow RendererAPI, IndexBuffer::Create") { return nullptr; }
+			HZ_CORE_ASSERT(false, "Unknown RendererAPI, IndexBuffer::Create") { return nullptr; }
 		}
 	}
 }

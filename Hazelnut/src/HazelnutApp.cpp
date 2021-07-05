@@ -8,8 +8,8 @@ namespace Hazel
 	class Hazelnut final : public Application
 	{
 	public:
-		Hazelnut()
-			:Application("Hazel Editor")
+		Hazelnut(ApplicationCommandLineArgs args)
+			:Application("Hazel Editor", args)
 		{
 			HZ_PROFILE_FUNCTION();
 
@@ -19,10 +19,10 @@ namespace Hazel
 		~Hazelnut() = default;
 	};
 
-	Application* CreateApplication()
+	Application* CreateApplication(ApplicationCommandLineArgs args)
 	{
 		HZ_PROFILE_FUNCTION();
 
-		return new Hazelnut();
+		return new Hazelnut(args);
 	}
 }

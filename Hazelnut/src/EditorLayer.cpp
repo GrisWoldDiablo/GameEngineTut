@@ -49,16 +49,29 @@ namespace Hazel
 		// Create an empty scene.
 		_activeScene = CreateRef<Scene>();
 		_activeScene->SetName(_kNewSceneName);
+
+		auto commandLineArgs = Application::Get().GetCommandLineArgs();
+		if (commandLineArgs.Count > 1)
+		{
+			auto sceneFilePath = commandLineArgs[1];
+			if (std::filesystem::exists(sceneFilePath))
+			{
+				SceneSerializer serializer(_activeScene);
+				if (serializer.Deserialize(sceneFilePath))
+				{
+					SetWindowTitle(sceneFilePath);
+				}
+			}
+			else
+			{
+				HZ_CORE_LERROR("No scene found at {0}", sceneFilePath);
+			}
+		}
+
+
 		_sceneHierarchyPanel.SetContext(_activeScene);
 		_editorCamera = EditorCamera(30.0f, 1.778f, 0.1f, 1000.0f);
 
-
-		SceneSerializer serializer(_activeScene);
-		std::string filePath = "C:\\Visual Studio Project\\GameEngineTut\\Hazelnut\\assets\\scenes\\Base.hazel";
-		if (serializer.Deserialize(filePath))
-		{
-			SetWindowTitle(filePath);
-		}
 	}
 
 	void EditorLayer::OnDetach()
