@@ -11,7 +11,6 @@ from urllib.request import urlopen
 class VulkanConfiguration:
     requiredVulkanVersion = "1.2.170.0"
     vulkanDirectory = "./Hazel/vendor/VulkanSDK"
-    vulkanSDK = os.environ.get("VULKAN_SDK")
 
     @classmethod
     def Validate(cls):
@@ -24,19 +23,20 @@ class VulkanConfiguration:
     
     @classmethod
     def CheckVulkanSDK(cls):
-        if (cls.vulkanSDK is None):
+        vulkanSDK = os.environ.get("VULKAN_SDK")
+        if (vulkanSDK is None):
             print("\nYou don't have the Vulkan SDK installed!")
             cls.__InstallVulkanSDK()
             return False
         else:
-            print(f"\nLocated Vulkan SDK ad {cls.vulkanSDK}")
+            print(f"\nLocated Vulkan SDK ad {vulkanSDK}")
 
-        if (cls.requiredVulkanVersion not in cls.vulkanSDK):
+        if (cls.requiredVulkanVersion not in vulkanSDK):
             print(f"You don't have the correct Vulkan SDK version! (Engine requires {cls.requiredVulkanVersion})")
             cls.__InstallVulkanSDK()
             return False
         
-        print(f"Correct Vulkan SDK version located at {cls.vulkanSDK}")
+        print(f"Correct Vulkan SDK version located at {vulkanSDK}")
         return True
     
     @classmethod
@@ -59,7 +59,7 @@ class VulkanConfiguration:
 
     @classmethod
     def CheckVulkanSDKDebugLibs(cls):
-        shadercLib = Path(f"{cls.vulkanSDK}/Lib/shaderc_sharedd.lib")
+        shadercLib = Path(f"{cls.vulkanDirectory}/Lib/shaderc_sharedd.lib")
 
         VulkanSDKDebugLibsURLlist = [
             f"https://sdk.lunarg.com/sdk/download/{cls.requiredVulkanVersion}/windows/VulkanSDK-{cls.requiredVulkanVersion}-DebugLibs.zip",
@@ -68,13 +68,13 @@ class VulkanConfiguration:
 
         if not shadercLib.exists():
             print(f"\no Vulkan SDK debug libs found. (Checked {shadercLib})")
-            vulkanPath = f"{cls.vulkanSDK}/VulkanSDK-{cls.requiredVulkanVersion}-DebugLibs.zip"
+            vulkanPath = f"{cls.vulkanDirectory}/VulkanSDK-{cls.requiredVulkanVersion}-DebugLibs.zip"
             Utils.DownloadFile(VulkanSDKDebugLibsURLlist, vulkanPath)
             print("Extracting", vulkanPath)
             Utils.UnzipFile(vulkanPath, deleteZipFile=False)
-            print(f"Vulkan SDK debug libs installed at {os.path.abspath(cls.vulkanSDK)}")
+            print(f"Vulkan SDK debug libs installed at {os.path.abspath(cls.vulkanDirectory)}")
         else:            
-            print(f"Vulkan SDK debug libs located at {os.path.abspath(cls.vulkanSDK)}")
+            print(f"Vulkan SDK debug libs located at {os.path.abspath(cls.vulkanDirectory)}")
         return True
 
 if __name__ == "__main__":
