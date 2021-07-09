@@ -8,14 +8,14 @@
 namespace Hazel
 {
 
-	Ref<UniformBuffer> UniformBuffer::Create(uint32_t side, uint32_t binding)
+	Ref<UniformBuffer> UniformBuffer::Create(uint32_t size, uint32_t binding)
 	{
 		switch (Renderer::GetAPI())
 		{
 		case RendererAPI::API::None:
 			HZ_CORE_ASSERT(false, "RendererAPI::None is currently not supported.") { return nullptr; }
 		case RendererAPI::API::OpenGL:
-			return CreateRef<OpenGLUniformBuffer>(side, binding);
+			return CreateRef<OpenGLUniformBuffer>(size, binding);
 		case RendererAPI::API::DirectX:
 			HZ_CORE_ASSERT(false, "RendererAPI::DirectX is currently not supported.") { return nullptr; }
 		case RendererAPI::API::Vulkan:

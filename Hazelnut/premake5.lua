@@ -40,7 +40,7 @@ project "Hazelnut"
 
 		postbuildcommands
 		{
-			"{COPY} \"%{LibraryDir.VulkanSDK_DebugDLL}\" \"%{cfg.targetdir}\""
+			"{COPYDIR} \"%{LibraryDir.VulkanSDK_DebugDLL}\" \"%{cfg.targetdir}\""
 		}
 
 	filter "configurations:Release"

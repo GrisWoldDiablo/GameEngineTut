@@ -138,7 +138,7 @@ namespace Hazel
 
 		sData.CameraBuffer.ViewProjection = camera.GetProjection() * glm::inverse(transform);
 		sData.CameraUniformBuffer->SetData(&sData.CameraBuffer, sizeof(Renderer2DData::CameraData));
-		
+
 		Reset();
 	}
 

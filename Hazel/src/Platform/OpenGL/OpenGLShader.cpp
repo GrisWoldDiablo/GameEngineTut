@@ -106,7 +106,8 @@ namespace Hazel
 
 		auto source = ReadFile(filePath);
 		auto shaderSources = PreProcess(source);
-
+		
+		HZ_CORE_LINFO("--- Preparing Shaders ---");
 		{
 			Timer timer;
 			CompileOrGetVulkanBinaries(shaderSources);
@@ -222,7 +223,7 @@ namespace Hazel
 			std::ifstream in(cachedPath, std::ios::in | std::ios::binary);
 			if (in.is_open())
 			{
-				HZ_CORE_LINFO("Loading Vulkan binary for {0}", Utils::GLShaderStageToString(stage));
+				HZ_CORE_LTRACE("Loading Vulkan binary for {0}", Utils::GLShaderStageToString(stage));
 				in.seekg(0, std::ios::end);
 				auto size = in.tellg();
 				in.seekg(0, std::ios::beg);
@@ -233,7 +234,7 @@ namespace Hazel
 			}
 			else
 			{
-				HZ_CORE_LINFO("Compiling Vulkan binary for {0}", Utils::GLShaderStageToString(stage));
+				HZ_CORE_LTRACE("Compiling Vulkan binary for {0}", Utils::GLShaderStageToString(stage));
 				shaderc::SpvCompilationResult module = compiler.CompileGlslToSpv(source, Utils::GLShaderStageToShaderC(stage), _filePath.c_str(), options);
 				if (module.GetCompilationStatus() != shaderc_compilation_status_success)
 				{
@@ -288,7 +289,7 @@ namespace Hazel
 			std::ifstream in(cachedPath, std::ios::in | std::ios::binary);
 			if (in.is_open())
 			{
-				HZ_CORE_LINFO("Loading OpenGL binary for {0}", Utils::GLShaderStageToString(stage));
+				HZ_CORE_LTRACE("Loading OpenGL binary for {0}", Utils::GLShaderStageToString(stage));
 				in.seekg(0, std::ios::end);
 				auto size = in.tellg();
 				in.seekg(0, std::ios::beg);
@@ -299,7 +300,7 @@ namespace Hazel
 			}
 			else
 			{
-				HZ_CORE_LINFO("Compiling OpenGL binary for {0}", Utils::GLShaderStageToString(stage));
+				HZ_CORE_LTRACE("Compiling OpenGL binary for {0}", Utils::GLShaderStageToString(stage));
 				spirv_cross::CompilerGLSL glslCompiler(spirv);
 				_openGLSourceCode[stage] = glslCompiler.compile();
 				auto& source = _openGLSourceCode[stage];
@@ -374,10 +375,14 @@ namespace Hazel
 		spirv_cross::ShaderResources resources = compiler.get_shader_resources();
 
 		HZ_CORE_LTRACE("OpenGLShader::Reflect - {0} {1}", Utils::GLShaderStageToString(stage), _filePath);
-		HZ_CORE_LTRACE("    {0} Uniform buffers", resources.uniform_buffers.size());
-		HZ_CORE_LTRACE("    {0} resources", resources.sampled_images.size());
+		HZ_CORE_LTRACE("    {0} Uniform buffer(s)", resources.uniform_buffers.size());
+		HZ_CORE_LTRACE("    {0} Resource(s)", resources.sampled_images.size());
+		
+		if (!resources.uniform_buffers.empty())
+		{
+			HZ_CORE_LTRACE("Uniform buffer(s):");
+		}
 
-		HZ_CORE_LTRACE("Uniform buffers:");
 		for (const auto& resource: resources.uniform_buffers)
 		{
 			const auto& bufferType = compiler.get_type(resource.base_type_id);

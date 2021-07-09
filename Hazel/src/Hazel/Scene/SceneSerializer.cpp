@@ -124,7 +124,7 @@ namespace Hazel
 		}
 
 		auto sceneName = data["Scene"].as<std::string>();
-		HZ_CORE_LTRACE("Deserializing scene '{0}'", sceneName);
+		HZ_CORE_LTRACE("Deserializing scene name['{0}']", sceneName);
 		_scene->SetName(sceneName);
 
 		auto entities = data["Entities"];
@@ -132,7 +132,7 @@ namespace Hazel
 		{
 			for (auto entity : entities)
 			{
-				auto uuid = entity["Entity"].as<uint64_t>(); // TODO Entity ID
+				auto entityID = entity["Entity"].as<uint64_t>(); // TODO Entity ID
 
 				std::string name;
 				auto tagComponent = entity["TagComponent"];
@@ -141,7 +141,7 @@ namespace Hazel
 					name = tagComponent["Tag"].as<std::string>();
 				}
 
-				HZ_CORE_LTRACE("Deserialized entity with ID['{0}'], name['{1}']", uuid, name);
+				HZ_CORE_LTRACE(" Entity: ID['{0}'], name['{1}']", entityID, name);
 
 				auto deserializedEntity = _scene->CreateEntity(name);
 
