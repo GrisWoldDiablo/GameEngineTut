@@ -18,7 +18,7 @@ namespace Hazel
 		glm::vec3 Position;
 		glm::vec4 Color;
 		glm::vec2 TextureCoord;
-		float TextureIndex;
+		int TextureIndex;
 		glm::vec2 TilingFactor;
 
 		// Editor-Only
@@ -75,7 +75,7 @@ namespace Hazel
 				{ ShaderDataType::Float3, "a_Position"		},
 				{ ShaderDataType::Float4, "a_Color"			},
 				{ ShaderDataType::Float2, "a_TextureCoord"	},
-				{ ShaderDataType::Float,  "a_TextureIndex"	},
+				{ ShaderDataType::Int,	  "a_TextureIndex"	},
 				{ ShaderDataType::Float2, "a_TilingFactor"	},
 				{ ShaderDataType::Int,	  "a_EntityID"		},
 			});
@@ -309,19 +309,19 @@ namespace Hazel
 	{
 		HZ_PROFILE_FUNCTION();
 
-		float textureIndex = 0.0f;
+		int textureIndex = 0;
 
 		// Check if the texture already was assigned to a texture slot.
 		for (uint32_t i = 1; i < sData.TextureSlotIndex; i++)
 		{
 			if (sData.TextureSlots[i]->Equals(*texture))
 			{
-				textureIndex = (float)i;
+				textureIndex = i;
 				break;
 			}
 		}
 
-		if (textureIndex == 0.0f)
+		if (textureIndex == 0)
 		{
 			// If all slots are taken, flush and reset.
 			if (sData.TextureSlotIndex >= Renderer2DData::MaxTextureSlots)
@@ -329,7 +329,7 @@ namespace Hazel
 				FlushAndReset();
 			}
 
-			textureIndex = (float)sData.TextureSlotIndex;
+			textureIndex = sData.TextureSlotIndex;
 			sData.TextureSlots[sData.TextureSlotIndex] = texture;
 			sData.TextureSlotIndex++;
 		}
@@ -387,19 +387,19 @@ namespace Hazel
 		}
 		sData.QuadTextureCoordinates = newCoords;
 
-		float textureIndex = 0.0f;
+		int textureIndex = 0;
 
 		// Check if the texture already was assigned to a texture slot.
 		for (uint32_t i = 1; i < sData.TextureSlotIndex; i++)
 		{
 			if (sData.TextureSlots[i]->Equals(*subTexture->GetTexture()))
 			{
-				textureIndex = (float)i;
+				textureIndex = i;
 				break;
 			}
 		}
 
-		if (textureIndex == 0.0f)
+		if (textureIndex == 0)
 		{
 			// If all slots are taken, flush and reset.
 			if (sData.TextureSlotIndex >= Renderer2DData::MaxTextureSlots)
@@ -407,7 +407,7 @@ namespace Hazel
 				FlushAndReset();
 			}
 
-			textureIndex = (float)sData.TextureSlotIndex;
+			textureIndex = sData.TextureSlotIndex;
 			sData.TextureSlots[sData.TextureSlotIndex] = subTexture->GetTexture();
 			sData.TextureSlotIndex++;
 		}
@@ -438,14 +438,14 @@ namespace Hazel
 		return sData.Stats;
 	}
 
-	void Renderer2D::LoadShader(const std::string& filePath)
+	void Renderer2D::LoadShader(const std::string& filePath, bool shouldRecompile)
 	{
 		HZ_CORE_LWARN("Reloading Shader");
 		sData.TextureShader = nullptr;
-		_asyncShaderCreation = std::async(std::launch::async, [](const std::string& filePath)
+		_asyncShaderCreation = std::async(std::launch::async, [](const std::string& filePath, bool shouldRecompile)
 		{
-			sData.TextureShader = Shader::Create(filePath, true);
-		}, filePath);
+			sData.TextureShader = Shader::Create(filePath, shouldRecompile);
+		}, filePath, shouldRecompile);
 	}
 
 	void Renderer2D::FlushAndReset()
@@ -456,7 +456,7 @@ namespace Hazel
 		Reset();
 	}
 
-	void Renderer2D::UpdateData(const glm::mat4& transform, const Color& color, int entityID, const glm::vec2& tilingFactor, float textureIndex)
+	void Renderer2D::UpdateData(const glm::mat4& transform, const Color& color, int entityID, const glm::vec2& tilingFactor, int textureIndex)
 	{
 		HZ_PROFILE_FUNCTION();
 

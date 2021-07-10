@@ -6,7 +6,7 @@
 layout(location = 0) in vec3 a_Position;
 layout(location = 1) in vec4 a_Color;
 layout(location = 2) in vec2 a_TextureCoord;
-layout(location = 3) in float a_TextureIndex;
+layout(location = 3) in int a_TextureIndex;
 layout(location = 4) in vec2 a_TilingFactor;
 layout(location = 5) in int a_EntityID;
 
@@ -20,21 +20,21 @@ struct VertexOutput
 {
 	vec4 Color;
 	vec2 TextureCoord;
-	float TextureIndex;
 	vec2 TilingFactor;
 	vec2 Resolution;
 };
 
 layout (location = 0) out VertexOutput Output;
-layout (location = 5) out flat int v_EntityID;
+layout (location = 4) out flat int v_EntityID;
+layout (location = 5) out flat int v_TextureIndex;
 
 void main()
 {
 	Output.Color = a_Color;
 	Output.TextureCoord = a_TextureCoord;
-	Output.TextureIndex = a_TextureIndex;
 	Output.TilingFactor = a_TilingFactor;
 	Output.Resolution = u_Resolution;
+	v_TextureIndex = a_TextureIndex;
 	v_EntityID = a_EntityID;
 
 	gl_Position = u_ViewProjection * vec4(a_Position, 1.0);
@@ -50,13 +50,13 @@ struct	VertexOutput
 {
 	vec4 Color;
 	vec2 TextureCoord;
-	float TextureIndex;
 	vec2 TilingFactor;
 	vec2 Resolution;
 };
 
 layout (location = 0) in VertexOutput Input;
-layout (location = 5) in flat int v_EntityID;
+layout (location = 4) in flat int v_EntityID;
+layout (location = 5) in flat int v_TextureIndex;
 
 layout (binding = 0) uniform sampler2D u_Texture[32];
 
@@ -65,8 +65,10 @@ layout (binding = 0) uniform sampler2D u_Texture[32];
 void main()
 {
 	vec4 tempColor = Input.Color;
+	tempColor *= texture(u_Texture[v_TextureIndex], Input.TextureCoord * Input.TilingFactor);
 
-	switch (int(Input.TextureIndex))
+#if 0
+	switch (v_TextureIndex)
 	{
 		case  0: tempColor *= texture(u_Texture[ 0], Input.TextureCoord * Input.TilingFactor); break;
 		case  1: tempColor *= texture(u_Texture[ 1], Input.TextureCoord * Input.TilingFactor); break;
@@ -101,6 +103,7 @@ void main()
 		case 30: tempColor *= texture(u_Texture[30], Input.TextureCoord * Input.TilingFactor); break;
 		case 31: tempColor *= texture(u_Texture[31], Input.TextureCoord * Input.TilingFactor); break;
 	}
+#endif
 	
 #if GRAYSCALE
 	float grayScalevalue = (0.299 * tempColor.x) + (0.587 * tempColor.y) + (0.114 * tempColor.z);

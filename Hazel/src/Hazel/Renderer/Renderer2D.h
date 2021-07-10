@@ -72,10 +72,10 @@ namespace Hazel
 		static void ResetStats();
 		static Statistics GetStats();
 
-		static void LoadShader(const std::string& filePath);
+		static void LoadShader(const std::string& filePath, bool shouldRecompile = false);
 
 	private:
 		static void FlushAndReset();
-		static void UpdateData(const glm::mat4& transform, const Color& color, int entityID = -1, const glm::vec2& tilingFactor = glm::vec2(1.0f), float textureIndex = 0.0f);
+		static void UpdateData(const glm::mat4& transform, const Color& color, int entityID = -1, const glm::vec2& tilingFactor = glm::vec2(1.0f), int textureIndex = 0);
 	};
 }

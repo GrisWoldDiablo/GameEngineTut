@@ -524,13 +524,26 @@ namespace Hazel
 
 			if (ImGui::BeginMenu("Extra"))
 			{
-				if (ImGui::MenuItem("Load Shader"))
+				if (ImGui::BeginMenu("Shader"))
 				{
-					auto filePath = FileDialogs::OpenFile("Shader (*.glsl)\0*.glsl\0");
-					if (!filePath.empty())
+					if (ImGui::MenuItem("Load"))
 					{
-						Renderer2D::LoadShader(filePath);
+						auto filePath = FileDialogs::OpenFile("Shader (*.glsl)\0*.glsl\0");
+						if (!filePath.empty())
+						{
+							Renderer2D::LoadShader(filePath);
+						}
 					}
+
+					if (ImGui::MenuItem("Load & Recompile"))
+					{
+						auto filePath = FileDialogs::OpenFile("Shader (*.glsl)\0*.glsl\0");
+						if (!filePath.empty())
+						{
+							Renderer2D::LoadShader(filePath, true);
+						}
+					}
+					ImGui::EndMenu();
 				}
 				ImGui::EndMenu();
 			}
