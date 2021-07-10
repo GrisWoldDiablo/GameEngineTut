@@ -184,6 +184,7 @@ namespace Hazel
 		DrawTools();
 
 		_sceneHierarchyPanel.OnImGuiRender();
+		_contentBrowserPanel.OnImGuiRender();
 
 		ImGui::End();
 	}

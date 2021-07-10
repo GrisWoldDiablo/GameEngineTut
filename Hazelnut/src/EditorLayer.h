@@ -1,6 +1,8 @@
 #pragma once
 #include "Hazel.h"
 #include "Panels/SceneHierarchyPanel.h"
+#include "Panels/ContentBrowserPanel.h"
+
 #include "Hazel/Events/KeyEvent.h"
 #include "Hazel/Events/MouseEvent.h"
 
@@ -70,6 +72,7 @@ namespace Hazel
 
 		// Panels
 		SceneHierarchyPanel _sceneHierarchyPanel;
+		ContentBrowserPanel _contentBrowserPanel;
 
 		// SceneViewport
 		int _gizmoType = -1;

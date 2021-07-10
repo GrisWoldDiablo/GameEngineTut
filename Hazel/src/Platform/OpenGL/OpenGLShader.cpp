@@ -116,7 +116,14 @@ namespace Hazel
 			CompileOrGetVulkanBinaries(shaderSources);
 			CompileOrGetOpenGLBinaries();
 			_isLoadingCompleted = true;
-			HZ_CORE_LWARN("Shader creation took {0} ms.", timer.ElapsedMillis());
+			if (timer.ElapsedMillis() < 1000.0f)
+			{
+				HZ_CORE_LWARN("Shader creation took {0} milliseconds.", timer.ElapsedMillis());
+			}
+			else
+			{
+				HZ_CORE_LWARN("Shader creation took {0} seconds.", timer.Elapsed());
+			}
 		}
 
 		auto lastSlash = filePath.find_last_of("/\\");

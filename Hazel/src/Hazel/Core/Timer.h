@@ -21,7 +21,7 @@ namespace Hazel
 
 		float Timer::Elapsed()
 		{
-			return std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - _start).count() * 0.001f * 0.001f * 0.001f;
+			return std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - _start).count() * 0.000000001f;
 		}
 
 		float Timer::ElapsedMillis()

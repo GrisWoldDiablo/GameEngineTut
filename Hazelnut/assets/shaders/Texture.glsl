@@ -44,7 +44,7 @@ void main()
 #version 450 core
 
 layout(location = 0) out vec4 color;
-layout(location = 1) out int color2; // -1 is not an entity
+layout(location = 1) out int entityID; // -1 is not an entity
 
 struct	VertexOutput
 {
@@ -65,7 +65,10 @@ layout (binding = 0) uniform sampler2D u_Texture[32];
 void main()
 {
 	vec4 tempColor = Input.Color;
-	tempColor *= texture(u_Texture[v_TextureIndex], Input.TextureCoord * Input.TilingFactor);
+	if (v_TextureIndex >= 0 && v_TextureIndex < 32)
+	{
+		tempColor *= texture(u_Texture[v_TextureIndex], Input.TextureCoord * Input.TilingFactor);
+	}
 
 #if 0
 	switch (v_TextureIndex)
@@ -110,7 +113,7 @@ void main()
 	tempColor = vec4(grayScalevalue, grayScalevalue, grayScalevalue, 1.0);
 #endif
 
-	// Final assignement
+	// Final assignment
 	color = tempColor;
-	color2 = v_EntityID;
+	entityID = v_EntityID;
 }

@@ -36,14 +36,13 @@ namespace Hazel
 		Ref<VertexArray> QuadVertexArray;
 		Ref<VertexBuffer> QuadVertexBuffer;
 		Ref<Shader> TextureShader;
-		Ref<Texture2D> WhiteTexture;
 
 		uint32_t QuadIndexCount = 0;
 		QuadVertex* QuadVertexBufferBase = nullptr;
 		QuadVertex* QuadVertexBufferPtr = nullptr;
 
 		std::array<Ref<Texture2D>, MaxTextureSlots> TextureSlots;
-		uint32_t TextureSlotIndex = 1; // Default index is 1 because, index 0 is White Texture.
+		uint32_t TextureSlotIndex = 0; // Default index is 1 because, index 0 is White Texture.
 
 		static const uint8_t QuadVertexCount = 4;
 		glm::vec4 QuadVertexPositions[4];
@@ -103,17 +102,6 @@ namespace Hazel
 		sData.QuadVertexArray->SetIndexBuffer(quadIndexBuffer);
 		delete[] quadIndices;
 
-		// Create a white texture, so we can render flat color using the texture shader.
-		sData.WhiteTexture = Texture2D::Create(1, 1);
-		uint32_t whiteTextureData = 0xffffffff;
-		sData.WhiteTexture->SetData(&whiteTextureData, sizeof(uint32_t));
-
-		int32_t samplers[sData.MaxTextureSlots];
-		for (uint32_t i = 0; i < sData.MaxTextureSlots; i++)
-		{
-			samplers[i] = i;
-		}
-
 		// -- Shader loading
 #define ASYNC 1
 
@@ -125,8 +113,6 @@ namespace Hazel
 #else
 		sData.TextureShader = Shader::Create("assets/shaders/Texture.glsl");
 #endif // ASYNC
-
-		sData.TextureSlots[0] = sData.WhiteTexture;
 
 		sData.QuadVertexPositions[0] = { -0.5f,-0.5f, 0.0f, 1.0f };
 		sData.QuadVertexPositions[1] = { 0.5f,-0.5f, 0.0f, 1.0f };
@@ -209,7 +195,7 @@ namespace Hazel
 		sData.QuadIndexCount = 0;
 		sData.QuadVertexBufferPtr = sData.QuadVertexBufferBase;
 
-		sData.TextureSlotIndex = 1;
+		sData.TextureSlotIndex = 0;
 	}
 
 	void Renderer2D::Flush()
@@ -312,7 +298,7 @@ namespace Hazel
 		int textureIndex = 0;
 
 		// Check if the texture already was assigned to a texture slot.
-		for (uint32_t i = 1; i < sData.TextureSlotIndex; i++)
+		for (uint32_t i = 0; i < sData.TextureSlotIndex; i++)
 		{
 			if (sData.TextureSlots[i]->Equals(*texture))
 			{
@@ -390,7 +376,7 @@ namespace Hazel
 		int textureIndex = 0;
 
 		// Check if the texture already was assigned to a texture slot.
-		for (uint32_t i = 1; i < sData.TextureSlotIndex; i++)
+		for (uint32_t i = 0; i < sData.TextureSlotIndex; i++)
 		{
 			if (sData.TextureSlots[i]->Equals(*subTexture->GetTexture()))
 			{
