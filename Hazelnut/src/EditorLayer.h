@@ -16,23 +16,23 @@ namespace Hazel
 	public:
 		EditorLayer();
 		~EditorLayer() = default;
+
 		void OnAttach() override;
-
-
 		void OnDetach() override;
 
 		void OnUpdate() override;
+
 		void OnImGuiRender() override;
 		void OnEvent(Event& event) override;
 
 	private:
 		bool OnKeyPressed(KeyPressedEvent& event);
 		bool OnMouseButtonReleased(MouseButtonReleasedEvent& event);
+		void MousePicking();
 
 		bool NewScene(const std::string& newSceneName = _kNewSceneName);
 		void OpenScene();
 		void SaveSceneAs();
-
 
 	private:
 		void DrawToolbar();

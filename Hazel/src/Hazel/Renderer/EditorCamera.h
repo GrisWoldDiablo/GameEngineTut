@@ -30,6 +30,7 @@ namespace Hazel
 		glm::vec3 GetForwardDirection() const;
 		const glm::vec3& GetPosition() const { return _position; }
 		const glm::vec3& GetRotation() const { return _rotation; }
+		glm::vec2 GetResolution() const { return { _viewportWidth, _viewportHeight }; }
 		glm::quat GetOrientation() const;
 
 		float GetDrivingSpeed() const { return _drivingSpeed; }
@@ -41,6 +42,7 @@ namespace Hazel
 		float GetNearClip() const { return _nearClip; }
 		float GetFarClip() const { return _farClip; }
 		void Reset();
+
 	private:
 		void UpdateProjection();
 		void UpdateView();

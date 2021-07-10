@@ -6,14 +6,14 @@
 
 namespace Hazel
 {
-	Ref<Shader> Shader::Create(const std::string& filePath)
+	Ref<Shader> Shader::Create(const std::string& filePath, bool shouldRecompile)
 	{
 		switch (Renderer::GetAPI())
 		{
 		case RendererAPI::API::None:
 			HZ_CORE_ASSERT(false, "RendererAPI::None is currently not supported."); return nullptr;
 		case RendererAPI::API::OpenGL:
-			return CreateRef<OpenGLShader>(filePath);
+			return CreateRef<OpenGLShader>(filePath, shouldRecompile);
 		case RendererAPI::API::DirectX:
 			HZ_CORE_ASSERT(false, "RendererAPI::DirectX is currently not supported."); return nullptr;
 		case RendererAPI::API::Vulkan:

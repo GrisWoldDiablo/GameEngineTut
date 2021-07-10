@@ -97,22 +97,25 @@ namespace Hazel
 		}
 	}
 
-	OpenGLShader::OpenGLShader(const std::string& filePath)
+	OpenGLShader::OpenGLShader(const std::string& filePath, bool shouldRecompile)
 		:_filePath(filePath)
 	{
 		HZ_PROFILE_FUNCTION();
 
-		Utils::CreateCacheDirectoryIfNeeded();
+		_shouldRecompile = shouldRecompile;
 
+		Utils::CreateCacheDirectoryIfNeeded();
 		auto source = ReadFile(filePath);
 		auto shaderSources = PreProcess(source);
-		
+
 		HZ_CORE_LINFO("--- Preparing Shaders ---");
 		{
 			Timer timer;
+			_isLoadingCompleted = false;
+			_isProgramCreated = false;
 			CompileOrGetVulkanBinaries(shaderSources);
 			CompileOrGetOpenGLBinaries();
-			CreateProgram();
+			_isLoadingCompleted = true;
 			HZ_CORE_LWARN("Shader creation took {0} ms.", timer.ElapsedMillis());
 		}
 
@@ -199,8 +202,6 @@ namespace Hazel
 	{
 		HZ_PROFILE_FUNCTION();
 
-		GLuint program = glCreateProgram();
-
 		shaderc::Compiler compiler;
 		shaderc::CompileOptions options;
 		options.SetTargetEnvironment(shaderc_target_env_vulkan, shaderc_env_version_vulkan_1_2);
@@ -221,7 +222,7 @@ namespace Hazel
 			std::filesystem::path cachedPath = cacheDirectory / (shaderFilePath.filename().string() + Utils::GLShaderStageCachedVulkaFileExtension(stage));
 
 			std::ifstream in(cachedPath, std::ios::in | std::ios::binary);
-			if (in.is_open())
+			if (!_shouldRecompile && in.is_open())
 			{
 				HZ_CORE_LTRACE("Loading Vulkan binary for {0}", Utils::GLShaderStageToString(stage));
 				in.seekg(0, std::ios::end);
@@ -239,7 +240,8 @@ namespace Hazel
 				if (module.GetCompilationStatus() != shaderc_compilation_status_success)
 				{
 					HZ_CORE_LERROR(module.GetErrorMessage());
-					HZ_CORE_ASSERT(false, "Compilation failed.")
+					HZ_CORE_ASSERT(false, "Compilation failed.");
+					return;
 				}
 
 				shaderData[stage] = std::vector<uint32_t>(module.cbegin(), module.cend());
@@ -287,7 +289,7 @@ namespace Hazel
 			std::filesystem::path cachedPath = cacheDirectory / (shaderFilePath.filename().string() + Utils::GLShaderStageCachedOpenGLFileExtension(stage));
 
 			std::ifstream in(cachedPath, std::ios::in | std::ios::binary);
-			if (in.is_open())
+			if (!_shouldRecompile && in.is_open())
 			{
 				HZ_CORE_LTRACE("Loading OpenGL binary for {0}", Utils::GLShaderStageToString(stage));
 				in.seekg(0, std::ios::end);
@@ -309,7 +311,8 @@ namespace Hazel
 				if (module.GetCompilationStatus() != shaderc_compilation_status_success)
 				{
 					HZ_CORE_LERROR(module.GetErrorMessage());
-					HZ_CORE_ASSERT(false, "Compilation failed.")
+					HZ_CORE_ASSERT(false, "Compilation failed.");
+					return;
 				}
 
 				shaderData[stage] = std::vector<uint32_t>(module.cbegin(), module.cend());
@@ -359,6 +362,10 @@ namespace Hazel
 				glDeleteShader(id);
 			}
 		}
+		else
+		{
+			_isProgramCreated = true;
+		}
 
 		for (auto id : shaderIDs)
 		{
@@ -377,13 +384,13 @@ namespace Hazel
 		HZ_CORE_LTRACE("OpenGLShader::Reflect - {0} {1}", Utils::GLShaderStageToString(stage), _filePath);
 		HZ_CORE_LTRACE("    {0} Uniform buffer(s)", resources.uniform_buffers.size());
 		HZ_CORE_LTRACE("    {0} Resource(s)", resources.sampled_images.size());
-		
+
 		if (!resources.uniform_buffers.empty())
 		{
 			HZ_CORE_LTRACE("Uniform buffer(s):");
 		}
 
-		for (const auto& resource: resources.uniform_buffers)
+		for (const auto& resource : resources.uniform_buffers)
 		{
 			const auto& bufferType = compiler.get_type(resource.base_type_id);
 			auto bufferSize = compiler.get_declared_struct_size(bufferType);
@@ -513,5 +520,13 @@ namespace Hazel
 	{
 		auto location = glGetUniformLocation(_rendererID, name.c_str());
 		glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(matrix));
+	}
+
+	void OpenGLShader::CompleteInitialization()
+	{
+		if (!_isProgramCreated && _isLoadingCompleted)
+		{
+			CreateProgram();
+		}
 	}
 }

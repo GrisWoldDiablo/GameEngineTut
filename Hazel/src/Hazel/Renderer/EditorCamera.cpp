@@ -223,6 +223,7 @@ namespace Hazel
 		_distance = 10.0f;
 		_rotation = _focalPoint = glm::vec3(0.0f);
 		_position = glm::vec3(0.0f, 0.0f, _distance);
+		_drivingSpeed = 1.0f;
 		UpdateView();
 	}
 }

@@ -9,6 +9,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include <future>
+
 namespace Hazel
 {
 	struct QuadVertex
@@ -52,12 +54,14 @@ namespace Hazel
 		struct CameraData
 		{
 			glm::mat4 ViewProjection;
+			glm::vec2 Resolution;
 		};
 		CameraData CameraBuffer;
 		Ref<UniformBuffer> CameraUniformBuffer;
 	};
 
 	static Renderer2DData sData;
+	static std::future<void> _asyncShaderCreation;
 
 	void Renderer2D::Init()
 	{
@@ -73,7 +77,7 @@ namespace Hazel
 				{ ShaderDataType::Float2, "a_TextureCoord"	},
 				{ ShaderDataType::Float,  "a_TextureIndex"	},
 				{ ShaderDataType::Float2, "a_TilingFactor"	},
-				{ ShaderDataType::Int, "a_EntityID"		},
+				{ ShaderDataType::Int,	  "a_EntityID"		},
 			});
 		sData.QuadVertexArray->AddVertexBuffer(sData.QuadVertexBuffer);
 
@@ -110,8 +114,17 @@ namespace Hazel
 			samplers[i] = i;
 		}
 
-		// -- Shaders
+		// -- Shader loading
+#define ASYNC 1
+
+#if ASYNC
+		_asyncShaderCreation = std::async(std::launch::async, []
+		{
+			sData.TextureShader = Shader::Create("assets/shaders/Texture.glsl");
+		});
+#else
 		sData.TextureShader = Shader::Create("assets/shaders/Texture.glsl");
+#endif // ASYNC
 
 		sData.TextureSlots[0] = sData.WhiteTexture;
 
@@ -132,34 +145,51 @@ namespace Hazel
 		delete[] sData.QuadVertexBufferBase;
 	}
 
-	void Renderer2D::BeginScene(const Camera& camera, const glm::mat4& transform)
+	bool Renderer2D::BeginScene(const Camera& camera, const glm::mat4& transform)
 	{
 		HZ_PROFILE_FUNCTION();
-
-		sData.CameraBuffer.ViewProjection = camera.GetProjection() * glm::inverse(transform);
-		sData.CameraUniformBuffer->SetData(&sData.CameraBuffer, sizeof(Renderer2DData::CameraData));
-
-		Reset();
+		return BeginScene(camera.GetProjection() * glm::inverse(transform));
 	}
 
-	void Renderer2D::BeginScene(const OrthographicCamera& camera, bool isGrayscale)
+	bool Renderer2D::BeginScene(const OrthographicCamera& camera)
 	{
 		HZ_PROFILE_FUNCTION();
 
-		sData.CameraBuffer.ViewProjection = camera.GetViewProjectionMatrix();
-		sData.CameraUniformBuffer->SetData(&sData.CameraBuffer, sizeof(Renderer2DData::CameraData));
-
-		Reset();
+		return BeginScene(camera.GetViewProjectionMatrix());
 	}
 
-	void Renderer2D::BeginScene(const EditorCamera& camera, bool isGrayscale)
+	bool Renderer2D::BeginScene(const EditorCamera& camera)
 	{
 		HZ_PROFILE_FUNCTION();
 
-		sData.CameraBuffer.ViewProjection = camera.GetViewProjection();
-		sData.CameraUniformBuffer->SetData(&sData.CameraBuffer, sizeof(Renderer2DData::CameraData));
+		return BeginScene(camera.GetViewProjection(), camera.GetResolution());
+	}
 
+	bool Renderer2D::BeginScene(glm::mat4 viewProjection, glm::vec2 resolution)
+	{
+		HZ_PROFILE_FUNCTION();
+
+		if (sData.TextureShader == nullptr)
+		{
+			return false;
+		}
+
+		if (sData.TextureShader->IsLoadingCompleted())
+		{
+			sData.TextureShader->CompleteInitialization();
+		}
+		else
+		{
+			return false;
+		}
+
+
+		sData.CameraBuffer.ViewProjection = viewProjection;
+		sData.CameraBuffer.Resolution = resolution;
+		sData.CameraUniformBuffer->SetData(&sData.CameraBuffer, sizeof(Renderer2DData::CameraData));
 		Reset();
+
+		return true;
 	}
 
 	void Renderer2D::EndScene()
@@ -406,6 +436,16 @@ namespace Hazel
 	Renderer2D::Statistics Renderer2D::GetStats()
 	{
 		return sData.Stats;
+	}
+
+	void Renderer2D::LoadShader(const std::string& filePath)
+	{
+		HZ_CORE_LWARN("Reloading Shader");
+		sData.TextureShader = nullptr;
+		_asyncShaderCreation = std::async(std::launch::async, [](const std::string& filePath)
+		{
+			sData.TextureShader = Shader::Create(filePath, true);
+		}, filePath);
 	}
 
 	void Renderer2D::FlushAndReset()

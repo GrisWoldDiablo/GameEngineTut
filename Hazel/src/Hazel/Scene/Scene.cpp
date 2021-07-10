@@ -68,20 +68,22 @@ namespace Hazel
 			return;
 		}
 
-		Renderer2D::BeginScene(*mainCamera, cameraTransform);
+		if (Renderer2D::BeginScene(*mainCamera, cameraTransform))
+		{
+			DrawSpriteRenderComponent();
 
-		DrawSpriteRenderComponent();
-
-		Renderer2D::EndScene();
+			Renderer2D::EndScene();
+		}
 	}
 
 	void Scene::OnUpdateEditor(EditorCamera& camera)
 	{
-		Renderer2D::BeginScene(camera);
+		if (Renderer2D::BeginScene(camera))
+		{
+			DrawSpriteRenderComponent();
 
-		DrawSpriteRenderComponent();
-		
-		Renderer2D::EndScene();
+			Renderer2D::EndScene();
+		}
 	}
 
 	void Scene::DrawSpriteRenderComponent()

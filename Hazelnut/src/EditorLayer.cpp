@@ -117,20 +117,7 @@ namespace Hazel
 		// Update Scene
 		_activeScene->OnUpdateEditor(_editorCamera);
 
-		auto [imMouseX, imMouseY] = ImGui::GetMousePos();
-		imMouseX -= _sceneViewportBounds[0].x;
-		imMouseY -= _sceneViewportBounds[0].y;
-
-		glm::vec2 sceneViewpostSize = _sceneViewportBounds[1] - _sceneViewportBounds[0];
-		imMouseY = sceneViewpostSize.y - imMouseY;
-		auto mouseX = (int)imMouseX;
-		auto mouseY = (int)imMouseY;
-
-		if (mouseX >= 0 && mouseY >= 0 && mouseX < (int)sceneViewpostSize.x && mouseY < (int)sceneViewpostSize.y)
-		{
-			int pixelData = _framebuffer->ReadPixel(1, mouseX, mouseY);
-			_hoveredEntity = pixelData == -1 ? Entity::Null : Entity((entt::entity)pixelData, _activeScene.get());
-		}
+		MousePicking();
 
 		_framebuffer->Unbind();
 
@@ -291,6 +278,30 @@ namespace Hazel
 		}
 
 		return false;
+	}
+
+	void EditorLayer::MousePicking()
+	{
+		if (!_isSceneViewportHovered)
+		{
+			_hoveredEntity = Entity::Null;
+			return;
+		}
+
+		auto [imMouseX, imMouseY] = ImGui::GetMousePos();
+		imMouseX -= _sceneViewportBounds[0].x;
+		imMouseY -= _sceneViewportBounds[0].y;
+
+		glm::vec2 sceneViewpostSize = _sceneViewportBounds[1] - _sceneViewportBounds[0];
+		imMouseY = sceneViewpostSize.y - imMouseY;
+		auto mouseX = (int)imMouseX;
+		auto mouseY = (int)imMouseY;
+
+		if (mouseX >= 0 && mouseY >= 0 && mouseX < (int)sceneViewpostSize.x && mouseY < (int)sceneViewpostSize.y)
+		{
+			int pixelData = _framebuffer->ReadPixel(1, mouseX, mouseY);
+			_hoveredEntity = pixelData == -1 ? Entity::Null : Entity((entt::entity)pixelData, _activeScene.get());
+		}
 	}
 
 	bool EditorLayer::NewScene(const std::string& newSceneName)
@@ -508,6 +519,21 @@ namespace Hazel
 				ImGui::EndMenu();
 			}
 			ImGui::Text("\tFPS : %i", _currentFPS);
+
+			ImGui::Spacing();
+
+			if (ImGui::BeginMenu("Extra"))
+			{
+				if (ImGui::MenuItem("Load Shader"))
+				{
+					auto filePath = FileDialogs::OpenFile("Shader (*.glsl)\0*.glsl\0");
+					if (!filePath.empty())
+					{
+						Renderer2D::LoadShader(filePath);
+					}
+				}
+				ImGui::EndMenu();
+			}
 			ImGui::EndMenuBar();
 		}
 	}

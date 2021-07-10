@@ -6,7 +6,6 @@
 #include "Hazel/Renderer/Camera.h"
 #include "Hazel/Core/Color.h"
 
-
 #include "Hazel/Renderer/EditorCamera.h"
 #include "Hazel/Scene/Components.h"
 
@@ -21,9 +20,11 @@ namespace Hazel
 		static void Init();
 		static void Shutdown();
 
-		static void BeginScene(const Camera& camera, const glm::mat4& transform);
-		static void BeginScene(const EditorCamera& camera, bool isGrayscale = false); // TODO to remove
-		static void BeginScene(const OrthographicCamera& camera, bool isGrayscale = false); // TODO to remove
+		static bool BeginScene(const Camera& camera, const glm::mat4& transform);
+		static bool BeginScene(const EditorCamera& camera); // TODO to remove
+		static bool BeginScene(const OrthographicCamera& camera); // TODO to remove
+		static bool BeginScene(glm::mat4 viewProjection, glm::vec2 resolution = glm::vec2(0.0f));
+
 		static void EndScene();
 		static void Flush();
 		static void Reset();
@@ -70,6 +71,8 @@ namespace Hazel
 
 		static void ResetStats();
 		static Statistics GetStats();
+
+		static void LoadShader(const std::string& filePath);
 
 	private:
 		static void FlushAndReset();

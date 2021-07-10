@@ -7,10 +7,10 @@ using GLenum = unsigned int;
 
 namespace Hazel
 {
-	class OpenGLShader :public Shader
+	class OpenGLShader : public Shader
 	{
 	public:
-		OpenGLShader(const std::string& filePath);
+		OpenGLShader(const std::string& filePath, bool shouldRecompile = false);
 		OpenGLShader(std::string name, const std::string& vertexSrc, const std::string& fragmentSrc);
 		~OpenGLShader() override;
 
@@ -41,6 +41,8 @@ namespace Hazel
 		void UploadUniformMat3(std::string name, const glm::mat3& matrix);
 		void UploadUniformMat4(std::string name, const glm::mat4& matrix);
 
+		void CompleteInitialization() override;
+
 	private:
 		std::string ReadFile(const std::string& filePath);
 		std::unordered_map<GLenum, std::string> PreProcess(const std::string& source);
@@ -58,5 +60,6 @@ namespace Hazel
 		std::unordered_map<GLenum, std::vector<uint32_t>> _openGLSPIRV;
 
 		std::unordered_map<GLenum, std::string> _openGLSourceCode;
+		bool _isProgramCreated;
 	};
 }

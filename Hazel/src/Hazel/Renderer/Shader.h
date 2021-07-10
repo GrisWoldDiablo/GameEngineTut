@@ -25,8 +25,15 @@ namespace Hazel
 
 		virtual void SetMat4(std::string name, const glm::mat4& value) = 0;
 
-		static Ref<Shader> Create(const std::string& filePath);
+		static Ref<Shader> Create(const std::string& filePath, bool shouldRecompile = false);
 		static Ref<Shader> Create(const std::string& name, const std::string& vertexSrc, const std::string& fragmentSrc);
+
+		virtual void CompleteInitialization() = 0;
+		bool IsLoadingCompleted() const { return _isLoadingCompleted; }
+
+	protected:
+		bool _isLoadingCompleted;
+		bool _shouldRecompile;
 	};
 
 	class ShaderLibrary
