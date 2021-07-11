@@ -2,9 +2,11 @@
 #include "SceneCamera.h"
 #include <glm/gtc/matrix_transform.hpp>
 
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/quaternion.hpp>
+
 namespace Hazel
 {
-
 	SceneCamera::SceneCamera()
 	{
 		RecalculateProjection();
@@ -58,5 +60,50 @@ namespace Hazel
 				_orthographicNear, _orthographicFar);
 		}	break;
 		}
+	}
+
+	const glm::mat4& SceneCamera::GetViewMatrix() const
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+	}
+
+	glm::mat4 SceneCamera::GetViewProjection() const
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+	}
+
+	glm::vec3 SceneCamera::GetUpDirection() const
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+	}
+
+	glm::vec3 SceneCamera::GetRightDirection() const
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+	}
+
+	glm::vec3 SceneCamera::GetForwardDirection() const
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+	}
+
+	const glm::vec3& SceneCamera::GetPosition() const
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+	}
+
+	const glm::vec3& SceneCamera::GetRotation() const
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+	}
+
+	glm::vec2 SceneCamera::GetResolution() const
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+	}
+
+	glm::quat SceneCamera::GetOrientation() const
+	{
+		throw std::logic_error("The method or operation is not implemented.");
 	}
 }

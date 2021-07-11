@@ -70,7 +70,7 @@ namespace Hazel
 
 		if (Renderer2D::BeginScene(*mainCamera, cameraTransform))
 		{
-			DrawSpriteRenderComponent();
+			DrawSpriteRenderComponent(*mainCamera);
 
 			Renderer2D::EndScene();
 		}
@@ -80,19 +80,21 @@ namespace Hazel
 	{
 		if (Renderer2D::BeginScene(camera))
 		{
-			DrawSpriteRenderComponent();
+			DrawSpriteRenderComponent(camera);
 
 			Renderer2D::EndScene();
 		}
 	}
 
-	void Scene::DrawSpriteRenderComponent()
+	void Scene::DrawSpriteRenderComponent(Camera& camera)
 	{
 		auto group = _registry.group<TransformComponent>(entt::get<SpriteRendererComponent>);
 
-		group.sort<TransformComponent>([](const auto& lhs, const auto& rhs)
+		group.sort<TransformComponent>([&](const auto& lhs, const auto& rhs)
 		{
-			return lhs.Position.z < rhs.Position.z;
+			auto lhsDistance = glm::distance(lhs.Position, camera.GetPosition());
+			auto rhsDistance = glm::distance(rhs.Position, camera.GetPosition());
+			return lhsDistance > rhsDistance;
 		});
 
 		for (const auto entity : group)

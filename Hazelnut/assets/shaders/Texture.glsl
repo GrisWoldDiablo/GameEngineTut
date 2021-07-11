@@ -113,6 +113,10 @@ void main()
 	tempColor = vec4(grayScalevalue, grayScalevalue, grayScalevalue, 1.0);
 #endif
 
+	if (tempColor.a < 0.01)
+	{
+		discard;
+	}
 	// Final assignment
 	color = tempColor;
 	entityID = v_EntityID;

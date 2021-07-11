@@ -146,7 +146,7 @@ namespace Hazel
 		if (!_colorAttachmentSpecifications.empty())
 		{
 			_colorAttachments.resize(_colorAttachmentSpecifications.size());
-			Utils::CreateTextures(multisampled, _colorAttachments.data(),(uint32_t)_colorAttachments.size());
+			Utils::CreateTextures(multisampled, _colorAttachments.data(), (uint32_t)_colorAttachments.size());
 
 			for (int i = 0; i < _colorAttachments.size(); i++)
 			{
@@ -234,7 +234,7 @@ namespace Hazel
 		auto& specification = _colorAttachmentSpecifications[attachmentIndex];
 		specification.TextureFormat;
 
-		glClearTexImage(_colorAttachments[attachmentIndex], 0, 
+		glClearTexImage(_colorAttachments[attachmentIndex], 0,
 			Utils::HazelTextureFormatToGL(specification.TextureFormat), GL_INT, &value);
 	}
 }
