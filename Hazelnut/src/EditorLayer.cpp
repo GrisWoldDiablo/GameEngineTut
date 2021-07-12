@@ -69,7 +69,7 @@ namespace Hazel
 		}
 
 
-		_sceneHierarchyPanel.SetContext(_activeScene);
+		_sceneHierarchyPanel.SetScene(_activeScene);
 		_editorCamera = EditorCamera(30.0f, 1.778f, 0.1f, 1000.0f);
 
 	}
@@ -285,7 +285,7 @@ namespace Hazel
 	{
 		if (!_isSceneViewportHovered)
 		{
-			_hoveredEntity = Entity::Null;
+			_hoveredEntity = Entity();
 			return;
 		}
 
@@ -301,7 +301,7 @@ namespace Hazel
 		if (mouseX >= 0 && mouseY >= 0 && mouseX < (int)sceneViewpostSize.x && mouseY < (int)sceneViewpostSize.y)
 		{
 			int pixelData = _framebuffer->ReadPixel(1, mouseX, mouseY);
-			_hoveredEntity = pixelData == -1 ? Entity::Null : Entity((entt::entity)pixelData, _activeScene.get());
+			_hoveredEntity = pixelData == -1 ? Entity() : Entity((entt::entity)pixelData, _activeScene.get());
 		}
 	}
 
@@ -324,7 +324,7 @@ namespace Hazel
 			}
 
 			_activeScene->OnViewportResize((uint32_t)_sceneViewportSize.x, (uint32_t)_sceneViewportSize.y);
-			_sceneHierarchyPanel.SetContext(_activeScene);
+			_sceneHierarchyPanel.SetScene(_activeScene);
 			// TODO save camera position in scene and reload it.
 			_editorCamera.Reset();
 
@@ -586,8 +586,8 @@ namespace Hazel
 		_sceneViewportBounds[1] = { maxBound.x, maxBound.y };
 
 #pragma region Gizmo
-		if (auto selectedEntity = _sceneHierarchyPanel.GetSelectedEntity();	selectedEntity != Entity::Null
-&& (_gizmoType != -1 || (_hasStoredPreviousGizmoType && _previousGizmoType != -1)))
+		if (auto selectedEntity = _sceneHierarchyPanel.GetSelectedEntity();	selectedEntity &&
+			(_gizmoType != -1 || (_hasStoredPreviousGizmoType && _previousGizmoType != -1)))
 		{
 			//// Runtime Camera;
 			//if (auto cameraEntity = _activeScene->GetPrimaryCameraEntity();
@@ -595,7 +595,7 @@ namespace Hazel
 			//{
 			//	const auto& camera = cameraEntity.GetComponent<CameraComponent>().Camera;
 			//	const auto& cameraProjection = camera.GetProjection();
-			//	glm::mat4 cameraView = glm::inverse(cameraEntity.GetComponent<TransformComponent>().GetTransform());
+			//	glm::mat4 cameraView = glm::inverse(cameraEntity.Transform().GetTransform());
 			//}
 
 			// Editor Camera
@@ -611,8 +611,8 @@ namespace Hazel
 
 
 			// Entity transform
-			auto& transformComponent = selectedEntity.GetComponent<TransformComponent>();
-			auto transform = transformComponent.GetTransform();
+			auto& transformComponent = selectedEntity.Transform();
+			auto transform = transformComponent.GetTransformMatrix();
 
 			// Snapping
 			bool snap = Input::IsKeyPressed(Key::LeftControl);
@@ -686,7 +686,7 @@ namespace Hazel
 		std::string name = "None";
 		if (_hoveredEntity)
 		{
-			name = _hoveredEntity.GetComponent<TagComponent>().Tag;
+			name = _hoveredEntity.Name();
 		}
 		ImGui::Text("Hovered Entity: %s", name.c_str());
 
@@ -735,8 +735,9 @@ namespace Hazel
 			{
 				auto color = Color::Random();
 				auto& newEntity = _activeScene->CreateEntity("Square " + std::to_string(i) + ":" + color.GetHexValue());
-				newEntity.AddComponent<SpriteRendererComponent>(color);
-				newEntity.GetComponent<TransformComponent>().Position = Random::Vec3();
+				auto& spriteRendererComponent = newEntity.AddComponent<SpriteRendererComponent>();
+				spriteRendererComponent.Color = color;
+				newEntity.Transform().Position = Random::Vec3();
 			}
 		}
 

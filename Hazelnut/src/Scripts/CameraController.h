@@ -11,7 +11,7 @@ namespace Hazel
 	public:
 		void OnCreate() override
 		{
-			HZ_CORE_LINFO("Create {0}", GetComponent<TagComponent>().Tag);
+			HZ_CORE_LINFO("Create {0}", _entity.Name());
 		}
 
 		void OnUpdate() override
@@ -22,7 +22,7 @@ namespace Hazel
 				return;
 			}
 
-			auto& position = GetComponent<TransformComponent>().Position;
+			auto& position = _entity.Transform().Position;
 
 			float speed = 5.0f;
 			float timestep = Time::GetTimestep();

@@ -37,16 +37,6 @@ namespace Hazel
 		ProjectionType GetProjectionType() const { return _projectionType; }
 		void SetProjectionType(ProjectionType type) { _projectionType = type; RecalculateProjection(); }
 
-		const glm::mat4& GetViewMatrix() const override;
-		glm::mat4 GetViewProjection() const override;
-		glm::vec3 GetUpDirection() const override;
-		glm::vec3 GetRightDirection() const override;
-		glm::vec3 GetForwardDirection() const override;
-		const glm::vec3& GetPosition() const override;
-		const glm::vec3& GetRotation() const override;
-		glm::vec2 GetResolution() const override;
-		glm::quat GetOrientation() const override;
-
 	private:
 		void RecalculateProjection();
 

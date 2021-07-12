@@ -1,8 +1,10 @@
 Scene: Base
 Entities:
   - Entity: 1657643249657
-    TagComponent:
-      Tag: Top
+    BaseComponent:
+      Name: Top
+      Tag: 0
+      Layer: 0
     TransformComponent:
       Position: [0, 0.5, 0]
       Rotation: [-0.602475524, -0.518819928, -0.622222662]
@@ -10,8 +12,10 @@ Entities:
     SpriteRendererComponent:
       Color: [0.307111651, 0.528957486, 0.0449307598, 1]
   - Entity: 1657643249657
-    TagComponent:
-      Tag: Left
+    BaseComponent:
+      Name: Left
+      Tag: 0
+      Layer: 0
     TransformComponent:
       Position: [-0.351277679, -0.0968286023, -0.105106317]
       Rotation: [0.971468508, -0.521092296, -0.621726274]
@@ -19,8 +23,10 @@ Entities:
     SpriteRendererComponent:
       Color: [0.588235319, 0.545098066, 0.31764707, 1]
   - Entity: 1657643249657
-    TagComponent:
-      Tag: Right
+    BaseComponent:
+      Name: Right
+      Tag: 0
+      Layer: 0
     TransformComponent:
       Position: [0.356995016, -0.10006386, -0.102868766]
       Rotation: [0.956944108, 0.512634754, 0.617514014]

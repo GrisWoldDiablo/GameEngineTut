@@ -15,27 +15,19 @@ namespace Hazel
 		out << YAML::BeginMap; // Entity
 		out << YAML::Key << "Entity" << YAML::Value << "1657643249657"; // TODO : Entity ID goes here.
 
-		if (auto component = entity.TryGetComponent<TagComponent>(); component != nullptr)
-		{
-			out << YAML::Key << "TagComponent";
-			out << YAML::BeginMap; // TagComponent
+		out << YAML::Key << "BaseComponent";
+		out << YAML::BeginMap; // BaseComponent
+		out << YAML::Key << "Name" << YAML::Value << entity.Name();
+		out << YAML::Key << "Tag" << YAML::Value << entity.Tag();
+		out << YAML::Key << "Layer" << YAML::Value << entity.Layer();
+		out << YAML::EndMap; // BaseComponent
 
-			out << YAML::Key << "Tag" << YAML::Value << component->Tag;
-
-			out << YAML::EndMap; // TagComponent
-		}
-
-		if (auto component = entity.TryGetComponent<TransformComponent>(); component != nullptr)
-		{
-			out << YAML::Key << "TransformComponent";
-			out << YAML::BeginMap; // TransformComponent
-
-			out << YAML::Key << "Position" << YAML::Value << component->Position;
-			out << YAML::Key << "Rotation" << YAML::Value << component->Rotation;
-			out << YAML::Key << "Scale" << YAML::Value << component->Scale;
-
-			out << YAML::EndMap; // TransformComponent
-		}
+		out << YAML::Key << "TransformComponent";
+		out << YAML::BeginMap; // TransformComponent
+		out << YAML::Key << "Position" << YAML::Value << entity.Transform().Position;
+		out << YAML::Key << "Rotation" << YAML::Value << entity.Transform().Rotation;
+		out << YAML::Key << "Scale" << YAML::Value << entity.Transform().Scale;
+		out << YAML::EndMap; // TransformComponent
 
 		if (auto component = entity.TryGetComponent<CameraComponent>(); component != nullptr)
 		{
@@ -94,7 +86,7 @@ namespace Hazel
 		_scene->_registry.each([&](auto entityID)
 		{
 			Entity entity = { entityID, _scene.get() };
-			if (entity == Entity::Null)
+			if (!entity)
 			{
 				return;
 			}
@@ -124,7 +116,7 @@ namespace Hazel
 		}
 
 		auto sceneName = data["Scene"].as<std::string>();
-		HZ_CORE_LTRACE("Deserializing scene name['{0}']", sceneName);
+		HZ_CORE_LTRACE("Deserializing scene name[{0}]", sceneName);
 		_scene->SetName(sceneName);
 
 		auto entities = data["Entities"];
@@ -135,21 +127,25 @@ namespace Hazel
 				auto entityID = entity["Entity"].as<uint64_t>(); // TODO Entity ID
 
 				std::string name;
-				auto tagComponent = entity["TagComponent"];
-				if (tagComponent)
+				int tag;
+				int layer;
+				auto baseComponent = entity["BaseComponent"];
+				if (baseComponent)
 				{
-					name = tagComponent["Tag"].as<std::string>();
+					name = baseComponent["Name"].as<std::string>();
+					tag = baseComponent["Tag"].as<int>();
+					layer = baseComponent["Layer"].as<int>();
 				}
 
-				HZ_CORE_LTRACE(" Entity: ID['{0}'], name['{1}']", entityID, name);
+				HZ_CORE_LTRACE(" Entity: ID[{0}], Name[{1}],Tag[{2}],Layer[{3}]", entityID, name, tag, layer);
 
-				auto deserializedEntity = _scene->CreateEntity(name);
+				auto deserializedEntity = _scene->CreateEntity(name, tag, layer);
 
 				auto transformComponent = entity["TransformComponent"];
 				if (transformComponent)
 				{
 					// Entities always have transform
-					auto& component = deserializedEntity.GetComponent<TransformComponent>();
+					auto& component = deserializedEntity.Transform();
 					component.Position = transformComponent["Position"].as<glm::vec3>();
 					component.Rotation = transformComponent["Rotation"].as<glm::vec3>();
 					component.Scale = transformComponent["Scale"].as<glm::vec3>();

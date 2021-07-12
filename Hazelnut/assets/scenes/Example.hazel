@@ -1,8 +1,10 @@
 Scene: Example
 Entities:
   - Entity: 1657643249657
-    TagComponent:
-      Tag: Main Camera
+    BaseComponent:
+      Name: Main Camera
+      Tag: 0
+      Layer: 0
     TransformComponent:
       Position: [0.899999976, 0, 14.3000002]
       Rotation: [0, 0, 0]
@@ -19,8 +21,10 @@ Entities:
       IsPrimary: true
       IsFixedAspectRatio: false
   - Entity: 1657643249657
-    TagComponent:
-      Tag: Triangle
+    BaseComponent:
+      Name: Triangle
+      Tag: 0
+      Layer: 0
     TransformComponent:
       Position: [1.79999995, 0, 8.69999981]
       Rotation: [0, 0, 1.05243349]
@@ -28,8 +32,10 @@ Entities:
     SpriteRendererComponent:
       Color: [0.803088784, 0, 0, 1]
   - Entity: 1657643249657
-    TagComponent:
-      Tag: Square
+    BaseComponent:
+      Name: Square
+      Tag: 0
+      Layer: 0
     TransformComponent:
       Position: [0, 0, 0]
       Rotation: [0, 0, 0]

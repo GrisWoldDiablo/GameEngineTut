@@ -1,8 +1,10 @@
 Scene: Tester
 Entities:
   - Entity: 1657643249657
-    TagComponent:
-      Tag: Right
+    BaseComponent:
+      Name: Right
+      Tag: 0
+      Layer: 0
     TransformComponent:
       Position: [0.349999994, 0, 0.349999994]
       Rotation: [0, 0.785398185, 0]
@@ -10,8 +12,10 @@ Entities:
     SpriteRendererComponent:
       Color: [0, 0.392156869, 1, 1]
   - Entity: 1657643249657
-    TagComponent:
-      Tag: Left
+    BaseComponent:
+      Name: Left
+      Tag: 0
+      Layer: 0
     TransformComponent:
       Position: [-0.349999994, 0, 0.349999994]
       Rotation: [0, -0.785398185, 0]
@@ -19,8 +23,10 @@ Entities:
     SpriteRendererComponent:
       Color: [0.392156869, 0.588235319, 1, 1]
   - Entity: 1657643249657
-    TagComponent:
-      Tag: Camera
+    BaseComponent:
+      Name: Camera
+      Tag: 0
+      Layer: 0
     TransformComponent:
       Position: [0, 3, 4.80000019]
       Rotation: [-0.633554518, 0, 0]
@@ -37,8 +43,10 @@ Entities:
       IsPrimary: true
       IsFixedAspectRatio: true
   - Entity: 1657643249657
-    TagComponent:
-      Tag: Top
+    BaseComponent:
+      Name: Top
+      Tag: 0
+      Layer: 0
     TransformComponent:
       Position: [0.151690528, -0.322721362, -1.7947464]
       Rotation: [-1.9517647, 0.936056435, -0.723815978]

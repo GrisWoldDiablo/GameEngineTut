@@ -167,15 +167,10 @@ namespace Hazel
 		ImGui::PopID();
 	}
 
-	SceneHierarchyPanel::SceneHierarchyPanel(const Ref<Scene>& context)
+	void SceneHierarchyPanel::SetScene(const Ref<Scene>& scene)
 	{
-		SetContext(context);
-	}
-
-	void SceneHierarchyPanel::SetContext(const Ref<Scene>& context)
-	{
-		_context = context;
-		_selectionContext = Entity::Null;
+		_scene = scene;
+		_selectedEntity = Entity();
 	}
 
 	void SceneHierarchyPanel::OnImGuiRender()
@@ -184,23 +179,23 @@ namespace Hazel
 
 		DrawSceneName();
 
-		_context->_registry.each([&](auto entityID)
+		_scene->_registry.each([&](auto entityID)
 		{
-			Entity entity{ entityID, _context.get() };
+			Entity entity{ entityID, _scene.get() };
 			DrawEntityNode(entity);
 		});
 
 		if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
 		{
-			_selectionContext = Entity::Null;
+			_selectedEntity = Entity();
 		}
 
 		// Right-Click on blank space.
 		if (ImGui::BeginPopupContextWindow(nullptr, ImGuiPopupFlags_MouseButtonRight | ImGuiPopupFlags_NoOpenOverItems))
 		{
-			if (ImGui::MenuItem("Create empty Entity"))
+			if (ImGui::MenuItem("Create New Entity"))
 			{
-				_context->CreateEntity("Empty Entity");
+				_scene->CreateEntity();
 			}
 			ImGui::EndPopup();
 		}
@@ -208,9 +203,9 @@ namespace Hazel
 		ImGui::End();
 
 		ImGui::Begin("Properties");
-		if (_selectionContext != Entity::Null)
+		if (_selectedEntity)
 		{
-			DrawComponents(_selectionContext);
+			DrawComponents(_selectedEntity);
 		}
 
 		ImGui::End();
@@ -220,13 +215,13 @@ namespace Hazel
 	{
 		char buffer[256];
 		memset(buffer, 0, sizeof(buffer));
-		strcpy_s(buffer, sizeof(buffer), _context->_name.c_str());
+		strcpy_s(buffer, sizeof(buffer), _scene->_name.c_str());
 		if (ImGui::InputText(" : Scene", buffer, sizeof(buffer), ImGuiInputTextFlags_EnterReturnsTrue))
 		{
 			auto newName = std::string(buffer);
 			if (!newName.empty())
 			{
-				_context->SetName(std::string(buffer));
+				_scene->SetName(std::string(buffer));
 			}
 		}
 		ImGui::Separator();
@@ -234,14 +229,12 @@ namespace Hazel
 
 	void SceneHierarchyPanel::DrawEntityNode(Entity entity)
 	{
-		auto& tag = entity.GetComponent<TagComponent>().Tag;
-
-		ImGuiTreeNodeFlags flags = ((_selectionContext == entity) ? ImGuiTreeNodeFlags_Selected : 0) | ImGuiTreeNodeFlags_OpenOnArrow;
+		ImGuiTreeNodeFlags flags = ((_selectedEntity == entity) ? ImGuiTreeNodeFlags_Selected : 0) | ImGuiTreeNodeFlags_OpenOnArrow;
 		flags |= ImGuiTreeNodeFlags_SpanAvailWidth;
-		bool expanded = ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)entity, flags, tag.c_str());
+		bool expanded = ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)entity, flags, entity.Name().c_str());
 		if (ImGui::IsItemClicked())
 		{
-			_selectionContext = entity;
+			_selectedEntity = entity;
 		}
 
 		bool shouldDeleteEntity = false;
@@ -261,28 +254,26 @@ namespace Hazel
 
 		if (shouldDeleteEntity)
 		{
-			_context->DestroyEntity(entity);
-			if (_selectionContext == entity)
+			_scene->DestroyEntity(entity);
+			if (_selectedEntity == entity)
 			{
-				_selectionContext = Entity::Null;
+				_selectedEntity = Entity();
 			}
 		}
 	}
 
 	void SceneHierarchyPanel::DrawComponents(Entity entity)
 	{
-#pragma region TagComponent
-		if (auto tagComponent = entity.TryGetComponent<TagComponent>(); tagComponent != nullptr)
+#pragma region BaseComponent
+		if (entity)
 		{
-			auto& tag = tagComponent->Tag;
 			char buffer[256];
 			memset(buffer, 0, sizeof(buffer));
-			strcpy_s(buffer, sizeof(buffer), tag.c_str());
-			if (ImGui::InputText("##:Tag", buffer, sizeof(buffer)))
+			strcpy_s(buffer, sizeof(buffer), entity.Name().c_str());
+			if (ImGui::InputText("##:Name", buffer, sizeof(buffer)))
 			{
-				tag = std::string(buffer);
+				entity.Name() = std::string(buffer);
 			}
-
 			ImGui::SameLine();
 			ImGui::PushItemWidth(-1);
 			if (ImGui::Button("Add Component"))
@@ -296,6 +287,15 @@ namespace Hazel
 				AddComponentMenu<SpriteRendererComponent>();
 				ImGui::EndPopup();
 			}
+			ImGui::PopItemWidth();
+
+			const char* tags[] = { "Default" }; // TODO Keep tags list somewhere else
+			ImGui::Combo("##Tag", &entity.Tag(), tags, IM_ARRAYSIZE(tags));
+
+			ImGui::PushItemWidth(-1);
+			ImGui::SameLine();
+			const char* layers[] = { "Default" }; // TODO Keep layers list somewhere else
+			ImGui::Combo("##Layer", &entity.Layer(), layers, IM_ARRAYSIZE(layers));
 			ImGui::PopItemWidth();
 		}
 #pragma endregion
@@ -332,7 +332,7 @@ namespace Hazel
 			std::string filePath;
 			if (isSpritePressed)
 			{
-				filePath = FileDialogs::OpenFile("Sprite texture (*.png)\0*.png\0");
+				filePath = FileDialogs::OpenFile("PNG (*.png)\0*.png\0");
 			}
 
 			if (component->Texture != nullptr && ImGui::BeginPopupContextItem())
@@ -353,11 +353,6 @@ namespace Hazel
 				}
 				ImGui::EndPopup();
 			}
-			// Added clear right click
-			/*if (ImGui::MenuItem("None"))
-			{
-				component->Texture = nullptr;
-			}*/
 
 			if (!filePath.empty())
 			{
@@ -453,7 +448,7 @@ namespace Hazel
 
 			if (ImGui::Checkbox("Fixed Aspect Ratio", &component->IsFixedAspectRatio) && !component->IsFixedAspectRatio)
 			{
-				camera.SetViewportSize(_context->_viewportWidth, _context->_viewportHeight);
+				camera.SetViewportSize(_scene->_viewportWidth, _scene->_viewportHeight);
 			}
 		});
 #pragma endregion
@@ -492,11 +487,11 @@ namespace Hazel
 		nameId = nameId.erase(0, nameId.find_last_of(':') + 1);
 		nameId = nameId.erase(nameId.find("Component"), nameId.length());
 
-		if (!_selectionContext.HasComponent<T>())
+		if (!_selectedEntity.HasComponent<T>())
 		{
 			if (ImGui::MenuItem(nameId.c_str()))
 			{
-				_selectionContext.AddComponent<T>();
+				_selectedEntity.AddComponent<T>();
 				ImGui::CloseCurrentPopup();
 			}
 		}

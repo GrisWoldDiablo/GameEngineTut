@@ -14,13 +14,13 @@ namespace Hazel
 		Scene() = default;
 		~Scene();
 
-		Entity CreateEntity(std::string name = std::string());
+		Entity CreateEntity(std::string name = "Entity", int tag = 0, int layer = 0);
 		void DestroyEntity(Entity entity);
 
 		void OnUpdateRuntime();
 		void OnUpdateEditor(EditorCamera& camera);
 
-		void DrawSpriteRenderComponent(Camera& camera);
+		void DrawSpriteRenderComponent(const glm::vec3& cameraPosition);
 
 		void OnViewportResize(uint32_t  width, uint32_t height);
 

@@ -22,16 +22,16 @@ namespace Hazel
 
 		inline void SetViewpostSize(float width, float height) { _viewportWidth = width; _viewportHeight = height; UpdateProjection(); }
 
-		const glm::mat4& GetViewMatrix() const override { return _viewMatrix; }
-		glm::mat4 GetViewProjection() const override { return _projection * _viewMatrix; }
+		const glm::mat4& GetViewMatrix() const { return _viewMatrix; }
+		glm::mat4 GetViewProjection() const { return _projection * _viewMatrix; }
 
-		glm::vec3 GetUpDirection() const override;
-		glm::vec3 GetRightDirection() const override;
-		glm::vec3 GetForwardDirection() const override;
-		const glm::vec3& GetPosition() const override { return _position; }
-		const glm::vec3& GetRotation() const override { return _rotation; }
-		glm::vec2 GetResolution() const override { return { _viewportWidth, _viewportHeight }; }
-		glm::quat GetOrientation() const override;
+		glm::vec3 GetUpDirection() const;
+		glm::vec3 GetRightDirection() const;
+		glm::vec3 GetForwardDirection() const;
+		const glm::vec3& GetPosition() const { return _position; }
+		const glm::vec3& GetRotation() const { return _rotation; }
+		glm::vec2 GetResolution() const { return { _viewportWidth, _viewportHeight }; }
+		glm::quat GetOrientation() const;
 
 		float GetDrivingSpeed() const { return _drivingSpeed; }
 

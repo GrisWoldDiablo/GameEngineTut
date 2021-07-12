@@ -10,14 +10,17 @@ namespace Hazel
 		_registry.clear();
 	}
 
-	Entity Scene::CreateEntity(std::string name)
+	Entity Scene::CreateEntity(std::string name, int tag, int layer)
 	{
 		Entity entity = { _registry.create(), this };
 
+		auto& baseComponent = entity.AddComponent<BaseComponent>();
+		baseComponent.Name = name;
+		baseComponent.Tag = tag;
+		baseComponent.Layer = layer;
+
 		entity.AddComponent<TransformComponent>();
 
-		auto& tagComponent = entity.AddComponent<TagComponent>();
-		tagComponent.Tag = name.empty() ? "Entity" : std::move(name);
 		return entity;
 	}
 
@@ -52,12 +55,14 @@ namespace Hazel
 		// Render 2D
 		Camera* mainCamera = nullptr;
 		glm::mat4 cameraTransform;
+		glm::vec3 cameraPosition;
 		_registry.view<CameraComponent, TransformComponent>().each([&](const auto entity, auto& camera, auto& transform)
 		{
 			if (camera.IsPrimary)
 			{
 				mainCamera = &camera.Camera;
-				cameraTransform = transform.GetTransform();
+				cameraTransform = transform.GetTransformMatrix();
+				cameraPosition = transform.Position;
 				return false;
 			}
 			return true;
@@ -70,7 +75,7 @@ namespace Hazel
 
 		if (Renderer2D::BeginScene(*mainCamera, cameraTransform))
 		{
-			DrawSpriteRenderComponent(*mainCamera);
+			DrawSpriteRenderComponent(cameraPosition);
 
 			Renderer2D::EndScene();
 		}
@@ -80,27 +85,27 @@ namespace Hazel
 	{
 		if (Renderer2D::BeginScene(camera))
 		{
-			DrawSpriteRenderComponent(camera);
+			DrawSpriteRenderComponent(camera.GetPosition());
 
 			Renderer2D::EndScene();
 		}
 	}
 
-	void Scene::DrawSpriteRenderComponent(Camera& camera)
+	void Scene::DrawSpriteRenderComponent(const glm::vec3& cameraPosition)
 	{
 		auto group = _registry.group<TransformComponent>(entt::get<SpriteRendererComponent>);
 
 		group.sort<TransformComponent>([&](const auto& lhs, const auto& rhs)
 		{
-			auto lhsDistance = glm::distance(lhs.Position, camera.GetPosition());
-			auto rhsDistance = glm::distance(rhs.Position, camera.GetPosition());
+			auto lhsDistance = glm::distance(lhs.Position, cameraPosition);
+			auto rhsDistance = glm::distance(rhs.Position, cameraPosition);
 			return lhsDistance > rhsDistance;
 		});
 
 		for (const auto entity : group)
 		{
 			auto [transform, sprite] = group.get<TransformComponent, SpriteRendererComponent>(entity);
-			Renderer2D::DrawSprite(transform.GetTransform(), sprite, (int)entity);
+			Renderer2D::DrawSprite(transform.GetTransformMatrix(), sprite, (int)entity);
 		}
 	}
 
@@ -133,7 +138,7 @@ namespace Hazel
 			}
 		}
 
-		return Entity::Null;
+		return Entity();
 	}
 
 	template<typename T>
@@ -143,7 +148,7 @@ namespace Hazel
 	}
 
 	template<>
-	void Scene::OnComponentAdded<TagComponent>(Entity entity, TagComponent& component)
+	void Scene::OnComponentAdded<BaseComponent>(Entity entity, BaseComponent& component)
 	{}
 
 	template<>

@@ -22,7 +22,7 @@ namespace Hazel
 		virtual void OnUpdate() {}
 		virtual std::string GetClassFilePath() = 0;
 
-	private:
+	protected:
 		Entity _entity;
 		friend class Scene;
 	};

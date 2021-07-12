@@ -10,14 +10,13 @@ namespace Hazel
 	{
 	public:
 		SceneHierarchyPanel() = default;
-		SceneHierarchyPanel(const Ref<Scene>& context);
 
-		void SetContext(const Ref<Scene>& context);
+		void SetScene(const Ref<Scene>& _scene);
 
 		void OnImGuiRender();
 
-		Entity GetSelectedEntity() const { return _selectionContext; }
-		void SetSelectedEntity(Entity entity) { _selectionContext = entity; }
+		Entity GetSelectedEntity() const { return _selectedEntity; }
+		void SetSelectedEntity(Entity entity) { _selectedEntity = entity; }
 
 	private:
 		void DrawSceneName();
@@ -27,7 +26,7 @@ namespace Hazel
 		void AddComponentMenu();
 
 	private:
-		Ref<Scene> _context;
-		Entity _selectionContext;
+		Ref<Scene> _scene;
+		Entity _selectedEntity;
 	};
 }

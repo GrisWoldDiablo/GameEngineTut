@@ -1,11 +1,30 @@
 #include "hzpch.h"
 #include "Entity.h"
+#include "Components.h"
 
 namespace Hazel
 {
-	const Entity Entity::Null = { entt::null, nullptr };
-
 	Entity::Entity(entt::entity handle, Scene* scene)
-		:_entityHandle(handle), _scene(scene)
+		: _entityHandle(handle), _scene(scene)
 	{}
+
+	std::string& Entity::Name()
+	{
+		return GetComponent<BaseComponent>().Name;
+	}
+
+	int& Entity::Tag()
+	{
+		return GetComponent<BaseComponent>().Tag;
+	}
+
+	int& Entity::Layer()
+	{
+		return GetComponent<BaseComponent>().Layer;
+	}
+
+	TransformComponent& Entity::Transform()
+	{
+		return GetComponent<TransformComponent>();
+	}
 }

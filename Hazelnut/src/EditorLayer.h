@@ -81,7 +81,7 @@ namespace Hazel
 		bool _hasStoredPreviousGizmoType = false;
 		glm::vec2 _sceneViewportBounds[2];
 		Entity _hoveredEntity;
-		
+
 		// Tools
 		bool _isDemoWidowOpen = false;
 

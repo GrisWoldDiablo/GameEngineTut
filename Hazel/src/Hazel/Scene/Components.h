@@ -12,30 +12,43 @@
 
 namespace Hazel
 {
-	struct TagComponent
+	struct Component
 	{
-		std::string Tag;
-
-		TagComponent() = default;
-		TagComponent(const TagComponent&) = default;
-		TagComponent(std::string tag)
-			:Tag(std::move(tag))
+	public:
+		Component(Entity entity)
+			:_entity(entity)
 		{}
+		virtual ~Component() = default;
+
+	public:
+		Entity GetEntity() { return _entity; }
+
+	private:
+		Entity _entity;
 	};
 
-	struct TransformComponent
+	struct BaseComponent : Component
+	{
+		std::string Name;
+		int Tag;
+		int Layer;
+
+		BaseComponent(Entity entity) : Component(entity) {};
+		BaseComponent(const BaseComponent&) = default;
+
+		~BaseComponent() = default;
+	};
+
+	struct TransformComponent : Component
 	{
 		glm::vec3 Position = { 0.0f, 0.0f, 0.0f };
 		glm::vec3 Rotation = { 0.0f, 0.0f, 0.0f };
 		glm::vec3 Scale = { 1.0f, 1.0f, 1.0f };
 
-		TransformComponent() = default;
+		TransformComponent(Entity entity) : Component(entity) {};
 		TransformComponent(const TransformComponent&) = default;
-		TransformComponent(const glm::vec3& position)
-			:Position(position)
-		{}
 
-		glm::mat4 GetTransform() const
+		glm::mat4 GetTransformMatrix() const
 		{
 			const auto kIdentityMatrix = glm::mat4(1.0f);
 			glm::mat4 rotation = glm::toMat4(glm::quat(Rotation));
@@ -50,30 +63,23 @@ namespace Hazel
 		}
 	};
 
-	struct SpriteRendererComponent
+	struct SpriteRendererComponent : Component
 	{
 		Ref<Texture2D> Texture = nullptr;
 		glm::vec2 Tiling{ 1.0f, 1.0f };
 		Color Color{ Color::White };
 
-		SpriteRendererComponent() = default;
+		SpriteRendererComponent(Entity entity) : Component(entity) {};
 		SpriteRendererComponent(const SpriteRendererComponent&) = default;
-		SpriteRendererComponent(const Hazel::Color& color)
-			:Color(color)
-		{}
-
-		SpriteRendererComponent(const Ref<Texture2D> texture)
-			:Texture(texture)
-		{}
 	};
 
-	struct CameraComponent
+	struct CameraComponent : Component
 	{
 		SceneCamera Camera;
-		bool IsPrimary = true; // TODO Think about moving to scene.
+		bool IsPrimary = true;
 		bool IsFixedAspectRatio = false;
 
-		CameraComponent() = default;
+		CameraComponent(Entity entity) : Component(entity) {};
 		CameraComponent(const CameraComponent&) = default;
 	};
 

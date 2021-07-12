@@ -14,7 +14,7 @@ namespace Hazel
 		void OnUpdate() override
 		{
 			float timestep = Time::GetTimestep();
-			auto& position = GetComponent<TransformComponent>().Position;
+			auto& position = _entity.Transform().Position;
 			position.y -= gravity;
 			position.y += upward * timestep;
 			upward -= speed * timestep;

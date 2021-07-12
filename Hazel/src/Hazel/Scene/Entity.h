@@ -1,23 +1,23 @@
 #pragma once
 #include "Scene.h"
+//#include "Components.h"
 
 namespace Hazel
 {
+	struct TransformComponent;
+
 	class Entity
 	{
-	public:
-		static const Entity Null;
-
 	public:
 		Entity() = default;
 		Entity(entt::entity handle, Scene* scene);
 		Entity(const Entity& other) = default;
 
-		template<typename T, typename... Args>
-		T& AddComponent(Args&&... args)
+		template<typename T>
+		T& AddComponent()
 		{
 			HZ_CORE_ASSERT(!HasComponent<T>(), "Entity already has component!");
-			auto& component = _scene->_registry.emplace<T>(_entityHandle, std::forward<Args>(args)...);
+			auto& component = _scene->_registry.emplace<T>(_entityHandle, *this);
 			_scene->OnComponentAdded<T>(*this, component);
 			return component;
 		}
@@ -61,6 +61,12 @@ namespace Hazel
 		{
 			return !(*this == other);
 		}
+
+		std::string& Name();
+		int& Tag();
+		int& Layer();
+
+		TransformComponent& Transform();
 
 	private:
 		entt::entity _entityHandle{ entt::null };
