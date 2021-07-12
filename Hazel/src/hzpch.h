@@ -21,5 +21,8 @@
 #include "Hazel/Debug/Instrumentor.h"
 
 #ifdef HZ_PLATFORM_WINDOWS
+#	ifndef NOMINMAX
+#		define NOMINMAX
+#	endif
 #include <Windows.h>
 #endif // HZ_PLATFORM_WINDOWS

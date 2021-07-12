@@ -67,7 +67,7 @@ namespace Hazel
 	{
 	public:
 		BufferLayout() = default;
-		BufferLayout(const std::initializer_list<BufferElement>& element)
+		BufferLayout(std::initializer_list<BufferElement> element)
 			:_elements(element)
 		{
 			CalculateOffsetAndStride();
