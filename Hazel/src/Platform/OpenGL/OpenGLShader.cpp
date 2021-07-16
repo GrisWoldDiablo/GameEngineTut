@@ -166,7 +166,6 @@ namespace Hazel
 			result.resize(inputFileStream.tellg());
 			inputFileStream.seekg(0, std::ios::beg);
 			inputFileStream.read(&result[0], result.size());
-			inputFileStream.close();
 		}
 		else
 		{

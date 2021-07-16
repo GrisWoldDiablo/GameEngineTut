@@ -1,13 +1,13 @@
 #pragma once
 #include "Event.h"
-#include "Hazel/Core/Input.h"
+#include "Hazel/Core/MouseCodes.h"
 
 namespace Hazel
 {
 	class MouseMovedEvent : public Event
 	{
 	public:
-		MouseMovedEvent(float x, float y)
+		MouseMovedEvent(const float x, const float y)
 			: _mouseX(x), _mouseY(y)
 		{
 			_deltaX = _sPreviousMouseX - _mouseX;
@@ -47,7 +47,7 @@ namespace Hazel
 	class MouseScrolledEvent : public Event
 	{
 	public:
-		MouseScrolledEvent(float xOffset, float yOffset)
+		MouseScrolledEvent(const float xOffset, const float yOffset)
 			: _xOffset(xOffset), _yOffset(yOffset)
 		{}
 
@@ -77,7 +77,7 @@ namespace Hazel
 		EVENT_CLASS_CATEGORY(EventCategoryMouse | EventCategoryInput | EventCategoryMouseButton)
 
 	protected:
-		MouseButtonEvent(MouseCode button)
+		MouseButtonEvent(const MouseCode button)
 			:_button(button)
 		{}
 
@@ -87,7 +87,7 @@ namespace Hazel
 	class MouseButtonPressedEvent : public MouseButtonEvent
 	{
 	public:
-		MouseButtonPressedEvent(MouseCode button)
+		MouseButtonPressedEvent(const MouseCode button)
 			: MouseButtonEvent(button)
 		{}
 
@@ -104,7 +104,7 @@ namespace Hazel
 	class MouseButtonReleasedEvent : public MouseButtonEvent
 	{
 	public:
-		MouseButtonReleasedEvent(MouseCode button)
+		MouseButtonReleasedEvent(const MouseCode button)
 			: MouseButtonEvent(button)
 		{}
 

@@ -2,7 +2,7 @@
 
 namespace Hazel
 {
-	typedef enum class KeyCode : uint16_t
+	using Key = enum class KeyCode : uint16_t
 	{
 		SPACE = 32,
 		Apostrophe = 39,/* ' */
@@ -139,7 +139,7 @@ namespace Hazel
 		RightSuper = 347,
 
 		Menu = 348,
-	} Key;
+	};
 
 	inline std::ostream& operator<<(std::ostream& os, const KeyCode& keyCode)
 	{

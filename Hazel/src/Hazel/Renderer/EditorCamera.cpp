@@ -1,5 +1,6 @@
 #include "hzpch.h"
 #include "EditorCamera.h"
+#include "Hazel/Core/Input.h"
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
@@ -15,8 +16,7 @@ namespace Hazel
 
 	void EditorCamera::OnUpdate()
 	{
-		auto [mouseX, mouseY] = Input::GetMousePosition();
-		const glm::vec2& mousePosition{ mouseX, mouseY };
+		const auto mousePosition = Input::GetMousePosition();
 		glm::vec2 delta = (mousePosition - _initialMousePosition) * 0.003f;
 		_initialMousePosition = mousePosition;
 

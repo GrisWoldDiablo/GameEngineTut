@@ -1,4 +1,11 @@
 #pragma once
+#include "Hazel/Core/PlatformDetection.h"
+
+#ifdef HZ_PLATFORM_WINDOWS
+#	ifndef NOMINMAX
+#		define NOMINMAX
+#	endif
+#endif // HZ_PLATFORM_WINDOWS
 
 #include <filesystem>
 #include <iostream>
@@ -21,8 +28,5 @@
 #include "Hazel/Debug/Instrumentor.h"
 
 #ifdef HZ_PLATFORM_WINDOWS
-#	ifndef NOMINMAX
-#		define NOMINMAX
-#	endif
 #include <Windows.h>
 #endif // HZ_PLATFORM_WINDOWS

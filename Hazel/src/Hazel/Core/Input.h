@@ -8,10 +8,10 @@ namespace Hazel
 	class Input
 	{
 	public:
-		static bool IsKeyPressed(KeyCode key);
+		static bool IsKeyPressed(const KeyCode key);
 
-		static bool IsMouseButtonPressed(MouseCode button);
-		static std::pair<float, float> GetMousePosition();
+		static bool IsMouseButtonPressed(const MouseCode button);
+		static glm::vec2 GetMousePosition();
 		static float GetMouseX();
 		static float GetMouseY();
 	};

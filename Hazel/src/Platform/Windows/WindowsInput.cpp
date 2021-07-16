@@ -6,7 +6,7 @@
 
 namespace Hazel
 {
-	bool Input::IsKeyPressed(KeyCode key)
+	bool Input::IsKeyPressed(const KeyCode key)
 	{
 		HZ_PROFILE_FUNCTION();
 
@@ -16,7 +16,7 @@ namespace Hazel
 		return state == GLFW_PRESS;
 	}
 
-	bool Input::IsMouseButtonPressed(MouseCode button)
+	bool Input::IsMouseButtonPressed(const MouseCode button)
 	{
 		HZ_PROFILE_FUNCTION();
 
@@ -26,7 +26,7 @@ namespace Hazel
 		return state == GLFW_PRESS;
 	}
 
-	std::pair<float, float> Input::GetMousePosition()
+	glm::vec2 Input::GetMousePosition()
 	{
 		HZ_PROFILE_FUNCTION();
 
@@ -41,17 +41,13 @@ namespace Hazel
 	{
 		HZ_PROFILE_FUNCTION();
 
-		auto [xPos, yPos] = GetMousePosition();
-
-		return (float)xPos;
+		return GetMousePosition().x;
 	}
 
 	float Input::GetMouseY()
 	{
 		HZ_PROFILE_FUNCTION();
 
-		auto [xPos, yPos] = GetMousePosition();
-
-		return (float)yPos;
+		return GetMousePosition().y;
 	}
 }

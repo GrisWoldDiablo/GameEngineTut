@@ -2,7 +2,7 @@
 
 namespace Hazel
 {
-	typedef enum class MouseCode : uint16_t
+	using Mouse = enum class MouseCode : uint16_t
 	{
 		Button1 = 0,
 		Button2 = 1,
@@ -16,7 +16,7 @@ namespace Hazel
 		ButtonLeft = Button1,
 		ButtonRight = Button2,
 		ButtonMiddle = Button3
-	} Mouse;
+	};
 
 	inline std::ostream& operator<<(std::ostream& os, const MouseCode& button)
 	{
