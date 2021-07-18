@@ -28,6 +28,7 @@ namespace Hazel
 		void SetName(const std::string& name) { _name = name; }
 
 		Entity GetPrimaryCameraEntity();
+		int GetEntityCount() const { return _registry.alive(); }
 
 	private:
 		template<typename T>

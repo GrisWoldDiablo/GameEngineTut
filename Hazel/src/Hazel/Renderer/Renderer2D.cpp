@@ -13,6 +13,8 @@
 
 namespace Hazel
 {
+	static std::string _sPreviousShaderFilePath;
+	
 	struct QuadVertex
 	{
 		glm::vec3 Position;
@@ -53,7 +55,8 @@ namespace Hazel
 		struct CameraData
 		{
 			glm::mat4 ViewProjection;
-			glm::vec2 Resolution;
+			glm::vec3 CameraPosition;
+			//glm::vec2 Resolution;
 		};
 		CameraData CameraBuffer;
 		Ref<UniformBuffer> CameraUniformBuffer;
@@ -106,10 +109,11 @@ namespace Hazel
 #define ASYNC 1
 
 #if ASYNC
-		_asyncShaderCreation = std::async(std::launch::async, []
-		{
-			sData.TextureShader = Shader::Create("assets/shaders/Texture.glsl");
-		});
+		LoadShader("assets/shaders/Texture.glsl");
+		//_asyncShaderCreation = std::async(std::launch::async, []
+		//{
+		//	sData.TextureShader = Shader::Create("assets/shaders/Texture.glsl");
+		//});
 #else
 		sData.TextureShader = Shader::Create("assets/shaders/Texture.glsl");
 #endif // ASYNC
@@ -119,8 +123,13 @@ namespace Hazel
 		sData.QuadVertexPositions[2] = { 0.5f, 0.5f, 0.0f, 1.0f };
 		sData.QuadVertexPositions[3] = { -0.5f, 0.5f, 0.0f, 1.0f };
 
-		sData.QuadTextureCoordinates = new glm::vec2[4];
-
+		sData.QuadTextureCoordinates = new glm::vec2[4]
+		{
+			{ 0.0f, 0.0f },
+			{ 1.0f, 0.0f },
+			{ 1.0f, 1.0f },
+			{ 0.0f, 1.0f }
+		};
 		sData.CameraUniformBuffer = UniformBuffer::Create(sizeof(Renderer2DData::CameraData), 0);
 	}
 
@@ -148,10 +157,10 @@ namespace Hazel
 	{
 		HZ_PROFILE_FUNCTION();
 
-		return BeginScene(camera.GetViewProjection(), camera.GetResolution());
+		return BeginScene(camera.GetViewProjection(), camera.GetResolution(), camera.GetPosition());
 	}
 
-	bool Renderer2D::BeginScene(glm::mat4 viewProjection, glm::vec2 resolution)
+	bool Renderer2D::BeginScene(const glm::mat4& viewProjection, const glm::vec2& resolution, const glm::vec3& cameraPosition)
 	{
 		HZ_PROFILE_FUNCTION();
 
@@ -171,7 +180,35 @@ namespace Hazel
 
 
 		sData.CameraBuffer.ViewProjection = viewProjection;
-		sData.CameraBuffer.Resolution = resolution;
+		sData.CameraBuffer.CameraPosition = cameraPosition;
+		//sData.CameraBuffer.Resolution = resolution;
+		sData.CameraUniformBuffer->SetData(&sData.CameraBuffer, sizeof(Renderer2DData::CameraData));
+		Reset();
+
+		return true;
+	}
+
+	bool Renderer2D::BeginScene(const glm::mat4& viewProjection, const glm::vec2& resolution)
+	{
+		HZ_PROFILE_FUNCTION();
+
+		if (sData.TextureShader == nullptr)
+		{
+			return false;
+		}
+
+		if (sData.TextureShader->IsLoadingCompleted())
+		{
+			sData.TextureShader->CompleteInitialization();
+		}
+		else
+		{
+			return false;
+		}
+
+
+		sData.CameraBuffer.ViewProjection = viewProjection;
+		//sData.CameraBuffer.Resolution = resolution;
 		sData.CameraUniformBuffer->SetData(&sData.CameraBuffer, sizeof(Renderer2DData::CameraData));
 		Reset();
 
@@ -320,11 +357,6 @@ namespace Hazel
 			sData.TextureSlotIndex++;
 		}
 
-		sData.QuadTextureCoordinates[0] = { 0.0f, 0.0f };
-		sData.QuadTextureCoordinates[1] = { 1.0f, 0.0f };
-		sData.QuadTextureCoordinates[2] = { 1.0f, 1.0f };
-		sData.QuadTextureCoordinates[3] = { 0.0f, 1.0f };
-
 		UpdateData(transform, tintColor, entityID, tilingFactor, textureIndex);
 	}
 #pragma endregion
@@ -426,12 +458,21 @@ namespace Hazel
 
 	void Renderer2D::LoadShader(const std::string& filePath, bool shouldRecompile)
 	{
-		HZ_CORE_LWARN("Reloading Shader");
+		HZ_CORE_LWARN("Loading Shader");
+		_sPreviousShaderFilePath = filePath;
 		sData.TextureShader = nullptr;
 		_asyncShaderCreation = std::async(std::launch::async, [](const std::string& filePath, bool shouldRecompile)
 		{
 			sData.TextureShader = Shader::Create(filePath, shouldRecompile);
 		}, filePath, shouldRecompile);
+	}
+
+	void Renderer2D::ReloadShader()
+	{
+		if (!_sPreviousShaderFilePath.empty())
+		{
+			LoadShader(_sPreviousShaderFilePath, true);
+		}
 	}
 
 	void Renderer2D::FlushAndReset()

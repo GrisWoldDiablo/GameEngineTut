@@ -168,7 +168,7 @@ namespace Hazel
 		ImGuiIO& io = ImGui::GetIO();
 		ImGuiStyle& style = ImGui::GetStyle();
 		auto originalWindowMinSize = style.WindowMinSize;
-		style.WindowMinSize.x = 370.0f;
+		style.WindowMinSize.x = 270.0f;
 
 		if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable)
 		{
@@ -301,7 +301,8 @@ namespace Hazel
 		if (mouseX >= 0 && mouseY >= 0 && mouseX < (int)sceneViewpostSize.x && mouseY < (int)sceneViewpostSize.y)
 		{
 			int pixelData = _framebuffer->ReadPixel(1, mouseX, mouseY);
-			_hoveredEntity = pixelData == -1 ? Entity() : Entity((entt::entity)pixelData, _activeScene.get());
+			auto entityCount = _activeScene->GetEntityCount();
+			_hoveredEntity = pixelData == -1 || pixelData > entityCount || entityCount == 0 ? Entity() : Entity((entt::entity)pixelData, _activeScene.get());
 		}
 	}
 
@@ -527,6 +528,11 @@ namespace Hazel
 			{
 				if (ImGui::BeginMenu("Shader"))
 				{
+					if (ImGui::MenuItem("Reload"))
+					{
+						Renderer2D::ReloadShader();
+					}
+
 					if (ImGui::MenuItem("Load"))
 					{
 						auto filePath = FileDialogs::OpenFile("Shader (*.glsl)\0*.glsl\0");
@@ -699,6 +705,12 @@ namespace Hazel
 
 		ImGui::Separator();
 		ImGui::Text("Ms per frame: %d", _updateTimer.GetProfileResult().ElapsedTime.count() / 1000);
+
+		ImGui::Text("Editor Camera");
+		auto& position = _editorCamera.GetPosition();
+		ImGui::Text("  Position(%.2f,%.2f,%.2f)", position.x, position.y, position.z);
+		auto& rotation = glm::degrees(_editorCamera.GetRotation());
+		ImGui::Text("  Rotation(%.2f,%.2f,%.2f)", rotation.x, rotation.y, rotation.z);
 
 		ImGui::End();
 	}

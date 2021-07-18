@@ -83,12 +83,24 @@ namespace Hazel
 
 	void Scene::OnUpdateEditor(EditorCamera& camera)
 	{
+		const auto kIdentityMatrix = glm::mat4(1.0f);
+		auto transform = glm::translate(kIdentityMatrix, camera.GetPosition() + camera.GetForwardDirection() * 10.0f)
+			* glm::toMat4(camera.GetOrientation())
+			* glm::scale(kIdentityMatrix, glm::vec3(1.0f)/*{ 9.53f, 5.36f, 1.0f }*/);
+
 		if (Renderer2D::BeginScene(camera))
 		{
-			DrawSpriteRenderComponent(camera.GetPosition());
+			Renderer2D::DrawQuad(transform, Color::Cyan);
 
 			Renderer2D::EndScene();
 		}
+
+		//if (Renderer2D::BeginScene(camera))
+		//{
+		//	DrawSpriteRenderComponent(camera.GetPosition());
+		//
+		//	Renderer2D::EndScene();
+		//}
 	}
 
 	void Scene::DrawSpriteRenderComponent(const glm::vec3& cameraPosition)

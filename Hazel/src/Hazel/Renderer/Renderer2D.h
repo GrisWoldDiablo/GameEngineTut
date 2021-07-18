@@ -23,7 +23,8 @@ namespace Hazel
 		static bool BeginScene(const Camera& camera, const glm::mat4& transform);
 		static bool BeginScene(const EditorCamera& camera); // TODO to remove
 		static bool BeginScene(const OrthographicCamera& camera); // TODO to remove
-		static bool BeginScene(glm::mat4 viewProjection, glm::vec2 resolution = glm::vec2(0.0f));
+		static bool BeginScene(const glm::mat4& viewProjection, const glm::vec2& resolution = glm::vec2(0.0f));
+		static bool BeginScene(const glm::mat4& viewProjection, const glm::vec2& resolution, const glm::vec3& cameraPosition);
 
 		static void EndScene();
 		static void Flush();
@@ -73,6 +74,7 @@ namespace Hazel
 		static Statistics GetStats();
 
 		static void LoadShader(const std::string& filePath, bool shouldRecompile = false);
+		static void ReloadShader();
 
 	private:
 		static void FlushAndReset();
