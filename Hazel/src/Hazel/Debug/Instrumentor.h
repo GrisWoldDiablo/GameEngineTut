@@ -186,18 +186,12 @@ namespace Hazel
 	{
 	public:
 		InstrumentationTimer(const char* name, const char* category, bool isSnapshot = false)
-			:_name(name), _category(category), _isSnapshot(isSnapshot), _isStopped(false), _shouldWriteResult(true)
+			:_name(name), _category(category), _isSnapshot(isSnapshot), _isStopped(false)
 		{
 			_profileResult.Name = name;
 			_profileResult.Category = category;
 			_profileResult.ThreadID = std::this_thread::get_id();
 			Start();
-		}
-
-		InstrumentationTimer()
-			:_name(""), _category(""), _isSnapshot(false), _isStopped(true), _shouldWriteResult(false)
-		{
-
 		}
 
 		~InstrumentationTimer()
@@ -213,7 +207,7 @@ namespace Hazel
 			_startTimepoint = std::chrono::steady_clock::now();
 			_profileResult.Start = FloatingPointMircroseconds{ _startTimepoint.time_since_epoch() };
 
-			if (_isSnapshot && _shouldWriteResult)
+			if (_isSnapshot)
 			{
 				Instrumentor::Get().WriteProfileSnapshotStart(_profileResult);
 			}
@@ -224,7 +218,7 @@ namespace Hazel
 			auto endTimepoint = std::chrono::steady_clock::now();
 			_profileResult.End = FloatingPointMircroseconds{ endTimepoint.time_since_epoch() };
 
-			if (_isSnapshot && _shouldWriteResult)
+			if (_isSnapshot)
 			{
 				Instrumentor::Get().WriteProfileSnapshotEnd(_profileResult);
 			}
@@ -233,18 +227,10 @@ namespace Hazel
 				_profileResult.ElapsedTime = std::chrono::time_point_cast<std::chrono::microseconds>(endTimepoint).time_since_epoch() -
 					std::chrono::time_point_cast<std::chrono::microseconds>(_startTimepoint).time_since_epoch();
 
-				if (_shouldWriteResult)
-				{
-					Instrumentor::Get().WriteProfile(_profileResult);
-				}
+				Instrumentor::Get().WriteProfile(_profileResult);
 			}
 
 			_isStopped = true;
-		}
-
-		ProfileResult GetProfileResult()
-		{
-			return _profileResult;
 		}
 
 	private:
@@ -253,7 +239,6 @@ namespace Hazel
 		std::chrono::time_point<std::chrono::steady_clock> _startTimepoint;
 		bool _isSnapshot;
 		bool _isStopped;
-		bool _shouldWriteResult;
 		struct ProfileResult _profileResult;
 	};
 }

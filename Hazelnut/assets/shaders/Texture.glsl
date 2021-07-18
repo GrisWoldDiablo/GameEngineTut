@@ -1,5 +1,3 @@
-// Basic Texture shader and can also be used for colors if u_Texture is set to white.
-
 #type vertex
 #version 450 core
 
@@ -13,7 +11,6 @@ layout(location = 5) in int a_EntityID;
 layout(std140, binding = 0) uniform Camera
 {
 	mat4 u_ViewProjection;
-	vec2 u_Resolution;
 };
 
 struct VertexOutput
@@ -21,7 +18,6 @@ struct VertexOutput
 	vec4 Color;
 	vec2 TextureCoord;
 	vec2 TilingFactor;
-	vec2 Resolution;
 };
 
 layout (location = 0) out VertexOutput Output;
@@ -33,7 +29,6 @@ void main()
 	Output.Color = a_Color;
 	Output.TextureCoord = a_TextureCoord;
 	Output.TilingFactor = a_TilingFactor;
-	Output.Resolution = u_Resolution;
 	v_TextureIndex = a_TextureIndex;
 	v_EntityID = a_EntityID;
 
@@ -51,7 +46,6 @@ struct	VertexOutput
 	vec4 Color;
 	vec2 TextureCoord;
 	vec2 TilingFactor;
-	vec2 Resolution;
 };
 
 layout (location = 0) in VertexOutput Input;
@@ -117,6 +111,7 @@ void main()
 	{
 		discard;
 	}
+
 	// Final assignment
 	color = tempColor;
 	entityID = v_EntityID;

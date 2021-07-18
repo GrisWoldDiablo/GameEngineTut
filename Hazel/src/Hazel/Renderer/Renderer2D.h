@@ -23,7 +23,7 @@ namespace Hazel
 		static bool BeginScene(const Camera& camera, const glm::mat4& transform);
 		static bool BeginScene(const EditorCamera& camera); // TODO to remove
 		static bool BeginScene(const OrthographicCamera& camera); // TODO to remove
-		static bool BeginScene(glm::mat4 viewProjection, glm::vec2 resolution = glm::vec2(0.0f));
+		static bool BeginScene(glm::mat4 viewProjection);
 
 		static void EndScene();
 		static void Flush();

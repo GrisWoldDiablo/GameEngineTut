@@ -53,7 +53,6 @@ namespace Hazel
 		struct CameraData
 		{
 			glm::mat4 ViewProjection;
-			glm::vec2 Resolution;
 		};
 		CameraData CameraBuffer;
 		Ref<UniformBuffer> CameraUniformBuffer;
@@ -148,10 +147,10 @@ namespace Hazel
 	{
 		HZ_PROFILE_FUNCTION();
 
-		return BeginScene(camera.GetViewProjection(), camera.GetResolution());
+		return BeginScene(camera.GetViewProjection());
 	}
 
-	bool Renderer2D::BeginScene(glm::mat4 viewProjection, glm::vec2 resolution)
+	bool Renderer2D::BeginScene(glm::mat4 viewProjection)
 	{
 		HZ_PROFILE_FUNCTION();
 
@@ -171,7 +170,6 @@ namespace Hazel
 
 
 		sData.CameraBuffer.ViewProjection = viewProjection;
-		sData.CameraBuffer.Resolution = resolution;
 		sData.CameraUniformBuffer->SetData(&sData.CameraBuffer, sizeof(Renderer2DData::CameraData));
 		Reset();
 

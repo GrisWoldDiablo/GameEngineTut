@@ -8,6 +8,8 @@
 
 #include "Hazel/Renderer/EditorCamera.h"
 
+#include "Hazel/Core/Timer.h"
+
 #include "imgui/imgui.h"
 namespace Hazel
 {
@@ -68,7 +70,8 @@ namespace Hazel
 		int _currentFPS = 60;
 		float _oneSecondCountDown = 1.0f;
 		int _lowFrames = 0;
-		InstrumentationTimer _updateTimer;
+		Timer _updateTimer;
+		float _updateTimerElapsedMillis;
 
 		// Panels
 		SceneHierarchyPanel _sceneHierarchyPanel;

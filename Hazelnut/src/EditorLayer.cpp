@@ -82,7 +82,7 @@ namespace Hazel
 	void EditorLayer::OnUpdate()
 	{
 		HZ_PROFILE_FUNCTION();
-		_updateTimer.Start();
+		_updateTimer.Reset();
 
 		auto& frameBufferSpec = _framebuffer->GetSpecification();
 		if (_sceneViewportSize.x > 0.0f && _sceneViewportSize.y > 0.0f &&
@@ -121,7 +121,7 @@ namespace Hazel
 
 		_framebuffer->Unbind();
 
-		_updateTimer.Stop();
+		_updateTimerElapsedMillis = _updateTimer.ElapsedMillis();
 	}
 
 	void EditorLayer::OnImGuiRender()
@@ -698,7 +698,7 @@ namespace Hazel
 		ImGui::Text("Indices: %d", stats.GetTotalIndexCount());
 
 		ImGui::Separator();
-		ImGui::Text("Ms per frame: %d", _updateTimer.GetProfileResult().ElapsedTime.count() / 1000);
+		ImGui::Text("Ms per frame: %.3f", _updateTimerElapsedMillis);
 
 		ImGui::End();
 	}
