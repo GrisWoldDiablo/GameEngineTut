@@ -168,7 +168,7 @@ namespace Hazel
 		ImGuiIO& io = ImGui::GetIO();
 		ImGuiStyle& style = ImGui::GetStyle();
 		auto originalWindowMinSize = style.WindowMinSize;
-		style.WindowMinSize.x = 370.0f;
+		style.WindowMinSize.x = 270.0f;
 
 		if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable)
 		{
@@ -179,13 +179,13 @@ namespace Hazel
 		style.WindowMinSize = originalWindowMinSize;
 
 		DrawFileMenu();
-		DrawStats();
 		DrawSceneViewport();
 		DrawTools();
 
 		_sceneHierarchyPanel.OnImGuiRender();
 		_contentBrowserPanel.OnImGuiRender();
 
+		DrawStats();
 		ImGui::End();
 	}
 
