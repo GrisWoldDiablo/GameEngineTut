@@ -46,6 +46,15 @@ namespace Hazel
 				{
 					// TODO Logic based on file extension.
 				}
+				if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None))
+				{
+					char buffer[256];
+					memset(buffer, 0, sizeof(buffer));
+					strcpy_s(buffer, sizeof(buffer), path.string().c_str());
+					ImGui::SetDragDropPayload("PNG_IMAGE", &buffer, sizeof(buffer));
+					ImGui::Text("Dragging %s", filenameString.c_str());
+					ImGui::EndDragDropSource();
+				}
 			}
 		}
 
