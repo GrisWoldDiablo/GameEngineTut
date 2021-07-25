@@ -12,6 +12,8 @@
 
 namespace Hazel
 {
+	extern const std::filesystem::path gAssetsPath;
+
 	EditorLayer::EditorLayer()
 		: Layer("Hazel Editor")
 	{
@@ -305,7 +307,9 @@ namespace Hazel
 
 	bool EditorLayer::NewScene(const std::string& newSceneName)
 	{
-		if (FileDialogs::NewFile())
+		const char* message = "You will lose current scene's unsaved progress.\nDo you want to continue?";
+		const char* title = "Warning!";
+		if (FileDialogs::QuestionBox(message, title))
 		{
 			_activeScene = CreateRef<Scene>();
 
@@ -337,16 +341,21 @@ namespace Hazel
 		auto filePath = FileDialogs::OpenFile("Hazel Scene (*.hazel)\0*.hazel\0");
 		if (!filePath.empty())
 		{
-			if (!NewScene())
-			{
-				return;
-			}
+			OpenScene(filePath);
+		}
+	}
 
-			SceneSerializer serializer(_activeScene);
-			if (serializer.Deserialize(filePath))
-			{
-				SetWindowTitle(filePath);
-			}
+	void EditorLayer::OpenScene(const std::filesystem::path& path)
+	{
+		if (!NewScene())
+		{
+			return;
+		}
+
+		SceneSerializer serializer(_activeScene);
+		if (serializer.Deserialize(path.string()))
+		{
+			SetWindowTitle(path.string());
 		}
 	}
 
@@ -573,6 +582,28 @@ namespace Hazel
 
 		auto textureID = _framebuffer->GetColorAttachmentRenderID();
 		ImGui::Image((void*)((uint64_t)textureID), { _sceneViewportSize.x, _sceneViewportSize.y }, ImVec2{ 0.0f, 1.0f }, ImVec2{ 1.0f, 0.0f });
+
+		if (ImGui::BeginDragDropTarget())
+		{
+			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
+			{
+				const auto* path = (const wchar_t*)payload->Data;
+				auto filePath = gAssetsPath / path;
+
+				if (filePath.extension() == ".hazel")
+				{
+					OpenScene(filePath);
+				}
+
+				if (filePath.extension() == ".png")
+				{
+					auto newEntity = _activeScene->CreateEntity(filePath.filename().string());
+					newEntity.AddComponent<SpriteRendererComponent>().Texture = Texture2D::Create(filePath.string());
+					_sceneHierarchyPanel.SetSelectedEntity(newEntity);
+				}
+			}
+			ImGui::EndDragDropTarget();
+		}
 
 		auto windowSize = ImGui::GetWindowSize();
 		auto minBound = ImGui::GetWindowPos();

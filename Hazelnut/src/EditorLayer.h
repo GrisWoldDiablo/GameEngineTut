@@ -36,6 +36,7 @@ namespace Hazel
 
 		bool NewScene(const std::string& newSceneName = _kNewSceneName);
 		void OpenScene();
+		void OpenScene(const std::filesystem::path& path);
 		void SaveSceneAs();
 
 	private:

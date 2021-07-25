@@ -7,11 +7,13 @@ namespace Hazel
 	class FileDialogs
 	{
 	public:
-		// Returns false if canceled.
-		static bool NewFile();
+		// Message Box with yes and no question.
+		static bool QuestionBox(const char* message, const char* title);
 		// Returns empty string if canceled.
 		static std::string OpenFile(const char* filter);
 		// Returns empty string if canceled.
 		static std::string SaveFile(const char* filter, const char* defaultFileName = nullptr);
+
+		static void ExecuteFile(const char* filePath);
 	};
 }

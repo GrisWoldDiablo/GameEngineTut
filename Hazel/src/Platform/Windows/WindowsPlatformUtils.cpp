@@ -9,14 +9,14 @@
 
 namespace Hazel
 {
-	bool FileDialogs::NewFile()
+	bool FileDialogs::QuestionBox(const char* message, const char* title)
 	{
 		auto result = MessageBoxA
 		(
 			glfwGetWin32Window((GLFWwindow*)Application::Get().GetWindow().GetNativeWindow()),
-			(LPCSTR)"You will lose current scene's unsaved progress.\nDo you want to continue?",
-			(LPCSTR)"Warning!",
-			MB_ICONWARNING | MB_YESNO
+			message,
+			title,
+			MB_ICONINFORMATION | MB_YESNO
 		);
 
 		return result == IDYES;
@@ -75,5 +75,11 @@ namespace Hazel
 		}
 
 		return std::string();
+	}
+
+	void FileDialogs::ExecuteFile(const char* filePath)
+	{
+		auto hwnd = glfwGetWin32Window((GLFWwindow*)Application::Get().GetWindow().GetNativeWindow());
+		ShellExecuteA(hwnd, "open", filePath, nullptr, nullptr, SW_SHOW);
 	}
 }

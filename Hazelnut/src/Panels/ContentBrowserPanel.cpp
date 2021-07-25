@@ -1,15 +1,16 @@
 #include "hzpch.h"
 #include "ContentBrowserPanel.h"
+#include "Hazel/Utils/PlatformUtils.h"
 
 #include <imgui/imgui.h>
 
 namespace Hazel
 {
 	// TODO change once we have projects.
-	static const std::filesystem::path sAssetsPath = "assets";
+	extern const std::filesystem::path gAssetsPath = "assets";
 
 	ContentBrowserPanel::ContentBrowserPanel()
-		:_currentDirectory(sAssetsPath)
+		:_currentDirectory(gAssetsPath)
 	{
 		_folderIconTexture = Texture2D::Create("Resources/Icons/ContentBrowser/FolderIcon256.png");
 		_fileIconTexture = Texture2D::Create("Resources/Icons/ContentBrowser/FileIcon256.png");
@@ -24,7 +25,7 @@ namespace Hazel
 			auto currentPath = _currentDirectory.string();
 			if (ImGui::Button(currentPath.c_str()))
 			{
-				if (_currentDirectory != std::filesystem::path(sAssetsPath))
+				if (_currentDirectory != std::filesystem::path(gAssetsPath))
 				{
 					_currentDirectory = _currentDirectory.parent_path();
 				}
@@ -43,30 +44,39 @@ namespace Hazel
 		columnCount = columnCount < 1 ? 1 : columnCount;
 		ImGui::Columns(columnCount, nullptr, false);
 
-		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
-
+		int id = 0;
 		for (auto& directoryEntry : std::filesystem::directory_iterator(_currentDirectory))
 		{
 			const auto& path = directoryEntry.path();
-			auto relativePath = std::filesystem::relative(path, sAssetsPath);
+			auto relativePath = std::filesystem::relative(path, gAssetsPath);
 			auto relativePathString = relativePath.string();
 			auto filenameString = relativePath.filename().string();
+			ImGui::PushID(filenameString.c_str());
 
 			Ref<Texture2D> icon = directoryEntry.is_directory() ? _folderIconTexture : _fileIconTexture;
 
+			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
 			ImGui::ImageButton((ImTextureID)(intptr_t)icon->GetRendererID(), { thumbnailSize, thumbnailSize }, uv0, uv1);
+			ImGui::PopStyleColor();
+
+			if (ImGui::BeginDragDropSource())
+			{
+				const wchar_t* itemPath = relativePath.c_str();
+				ImGui::SetDragDropPayload("CONTENT_BROWSER_ITEM", itemPath, (wcslen(itemPath) + 1) * sizeof(wchar_t));
+				ImGui::Text(filenameString.c_str());
+				ImGui::EndDragDropSource();
+			}
+
 			if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
 			{
 				if (directoryEntry.is_directory())
 				{
 					_currentDirectory /= path.filename();
 				}
-				else
+				else if(FileDialogs::QuestionBox("Do you want to open file in external program?","Open File"))
 				{
-					//if (ImGui::Button(filenameString.c_str()))
-					//{
-					//	// TODO Logic based on file extension.
-					//}
+					FileDialogs::ExecuteFile(path.string().c_str());
+					// TODO Logic based on file extension.
 				}
 			}
 
@@ -76,10 +86,10 @@ namespace Hazel
 			ImGui::SetCursorPosX(ImGui::GetCursorPosX() + offSet);
 			ImGui::TextWrapped(filenameString.c_str());
 
+			ImGui::PopID();
 			ImGui::NextColumn();
 		}
 
-		ImGui::PopStyleColor();
 		ImGui::Columns(1);
 
 		ImGui::SliderFloat("Thumbnail Size", &thumbnailSize, 56.0f, 512.0f);
