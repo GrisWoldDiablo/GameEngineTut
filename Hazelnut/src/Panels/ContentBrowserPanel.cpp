@@ -42,55 +42,55 @@ namespace Hazel
 		float panelWidth = ImGui::GetContentRegionAvail().x;
 		auto columnCount = (int)(panelWidth / cellSize);
 		columnCount = columnCount < 1 ? 1 : columnCount;
-		ImGui::Columns(columnCount, nullptr, false);
 
-		int id = 0;
-		for (auto& directoryEntry : std::filesystem::directory_iterator(_currentDirectory))
+		if (ImGui::BeginTable("FolderContent", columnCount, ImGuiTableFlags_SizingFixedSame))
 		{
-			const auto& path = directoryEntry.path();
-			auto relativePath = std::filesystem::relative(path, gAssetsPath);
-			auto relativePathString = relativePath.string();
-			auto filenameString = relativePath.filename().string();
-			ImGui::PushID(filenameString.c_str());
-
-			Ref<Texture2D> icon = directoryEntry.is_directory() ? _folderIconTexture : _fileIconTexture;
-
-			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
-			ImGui::ImageButton((ImTextureID)(intptr_t)icon->GetRendererID(), { thumbnailSize, thumbnailSize }, uv0, uv1);
-			ImGui::PopStyleColor();
-
-			if (ImGui::BeginDragDropSource())
+			for (auto& directoryEntry : std::filesystem::directory_iterator(_currentDirectory))
 			{
-				const wchar_t* itemPath = relativePath.c_str();
-				ImGui::SetDragDropPayload("CONTENT_BROWSER_ITEM", itemPath, (wcslen(itemPath) + 1) * sizeof(wchar_t));
-				ImGui::Text(filenameString.c_str());
-				ImGui::EndDragDropSource();
-			}
+				ImGui::TableNextColumn();
+				const auto& path = directoryEntry.path();
+				auto relativePath = std::filesystem::relative(path, gAssetsPath);
+				auto relativePathString = relativePath.string();
+				auto filenameString = relativePath.filename().string();
+				ImGui::PushID(filenameString.c_str());
 
-			if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
-			{
-				if (directoryEntry.is_directory())
+				Ref<Texture2D> icon = directoryEntry.is_directory() ? _folderIconTexture : _fileIconTexture;
+
+				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
+				ImGui::ImageButton((ImTextureID)(intptr_t)icon->GetRendererID(), { thumbnailSize, thumbnailSize }, uv0, uv1);
+				ImGui::PopStyleColor();
+
+				if (ImGui::BeginDragDropSource())
 				{
-					_currentDirectory /= path.filename();
+					const wchar_t* itemPath = relativePath.c_str();
+					ImGui::SetDragDropPayload("CONTENT_BROWSER_ITEM", itemPath, (wcslen(itemPath) + 1) * sizeof(wchar_t));
+					ImGui::Text(filenameString.c_str());
+					ImGui::EndDragDropSource();
 				}
-				else if(FileDialogs::QuestionBox("Do you want to open file in external program?","Open File"))
+
+				if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
 				{
-					FileDialogs::ExecuteFile(path.string().c_str());
-					// TODO Logic based on file extension.
+					if (directoryEntry.is_directory())
+					{
+						_currentDirectory /= path.filename();
+					}
+					else if (FileDialogs::QuestionBox("Do you want to open file in external program?", "Open File"))
+					{
+						FileDialogs::ExecuteFile(path.string().c_str());
+						// TODO Logic based on file extension.
+					}
 				}
+
+				float tw = ImGui::CalcTextSize(filenameString.c_str()).x;
+				float offSet = (cellSize - tw - padding) / 2.0f;
+				offSet = offSet < 0.0f ? 0.0f : offSet;
+				ImGui::SetCursorPosX(ImGui::GetCursorPosX() + offSet);
+				ImGui::TextWrapped(filenameString.c_str());
+
+				ImGui::PopID();
 			}
-
-			float tw = ImGui::CalcTextSize(filenameString.c_str()).x;
-			float offSet = (cellSize - tw - padding) / 2.0f;
-			offSet = offSet < 0.0f ? 0.0f : offSet;
-			ImGui::SetCursorPosX(ImGui::GetCursorPosX() + offSet);
-			ImGui::TextWrapped(filenameString.c_str());
-
-			ImGui::PopID();
-			ImGui::NextColumn();
+			ImGui::EndTable();
 		}
-
-		ImGui::Columns(1);
 
 		ImGui::SliderFloat("Thumbnail Size", &thumbnailSize, 56.0f, 512.0f);
 		ImGui::SliderFloat("Padding", &padding, 0.0f, 32.0f);

@@ -395,7 +395,6 @@ namespace Hazel
 		auto tableFlags = ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_NoHostExtendX;
 		if (ImGui::BeginTable("Toolbar", 3, tableFlags))
 		{
-			ImGui::TableNextRow();
 			ImGui::TableNextColumn();
 			ImGui::TableNextColumn();
 
