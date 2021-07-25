@@ -1,4 +1,5 @@
 #pragma once
+#include "Hazel/Renderer/Texture.h"
 
 namespace Hazel
 {
@@ -11,5 +12,8 @@ namespace Hazel
 
 	private:
 		std::filesystem::path _currentDirectory;
+
+		Ref<Texture2D> _folderIconTexture;
+		Ref<Texture2D> _fileIconTexture;
 	};
 }

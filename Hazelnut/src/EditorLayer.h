@@ -52,11 +52,9 @@ namespace Hazel
 
 	private:
 		Color _clearColor = { 0.13f, 0.13f, 0.13f, 1.0f };
-
 		Ref<Framebuffer> _framebuffer;
-		Ref<Texture2D> _unwrapTexture;
 
-		glm::vec2 _sceneViewportSize = { 0,0 };
+		glm::vec2 _sceneViewportSize = { 0.0f, 0.0f };
 
 		bool _isSceneViewportFocused = false;
 		bool _isSceneViewportHovered = false;
@@ -71,7 +69,7 @@ namespace Hazel
 		float _oneSecondCountDown = 1.0f;
 		int _lowFrames = 0;
 		Timer _updateTimer;
-		float _updateTimerElapsedMillis;
+		float _updateTimerElapsedMillis = 0.0f;
 
 		// Panels
 		SceneHierarchyPanel _sceneHierarchyPanel;

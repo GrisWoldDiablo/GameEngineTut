@@ -175,7 +175,7 @@ namespace Hazel
 
 	void SceneHierarchyPanel::OnImGuiRender()
 	{
-		ImGui::Begin("Scene Hierarchy");
+		ImGui::Begin("Scene Hierarchy", nullptr, ImGuiWindowFlags_MenuBar);
 
 		DrawSceneName();
 
@@ -213,16 +213,20 @@ namespace Hazel
 
 	void SceneHierarchyPanel::DrawSceneName()
 	{
-		char buffer[256];
-		memset(buffer, 0, sizeof(buffer));
-		strcpy_s(buffer, sizeof(buffer), _scene->_name.c_str());
-		if (ImGui::InputText(" : Scene", buffer, sizeof(buffer), ImGuiInputTextFlags_EnterReturnsTrue))
+		if (ImGui::BeginMenuBar())
 		{
-			auto newName = std::string(buffer);
-			if (!newName.empty())
+			char buffer[256];
+			memset(buffer, 0, sizeof(buffer));
+			strcpy_s(buffer, sizeof(buffer), _scene->_name.c_str());
+			if (ImGui::InputText(" : Scene", buffer, sizeof(buffer), ImGuiInputTextFlags_EnterReturnsTrue))
 			{
-				_scene->SetName(std::string(buffer));
+				auto newName = std::string(buffer);
+				if (!newName.empty())
+				{
+					_scene->SetName(std::string(buffer));
+				}
 			}
+			ImGui::EndMenuBar();
 		}
 		ImGui::Separator();
 	}
@@ -232,36 +236,6 @@ namespace Hazel
 		ImGuiTreeNodeFlags flags = ((_selectedEntity == entity) ? ImGuiTreeNodeFlags_Selected : 0) | ImGuiTreeNodeFlags_OpenOnArrow;
 		flags |= ImGuiTreeNodeFlags_SpanAvailWidth;
 		bool expanded = ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)entity, flags, entity.Name().c_str());
-
-		std::string filePath;
-		if (ImGui::BeginDragDropTarget())
-		{
-			if (const auto* payload = ImGui::AcceptDragDropPayload("PNG_IMAGE"))
-			{
-
-				char buffer[256];
-				memset(buffer, 0, sizeof(buffer));
-				HZ_CORE_ASSERT(payload->DataSize == sizeof(buffer), "Not a Path");
-				memcpy(buffer, payload->Data, sizeof(buffer));
-				filePath = std::string(buffer);
-
-			}
-			ImGui::EndDragDropTarget();
-		}
-
-		if (!filePath.empty())
-		{
-			if (auto* component = entity.TryGetComponent<SpriteRendererComponent>(); component != nullptr)
-			{
-				// TODO Look use texture assets
-				component->Texture = Texture2D::Create(filePath);
-			}
-			else
-			{
-				component = &entity.AddComponent<SpriteRendererComponent>();
-				component->Texture = Texture2D::Create(filePath);
-			}
-		}
 
 		if (ImGui::IsItemClicked())
 		{
@@ -364,19 +338,6 @@ namespace Hazel
 			if (isSpritePressed)
 			{
 				filePath = FileDialogs::OpenFile("PNG (*.png)\0*.png\0");
-			}
-
-			if (ImGui::BeginDragDropTarget())
-			{
-				if (const auto* payload = ImGui::AcceptDragDropPayload("PNG_IMAGE"))
-				{
-					char buffer[256];
-					memset(buffer, 0, sizeof(buffer));
-					HZ_CORE_ASSERT(payload->DataSize == sizeof(buffer), "Not a Path");
-					memcpy(buffer, payload->Data, sizeof(buffer));
-					filePath = std::string(buffer);
-				}
-				ImGui::EndDragDropTarget();
 			}
 
 			if (component->Texture != nullptr && ImGui::BeginPopupContextItem())

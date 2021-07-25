@@ -14,7 +14,17 @@ namespace Hazel
 {
 	EditorLayer::EditorLayer()
 		: Layer("Hazel Editor")
-	{}
+	{
+		// Create Gizmo Icons texture.
+		_panIconTexture = Texture2D::Create("Resources/Icons/Gizmo/PanIcon256White.png");
+		_eyeIconTexture = Texture2D::Create("Resources/Icons/Gizmo/EyeIcon256White.png");
+		_nothingGizmoIconTexture = Texture2D::Create("Resources/Icons/Gizmo/NothingGizmo256White.png");
+		_positionGizmoIconTexture = Texture2D::Create("Resources/Icons/Gizmo/PositionGizmo256White.png");
+		_rotationGizmoIconTexture = Texture2D::Create("Resources/Icons/Gizmo/RotationGizmo256White.png");
+		_scaleGizmoIconTexture = Texture2D::Create("Resources/Icons/Gizmo/ScaleGizmo256White.png");
+		_localGizmoIconTexture = Texture2D::Create("Resources/Icons/Gizmo/LocalGizmo256White.png");
+		_globalGizmoIconTexture = Texture2D::Create("Resources/Icons/Gizmo/GlobalGizmo256White.png");
+	}
 
 	void EditorLayer::OnAttach()
 	{
@@ -22,21 +32,9 @@ namespace Hazel
 
 		// Set Fonts
 		auto imGuiLayer = Application::Get().GetImGuiLayer();
-		auto normalFontPath = "assets/fonts/opensans/OpenSans-SemiBold.ttf";
-		auto boldFontPath = "assets/fonts/opensans/OpenSans-ExtraBold.ttf";
+		auto normalFontPath = "Resources/Fonts/opensans/OpenSans-SemiBold.ttf";
+		auto boldFontPath = "Resources/Fonts/opensans/OpenSans-ExtraBold.ttf";
 		imGuiLayer->SetFonts(normalFontPath, { boldFontPath });
-
-		// Create Gizmo Icons texture.
-		_panIconTexture = Texture2D::Create("assets/icons/PanIcon256White.png");
-		_eyeIconTexture = Texture2D::Create("assets/icons/EyeIcon256White.png");
-		_nothingGizmoIconTexture = Texture2D::Create("assets/icons/NothingGizmo256White.png");
-		_positionGizmoIconTexture = Texture2D::Create("assets/icons/PositionGizmo256White.png");
-		_rotationGizmoIconTexture = Texture2D::Create("assets/icons/RotationGizmo256White.png");
-		_scaleGizmoIconTexture = Texture2D::Create("assets/icons/ScaleGizmo256White.png");
-		_localGizmoIconTexture = Texture2D::Create("assets/icons/LocalGizmo256White.png");
-		_globalGizmoIconTexture = Texture2D::Create("assets/icons/GlobalGizmo256White.png");
-
-		_unwrapTexture = Texture2D::Create("assets/textures/unwrap_helper.png");
 
 		auto framebufferSpecification = FramebufferSpecification
 		{
@@ -376,14 +374,14 @@ namespace Hazel
 
 	void EditorLayer::DrawToolbar()
 	{
-		auto size = ImVec2(25.0f, 25.0f);
-		auto uv0 = ImVec2(0.0f, 1.0f);
-		auto uv1 = ImVec2(1.0f, 0.0f);
+		const auto size = ImVec2(25.0f, 25.0f);
+		const auto uv0 = ImVec2(0.0f, 1.0f);
+		const auto uv1 = ImVec2(1.0f, 0.0f);
 
-		auto selectedColor = ImVec4(0.196f, 0.196f, 0.5f, 1.0f);
-		auto tintColor = ImVec4(0.396f, 0.396f, 0.8f, 1.0f);
-		auto normalColor = ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
-		auto whiteColor = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
+		const auto selectedColor = ImVec4(0.196f, 0.196f, 0.5f, 1.0f);
+		const auto tintColor = ImVec4(0.396f, 0.396f, 0.8f, 1.0f);
+		const auto normalColor = ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
+		const auto whiteColor = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
 
 		auto tableFlags = ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_NoHostExtendX;
 		if (ImGui::BeginTable("Toolbar", 3, tableFlags))
