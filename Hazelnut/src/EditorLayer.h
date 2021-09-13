@@ -51,6 +51,9 @@ namespace Hazel
 		void SetWindowTitle(const std::string& filePath);
 		void AddTooltip(const std::string& tooltipMessage);
 
+		void OnScenePlay();
+		void OnSceneStop();
+		
 	private:
 		Color _clearColor = { 0.13f, 0.13f, 0.13f, 1.0f };
 		Ref<Framebuffer> _framebuffer;
@@ -63,6 +66,8 @@ namespace Hazel
 		// Basics
 		EditorCamera _editorCamera;
 		Ref<Scene> _activeScene;
+		Ref<Scene> _editorScene;
+		Ref<Scene> _runtimeScene;
 
 		// FPS
 		int _frameCount = 0;
@@ -99,5 +104,15 @@ namespace Hazel
 		Ref<Texture2D> _scaleGizmoIconTexture;
 		Ref<Texture2D> _localGizmoIconTexture;
 		Ref<Texture2D> _globalGizmoIconTexture;
+		Ref<Texture2D> _playButtonIconTexture;
+		Ref<Texture2D> _stopButtonIconTexture;
+
+		enum class SceneState
+		{
+			Edit = 0,
+			Play = 1
+		};
+
+		SceneState _sceneState = SceneState::Edit;
 	};
 }

@@ -83,7 +83,7 @@ void Sandbox2D::OnDetach()
 void Sandbox2D::OnUpdate()
 {
 	HZ_PROFILE_FUNCTION();
-	_updateTimer.Start();
+	_updateTimer.Reset();
 
 	_cameraController.OnUpdate();
 
@@ -106,21 +106,21 @@ void Sandbox2D::OnUpdate()
 
 	if (Hazel::Input::IsMouseButtonPressed(HZ_MOUSE_BUTTON_LEFT))
 	{
-		auto [x, y] = Hazel::Input::GetMousePosition();
+		auto mousePosition = Hazel::Input::GetMousePosition();
 		auto width = Hazel::Application::Get().GetWindow().GetWidth();
 		auto height = Hazel::Application::Get().GetWindow().GetHeight();
 
 		auto bounds = _cameraController.GetBounds();
 
-		x = (x / width) * bounds.GetWidth() - bounds.GetWidth() * 0.5f;
-		y = bounds.GetHeight() * 0.5f - (y / height) * bounds.GetHeight();
+		mousePosition.x = (mousePosition.x / width) * bounds.GetWidth() - bounds.GetWidth() * 0.5f;
+		mousePosition.y = bounds.GetHeight() * 0.5f - (mousePosition.y / height) * bounds.GetHeight();
 
 		auto rotation = _cameraController.GetRotation();
 		auto rad = glm::radians(rotation);
 		auto cos = glm::cos(rad);
 		auto sin = glm::sin(rad);
-		auto xPrime = x * cos - y * sin;
-		auto yPrime = x * sin + y * cos;
+		auto xPrime = mousePosition.x * cos - mousePosition.y * sin;
+		auto yPrime = mousePosition.x * sin + mousePosition.y * cos;
 
 		auto pos = _cameraController.GetPosition();
 		_particleProps.Position = { xPrime + pos.x, yPrime + pos.y };
@@ -170,7 +170,6 @@ void Sandbox2D::OnUpdate()
 
 	_particleSystem.OnUpdate(Hazel::Time::GetTimestep());
 	_particleSystem.OnRender(_cameraController.GetCamera());
-	_updateTimer.Stop();
 }
 
 /// <summary>
@@ -248,7 +247,7 @@ void Sandbox2D::DrawStats()
 	ImGui::Text("Vertices: %d", stats.GetTotalVertexCount());
 	ImGui::Text("Indices: %d", stats.GetTotalIndexCount());
 	auto cycle = (glm::sin(Hazel::Platform::GetTime()) + 1.0f) * 0.5f;
-	ImGui::Text("Ms per frame: %d", _updateTimer.GetProfileResult().ElapsedTime.count() / 1000);
+	ImGui::Text("Ms per frame: %d", _updateTimer.ElapsedMillis());
 
 	ImGui::End();
 }

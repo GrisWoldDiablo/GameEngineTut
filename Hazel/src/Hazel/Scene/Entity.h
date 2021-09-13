@@ -42,10 +42,10 @@ namespace Hazel
 			return _scene->_registry.try_get<T>(_entityHandle);
 		}
 
-		template<typename T>
+		template<typename... T>
 		bool HasComponent()
 		{
-			return _scene->_registry.has<T>(_entityHandle);
+			return _scene->_registry.any_of<T...>(_entityHandle);
 		}
 
 		operator bool() const { return _entityHandle != entt::null; }

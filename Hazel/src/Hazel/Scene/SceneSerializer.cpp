@@ -6,6 +6,8 @@
 
 namespace Hazel
 {
+	static std::string _runtimeSceneData;
+
 	SceneSerializer::SceneSerializer(const Ref<Scene>& scene)
 		: _scene(scene)
 	{}
@@ -45,6 +47,7 @@ namespace Hazel
 			out << YAML::Key << "OrthographicSize" << YAML::Value << camera.GetOrthographicSize();
 			out << YAML::Key << "OrthographicNearClip" << YAML::Value << camera.GetOrthographicNearClip();
 			out << YAML::Key << "OrthographicFarClip" << YAML::Value << camera.GetOrthographicFarClip();
+			out << YAML::Key << "AspectRatio" << YAML::Value << camera.GetAspectRatio();
 			out << YAML::EndMap; // Camera
 
 			out << YAML::Key << "IsPrimary" << YAML::Value << component->IsPrimary;
@@ -71,6 +74,17 @@ namespace Hazel
 		out << YAML::EndMap;
 	}
 
+	template<typename T>
+	static T GetValue(const YAML::Node& node, const std::string& fieldName, T fallbackValue)
+	{
+		if (auto field = node[fieldName]; field)
+		{
+			return field.as<T>();
+		}
+
+		return fallbackValue;
+	}
+
 	void SceneSerializer::Serialize(const std::string& filepath)
 	{
 		auto fileName = std::string(filepath);
@@ -79,10 +93,29 @@ namespace Hazel
 		_scene->SetName(fileName);
 
 		YAML::Emitter out;
+		SerializeData(out);
+
+		std::ofstream fout(filepath);
+		fout << out.c_str();
+	}
+
+	void SceneSerializer::SerializeRuntime()
+	{
+		YAML::Emitter out;
+		SerializeData(out);
+
+		std::stringstream stream;
+		stream << out.c_str();
+		_runtimeSceneData = stream.str();
+	}
+
+	void SceneSerializer::SerializeData(YAML::Emitter& out)
+	{
 		out << YAML::BeginMap;
 		out << YAML::Key << "Scene" << YAML::Value << _scene->_name;
 		out << YAML::Key << "Entities" << YAML::Value << YAML::BeginSeq;
 
+		std::vector<Entity> entities = std::vector<Entity>();
 		_scene->_registry.each([&](auto entityID)
 		{
 			Entity entity = { entityID, _scene.get() };
@@ -90,33 +123,42 @@ namespace Hazel
 			{
 				return;
 			}
+			entities.push_back(entity);
+		});
 
+		std::for_each(entities.rbegin(), entities.rend(), [&](auto entity)
+		{
 			SerializeEntity(out, entity);
 		});
 
 		out << YAML::EndSeq;
 		out << YAML::EndMap;
-
-		std::ofstream fout(filepath);
-		fout << out.c_str();
-	}
-
-	void SceneSerializer::SerializeRuntime(const std::string& filepath)
-	{
-		// Not implemented
-		HZ_CORE_ASSERT(false, "Not implemented yet!");
 	}
 
 	bool SceneSerializer::Deserialize(const std::string& filepath)
 	{
 		YAML::Node data = YAML::LoadFile(filepath);
+		return DeserializeData(data);
+	}
+
+	bool SceneSerializer::DeserializeRuntime()
+	{
+		YAML::Node data = YAML::Load(_runtimeSceneData.c_str());
+		return DeserializeData(data, false);
+	}
+
+	bool SceneSerializer::DeserializeData(const YAML::Node& data, bool isWithLog)
+	{
 		if (!data["Scene"])
 		{
 			return false;
 		}
 
 		auto sceneName = data["Scene"].as<std::string>();
-		HZ_CORE_LTRACE("Deserializing scene name[{0}]", sceneName);
+		if (isWithLog)
+		{
+			HZ_CORE_LTRACE("Deserializing scene name[{0}]", sceneName);
+		}
 		_scene->SetName(sceneName);
 
 		auto entities = data["Entities"];
@@ -137,8 +179,10 @@ namespace Hazel
 					layer = baseComponent["Layer"].as<int>();
 				}
 
-				HZ_CORE_LTRACE(" Entity: ID[{0}], Name[{1}],Tag[{2}],Layer[{3}]", entityID, name, tag, layer);
-
+				if (isWithLog)
+				{
+					HZ_CORE_LTRACE(" Entity: ID[{0}], Name[{1}],Tag[{2}],Layer[{3}]", entityID, name, tag, layer);
+				}
 				auto deserializedEntity = _scene->CreateEntity(name, tag, layer);
 
 				auto transformComponent = entity["TransformComponent"];
@@ -156,6 +200,8 @@ namespace Hazel
 				{
 					auto& component = deserializedEntity.AddComponent<CameraComponent>();
 					auto& cameraProperties = cameraComponent["Camera"];
+
+					component.Camera.SetAspectRatio(GetValue<float>(cameraProperties, "AspectRatio"));
 					component.Camera.SetProjectionType((SceneCamera::ProjectionType)cameraProperties["ProjectionType"].as<int>());
 
 					component.Camera.SetPerspectiveVerticalFOV(cameraProperties["PerspectiveVerticalFOV"].as<float>());
@@ -182,19 +228,11 @@ namespace Hazel
 						component.Tiling = spriteRendererComponent["Tiling"].as<glm::vec2>();
 					}
 
-					component.Color = spriteRendererComponent["Color"].as<glm::vec4>();
+					component.Color = GetValue<glm::vec4>(spriteRendererComponent, "Color", { 0.0f, 0.0f, 0.0f, 1.0f });
 				}
 			}
 		}
 
 		return true;
-	}
-
-	bool SceneSerializer::DeserializeRuntime(const std::string& filepath)
-	{
-		// Not implemented
-		HZ_CORE_ASSERT(false, "Not implemented yet!");
-
-		return false;
 	}
 }

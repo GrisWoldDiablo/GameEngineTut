@@ -26,6 +26,8 @@ namespace Hazel
 		_scaleGizmoIconTexture = Texture2D::Create("Resources/Icons/Gizmo/ScaleGizmo256White.png");
 		_localGizmoIconTexture = Texture2D::Create("Resources/Icons/Gizmo/LocalGizmo256White.png");
 		_globalGizmoIconTexture = Texture2D::Create("Resources/Icons/Gizmo/GlobalGizmo256White.png");
+		_playButtonIconTexture = Texture2D::Create("Resources/Icons/General/PlayButton256.png");
+		_stopButtonIconTexture = Texture2D::Create("Resources/Icons/General/StopButton256.png");
 	}
 
 	void EditorLayer::OnAttach()
@@ -100,10 +102,6 @@ namespace Hazel
 		//SafetyShutdownCheck();
 #endif // !HZ_PROFILE
 
-		_editorCamera.IsEnable() =
-			(_isSceneViewportHovered && _isSceneViewportFocused && !ImGuizmo::IsUsing())
-			|| _editorCamera.IsAdjusting();
-		_editorCamera.OnUpdate();
 
 		Renderer2D::ResetStats();
 		// Render
@@ -114,8 +112,23 @@ namespace Hazel
 		// Clear our entity ID attachment to -1
 		_framebuffer->ClearAttachment(1, -1);
 
-		// Update Scene
-		_activeScene->OnUpdateEditor(_editorCamera);
+		switch (_sceneState)
+		{
+		case EditorLayer::SceneState::Edit:
+		{
+			_editorCamera.IsEnable() =
+				(_isSceneViewportHovered && _isSceneViewportFocused && !ImGuizmo::IsUsing())
+				|| _editorCamera.IsAdjusting();
+			_editorCamera.OnUpdate();
+
+			// Update Scene
+			_activeScene->OnUpdateEditor(_editorCamera);
+		}	break;
+		case EditorLayer::SceneState::Play:
+		{
+			_activeScene->OnUpdateRuntime();
+		}	break;
+		}
 
 		MousePicking();
 
@@ -262,6 +275,14 @@ namespace Hazel
 				_gizmoSpace = _gizmoSpace == ImGuizmo::LOCAL ? ImGuizmo::WORLD : ImGuizmo::LOCAL;
 			}
 			break;
+			// TODO make this work, requires to make events no blocked when scene view not in focus, or more like having exceptions.
+			//case Key::Escape:
+			//	auto payload = ImGui::GetDragDropPayload();
+			//	if (payload != nullptr)
+			//	{
+			//		ImGui::AcceptDragDropPayload(payload->DataType);
+			//	}
+			//	break;
 		}
 
 		return true;
@@ -270,7 +291,7 @@ namespace Hazel
 	bool EditorLayer::OnMouseButtonReleased(MouseButtonReleasedEvent& event)
 	{
 		// Mouse picking
-		if (event.GetMouseButton() == Mouse::ButtonLeft)
+		if (event.GetMouseButton() == Mouse::ButtonLeft && _sceneState == SceneState::Edit)
 		{
 			if (_isSceneViewportHovered && (!_sceneHierarchyPanel.GetSelectedEntity() || !ImGuizmo::IsOver()) && !Input::IsKeyPressed(Key::LeftAlt))
 			{
@@ -392,16 +413,21 @@ namespace Hazel
 		const auto normalColor = ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
 		const auto whiteColor = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
 
-		auto tableFlags = ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_NoHostExtendX;
-		if (ImGui::BeginTable("Toolbar", 3, tableFlags))
+		auto tableFlags = ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_SizingFixedFit;
+		if (ImGui::BeginTable("Toolbar", 4, tableFlags))
 		{
+			ImGui::TableSetupColumn("Blank");
+			ImGui::TableSetupColumn("Gizmo");
+			ImGui::TableSetupColumn("Space");
+			ImGui::TableSetupColumn("SceneState", ImGuiTableColumnFlags_WidthStretch);
+
 			ImGui::TableNextColumn();
 			ImGui::TableNextColumn();
 
-			ImTextureID toolbarButtonOneTexture;
+			ImTextureID gizmoButtonTexture;
 			if (_editorCamera.IsAdjusting())
 			{
-				toolbarButtonOneTexture = (ImTextureID)(intptr_t)_eyeIconTexture->GetRendererID();
+				gizmoButtonTexture = (ImTextureID)(intptr_t)_eyeIconTexture->GetRendererID();
 				if (!_hasStoredPreviousGizmoType)
 				{
 					_previousGizmoType = _gizmoType;
@@ -411,7 +437,7 @@ namespace Hazel
 			}
 			else
 			{
-				toolbarButtonOneTexture = (ImTextureID)(intptr_t)_nothingGizmoIconTexture->GetRendererID();
+				gizmoButtonTexture = (ImTextureID)(intptr_t)_nothingGizmoIconTexture->GetRendererID();
 				if (_hasStoredPreviousGizmoType)
 				{
 					_gizmoType = _previousGizmoType;
@@ -421,7 +447,7 @@ namespace Hazel
 			}
 
 			bool isNothing = _gizmoType == -1;
-			if (ImGui::ImageButton(toolbarButtonOneTexture, size, uv0, uv1, 3, isNothing ? selectedColor : normalColor, isNothing ? tintColor : whiteColor))
+			if (ImGui::ImageButton(gizmoButtonTexture, size, uv0, uv1, 3, isNothing ? selectedColor : normalColor, isNothing ? tintColor : whiteColor))
 			{
 				_gizmoType = -1;
 			}
@@ -483,6 +509,30 @@ namespace Hazel
 				ImGui::SameLine();
 				ImGui::AlignTextToFramePadding();
 				ImGui::Text("Global");
+			}
+
+			ImGui::TableNextColumn();
+
+			float centeredCursorPositionX = (ImGui::GetContentRegionMax().x * 0.5f) - (size.x * 0.5f);
+			if (centeredCursorPositionX > ImGui::GetCursorPosX())
+			{
+				ImGui::SetCursorPosX(centeredCursorPositionX);
+			}
+
+			bool isEditing = _sceneState == SceneState::Edit;
+			auto sceneStateButton = isEditing ? _playButtonIconTexture : _stopButtonIconTexture;
+
+			if (ImGui::ImageButton((ImTextureID)(intptr_t)sceneStateButton->GetRendererID(), size, uv0, uv1, 3, isEditing ? normalColor : selectedColor, isEditing ? whiteColor : tintColor))
+			{
+				switch (_sceneState)
+				{
+				case EditorLayer::SceneState::Edit:
+					OnScenePlay();
+					break;
+				case EditorLayer::SceneState::Play:
+					OnSceneStop();
+					break;
+				}
 			}
 
 			ImGui::EndTable();
@@ -581,6 +631,13 @@ namespace Hazel
 
 		auto textureID = _framebuffer->GetColorAttachmentRenderID();
 		ImGui::Image((void*)((uint64_t)textureID), { _sceneViewportSize.x, _sceneViewportSize.y }, ImVec2{ 0.0f, 1.0f }, ImVec2{ 1.0f, 0.0f });
+
+		if (_sceneState == SceneState::Play)
+		{
+			ImGui::End();
+			ImGui::PopStyleVar();
+			return;
+		}
 
 		if (ImGui::BeginDragDropTarget())
 		{
@@ -828,5 +885,35 @@ namespace Hazel
 		{
 			_timeSpentHovering = 0.0f;
 		}
+	}
+
+	void EditorLayer::OnScenePlay()
+	{
+		_sceneState = SceneState::Play;
+		SceneSerializer sceneSerializer(_activeScene);
+		sceneSerializer.SerializeRuntime();
+		_editorScene = _activeScene;
+
+		_runtimeScene = CreateRef<Scene>();
+		SceneSerializer runtimeSceneSerializer(_runtimeScene);
+		runtimeSceneSerializer.DeserializeRuntime();
+
+		_activeScene = _runtimeScene;
+		_activeScene->OnViewportResize((uint32_t)_sceneViewportSize.x, (uint32_t)_sceneViewportSize.y);
+		_sceneHierarchyPanel.SetScene(_activeScene);
+	}
+
+	void EditorLayer::OnSceneStop()
+	{
+		_sceneState = SceneState::Edit;
+		_editorScene = CreateRef<Scene>();
+
+		SceneSerializer sceneSerializer(_editorScene);
+		sceneSerializer.DeserializeRuntime();
+
+		_activeScene = _editorScene;
+
+		_activeScene->OnViewportResize((uint32_t)_sceneViewportSize.x, (uint32_t)_sceneViewportSize.y);
+		_sceneHierarchyPanel.SetScene(_activeScene);
 	}
 }

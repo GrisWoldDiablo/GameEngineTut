@@ -14,7 +14,8 @@ namespace Hazel
 		glTextureStorage2D(_rendererID, 1, _internalFormat, _width, _height);
 
 		glTextureParameteri(_rendererID, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTextureParameteri(_rendererID, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		_magFilter = GL_LINEAR;
+		glTextureParameteri(_rendererID, GL_TEXTURE_MAG_FILTER, _magFilter);
 
 		// Tiling.
 		glTextureParameteri(_rendererID, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -61,7 +62,8 @@ namespace Hazel
 		glTextureStorage2D(_rendererID, 1, _internalFormat, _width, _height);
 
 		glTextureParameteri(_rendererID, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTextureParameteri(_rendererID, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		_magFilter = GL_LINEAR;
+		glTextureParameteri(_rendererID, GL_TEXTURE_MAG_FILTER, _magFilter);
 
 		// Tiling.
 		glTextureParameteri(_rendererID, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -98,5 +100,17 @@ namespace Hazel
 	bool OpenGLTexture2D::Equals(const Texture& other) const
 	{
 		return _rendererID == ((OpenGLTexture2D&)other)._rendererID;
+	}
+
+	void OpenGLTexture2D::SetMagFilter(uint32_t magFilter)
+	{
+		_magFilter = magFilter;
+		glTextureParameteri(_rendererID, GL_TEXTURE_MAG_FILTER, _magFilter);
+	}
+
+	void OpenGLTexture2D::ToggleMagFilter(uint32_t magFilter)
+	{
+		_magFilter = magFilter == GL_LINEAR ? GL_NEAREST : GL_LINEAR;
+		glTextureParameteri(_rendererID, GL_TEXTURE_MAG_FILTER, _magFilter);
 	}
 }

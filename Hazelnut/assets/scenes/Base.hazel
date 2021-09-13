@@ -2,15 +2,36 @@ Scene: Base
 Entities:
   - Entity: 1657643249657
     BaseComponent:
-      Name: Top
+      Name: Camera
       Tag: 0
       Layer: 0
     TransformComponent:
-      Position: [0, 0.5, 0]
-      Rotation: [-0.602475524, -0.518819928, -0.622222662]
-      Scale: [0.999999881, 0.999997973, 0.999999881]
+      Position: [-1.70114124, 1.68518293, 5.20732307]
+      Rotation: [-0.233351022, -0.496084303, 0.112653531]
+      Scale: [0.999999762, 1, 1]
+    CameraComponent:
+      Camera:
+        ProjectionType: 1
+        PerspectiveVerticalFOV: 0.785398185
+        PerspectiveNearClip: 0.00999999978
+        PerspectiveFarClip: 1000
+        OrthographicSize: 10
+        OrthographicNearClip: -1
+        OrthographicFarClip: 10
+        AspectRatio: 1.75
+      IsPrimary: true
+      IsFixedAspectRatio: false
+  - Entity: 1657643249657
+    BaseComponent:
+      Name: Right
+      Tag: 0
+      Layer: 0
+    TransformComponent:
+      Position: [0.356995016, -0.10006386, -0.102868766]
+      Rotation: [0.956944108, 0.512634754, 0.617514014]
+      Scale: [0.999999225, 0.99999994, 0.999999583]
     SpriteRendererComponent:
-      Color: [0.307111651, 0.528957486, 0.0449307598, 1]
+      Color: [0.607843161, 0.494117647, 0.309803933, 1]
   - Entity: 1657643249657
     BaseComponent:
       Name: Left
@@ -24,12 +45,12 @@ Entities:
       Color: [0.588235319, 0.545098066, 0.31764707, 1]
   - Entity: 1657643249657
     BaseComponent:
-      Name: Right
+      Name: Top
       Tag: 0
       Layer: 0
     TransformComponent:
-      Position: [0.356995016, -0.10006386, -0.102868766]
-      Rotation: [0.956944108, 0.512634754, 0.617514014]
-      Scale: [0.999999225, 0.99999994, 0.999999583]
+      Position: [0, 0.5, 0]
+      Rotation: [-0.602475524, -0.518819928, -0.622222662]
+      Scale: [0.999999881, 0.999997973, 0.999999881]
     SpriteRendererComponent:
-      Color: [0.607843161, 0.494117647, 0.309803933, 1]
+      Color: [0.307111651, 0.528957486, 0.0449307598, 1]

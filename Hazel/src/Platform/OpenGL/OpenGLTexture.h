@@ -16,8 +16,11 @@ namespace Hazel
 		uint32_t GetHeight() const override { return _height; }
 		uint32_t GetRendererID() const override { return _rendererID; }
 		std::string GetPath() const override { return _path; }
+		uint32_t GetMagFilter() const override { return _magFilter; }
 
 		void SetData(void* data, uint32_t size) override;
+		void SetMagFilter(uint32_t magFilter) override;
+		void ToggleMagFilter(uint32_t magFilter) override;
 
 		void Bind(uint32_t slot = 0) const override;
 		bool Equals(const Texture& other) const override;
@@ -34,5 +37,6 @@ namespace Hazel
 		uint32_t _rendererID;
 		GLenum _internalFormat;
 		GLenum _dataFormat;
+		uint32_t _magFilter;
 	};
 }

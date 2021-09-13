@@ -112,9 +112,9 @@ namespace Hazel
 		virtual ~Serializer() = default;
 
 		virtual void Serialize(const std::string& filepath) = 0;
-		virtual void SerializeRuntime(const std::string& filepath) = 0;
+		virtual void SerializeRuntime() = 0;
 
 		virtual bool Deserialize(const std::string& filepath) = 0;
-		virtual bool DeserializeRuntime(const std::string& filepath) = 0;
+		virtual bool DeserializeRuntime() = 0;
 	};
 }

@@ -13,6 +13,8 @@
 
 namespace Hazel
 {
+	extern const std::filesystem::path gAssetsPath;
+
 	template<typename T>
 	static void ResetButton(const std::string& label, T& values, float resetValue, ImVec2 size)
 	{
@@ -335,6 +337,22 @@ namespace Hazel
 			}
 
 			std::string filePath;
+
+			if (ImGui::BeginDragDropTarget())
+			{
+				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
+				{
+					const auto* path = (const wchar_t*)payload->Data;
+					auto fileSystemPath = gAssetsPath / path;
+
+					if (fileSystemPath.extension() == ".png")
+					{
+						filePath = fileSystemPath.string();
+					}
+				}
+				ImGui::EndDragDropTarget();
+			}
+
 			if (isSpritePressed)
 			{
 				filePath = FileDialogs::OpenFile("PNG (*.png)\0*.png\0");
@@ -361,12 +379,17 @@ namespace Hazel
 
 			if (!filePath.empty())
 			{
-				// TODO Look use texture assets
 				component->Texture = Texture2D::Create(filePath);
 			}
 
 			if (component->Texture != nullptr)
 			{
+				if (ImGui::Button("Mag Filter Toggle"))
+				{
+					// TODO serialize Mag Filter
+					auto currentMagFilter = component->Texture->GetMagFilter();
+					component->Texture->ToggleMagFilter(currentMagFilter);
+				}
 				DrawVecControls("Tiling", component->Tiling, 1.0f);
 			}
 
@@ -447,7 +470,6 @@ namespace Hazel
 				{
 					camera.SetOrthographicFarClip(orthographicFarClip);
 				}
-
 			}	break;
 			}
 

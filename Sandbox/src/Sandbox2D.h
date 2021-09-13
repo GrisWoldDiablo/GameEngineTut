@@ -1,6 +1,6 @@
 #pragma once
 #include "Hazel.h"
-
+#include "Hazel/Core/Timer.h"
 #include "ParticleSystem.h"
 
 class Sandbox2D final : public Hazel::Layer
@@ -45,7 +45,7 @@ private:
 	// Particle
 	ParticleSystem _particleSystem;
 	ParticleProps _particleProps;
-	Hazel::InstrumentationTimer _updateTimer;
+	Hazel::Timer _updateTimer;
 	int _particlesAmountPerFrame = 50;
 	int _particlesPoolSize = 100000;
 
