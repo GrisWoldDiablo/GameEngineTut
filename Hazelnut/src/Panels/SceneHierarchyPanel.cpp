@@ -292,6 +292,8 @@ namespace Hazel
 			{
 				AddComponentMenu<CameraComponent>();
 				AddComponentMenu<SpriteRendererComponent>();
+				AddComponentMenu<Rigidbody2DComponent>();
+				AddComponentMenu<BoxCollider2DComponent>();
 				ImGui::EndPopup();
 			}
 			ImGui::PopItemWidth();
@@ -503,6 +505,46 @@ namespace Hazel
 				ImGui::Text(result.c_str());
 				ImGui::EndChild();
 			}
+		});
+#pragma endregion
+
+#pragma region Rigidbody2DComponent
+		DrawComponent<Rigidbody2DComponent>(entity, "Rigidbody 2D", [&](Rigidbody2DComponent* component)
+		{
+			const char* bodyType[] = { "Static","Dynamic","Kinematic" };
+			const char* currentBodyType = bodyType[(int)component->Type];
+			if (ImGui::BeginCombo("Type", currentBodyType))
+			{
+				for (int i = 0; i < 3; i++)
+				{
+					bool isSelected = currentBodyType == bodyType[i];
+					if (ImGui::Selectable(bodyType[i], isSelected))
+					{
+						currentBodyType = bodyType[i];
+						component->Type = (Rigidbody2DComponent::BodyType)i;
+					}
+
+					if (isSelected)
+					{
+						ImGui::SetItemDefaultFocus();
+					}
+				}
+				ImGui::EndCombo();
+			}
+
+			ImGui::Checkbox("Fixed Rotation", &component->IsFixedRotation);
+		});
+#pragma endregion
+
+#pragma region BoxCollider2DComponent
+		DrawComponent<BoxCollider2DComponent>(entity, "Box Collider 2D", [&](BoxCollider2DComponent* component)
+		{
+			DrawVecControls("Offset", component->Offset, 0.0f);
+			DrawVecControls("Size", component->Size, 0.5f);
+			ImGui::DragFloat("Density", &component->Density, 0.01f, 0.0f, 1.0f);
+			ImGui::DragFloat("Friction", &component->Friction, 0.01f, 0.0f, 1.0f);
+			ImGui::DragFloat("Restitution", &component->Restitution, 0.01f, 0.0f, 1.0f);
+			ImGui::DragFloat("Restitution Threshold", &component->RestitutionThreshold, 0.01f, 0.0f);
 		});
 #pragma endregion
 	}

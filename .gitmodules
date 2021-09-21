@@ -21,3 +21,6 @@
 [submodule "Hazel/vendor/ImGuizmo"]
 	path = Hazel/vendor/ImGuizmo
 	url = https://github.com/GrisWoldDiablo/ImGuizmo
+[submodule "Hazel/vendor/Box2D"]
+	path = Hazel/vendor/Box2D
+	url = https://github.com/GrisWoldDiablo/box2d

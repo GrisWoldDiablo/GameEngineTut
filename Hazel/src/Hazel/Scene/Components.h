@@ -30,8 +30,8 @@ namespace Hazel
 	struct BaseComponent : Component
 	{
 		std::string Name;
-		int Tag;
-		int Layer;
+		int Tag = 0;
+		int Layer = 0;
 
 		BaseComponent(Entity entity) : Component(entity) {};
 		BaseComponent(const BaseComponent&) = default;
@@ -41,9 +41,9 @@ namespace Hazel
 
 	struct TransformComponent : Component
 	{
-		glm::vec3 Position = { 0.0f, 0.0f, 0.0f };
-		glm::vec3 Rotation = { 0.0f, 0.0f, 0.0f };
-		glm::vec3 Scale = { 1.0f, 1.0f, 1.0f };
+		glm::vec3 Position{ 0.0f, 0.0f, 0.0f };
+		glm::vec3 Rotation{ 0.0f, 0.0f, 0.0f };
+		glm::vec3 Scale{ 1.0f, 1.0f, 1.0f };
 
 		TransformComponent(Entity entity) : Component(entity) {};
 		TransformComponent(const TransformComponent&) = default;
@@ -96,5 +96,44 @@ namespace Hazel
 			InstantiateScript = []() { return static_cast<ScriptableEntity*>(new T()); };
 			DestroyScript = [](NativeScriptComponent* nsc) { delete  nsc->Instance; nsc->Instance = nullptr; };
 		}
+	};
+
+	// Physics
+
+	struct Rigidbody2DComponent : Component
+	{
+		enum class BodyType 
+		{
+			Static = 0,
+			Dynamic,
+			Kinematic
+		};
+
+		BodyType Type = BodyType::Static;
+		bool IsFixedRotation = false;
+
+		// Storage for runtime
+		void* RuntimeBody = nullptr;
+
+		Rigidbody2DComponent(Entity entity) : Component(entity) {};
+		Rigidbody2DComponent(const Rigidbody2DComponent&) = default;
+	};
+
+	struct BoxCollider2DComponent : Component
+	{
+		glm::vec2 Offset{ 0.0f, 0.0f };
+		glm::vec2 Size{ 0.5f, 0.5f };
+
+		// TODO move into physics material
+		float Density = 1.0f;
+		float Friction = 0.5f;
+		float Restitution = 0.0f;
+		float RestitutionThreshold = 0.5f;
+
+		// Storage for runtime
+		void* RuntimeFixture = nullptr;
+
+		BoxCollider2DComponent(Entity entity) : Component(entity) {};
+		BoxCollider2DComponent(const BoxCollider2DComponent&) = default;
 	};
 }

@@ -18,4 +18,7 @@ if platform.system() == "Windows":
     print("\nRunning premake...") 
     subprocess.call([os.path.abspath("./scripts/Win-GenerateVS-2019.bat"), "nopause"])
 
+print("\nUpdating submodules...")
+subprocess.call(["git", "submodule", "update", "--init", "--recursive"])
+
 print("\nSetup completed!")

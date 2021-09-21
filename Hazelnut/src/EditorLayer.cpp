@@ -70,10 +70,8 @@ namespace Hazel
 			}
 		}
 
-
 		_sceneHierarchyPanel.SetScene(_activeScene);
 		_editorCamera = EditorCamera(30.0f, 1.778f, 0.1f, 1000.0f);
-
 	}
 
 	void EditorLayer::OnDetach()
@@ -368,6 +366,12 @@ namespace Hazel
 
 	void EditorLayer::OpenScene(const std::filesystem::path& path)
 	{
+		if (path.extension().string() != ".hazel")
+		{
+			HZ_CORE_LWARN("Could not load {0} - not a scene file.", path.filename().string());
+			return;
+		}
+		
 		if (!NewScene())
 		{
 			return;
@@ -890,6 +894,7 @@ namespace Hazel
 	void EditorLayer::OnScenePlay()
 	{
 		_sceneState = SceneState::Play;
+
 		SceneSerializer sceneSerializer(_activeScene);
 		sceneSerializer.SerializeRuntime();
 		_editorScene = _activeScene;
@@ -899,6 +904,9 @@ namespace Hazel
 		runtimeSceneSerializer.DeserializeRuntime();
 
 		_activeScene = _runtimeScene;
+
+		_activeScene->OnRuntimeStart();
+
 		_activeScene->OnViewportResize((uint32_t)_sceneViewportSize.x, (uint32_t)_sceneViewportSize.y);
 		_sceneHierarchyPanel.SetScene(_activeScene);
 	}
@@ -906,6 +914,9 @@ namespace Hazel
 	void EditorLayer::OnSceneStop()
 	{
 		_sceneState = SceneState::Edit;
+
+		_activeScene->OnRuntimeStop();
+
 		_editorScene = CreateRef<Scene>();
 
 		SceneSerializer sceneSerializer(_editorScene);

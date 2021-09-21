@@ -12,25 +12,81 @@ namespace Hazel
 		: _scene(scene)
 	{}
 
+	static std::string ProjectionTypeToString(SceneCamera::ProjectionType projectionType)
+	{
+		switch (projectionType)
+		{
+		case SceneCamera::ProjectionType::Perspective: return "Perspective";
+		case SceneCamera::ProjectionType::Orthographic: return "Orthographic";
+		}
+
+		HZ_CORE_ASSERT(false, "Unknown Projection Type");
+		return {};
+	}
+
+	static SceneCamera::ProjectionType ProjectionTypeFromString(const std::string& projectionTypeString)
+	{
+		if (projectionTypeString == "Perspective" || projectionTypeString == "0")
+		{
+			return SceneCamera::ProjectionType::Perspective;
+		}
+
+		if (projectionTypeString == "Orthographic" || projectionTypeString == "1")
+		{
+			return SceneCamera::ProjectionType::Orthographic;
+		}
+
+		HZ_CORE_ASSERT(false, "Unknown Projection Type");
+		return SceneCamera::ProjectionType::Perspective;
+	}
+
+	static std::string Rigidbody2DBodyTypeToString(Rigidbody2DComponent::BodyType bodyType)
+	{
+		switch (bodyType)
+		{
+		case Rigidbody2DComponent::BodyType::Static: return "Static";
+		case Rigidbody2DComponent::BodyType::Dynamic: return "Dynamic";
+		case Rigidbody2DComponent::BodyType::Kinematic: return "Kinematic";
+		}
+
+		HZ_CORE_ASSERT(false, "Unknown Body Type");
+		return {};
+	}
+
+	static Rigidbody2DComponent::BodyType Rigidbody2DBodyTypeFromString(const std::string& bodyTypeString)
+	{
+		if (bodyTypeString == "Static") return  Rigidbody2DComponent::BodyType::Static;
+		if (bodyTypeString == "Dynamic") return  Rigidbody2DComponent::BodyType::Dynamic;
+		if (bodyTypeString == "Kinematic") return  Rigidbody2DComponent::BodyType::Kinematic;
+
+		HZ_CORE_ASSERT(false, "Unknown Body Type");
+		return  Rigidbody2DComponent::BodyType::Static;
+	}
+
 	static void SerializeEntity(YAML::Emitter& out, Entity entity)
 	{
 		out << YAML::BeginMap; // Entity
 		out << YAML::Key << "Entity" << YAML::Value << "1657643249657"; // TODO : Entity ID goes here.
 
+#pragma region BaseComponent
 		out << YAML::Key << "BaseComponent";
 		out << YAML::BeginMap; // BaseComponent
 		out << YAML::Key << "Name" << YAML::Value << entity.Name();
 		out << YAML::Key << "Tag" << YAML::Value << entity.Tag();
 		out << YAML::Key << "Layer" << YAML::Value << entity.Layer();
-		out << YAML::EndMap; // BaseComponent
+		out << YAML::EndMap; // BaseComponent  
+#pragma endregion
 
+#pragma region TransformComponent
 		out << YAML::Key << "TransformComponent";
 		out << YAML::BeginMap; // TransformComponent
 		out << YAML::Key << "Position" << YAML::Value << entity.Transform().Position;
 		out << YAML::Key << "Rotation" << YAML::Value << entity.Transform().Rotation;
 		out << YAML::Key << "Scale" << YAML::Value << entity.Transform().Scale;
-		out << YAML::EndMap; // TransformComponent
+		out << YAML::EndMap; // TransformComponent  
+#pragma endregion
 
+#pragma region CameraComponent
 		if (auto component = entity.TryGetComponent<CameraComponent>(); component != nullptr)
 		{
 			out << YAML::Key << "CameraComponent";
@@ -40,7 +96,8 @@ namespace Hazel
 
 			out << YAML::Key << "Camera" << YAML::Value;
 			out << YAML::BeginMap; // Camera
-			out << YAML::Key << "ProjectionType" << YAML::Value << (int)camera.GetProjectionType();
+			auto v = ProjectionTypeToString(camera.GetProjectionType());
+			out << YAML::Key << "ProjectionType" << YAML::Value << ProjectionTypeToString(camera.GetProjectionType());
 			out << YAML::Key << "PerspectiveVerticalFOV" << YAML::Value << camera.GetPerspectiveVerticalFOV();
 			out << YAML::Key << "PerspectiveNearClip" << YAML::Value << camera.GetPerspectiveNearClip();
 			out << YAML::Key << "PerspectiveFarClip" << YAML::Value << camera.GetPerspectiveFarClip();
@@ -55,7 +112,9 @@ namespace Hazel
 
 			out << YAML::EndMap; // CameraComponent
 		}
+#pragma endregion
 
+#pragma region SpriteRendererComponent
 		if (auto component = entity.TryGetComponent<SpriteRendererComponent>(); component != nullptr)
 		{
 			out << YAML::Key << "SpriteRendererComponent";
@@ -70,6 +129,37 @@ namespace Hazel
 
 			out << YAML::EndMap; // SpriteRendererComponent
 		}
+#pragma endregion
+
+#pragma region Rigidbody2DComponent
+		if (auto component = entity.TryGetComponent<Rigidbody2DComponent>(); component != nullptr)
+		{
+			out << YAML::Key << "Rigidbody2DComponent";
+			out << YAML::BeginMap; // Rigidbody2DComponent
+
+			out << YAML::Key << "BodyType" << YAML::Value << Rigidbody2DBodyTypeToString(component->Type);
+			out << YAML::Key << "IsFixedRotation" << YAML::Value << component->IsFixedRotation;
+
+			out << YAML::EndMap; // Rigidbody2DComponent
+		}
+#pragma endregion
+
+#pragma region BoxCollider2DComponent
+		if (auto component = entity.TryGetComponent<BoxCollider2DComponent>(); component != nullptr)
+		{
+			out << YAML::Key << "BoxCollider2DComponent";
+			out << YAML::BeginMap; // BoxCollider2DComponent
+
+			out << YAML::Key << "Offset" << YAML::Value << component->Offset;
+			out << YAML::Key << "Size" << YAML::Value << component->Size;
+			out << YAML::Key << "Density" << YAML::Value << component->Density;
+			out << YAML::Key << "Friction" << YAML::Value << component->Friction;
+			out << YAML::Key << "Restitution" << YAML::Value << component->Restitution;
+			out << YAML::Key << "RestitutionThreshold" << YAML::Value << component->RestitutionThreshold;
+
+			out << YAML::EndMap; // BoxCollider2DComponent
+		}
+#pragma endregion
 
 		out << YAML::EndMap;
 	}
@@ -168,6 +258,7 @@ namespace Hazel
 			{
 				auto entityID = entity["Entity"].as<uint64_t>(); // TODO Entity ID
 
+#pragma region BaseComponent
 				std::string name;
 				int tag;
 				int layer;
@@ -178,6 +269,7 @@ namespace Hazel
 					tag = baseComponent["Tag"].as<int>();
 					layer = baseComponent["Layer"].as<int>();
 				}
+#pragma endregion
 
 				if (isWithLog)
 				{
@@ -185,6 +277,7 @@ namespace Hazel
 				}
 				auto deserializedEntity = _scene->CreateEntity(name, tag, layer);
 
+#pragma region TransformComponent
 				auto transformComponent = entity["TransformComponent"];
 				if (transformComponent)
 				{
@@ -194,7 +287,9 @@ namespace Hazel
 					component.Rotation = transformComponent["Rotation"].as<glm::vec3>();
 					component.Scale = transformComponent["Scale"].as<glm::vec3>();
 				}
+#pragma endregion
 
+#pragma region CameraComponent
 				auto cameraComponent = entity["CameraComponent"];
 				if (cameraComponent)
 				{
@@ -202,7 +297,7 @@ namespace Hazel
 					auto& cameraProperties = cameraComponent["Camera"];
 
 					component.Camera.SetAspectRatio(GetValue<float>(cameraProperties, "AspectRatio"));
-					component.Camera.SetProjectionType((SceneCamera::ProjectionType)cameraProperties["ProjectionType"].as<int>());
+					component.Camera.SetProjectionType(ProjectionTypeFromString(GetValue<std::string>(cameraProperties, "ProjectionType", "Perspective")));
 
 					component.Camera.SetPerspectiveVerticalFOV(cameraProperties["PerspectiveVerticalFOV"].as<float>());
 					component.Camera.SetPerspectiveNearClip(cameraProperties["PerspectiveNearClip"].as<float>());
@@ -215,7 +310,9 @@ namespace Hazel
 					component.IsPrimary = cameraComponent["IsPrimary"].as<bool>();
 					component.IsFixedAspectRatio = cameraComponent["IsFixedAspectRatio"].as<bool>();
 				}
+#pragma endregion
 
+#pragma region SpriteRendererComponent
 				auto spriteRendererComponent = entity["SpriteRendererComponent"];
 				if (spriteRendererComponent)
 				{
@@ -230,6 +327,31 @@ namespace Hazel
 
 					component.Color = GetValue<glm::vec4>(spriteRendererComponent, "Color", { 0.0f, 0.0f, 0.0f, 1.0f });
 				}
+#pragma endregion
+
+#pragma region Rigidbody2DComponent
+				auto rigidbody2DComponent = entity["Rigidbody2DComponent"];
+				if (rigidbody2DComponent)
+				{
+					auto& component = deserializedEntity.AddComponent<Rigidbody2DComponent>();
+					component.Type = Rigidbody2DBodyTypeFromString(GetValue<std::string>(rigidbody2DComponent, "BodyType", "Static"));
+					component.IsFixedRotation = GetValue<bool>(rigidbody2DComponent, "IsFixedRotation");
+				}
+#pragma endregion
+
+#pragma region BoxCollider2DComponent
+				auto boxCollider2DComponent = entity["BoxCollider2DComponent"];
+				if (boxCollider2DComponent)
+				{
+					auto& component = deserializedEntity.AddComponent<BoxCollider2DComponent>();
+					component.Offset = GetValue<glm::vec2>(boxCollider2DComponent, "Offset");
+					component.Size = GetValue<glm::vec2>(boxCollider2DComponent, "Size", { 0.5f, 0.5f });
+					component.Density = GetValue<float>(boxCollider2DComponent, "Density", 1.0f);
+					component.Friction = GetValue<float>(boxCollider2DComponent, "Friction", 0.5f);
+					component.Restitution = GetValue<float>(boxCollider2DComponent, "Restitution");
+					component.RestitutionThreshold = GetValue<float>(boxCollider2DComponent, "RestitutionThreshold", 0.5f);
+				}
+#pragma endregion
 			}
 		}
 

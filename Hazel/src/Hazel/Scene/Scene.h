@@ -4,6 +4,8 @@
 
 #include "entt.hpp"
 
+class b2World;
+
 namespace Hazel
 {
 	class Entity;
@@ -16,6 +18,9 @@ namespace Hazel
 
 		Entity CreateEntity(std::string name = "Entity", int tag = 0, int layer = 0);
 		void DestroyEntity(Entity entity);
+
+		void OnRuntimeStart();
+		void OnRuntimeStop();
 
 		void OnUpdateRuntime();
 		void OnUpdateEditor(EditorCamera& camera);
@@ -38,6 +43,8 @@ namespace Hazel
 		uint32_t _viewportWidth = 0;
 		uint32_t _viewportHeight = 0;
 		std::string _name;
+
+		b2World* _physicsWorld = nullptr;
 
 		friend class Entity;
 		friend class SceneSerializer;

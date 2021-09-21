@@ -3,8 +3,26 @@
 #include "components.h"
 #include "Hazel/Renderer/Renderer2D.h"
 
+#include "box2d/b2_world.h"
+#include "box2d/b2_body.h"
+#include "box2d/b2_fixture.h"
+#include "box2d/b2_polygon_shape.h"
+
 namespace Hazel
 {
+	static b2BodyType Rigidbody2DTypeToBox2DBody(Rigidbody2DComponent::BodyType bodyType)
+	{
+		switch (bodyType)
+		{
+		case Hazel::Rigidbody2DComponent::BodyType::Static: return b2_staticBody;
+		case Hazel::Rigidbody2DComponent::BodyType::Dynamic: return b2_dynamicBody;
+		case Hazel::Rigidbody2DComponent::BodyType::Kinematic: return b2_kinematicBody;
+		}
+
+		HZ_CORE_ASSERT(false, "Unknown body Type!");
+		return b2_staticBody;
+	}
+
 	Scene::~Scene()
 	{
 		_registry.clear();
@@ -29,10 +47,50 @@ namespace Hazel
 		_registry.destroy(entity);
 	}
 
+	void Scene::OnRuntimeStart()
+	{
+		_physicsWorld = new b2World({ 0.0f, -9.8f });
+		_registry.view<Rigidbody2DComponent>().each([=](const auto entt, Rigidbody2DComponent& rb2d)
+		{
+			auto& entity = rb2d.GetEntity();
+			auto& transform = entity.Transform();
+
+			b2BodyDef bodyDef;
+			bodyDef.type = Rigidbody2DTypeToBox2DBody(rb2d.Type);
+			bodyDef.position.Set(transform.Position.x, transform.Position.y);
+			bodyDef.angle = transform.Rotation.z;
+
+			b2Body* body = _physicsWorld->CreateBody(&bodyDef);
+			body->SetFixedRotation(rb2d.IsFixedRotation);
+			rb2d.RuntimeBody = body;
+
+			if (auto* bc2d = entity.TryGetComponent<BoxCollider2DComponent>(); bc2d != nullptr)
+			{
+				b2PolygonShape boxShape;
+				boxShape.SetAsBox(bc2d->Size.x * transform.Scale.x, bc2d->Size.y * transform.Scale.y);
+
+				b2FixtureDef fixtureDef;
+				fixtureDef.shape = &boxShape;
+				fixtureDef.density = bc2d->Density;
+				fixtureDef.friction = bc2d->Friction;
+				fixtureDef.restitution = bc2d->Restitution;
+				fixtureDef.restitutionThreshold = bc2d->RestitutionThreshold;
+
+				body->CreateFixture(&fixtureDef);
+			}
+		});
+	}
+
+	void Scene::OnRuntimeStop()
+	{
+		delete _physicsWorld;
+		_physicsWorld = nullptr;
+	}
+
 	void Scene::OnUpdateRuntime()
 	{
 		// Update Scripts
-		_registry.view<NativeScriptComponent>().each([=](const auto entity, auto& nsc)
+		_registry.view<NativeScriptComponent>().each([=](const auto entt, auto& nsc)
 		{
 			auto& instance = nsc.Instance;
 
@@ -40,7 +98,7 @@ namespace Hazel
 			if (instance == nullptr)
 			{
 				instance = nsc.InstantiateScript();
-				instance->_entity = { entity, this };
+				instance->_entity = { entt, this };
 				instance->OnCreate();
 			}
 
@@ -52,11 +110,33 @@ namespace Hazel
 			instance->OnUpdate();
 		});
 
+		// Physics
+		{
+			const int32_t velocityInteration = 6;
+			const int32_t positionInteration = 2;
+			_physicsWorld->Step(Time::GetTimestep(), velocityInteration, positionInteration);
+
+			// Retrieve transform from Box2D
+			_registry.view<Rigidbody2DComponent>().each([&](const auto entt, Rigidbody2DComponent& rb2d)
+			{
+				auto& entity = rb2d.GetEntity();
+				auto& transform = entity.Transform();
+				if (auto* bc2d = entity.TryGetComponent<BoxCollider2DComponent>(); bc2d != nullptr)
+				{
+					auto* body = (b2Body*)rb2d.RuntimeBody;
+					const auto& position = body->GetPosition();
+					transform.Position.x = position.x;
+					transform.Position.y = position.y;
+					transform.Rotation.z = body->GetAngle();
+				}
+			});
+		}
+
 		// Render 2D
 		Camera* mainCamera = nullptr;
 		glm::mat4 cameraTransform;
 		glm::vec3 cameraPosition;
-		_registry.view<CameraComponent, TransformComponent>().each([&](const auto entity, auto& camera, auto& transform)
+		_registry.view<CameraComponent, TransformComponent>().each([&](const auto entity, CameraComponent& camera, TransformComponent& transform)
 		{
 			if (camera.IsPrimary)
 			{
@@ -170,5 +250,13 @@ namespace Hazel
 
 	template<>
 	void Scene::OnComponentAdded<NativeScriptComponent>(Entity entity, NativeScriptComponent& component)
+	{}
+
+	template<>
+	void Scene::OnComponentAdded<Rigidbody2DComponent>(Entity entity, Rigidbody2DComponent& component)
+	{}
+
+	template<>
+	void Scene::OnComponentAdded<BoxCollider2DComponent>(Entity entity, BoxCollider2DComponent& component)
 	{}
 }

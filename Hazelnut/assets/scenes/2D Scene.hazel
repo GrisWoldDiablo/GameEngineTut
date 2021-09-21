@@ -1,0 +1,86 @@
+Scene: 2D Scene
+Entities:
+  - Entity: 1657643249657
+    BaseComponent:
+      Name: Slope
+      Tag: 0
+      Layer: 0
+    TransformComponent:
+      Position: [0, -2.4570334, 0]
+      Rotation: [0, 0, -0.287857264]
+      Scale: [21.6888866, 0.265017986, 1]
+    SpriteRendererComponent:
+      Color: [0.99227798, 0.739552617, 0.222208977, 1]
+    Rigidbody2DComponent:
+      BodyType: Static
+      IsFixedRotation: false
+    BoxCollider2DComponent:
+      Offset: [0, 0]
+      Size: [0.5, 0.5]
+      Density: 1
+      Friction: 0.119999997
+      Restitution: 0
+      RestitutionThreshold: 0.5
+  - Entity: 1657643249657
+    BaseComponent:
+      Name: Square
+      Tag: 0
+      Layer: 0
+    TransformComponent:
+      Position: [-2.71451521, 2.47310162, 0]
+      Rotation: [0, 0, 0.659734488]
+      Scale: [0.999999821, 0.999999821, 1]
+    SpriteRendererComponent:
+      Color: [0.196911216, 0.913956225, 1, 1]
+    Rigidbody2DComponent:
+      BodyType: Dynamic
+      IsFixedRotation: false
+    BoxCollider2DComponent:
+      Offset: [0, 0]
+      Size: [0.5, 0.5]
+      Density: 1
+      Friction: 0.5
+      Restitution: 0.529999971
+      RestitutionThreshold: 0.5
+  - Entity: 1657643249657
+    BaseComponent:
+      Name: Camera
+      Tag: 0
+      Layer: 0
+    TransformComponent:
+      Position: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    CameraComponent:
+      Camera:
+        ProjectionType: Orthographic
+        PerspectiveVerticalFOV: 0.785398185
+        PerspectiveNearClip: 0.00999999978
+        PerspectiveFarClip: 1000
+        OrthographicSize: 10
+        OrthographicNearClip: -1
+        OrthographicFarClip: 1
+        AspectRatio: 1.86422014
+      IsPrimary: true
+      IsFixedAspectRatio: false
+  - Entity: 1657643249657
+    BaseComponent:
+      Name: Wall
+      Tag: 0
+      Layer: 0
+    TransformComponent:
+      Position: [7.51363277, -0.758702874, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 7.16579294, 1]
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 1]
+    Rigidbody2DComponent:
+      BodyType: Static
+      IsFixedRotation: false
+    BoxCollider2DComponent:
+      Offset: [0, 0]
+      Size: [0.5, 0.5]
+      Density: 1
+      Friction: 0.5
+      Restitution: 0
+      RestitutionThreshold: 0.5
