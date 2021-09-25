@@ -1,6 +1,7 @@
 #include "hzpch.h"
 #include "Scene.h"
 #include "components.h"
+#include "ScriptableEntity.h"
 #include "Hazel/Renderer/Renderer2D.h"
 
 #include "box2d/b2_world.h"
@@ -28,9 +29,16 @@ namespace Hazel
 		_registry.clear();
 	}
 
-	Entity Scene::CreateEntity(std::string name, int tag, int layer)
+	Entity Scene::CreateEntity(const std::string& name, int tag, int layer)
+	{
+		return CreateEntityWithUUID(UUID(), name, tag, layer);
+	}
+
+	Entity Scene::CreateEntityWithUUID(UUID uuid, const std::string& name, int tag, int layer)
 	{
 		Entity entity = { _registry.create(), this };
+
+		entity.AddComponent<IDComponent>(uuid);
 
 		auto& baseComponent = entity.AddComponent<BaseComponent>();
 		baseComponent.Name = name;
@@ -52,7 +60,7 @@ namespace Hazel
 		_physicsWorld = new b2World({ 0.0f, -9.8f });
 		_registry.view<Rigidbody2DComponent>().each([=](const auto entt, Rigidbody2DComponent& rb2d)
 		{
-			auto& entity = rb2d.GetEntity();
+			Entity entity = { entt, this };
 			auto& transform = entity.Transform();
 
 			b2BodyDef bodyDef;
@@ -119,8 +127,9 @@ namespace Hazel
 			// Retrieve transform from Box2D
 			_registry.view<Rigidbody2DComponent>().each([&](const auto entt, Rigidbody2DComponent& rb2d)
 			{
-				auto& entity = rb2d.GetEntity();
+				Entity entity = { entt, this };
 				auto& transform = entity.Transform();
+
 				if (auto* bc2d = entity.TryGetComponent<BoxCollider2DComponent>(); bc2d != nullptr)
 				{
 					auto* body = (b2Body*)rb2d.RuntimeBody;
@@ -226,6 +235,10 @@ namespace Hazel
 	{
 		static_assert(false);
 	}
+
+	template<>
+	void Scene::OnComponentAdded<IDComponent>(Entity entity, IDComponent& component)
+	{}
 
 	template<>
 	void Scene::OnComponentAdded<BaseComponent>(Entity entity, BaseComponent& component)

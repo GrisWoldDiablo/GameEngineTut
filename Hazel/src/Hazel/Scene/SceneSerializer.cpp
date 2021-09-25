@@ -65,8 +65,10 @@ namespace Hazel
 
 	static void SerializeEntity(YAML::Emitter& out, Entity entity)
 	{
+		HZ_CORE_ASSERT(entity.HasComponent<IDComponent>(), "IDComponent missing!");
+
 		out << YAML::BeginMap; // Entity
-		out << YAML::Key << "Entity" << YAML::Value << "1657643249657"; // TODO : Entity ID goes here.
+		out << YAML::Key << "Entity" << YAML::Value << entity.GetUUID();
 
 #pragma region BaseComponent
 		out << YAML::Key << "BaseComponent";
@@ -256,7 +258,7 @@ namespace Hazel
 		{
 			for (auto entity : entities)
 			{
-				auto entityID = entity["Entity"].as<uint64_t>(); // TODO Entity ID
+				auto entityID = entity["Entity"].as<uint64_t>();
 
 #pragma region BaseComponent
 				std::string name;
@@ -275,7 +277,7 @@ namespace Hazel
 				{
 					HZ_CORE_LTRACE(" Entity: ID[{0}], Name[{1}],Tag[{2}],Layer[{3}]", entityID, name, tag, layer);
 				}
-				auto deserializedEntity = _scene->CreateEntity(name, tag, layer);
+				auto deserializedEntity = _scene->CreateEntityWithUUID(entityID, name, tag, layer);
 
 #pragma region TransformComponent
 				auto transformComponent = entity["TransformComponent"];

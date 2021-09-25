@@ -1,6 +1,6 @@
 Scene: Base
 Entities:
-  - Entity: 1657643249657
+  - Entity: 11256980088583822476
     BaseComponent:
       Name: Camera
       Tag: 0
@@ -11,7 +11,7 @@ Entities:
       Scale: [0.999999762, 1, 1]
     CameraComponent:
       Camera:
-        ProjectionType: 1
+        ProjectionType: Orthographic
         PerspectiveVerticalFOV: 0.785398185
         PerspectiveNearClip: 0.00999999978
         PerspectiveFarClip: 1000
@@ -21,7 +21,7 @@ Entities:
         AspectRatio: 1.75
       IsPrimary: true
       IsFixedAspectRatio: false
-  - Entity: 1657643249657
+  - Entity: 10761068567759232447
     BaseComponent:
       Name: Right
       Tag: 0
@@ -32,7 +32,7 @@ Entities:
       Scale: [0.999999225, 0.99999994, 0.999999583]
     SpriteRendererComponent:
       Color: [0.607843161, 0.494117647, 0.309803933, 1]
-  - Entity: 1657643249657
+  - Entity: 2794600615049611686
     BaseComponent:
       Name: Left
       Tag: 0
@@ -43,7 +43,7 @@ Entities:
       Scale: [0.999999404, 0.999999881, 0.999999464]
     SpriteRendererComponent:
       Color: [0.588235319, 0.545098066, 0.31764707, 1]
-  - Entity: 1657643249657
+  - Entity: 10313605176620592272
     BaseComponent:
       Name: Top
       Tag: 0

@@ -1,6 +1,6 @@
 Scene: 3D Example Blue
 Entities:
-  - Entity: 1657643249657
+  - Entity: 18150426363550980669
     BaseComponent:
       Name: Right
       Tag: 0
@@ -11,7 +11,7 @@ Entities:
       Scale: [1, 1, 1]
     SpriteRendererComponent:
       Color: [0, 0.392156869, 1, 1]
-  - Entity: 1657643249657
+  - Entity: 4909115464262586653
     BaseComponent:
       Name: Left
       Tag: 0
@@ -22,7 +22,7 @@ Entities:
       Scale: [1, 1, 1]
     SpriteRendererComponent:
       Color: [0.392156869, 0.588235319, 1, 1]
-  - Entity: 1657643249657
+  - Entity: 17296439708741178984
     BaseComponent:
       Name: Camera
       Tag: 0
@@ -33,16 +33,17 @@ Entities:
       Scale: [1, 1, 1]
     CameraComponent:
       Camera:
-        ProjectionType: 0
+        ProjectionType: Perspective
         PerspectiveVerticalFOV: 0.52359879
         PerspectiveNearClip: 0.00999999978
         PerspectiveFarClip: 1000
         OrthographicSize: 10
         OrthographicNearClip: -1
         OrthographicFarClip: 1
+        AspectRatio: 0
       IsPrimary: true
       IsFixedAspectRatio: true
-  - Entity: 1657643249657
+  - Entity: 5746112265823965145
     BaseComponent:
       Name: Top
       Tag: 0

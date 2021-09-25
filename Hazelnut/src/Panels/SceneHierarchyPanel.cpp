@@ -1,5 +1,6 @@
 #include "SceneHierarchyPanel.h"
 #include "Hazel/Scene/Components.h"
+#include "Hazel/Scene/ScriptableEntity.h"
 
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>

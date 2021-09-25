@@ -1,51 +1,47 @@
 #pragma once
+
+#include "Hazel/Core/Color.h"
+#include "SceneCamera.h"
+#include "Hazel/Core/UUID.h"
+#include "Hazel/Renderer/Texture.h"
+
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
 
-#include "Hazel/Core/Color.h"
-#include "SceneCamera.h"
-#include "ScriptableEntity.h"
-#include "Hazel/Renderer/Texture.h"
-
 namespace Hazel
 {
-	struct Component
+	struct IDComponent
 	{
-	public:
-		Component(Entity entity)
-			:_entity(entity)
-		{}
-		virtual ~Component() = default;
+		UUID ID;
 
-	public:
-		Entity GetEntity() { return _entity; }
+		IDComponent() = default;
+		IDComponent(const IDComponent&) = default;
 
-	private:
-		Entity _entity;
+		~IDComponent() = default;
 	};
 
-	struct BaseComponent : Component
+	struct BaseComponent
 	{
 		std::string Name;
 		int Tag = 0;
 		int Layer = 0;
 
-		BaseComponent(Entity entity) : Component(entity) {};
+		BaseComponent() = default;
 		BaseComponent(const BaseComponent&) = default;
 
 		~BaseComponent() = default;
 	};
 
-	struct TransformComponent : Component
+	struct TransformComponent
 	{
 		glm::vec3 Position{ 0.0f, 0.0f, 0.0f };
 		glm::vec3 Rotation{ 0.0f, 0.0f, 0.0f };
 		glm::vec3 Scale{ 1.0f, 1.0f, 1.0f };
 
-		TransformComponent(Entity entity) : Component(entity) {};
+		TransformComponent() = default;
 		TransformComponent(const TransformComponent&) = default;
 
 		glm::mat4 GetTransformMatrix() const
@@ -63,25 +59,28 @@ namespace Hazel
 		}
 	};
 
-	struct SpriteRendererComponent : Component
+	struct SpriteRendererComponent
 	{
 		Ref<Texture2D> Texture = nullptr;
 		glm::vec2 Tiling{ 1.0f, 1.0f };
 		Color Color{ Color::White };
 
-		SpriteRendererComponent(Entity entity) : Component(entity) {};
+		SpriteRendererComponent() = default;
 		SpriteRendererComponent(const SpriteRendererComponent&) = default;
 	};
 
-	struct CameraComponent : Component
+	struct CameraComponent
 	{
 		SceneCamera Camera;
 		bool IsPrimary = true;
 		bool IsFixedAspectRatio = false;
 
-		CameraComponent(Entity entity) : Component(entity) {};
+		CameraComponent() = default;
 		CameraComponent(const CameraComponent&) = default;
 	};
+
+	// Forward declaration
+	class ScriptableEntity;
 
 	struct NativeScriptComponent
 	{
@@ -100,9 +99,9 @@ namespace Hazel
 
 	// Physics
 
-	struct Rigidbody2DComponent : Component
+	struct Rigidbody2DComponent
 	{
-		enum class BodyType 
+		enum class BodyType
 		{
 			Static = 0,
 			Dynamic,
@@ -115,11 +114,11 @@ namespace Hazel
 		// Storage for runtime
 		void* RuntimeBody = nullptr;
 
-		Rigidbody2DComponent(Entity entity) : Component(entity) {};
+		Rigidbody2DComponent() = default;
 		Rigidbody2DComponent(const Rigidbody2DComponent&) = default;
 	};
 
-	struct BoxCollider2DComponent : Component
+	struct BoxCollider2DComponent
 	{
 		glm::vec2 Offset{ 0.0f, 0.0f };
 		glm::vec2 Size{ 0.5f, 0.5f };
@@ -133,7 +132,7 @@ namespace Hazel
 		// Storage for runtime
 		void* RuntimeFixture = nullptr;
 
-		BoxCollider2DComponent(Entity entity) : Component(entity) {};
+		BoxCollider2DComponent() = default;
 		BoxCollider2DComponent(const BoxCollider2DComponent&) = default;
 	};
 }
