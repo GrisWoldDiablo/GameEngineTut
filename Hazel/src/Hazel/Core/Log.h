@@ -4,9 +4,8 @@
 #include "spdlog/spdlog.h"
 #include "spdlog/fmt/ostr.h"
 
-#include "glm/vec2.hpp"
-#include "glm/vec3.hpp"
-#include "glm/vec4.hpp"
+#define  GLM_ENABLE_EXPERIMENTAL
+#include "glm/gtx/string_cast.hpp"
 
 #include "Color.h"
 
@@ -44,83 +43,20 @@ namespace Hazel
 
 // String formatters for glm structs
 
-template <>
-struct fmt::formatter<glm::vec2>
+template<typename OStream, glm::length_t L, typename T, glm::qualifier Q>
+inline OStream& operator<<(OStream& os, const glm::vec<L, T, Q>& vector)
 {
-	// Presentation format: 'f' - fixed
-	char presentation = 'f';
+	return os << glm::to_string(vector);
+}
 
-	constexpr auto parse(fmt::format_parse_context& ctx)
-	{
-		// Parse the presentation format and store it in the formatter:
-		auto it = ctx.begin(), end = ctx.end();
-		if (it != end && (*it == 'f')) presentation = *it++;
-
-		// Check if reached the end of the range:
-		if (it != end && *it != '}')
-			throw format_error("invalid format");
-
-		// Return an iterator past the end of the parsed range:
-		return it;
-	}
-
-	template <typename FormatContext>
-	auto format(const glm::vec2& vec2, FormatContext& ctx)
-	{
-		return format_to(ctx.out(), "(x:{:.3f}, y:{:.3f})", vec2.x, vec2.y);
-	}
-};
-
-template <>
-struct fmt::formatter<glm::vec3>
+template<typename OStream, glm::length_t C, glm::length_t R, typename T, glm::qualifier Q>
+inline OStream& operator<<(OStream& os, const glm::mat<C, R, T, Q>& matrix)
 {
-	// Presentation format: 'f' - fixed
-	char presentation = 'f';
+	return os << glm::to_string(matrix);
+}
 
-	constexpr auto parse(fmt::format_parse_context& ctx)
-	{
-		// Parse the presentation format and store it in the formatter:
-		auto it = ctx.begin(), end = ctx.end();
-		if (it != end && (*it == 'f')) presentation = *it++;
-
-		// Check if reached the end of the range:
-		if (it != end && *it != '}')
-			throw format_error("invalid format");
-
-		// Return an iterator past the end of the parsed range:
-		return it;
-	}
-
-	template <typename FormatContext>
-	auto format(const glm::vec3& vec3, FormatContext& ctx)
-	{
-		return format_to(ctx.out(), "(x:{:.3f}, y:{:.3f}, z:{:.3f})", vec3.x, vec3.y, vec3.z);
-	}
-};
-
-template <>
-struct fmt::formatter<glm::vec4>
+template<typename OStream, typename T, glm::qualifier Q>
+inline OStream& operator<<(OStream& os, const glm::qua<T, Q>& quaternion)
 {
-	// Presentation format: 'f' - fixed
-	char presentation = 'f';
-
-	constexpr auto parse(fmt::format_parse_context& ctx)
-	{
-		// Parse the presentation format and store it in the formatter:
-		auto it = ctx.begin(), end = ctx.end();
-		if (it != end && (*it == 'f')) presentation = *it++;
-
-		// Check if reached the end of the range:
-		if (it != end && *it != '}')
-			throw format_error("invalid format");
-
-		// Return an iterator past the end of the parsed range:
-		return it;
-	}
-
-	template <typename FormatContext>
-	auto format(const glm::vec4& vec4, FormatContext& ctx)
-	{
-		return format_to(ctx.out(), "(x:{:.3f}, y:{:.3f}, z:{:.3f}, w:{:.3f})", vec4.x, vec4.y, vec4.z, vec4.w);
-	}
-};
+	return os << glm::to_string(quaternion);
+}
