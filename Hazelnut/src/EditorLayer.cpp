@@ -19,6 +19,7 @@ namespace Hazel
 	{
 		// Create Gizmo Icons texture.
 		_panIconTexture = Texture2D::Create("Resources/Icons/Gizmo/PanIcon256White.png");
+		_magnifierIconTexture = Texture2D::Create("Resources/Icons/Gizmo/MagnifierIcon256White.png");
 		_eyeIconTexture = Texture2D::Create("Resources/Icons/Gizmo/EyeIcon256White.png");
 		_nothingGizmoIconTexture = Texture2D::Create("Resources/Icons/Gizmo/NothingGizmo256White.png");
 		_positionGizmoIconTexture = Texture2D::Create("Resources/Icons/Gizmo/PositionGizmo256White.png");
@@ -371,7 +372,7 @@ namespace Hazel
 			HZ_CORE_LWARN("Could not load {0} - not a scene file.", path.filename().string());
 			return;
 		}
-		
+
 		if (!NewScene())
 		{
 			return;
@@ -428,10 +429,23 @@ namespace Hazel
 			ImGui::TableNextColumn();
 			ImGui::TableNextColumn();
 
-			ImTextureID gizmoButtonTexture;
+			Ref<Texture2D> gizmoButtonTexture;
+
 			if (_editorCamera.IsAdjusting())
 			{
-				gizmoButtonTexture = (ImTextureID)(intptr_t)_eyeIconTexture->GetRendererID();
+				if (_editorCamera.IsPanning())
+				{
+					gizmoButtonTexture = _panIconTexture;
+				}
+				else if (_editorCamera.IsZooming())
+				{
+					gizmoButtonTexture = _magnifierIconTexture;
+				}
+				else
+				{
+					gizmoButtonTexture = _eyeIconTexture;
+				}
+
 				if (!_hasStoredPreviousGizmoType)
 				{
 					_previousGizmoType = _gizmoType;
@@ -441,7 +455,7 @@ namespace Hazel
 			}
 			else
 			{
-				gizmoButtonTexture = (ImTextureID)(intptr_t)_nothingGizmoIconTexture->GetRendererID();
+				gizmoButtonTexture = _nothingGizmoIconTexture;
 				if (_hasStoredPreviousGizmoType)
 				{
 					_gizmoType = _previousGizmoType;
@@ -451,7 +465,7 @@ namespace Hazel
 			}
 
 			bool isNothing = _gizmoType == -1;
-			if (ImGui::ImageButton(gizmoButtonTexture, size, uv0, uv1, 3, isNothing ? selectedColor : normalColor, isNothing ? tintColor : whiteColor))
+			if (ImGui::ImageButton((ImTextureID)(intptr_t)gizmoButtonTexture->GetRendererID(), size, uv0, uv1, 3, isNothing ? selectedColor : normalColor, isNothing ? tintColor : whiteColor))
 			{
 				_gizmoType = -1;
 			}
@@ -735,31 +749,36 @@ namespace Hazel
 
 #pragma region CameraDriving
 		// TODO Draw Magnifying and Hand cursor when zooming and panning
-// Draw Eye cursor and move speed when driving the camera
-		if (_editorCamera.IsDriving() && ImGui::IsItemHovered())
+		// Draw Eye cursor and move speed when driving the camera
+		if (_editorCamera.IsAdjusting() && ImGui::IsItemHovered())
 		{
+			// Cursor
 			ImGui::SetMouseCursor(ImGuiMouseCursor_None);
-
 			auto mousePos = ImGui::GetMousePos();
 
-			// Cursor
 			auto upperLeftPos = mousePos;
 			upperLeftPos.y -= 10.0f;
 			upperLeftPos.x -= 10.0f;
 			auto lowerRightPos = upperLeftPos;
 			lowerRightPos.y += 25.0f;
 			lowerRightPos.x += 25.0f;
-			auto uv0 = ImVec2(0.0f, 1.0f);
-			auto uv1 = ImVec2(1.0f, 0.0f);
-			ImGui::GetForegroundDrawList()->AddImage((ImTextureID)(intptr_t)_eyeIconTexture->GetRendererID(), upperLeftPos, lowerRightPos, uv0, uv1, IM_COL32_WHITE);
 
-			// Move Speed
-			std::stringstream ss;
-			ss << _editorCamera.GetDrivingSpeed();
-			mousePos.y += 10.0f;
-			mousePos.x += 10.0f;
-			ImGui::GetForegroundDrawList()->AddText(mousePos, IM_COL32_WHITE, ss.str().c_str());
+			Ref<Texture2D> cursorTexture = _editorCamera.IsPanning() ? _panIconTexture : _magnifierIconTexture;
+
+			if (_editorCamera.IsDriving())
+			{
+				cursorTexture = _eyeIconTexture;
+				// Move Speed
+				std::stringstream ss;
+				ss << _editorCamera.GetDrivingSpeed();
+				mousePos.y += 10.0f;
+				mousePos.x += 10.0f;
+				ImGui::GetForegroundDrawList()->AddText(mousePos, IM_COL32_WHITE, ss.str().c_str());
+			}
+
+			ImGui::GetForegroundDrawList()->AddImage((ImTextureID)(intptr_t)cursorTexture->GetRendererID(), upperLeftPos, lowerRightPos, { 0.0f, 1.0f }, { 1.0f, 0.0f }, IM_COL32_WHITE);
 		}
+
 #pragma endregion
 
 		ImGui::End();

@@ -36,6 +36,8 @@ namespace Hazel
 		float GetDrivingSpeed() const { return _drivingSpeed; }
 
 		bool IsAdjusting() const { return _isAdjusting; }
+		bool IsPanning() const { return _isPanning; }
+		bool IsZooming() const { return _isZooming; }
 		bool IsDriving()const { return _isDriving; }
 		bool& IsEnable() { return _isEnable; }
 
@@ -63,6 +65,9 @@ namespace Hazel
 		float ZoomSpeed() const;
 
 		bool _isEnable = false;
+		bool _isPanning = false;
+		bool _isZooming = false;
+
 	private:
 		float _FOV = 30.0f;
 		float _aspectRatio = 1.778f;

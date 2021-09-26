@@ -23,6 +23,8 @@ namespace Hazel
 		_canScrollZoom = true;
 		_isAdjusting = false;
 		_isDriving = false;
+		_isPanning = false;
+		_isZooming = false;
 
 		if (!_isEnable)
 		{
@@ -46,8 +48,6 @@ namespace Hazel
 		}
 		else if (Input::IsMouseButtonPressed(Mouse::ButtonRight))
 		{
-			_canScrollZoom = false;
-			_isDriving = true;
 			MouseRotateInPlace(delta * _rotationSpeed);
 			Drive();
 		}
@@ -105,6 +105,9 @@ namespace Hazel
 		}
 
 		_position += GetOrientation() * delta * DrivingSpeed();
+
+		_canScrollZoom = false;
+		_isDriving = true;
 	}
 
 
@@ -153,6 +156,7 @@ namespace Hazel
 		_position += GetUpDirection() * delta.y * ySpeed;
 
 		_isAdjusting = true;
+		_isPanning = true;
 	}
 
 	void EditorCamera::MouseRotateInPlace(const glm::vec2& delta)
@@ -185,6 +189,7 @@ namespace Hazel
 		_position += GetForwardDirection() * zoomDistance;
 
 		_isAdjusting = true;
+		_isZooming = true;
 	}
 
 	void EditorCamera::UpdateProjection()

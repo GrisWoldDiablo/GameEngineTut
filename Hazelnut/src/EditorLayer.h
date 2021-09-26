@@ -97,6 +97,7 @@ namespace Hazel
 
 		// Toolbar Icons
 		Ref<Texture2D> _panIconTexture;
+		Ref<Texture2D> _magnifierIconTexture;
 		Ref<Texture2D> _eyeIconTexture;
 		Ref<Texture2D> _nothingGizmoIconTexture;
 		Ref<Texture2D> _positionGizmoIconTexture;
