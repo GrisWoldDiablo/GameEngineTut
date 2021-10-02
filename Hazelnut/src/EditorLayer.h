@@ -34,9 +34,10 @@ namespace Hazel
 		bool OnMouseButtonReleased(MouseButtonReleasedEvent& event);
 		void MousePicking();
 
-		bool NewScene(const std::string& newSceneName = _kNewSceneName);
+		bool ClearSceneCheck();
+		void NewScene(bool withCheck = false);
 		void OpenScene();
-		void OpenScene(const std::filesystem::path& path);
+		void OpenScene(const std::filesystem::path& path, bool withCheck = false);
 		void SaveSceneAs();
 
 	private:
@@ -67,7 +68,6 @@ namespace Hazel
 		EditorCamera _editorCamera;
 		Ref<Scene> _activeScene;
 		Ref<Scene> _editorScene;
-		Ref<Scene> _runtimeScene;
 
 		// FPS
 		int _frameCount = 0;

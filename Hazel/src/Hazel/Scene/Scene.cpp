@@ -24,9 +24,58 @@ namespace Hazel
 		return b2_staticBody;
 	}
 
+
 	Scene::~Scene()
 	{
 		_registry.clear();
+	}
+
+	template<typename Component>
+	static void CopyComponent(entt::registry& dst, entt::registry& src, const std::unordered_map<UUID, entt::entity>& enttMap)
+	{
+		src.view<Component>().each([&](const auto entt, Component& component)
+		{
+			UUID uuid = src.get<IDComponent>(entt).ID;
+			HZ_CORE_ASSERT(enttMap.find(uuid) != enttMap.end(), "UUID not found in enttMap!");
+			auto dstEnttID = enttMap.at(uuid);
+
+			dst.emplace_or_replace<Component>(dstEnttID, component);
+		});
+	}
+
+	Ref<Scene> Scene::Copy(Ref<Scene> other)
+	{
+		Ref<Scene> newScene = CreateRef<Scene>();
+
+		newScene->_viewportWidth = other->_viewportWidth;
+		newScene->_viewportHeight = other->_viewportHeight;
+
+
+		auto& srcSceneRegistry = other->_registry;
+		auto& dstSceneRegistry = newScene->_registry;
+		std::unordered_map<UUID, entt::entity> enttMap;
+
+		srcSceneRegistry.view<IDComponent>().each([&](const auto entt, IDComponent& idComponent)
+		{
+			UUID uuid = idComponent.ID;
+
+			const BaseComponent& baseComponent = srcSceneRegistry.get<BaseComponent>(entt);
+			const auto& name = baseComponent.Name;
+			const auto& tag = baseComponent.Tag;
+			const auto& layer = baseComponent.Layer;
+
+			enttMap[uuid] = (entt::entity)newScene->CreateEntityWithUUID(uuid, name, tag, layer);
+		});
+
+		// Copy components
+		CopyComponent<TransformComponent>(dstSceneRegistry, srcSceneRegistry, enttMap);
+		CopyComponent<SpriteRendererComponent>(dstSceneRegistry, srcSceneRegistry, enttMap);
+		CopyComponent<CameraComponent>(dstSceneRegistry, srcSceneRegistry, enttMap);
+		CopyComponent<NativeScriptComponent>(dstSceneRegistry, srcSceneRegistry, enttMap);
+		CopyComponent<Rigidbody2DComponent>(dstSceneRegistry, srcSceneRegistry, enttMap);
+		CopyComponent<BoxCollider2DComponent>(dstSceneRegistry, srcSceneRegistry, enttMap);
+
+		return newScene;
 	}
 
 	Entity Scene::CreateEntity(const std::string& name, int tag, int layer)

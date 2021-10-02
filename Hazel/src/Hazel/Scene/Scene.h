@@ -17,6 +17,8 @@ namespace Hazel
 		Scene() = default;
 		~Scene();
 
+		static Ref<Scene> Copy(Ref<Scene> scene);
+
 		Entity CreateEntity(const std::string& name = "Entity", int tag = 0, int layer = 0);
 		Entity CreateEntityWithUUID(UUID uuid, const std::string& name = "Entity", int tag = 0, int layer = 0);
 		void DestroyEntity(Entity entity);

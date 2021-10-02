@@ -49,29 +49,24 @@ namespace Hazel
 		};
 		_framebuffer = Framebuffer::Create(framebufferSpecification);
 
-		// Create an empty scene.
-		_activeScene = CreateRef<Scene>();
-		_activeScene->SetName(_kNewSceneName);
-
 		auto commandLineArgs = Application::Get().GetCommandLineArgs();
 		if (commandLineArgs.Count > 1)
 		{
 			auto sceneFilePath = commandLineArgs[1];
 			if (std::filesystem::exists(sceneFilePath))
 			{
-				SceneSerializer serializer(_activeScene);
-				if (serializer.Deserialize(sceneFilePath))
-				{
-					SetWindowTitle(sceneFilePath);
-				}
+				OpenScene(sceneFilePath, false);
 			}
 			else
 			{
 				HZ_CORE_LERROR("No scene found at {0}", sceneFilePath);
 			}
 		}
+		else
+		{
+			NewScene();
+		}
 
-		_sceneHierarchyPanel.SetScene(_activeScene);
 		_editorCamera = EditorCamera(30.0f, 1.778f, 0.1f, 1000.0f);
 	}
 
@@ -325,35 +320,27 @@ namespace Hazel
 		}
 	}
 
-	bool EditorLayer::NewScene(const std::string& newSceneName)
+	bool EditorLayer::ClearSceneCheck()
 	{
 		const char* message = "You will lose current scene's unsaved progress.\nDo you want to continue?";
 		const char* title = "Warning!";
-		if (FileDialogs::QuestionBox(message, title))
+		return FileDialogs::QuestionBox(message, title);
+	}
+
+	void EditorLayer::NewScene(bool withCheck)
+	{
+		if (withCheck && !ClearSceneCheck())
 		{
-			_activeScene = CreateRef<Scene>();
-
-			if (newSceneName.empty() || std::all_of(newSceneName.begin(), newSceneName.end(), [](char c)
-			{
-				return std::isspace(static_cast<unsigned char>(c));
-			}))
-			{
-				_activeScene->SetName(newSceneName);
-			}
-			else
-			{
-				_activeScene->SetName(_kNewSceneName);
-			}
-
-			_activeScene->OnViewportResize((uint32_t)_sceneViewportSize.x, (uint32_t)_sceneViewportSize.y);
-			_sceneHierarchyPanel.SetScene(_activeScene);
-			// TODO save camera position in scene and reload it.
-			_editorCamera.Reset();
-
-			return true;
+			return;
 		}
 
-		return false;
+		_editorScene = CreateRef<Scene>();
+		_editorScene->SetName(_kNewSceneName);
+
+		SetWindowTitle("Unsaved");
+
+		_activeScene = _editorScene;
+		_sceneHierarchyPanel.SetScene(_activeScene);
 	}
 
 	void EditorLayer::OpenScene()
@@ -361,11 +348,11 @@ namespace Hazel
 		auto filePath = FileDialogs::OpenFile("Hazel Scene (*.hazel)\0*.hazel\0");
 		if (!filePath.empty())
 		{
-			OpenScene(filePath);
+			OpenScene(filePath, true);
 		}
 	}
 
-	void EditorLayer::OpenScene(const std::filesystem::path& path)
+	void EditorLayer::OpenScene(const std::filesystem::path& path, bool withCheck)
 	{
 		if (path.extension().string() != ".hazel")
 		{
@@ -373,15 +360,25 @@ namespace Hazel
 			return;
 		}
 
-		if (!NewScene())
+		if (withCheck && !ClearSceneCheck())
 		{
 			return;
 		}
 
-		SceneSerializer serializer(_activeScene);
+		if (_sceneState != SceneState::Edit)
+		{
+			OnSceneStop();
+		}
+
+		_editorScene = CreateRef<Scene>();
+		SceneSerializer serializer(_editorScene);
 		if (serializer.Deserialize(path.string()))
 		{
 			SetWindowTitle(path.string());
+			
+			_activeScene = _editorScene;
+
+			_sceneHierarchyPanel.SetScene(_activeScene);
 		}
 	}
 
@@ -565,7 +562,7 @@ namespace Hazel
 			{
 				if (ImGui::MenuItem("New", "Ctrl+N"))
 				{
-					NewScene();
+					NewScene(true);
 				}
 
 				if (ImGui::MenuItem("Open...", "Ctrl+O"))
@@ -650,13 +647,6 @@ namespace Hazel
 		auto textureID = _framebuffer->GetColorAttachmentRenderID();
 		ImGui::Image((void*)((uint64_t)textureID), { _sceneViewportSize.x, _sceneViewportSize.y }, ImVec2{ 0.0f, 1.0f }, ImVec2{ 1.0f, 0.0f });
 
-		if (_sceneState == SceneState::Play)
-		{
-			ImGui::End();
-			ImGui::PopStyleVar();
-			return;
-		}
-
 		if (ImGui::BeginDragDropTarget())
 		{
 			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
@@ -666,7 +656,7 @@ namespace Hazel
 
 				if (filePath.extension() == ".hazel")
 				{
-					OpenScene(filePath);
+					OpenScene(filePath, true);
 				}
 
 				if (filePath.extension() == ".png")
@@ -692,20 +682,27 @@ namespace Hazel
 		if (auto selectedEntity = _sceneHierarchyPanel.GetSelectedEntity();	selectedEntity &&
 			(_gizmoType != -1 || (_hasStoredPreviousGizmoType && _previousGizmoType != -1)))
 		{
-			//// Runtime Camera;
-			//if (auto cameraEntity = _activeScene->GetPrimaryCameraEntity();
-			//	cameraEntity != Entity::Null)
-			//{
-			//	const auto& camera = cameraEntity.GetComponent<CameraComponent>().Camera;
-			//	const auto& cameraProjection = camera.GetProjection();
-			//	glm::mat4 cameraView = glm::inverse(cameraEntity.Transform().GetTransform());
-			//}
+			glm::mat4 cameraProjection;
+			glm::mat4 cameraView;
+			if (_sceneState == SceneState::Play)
+			{
+				if (auto cameraEntity = _activeScene->GetPrimaryCameraEntity(); cameraEntity)
+				{
+					// Runtime Camera;
+					const auto& camera = cameraEntity.GetComponent<CameraComponent>().Camera;
+					cameraProjection = camera.GetProjection();
+					cameraView = glm::inverse(cameraEntity.Transform().GetTransformMatrix());
+					ImGuizmo::SetOrthographic(camera.GetProjectionType() == SceneCamera::ProjectionType::Orthographic);
+				}
+			}
+			else
+			{
+				// Editor Camera
+				cameraProjection = _editorCamera.GetProjection();
+				cameraView = _editorCamera.GetViewMatrix();
+				ImGuizmo::SetOrthographic(false);
+			}
 
-			// Editor Camera
-			const auto& cameraProjection = _editorCamera.GetProjection();
-			glm::mat4 cameraView = _editorCamera.GetViewMatrix();
-
-			ImGuizmo::SetOrthographic(false);
 			ImGuizmo::SetDrawlist();
 
 			auto windowWidth = (float)ImGui::GetWindowWidth();
@@ -826,7 +823,7 @@ namespace Hazel
 		}
 		ImGui::Separator();
 
-		//Since we can remove and add component need to disable this for now, to revamp later.
+		// TODO Since we can remove and add component need to disable this for now, to revamp later.
 		/*auto& mainCamera = _mainCamera.GetComponent<CameraComponent>();
 		auto& secondaryCamera = _secondaryCamera.GetComponent<CameraComponent>();
 
@@ -914,36 +911,17 @@ namespace Hazel
 	{
 		_sceneState = SceneState::Play;
 
-		SceneSerializer sceneSerializer(_activeScene);
-		sceneSerializer.SerializeRuntime();
-		_editorScene = _activeScene;
-
-		_runtimeScene = CreateRef<Scene>();
-		SceneSerializer runtimeSceneSerializer(_runtimeScene);
-		runtimeSceneSerializer.DeserializeRuntime();
-
-		_activeScene = _runtimeScene;
+		_activeScene = Scene::Copy(_editorScene);
+		_activeScene->OnViewportResize((uint32_t)_sceneViewportSize.x, (uint32_t)_sceneViewportSize.y);
 
 		_activeScene->OnRuntimeStart();
-
-		_activeScene->OnViewportResize((uint32_t)_sceneViewportSize.x, (uint32_t)_sceneViewportSize.y);
-		_sceneHierarchyPanel.SetScene(_activeScene);
 	}
 
 	void EditorLayer::OnSceneStop()
 	{
 		_sceneState = SceneState::Edit;
-
+		_sceneHierarchyPanel.SetSelectedEntity(Entity());
 		_activeScene->OnRuntimeStop();
-
-		_editorScene = CreateRef<Scene>();
-
-		SceneSerializer sceneSerializer(_editorScene);
-		sceneSerializer.DeserializeRuntime();
-
 		_activeScene = _editorScene;
-
-		_activeScene->OnViewportResize((uint32_t)_sceneViewportSize.x, (uint32_t)_sceneViewportSize.y);
-		_sceneHierarchyPanel.SetScene(_activeScene);
 	}
 }

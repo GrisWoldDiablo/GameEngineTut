@@ -229,6 +229,7 @@ namespace Hazel
 					_scene->SetName(std::string(buffer));
 				}
 			}
+			ImGui::Checkbox("Debug", &_isDebug);
 			ImGui::EndMenuBar();
 		}
 		ImGui::Separator();
@@ -238,7 +239,16 @@ namespace Hazel
 	{
 		ImGuiTreeNodeFlags flags = ((_selectedEntity == entity) ? ImGuiTreeNodeFlags_Selected : 0) | ImGuiTreeNodeFlags_OpenOnArrow;
 		flags |= ImGuiTreeNodeFlags_SpanAvailWidth;
-		bool expanded = ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)entity, flags, entity.Name().c_str());
+
+		std::string displayName = entity.Name();
+		if (_isDebug)
+		{
+			std::stringstream ss;
+			ss << displayName << "<" << entity.GetUUID() << ">";
+			displayName = ss.str();
+		}
+
+		bool expanded = ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)entity, flags, displayName.c_str());
 
 		if (ImGui::IsItemClicked())
 		{

@@ -28,5 +28,6 @@ namespace Hazel
 	private:
 		Ref<Scene> _scene;
 		Entity _selectedEntity;
+		bool _isDebug = false;
 	};
 }
