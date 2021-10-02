@@ -38,6 +38,10 @@ namespace Hazel
 		void NewScene(bool withCheck = false);
 		void OpenScene();
 		void OpenScene(const std::filesystem::path& path, bool withCheck = false);
+		void SaveScene();
+
+		void SerializeScene();
+
 		void SaveSceneAs();
 
 	private:
@@ -54,6 +58,8 @@ namespace Hazel
 
 		void OnScenePlay();
 		void OnSceneStop();
+
+		void DuplicateEntity();
 		
 	private:
 		Color _clearColor = { 0.13f, 0.13f, 0.13f, 1.0f };
@@ -68,6 +74,7 @@ namespace Hazel
 		EditorCamera _editorCamera;
 		Ref<Scene> _activeScene;
 		Ref<Scene> _editorScene;
+		std::filesystem::path _editorScenePath;
 
 		// FPS
 		int _frameCount = 0;

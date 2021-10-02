@@ -20,6 +20,14 @@ namespace Hazel
 			return component;
 		}
 
+		template<typename T, typename... Args>
+		T& AddOrReplaceComponent(Args&&... args)
+		{
+			auto& component = _scene->_registry.emplace_or_replace<T>(_entityHandle, std::forward<Args>(args)...);
+			_scene->OnComponentAdded<T>(*this, component);
+			return component;
+		}
+
 		template<typename T>
 		void RemoveComponent()
 		{
@@ -70,7 +78,6 @@ namespace Hazel
 		int& Layer();
 
 		TransformComponent& Transform();
-
 	private:
 		entt::entity _entityHandle{ entt::null };
 		Scene* _scene = nullptr;

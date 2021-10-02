@@ -33,6 +33,8 @@ namespace Hazel
 
 		void OnViewportResize(uint32_t  width, uint32_t height);
 
+		Entity DuplicateEntity(Entity entity);
+
 		std::string GetName() const { return _name; }
 		void SetName(const std::string& name) { _name = name; }
 

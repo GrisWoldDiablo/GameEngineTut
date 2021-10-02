@@ -68,6 +68,7 @@ namespace Hazel
 		}
 
 		_editorCamera = EditorCamera(30.0f, 1.778f, 0.1f, 1000.0f);
+		Application::Get().GetImGuiLayer()->BlockEvents(false);
 	}
 
 	void EditorLayer::OnDetach()
@@ -198,7 +199,10 @@ namespace Hazel
 
 	void EditorLayer::OnEvent(Event& event)
 	{
-		_editorCamera.OnEvent(event);
+		if (_isSceneViewportFocused)
+		{
+			_editorCamera.OnEvent(event);
+		}
 
 		EventDispatcher dispatcher(event);
 		dispatcher.Dispatch<KeyPressedEvent>(HZ_BIND_EVENT_FN(OnKeyPressed));
@@ -219,26 +223,46 @@ namespace Hazel
 
 		switch (event.GetKeyCode())
 		{
+			// File Commands
 		case Key::N:
+		{
 			if (isControlPressed && !isShiftPressed)
 			{
-				NewScene();
+				NewScene(true);
 			}
 			break;
+		}
 		case Key::O:
+		{
 			if (isControlPressed && !isShiftPressed)
 			{
 				OpenScene();
 			}
 			break;
+		}
 		case Key::S:
-			if (isControlPressed && isShiftPressed)
+		{
+			if (_sceneState != SceneState::Edit)
 			{
-				SaveSceneAs();
+				break;
+			}
+
+			if (isControlPressed)
+			{
+				if (isShiftPressed)
+				{
+					SaveSceneAs();
+				}
+				else
+				{
+					SaveScene();
+				}
 			}
 			break;
-			// Gizmos 
+		}
+		// Gizmos Commands
 		case Key::Q: // Nothing
+		{
 			if (!isModiferPressed && !isImGuizmoInUse)
 			{
 				_gizmoType = -1;
@@ -250,6 +274,7 @@ namespace Hazel
 				_gizmoType = ImGuizmo::TRANSLATE;
 			}
 			break;
+		}
 		case Key::E: // Rotation
 			if (!isModiferPressed && !isImGuizmoInUse)
 			{
@@ -257,26 +282,39 @@ namespace Hazel
 			}
 			break;
 		case Key::R: // Scale
+		{
 			if (!isModiferPressed && !isImGuizmoInUse)
 			{
 				_gizmoType = ImGuizmo::SCALE;
 				_gizmoSpace = ImGuizmo::LOCAL;
 			}
 			break;
+		}
 		case Key::X: // space toggle, Local or Global
+		{
 			if (!isModiferPressed && !isImGuizmoInUse && _gizmoType != ImGuizmo::SCALE)
 			{
 				_gizmoSpace = _gizmoSpace == ImGuizmo::LOCAL ? ImGuizmo::WORLD : ImGuizmo::LOCAL;
 			}
 			break;
-			// TODO make this work, requires to make events no blocked when scene view not in focus, or more like having exceptions.
-			//case Key::Escape:
-			//	auto payload = ImGui::GetDragDropPayload();
-			//	if (payload != nullptr)
-			//	{
-			//		ImGui::AcceptDragDropPayload(payload->DataType);
-			//	}
-			//	break;
+		}
+		// Scene Commands
+		case Key::D:
+		{
+			if (isControlPressed)
+			{
+				DuplicateEntity();
+			}
+			break;
+		}
+		// TODO make this work, requires to make events no blocked when scene view not in focus, or more like having exceptions.
+		//case Key::Escape:
+		//	auto payload = ImGui::GetDragDropPayload();
+		//	if (payload != nullptr)
+		//	{
+		//		ImGui::AcceptDragDropPayload(payload->DataType);
+		//	}
+		//	break;
 		}
 
 		return true;
@@ -333,6 +371,11 @@ namespace Hazel
 		{
 			return;
 		}
+		
+		if (_sceneState != SceneState::Edit)
+		{
+			OnSceneStop();
+		}
 
 		_editorScene = CreateRef<Scene>();
 		_editorScene->SetName(_kNewSceneName);
@@ -341,6 +384,8 @@ namespace Hazel
 
 		_activeScene = _editorScene;
 		_sceneHierarchyPanel.SetScene(_activeScene);
+
+		_editorScenePath = std::filesystem::path();
 	}
 
 	void EditorLayer::OpenScene()
@@ -374,26 +419,56 @@ namespace Hazel
 		SceneSerializer serializer(_editorScene);
 		if (serializer.Deserialize(path.string()))
 		{
-			SetWindowTitle(path.string());
-			
-			_activeScene = _editorScene;
+			_editorScenePath = path;
 
+			SetWindowTitle(path.string());
+
+			_activeScene = _editorScene;
 			_sceneHierarchyPanel.SetScene(_activeScene);
 		}
 	}
 
+	void EditorLayer::SaveScene()
+	{
+		if (_sceneState != SceneState::Edit)
+		{
+			FileDialogs::QuestionBox("You can't save while in play mode!", "Error");
+			return;
+		}
+
+		if (!_editorScenePath.empty())
+		{
+			SerializeScene();
+		}
+		else
+		{
+			SaveSceneAs();
+		}
+	}
+
+
 	void EditorLayer::SaveSceneAs()
 	{
+		if (_sceneState != SceneState::Edit)
+		{
+			FileDialogs::QuestionBox("You can't save while in play mode!", "Error");
+			return;
+		}
+
 		auto sceneName = _activeScene->GetName();
 		auto filePath = FileDialogs::SaveFile("Hazel Scene (*.hazel)\0*.hazel\0", !sceneName.empty() ? sceneName.c_str() : nullptr);
 
 		if (!filePath.empty())
 		{
+			SerializeScene();
 			SetWindowTitle(filePath);
-
-			SceneSerializer serializer(_activeScene);
-			serializer.Serialize(filePath);
 		}
+	}
+
+	void EditorLayer::SerializeScene()
+	{
+		SceneSerializer serializer(_activeScene);
+		serializer.Serialize(_editorScenePath.string());
 	}
 
 	void EditorLayer::SetWindowTitle(const std::string& filePath)
@@ -639,7 +714,8 @@ namespace Hazel
 		{
 			ImGui::SetWindowFocus();
 		}
-		Application::Get().GetImGuiLayer()->BlockEvents(!_isSceneViewportFocused && !_isSceneViewportHovered);
+		// TODO revisit
+		//Application::Get().GetImGuiLayer()->BlockEvents(!_isSceneViewportFocused && !_isSceneViewportHovered);
 
 		auto sceneViewportPanelSize = ImGui::GetContentRegionAvail();
 		_sceneViewportSize = { sceneViewportPanelSize.x, sceneViewportPanelSize.y };
@@ -912,16 +988,31 @@ namespace Hazel
 		_sceneState = SceneState::Play;
 
 		_activeScene = Scene::Copy(_editorScene);
+		
 		_activeScene->OnViewportResize((uint32_t)_sceneViewportSize.x, (uint32_t)_sceneViewportSize.y);
-
 		_activeScene->OnRuntimeStart();
+		
+		_sceneHierarchyPanel.SetScene(_activeScene);
+		_sceneHierarchyPanel.SetSelectedEntity(Entity());
 	}
 
 	void EditorLayer::OnSceneStop()
 	{
 		_sceneState = SceneState::Edit;
-		_sceneHierarchyPanel.SetSelectedEntity(Entity());
+		
 		_activeScene->OnRuntimeStop();
 		_activeScene = _editorScene;
+		
+		_sceneHierarchyPanel.SetScene(_activeScene);
+		_sceneHierarchyPanel.SetSelectedEntity(Entity());
+	}
+
+	void EditorLayer::DuplicateEntity()
+	{
+		if (auto selectedEntity = _sceneHierarchyPanel.GetSelectedEntity(); selectedEntity)
+		{
+			auto newEntity = _activeScene->DuplicateEntity(selectedEntity);
+			_sceneHierarchyPanel.SetSelectedEntity(newEntity);
+		}
 	}
 }

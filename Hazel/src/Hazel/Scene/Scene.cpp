@@ -43,6 +43,15 @@ namespace Hazel
 		});
 	}
 
+	template<typename Component>
+	static void CopyComponentIfExist(Entity dst, Entity src)
+	{
+		if (src.HasComponent<Component>())
+		{
+			dst.AddOrReplaceComponent<Component>(src.GetComponent<Component>());
+		}
+	}
+
 	Ref<Scene> Scene::Copy(Ref<Scene> other)
 	{
 		Ref<Scene> newScene = CreateRef<Scene>();
@@ -262,6 +271,20 @@ namespace Hazel
 				cameraComponent.Camera.SetViewportSize(width, height);
 			}
 		}
+	}
+
+	Entity Scene::DuplicateEntity(Entity entity)
+	{
+		Entity newEntity = CreateEntity(entity.Name() + " (D)");
+
+		CopyComponentIfExist<TransformComponent>(newEntity, entity);
+		CopyComponentIfExist<SpriteRendererComponent>(newEntity, entity);
+		CopyComponentIfExist<CameraComponent>(newEntity, entity);
+		CopyComponentIfExist<NativeScriptComponent>(newEntity, entity);
+		CopyComponentIfExist<Rigidbody2DComponent>(newEntity, entity);
+		CopyComponentIfExist<BoxCollider2DComponent>(newEntity, entity);
+		
+		return newEntity;
 	}
 
 	Entity Scene::GetPrimaryCameraEntity()
