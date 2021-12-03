@@ -8,6 +8,7 @@
 #include "box2d/b2_body.h"
 #include "box2d/b2_fixture.h"
 #include "box2d/b2_polygon_shape.h"
+#include "../../Hazelnut/src/Scripts/SquareJump.h"
 
 namespace Hazel
 {
@@ -80,7 +81,8 @@ namespace Hazel
 		CopyComponent<TransformComponent>(dstSceneRegistry, srcSceneRegistry, enttMap);
 		CopyComponent<SpriteRendererComponent>(dstSceneRegistry, srcSceneRegistry, enttMap);
 		CopyComponent<CameraComponent>(dstSceneRegistry, srcSceneRegistry, enttMap);
-		CopyComponent<NativeScriptComponent>(dstSceneRegistry, srcSceneRegistry, enttMap);
+		//CopyComponent<NativeScriptComponent>(dstSceneRegistry, srcSceneRegistry, enttMap);
+		CopyComponent<SquareJumpComponent>(dstSceneRegistry, srcSceneRegistry, enttMap);
 		CopyComponent<Rigidbody2DComponent>(dstSceneRegistry, srcSceneRegistry, enttMap);
 		CopyComponent<BoxCollider2DComponent>(dstSceneRegistry, srcSceneRegistry, enttMap);
 
@@ -145,6 +147,19 @@ namespace Hazel
 				body->CreateFixture(&fixtureDef);
 			}
 		});
+
+		// Instantiate Scripts
+		auto scriptFunction = [=](const auto entt, auto& nsc)
+		{
+			auto& instance = nsc.Instance;
+
+			instance = nsc.InstantiateScript();
+			instance->_entity = { entt, this };
+			instance->OnCreate();
+		};
+
+		//_registry.view<NativeScriptComponent>().each(scriptFunction);
+		_registry.view<SquareJumpComponent>().each(scriptFunction);
 	}
 
 	void Scene::OnRuntimeStop()
@@ -156,17 +171,9 @@ namespace Hazel
 	void Scene::OnUpdateRuntime()
 	{
 		// Update Scripts
-		_registry.view<NativeScriptComponent>().each([=](const auto entt, auto& nsc)
+		auto scriptFunction = [=](const auto entt, auto& nsc)
 		{
 			auto& instance = nsc.Instance;
-
-			// TODO Move to OnScenePlay
-			if (instance == nullptr)
-			{
-				instance = nsc.InstantiateScript();
-				instance->_entity = { entt, this };
-				instance->OnCreate();
-			}
 
 			if (!instance->IsEnable)
 			{
@@ -174,7 +181,9 @@ namespace Hazel
 			}
 
 			instance->OnUpdate();
-		});
+		};
+		//_registry.view<NativeScriptComponent>().each(scriptFunction);
+		_registry.view<SquareJumpComponent>().each(scriptFunction);
 
 		// Physics
 		{
@@ -280,10 +289,10 @@ namespace Hazel
 		CopyComponentIfExist<TransformComponent>(newEntity, entity);
 		CopyComponentIfExist<SpriteRendererComponent>(newEntity, entity);
 		CopyComponentIfExist<CameraComponent>(newEntity, entity);
-		CopyComponentIfExist<NativeScriptComponent>(newEntity, entity);
+		//CopyComponentIfExist<NativeScriptComponent>(newEntity, entity);
 		CopyComponentIfExist<Rigidbody2DComponent>(newEntity, entity);
 		CopyComponentIfExist<BoxCollider2DComponent>(newEntity, entity);
-		
+
 		return newEntity;
 	}
 
@@ -333,8 +342,12 @@ namespace Hazel
 		}
 	}
 
+	//template<>
+	//void Scene::OnComponentAdded<NativeScriptComponent>(Entity entity, NativeScriptComponent& component)
+	//{}
+
 	template<>
-	void Scene::OnComponentAdded<NativeScriptComponent>(Entity entity, NativeScriptComponent& component)
+	void Scene::OnComponentAdded<SquareJumpComponent>(Entity entity, SquareJumpComponent& component)
 	{}
 
 	template<>

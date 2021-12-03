@@ -1,5 +1,6 @@
 #pragma once
 #include "Hazel/Scene/ScriptableEntity.h"
+#include "Hazel/Core/Input.h"
 
 namespace Hazel
 {

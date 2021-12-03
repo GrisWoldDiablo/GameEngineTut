@@ -23,7 +23,9 @@ namespace Hazel
 		void DrawEntityNode(Entity entity);
 		void DrawComponents(Entity entity);
 		template<typename T>
-		void AddComponentMenu();
+		bool AddComponentMenu(std::string nameId = "");
+		template<typename T1, typename T2>
+		void AddNativeScriptMenu();
 
 	private:
 		Ref<Scene> _scene;

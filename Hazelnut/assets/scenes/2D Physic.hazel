@@ -6,9 +6,9 @@ Entities:
       Tag: 0
       Layer: 0
     TransformComponent:
-      Position: [0, -2.4570334, 0]
+      Position: [-4.24304962, -3.37969255, 0]
       Rotation: [0, 0, -0.287857264]
-      Scale: [21.6888866, 0.265017986, 1]
+      Scale: [21.6888866, 0.265017897, 1]
     SpriteRendererComponent:
       Color: [0.99227798, 0.739552617, 0.222208977, 1]
     Rigidbody2DComponent:
@@ -27,7 +27,7 @@ Entities:
       Tag: 0
       Layer: 0
     TransformComponent:
-      Position: [-2.71451521, 2.47310162, 0]
+      Position: [8.04013062, 7.6078825, 0]
       Rotation: [0, 0, 0.659734488]
       Scale: [0.999999821, 0.999999821, 1]
     SpriteRendererComponent:
@@ -69,7 +69,7 @@ Entities:
       Tag: 0
       Layer: 0
     TransformComponent:
-      Position: [7.51363277, -0.758702874, 0]
+      Position: [6.46338558, -2.32320833, 0]
       Rotation: [0, 0, 0]
       Scale: [1, 7.16579294, 1]
     SpriteRendererComponent:
@@ -82,5 +82,26 @@ Entities:
       Size: [0.5, 0.5]
       Density: 1
       Friction: 0.5
+      Restitution: 0
+      RestitutionThreshold: 0.5
+  - Entity: 5634494811630249679
+    BaseComponent:
+      Name: Slope (D)
+      Tag: 0
+      Layer: 0
+    TransformComponent:
+      Position: [6.67965508, 4.12190247, 0]
+      Rotation: [0, 0, 0.335360467]
+      Scale: [21.6888771, 0.265017897, 1]
+    SpriteRendererComponent:
+      Color: [0.99227798, 0.739552617, 0.222208977, 1]
+    Rigidbody2DComponent:
+      BodyType: Static
+      IsFixedRotation: false
+    BoxCollider2DComponent:
+      Offset: [0, 0]
+      Size: [0.5, 0.5]
+      Density: 1
+      Friction: 0.119999997
       Restitution: 0
       RestitutionThreshold: 0.5

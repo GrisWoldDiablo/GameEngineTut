@@ -11,6 +11,7 @@
 #include <filesystem>
 
 #include "Hazel/Utils/PlatformUtils.h"
+#include "../Scripts/SquareJump.h"
 
 namespace Hazel
 {
@@ -305,6 +306,9 @@ namespace Hazel
 				AddComponentMenu<SpriteRendererComponent>();
 				AddComponentMenu<Rigidbody2DComponent>();
 				AddComponentMenu<BoxCollider2DComponent>();
+				AddNativeScriptMenu<SquareJumpComponent, SquareJump>();
+				//AddNativeScriptMenu<NativeScriptComponent, SquareJump>();
+
 				ImGui::EndPopup();
 			}
 			ImGui::PopItemWidth();
@@ -494,8 +498,13 @@ namespace Hazel
 #pragma endregion
 
 #pragma region NativeScriptComponent
-		DrawComponent<NativeScriptComponent>(entity, "Native Script", [](NativeScriptComponent* component)
+		auto function = [](auto* component)
 		{
+			if (component->Instance == nullptr)
+			{
+				ImGui::Text("Only available in Play Mode");
+				return;
+			}
 			ImGui::Checkbox("Active", &component->Instance->IsEnable);
 			std::string classFilePath = component->Instance->GetClassFilePath();
 			auto lastSlash = classFilePath.find("\\src\\");
@@ -516,7 +525,11 @@ namespace Hazel
 				ImGui::Text(result.c_str());
 				ImGui::EndChild();
 			}
-		});
+		};
+
+		//DrawComponent<NativeScriptComponent>(entity, "Native Script", function);
+		DrawComponent<SquareJumpComponent>(entity, "SquareJump Script", function);
+
 #pragma endregion
 
 #pragma region Rigidbody2DComponent
@@ -561,11 +574,18 @@ namespace Hazel
 	}
 
 	template<typename T>
-	void SceneHierarchyPanel::AddComponentMenu()
+	bool SceneHierarchyPanel::AddComponentMenu(std::string nameId)
 	{
-		auto nameId = std::string(typeid(T).name());
-		nameId = nameId.erase(0, nameId.find_last_of(':') + 1);
-		nameId = nameId.erase(nameId.find("Component"), nameId.length());
+		if (nameId.empty())
+		{
+			nameId = std::string(typeid(T).name());
+			nameId = nameId.erase(0, nameId.find_last_of(':') + 1);
+			size_t index = nameId.find("Component");
+			if (index < nameId.length())
+			{
+				nameId = nameId.erase(index, nameId.length());
+			}
+		}
 
 		if (!_selectedEntity.HasComponent<T>())
 		{
@@ -573,11 +593,26 @@ namespace Hazel
 			{
 				_selectedEntity.AddComponent<T>();
 				ImGui::CloseCurrentPopup();
+				return true;
 			}
 		}
 		else
 		{
 			ImGui::TextDisabled(nameId.c_str());
+		}
+
+		return false;
+	}
+
+	template<typename T1, typename T2>
+	void SceneHierarchyPanel::AddNativeScriptMenu()
+	{
+		auto nameId = std::string(typeid(T2).name());
+		nameId = nameId.erase(0, nameId.find_last_of(':') + 1);
+		if (AddComponentMenu<T1>(nameId))
+		{
+			auto& component = _selectedEntity.GetComponent<T1>();
+			component.Bind<T2>();
 		}
 	}
 }

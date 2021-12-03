@@ -82,20 +82,23 @@ namespace Hazel
 	// Forward declaration
 	class ScriptableEntity;
 
+	template<typename NSC>
 	struct NativeScriptComponent
 	{
 		ScriptableEntity* Instance = nullptr;
 
 		ScriptableEntity* (*InstantiateScript)();
-		void (*DestroyScript)(NativeScriptComponent*);
+		void (*DestroyScript)(NSC*);
 
 		template<typename T>
 		void Bind()
 		{
 			InstantiateScript = []() { return static_cast<ScriptableEntity*>(new T()); };
-			DestroyScript = [](NativeScriptComponent* nsc) { delete  nsc->Instance; nsc->Instance = nullptr; };
+			DestroyScript = [](NSC* nsc) { delete  nsc->Instance; nsc->Instance = nullptr; };
 		}
 	};
+
+	struct SquareJumpComponent : NativeScriptComponent<SquareJumpComponent> {};
 
 	// Physics
 
