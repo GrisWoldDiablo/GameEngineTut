@@ -60,7 +60,7 @@ namespace Hazel
 		void OnSceneStop();
 
 		void DuplicateEntity();
-		
+
 	private:
 		Color _clearColor = { 0.13f, 0.13f, 0.13f, 1.0f };
 		Ref<Framebuffer> _framebuffer;

@@ -154,6 +154,7 @@ namespace Hazel
 
 			out << YAML::Key << "Offset" << YAML::Value << component->Offset;
 			out << YAML::Key << "Size" << YAML::Value << component->Size;
+			out << YAML::Key << "Angle" << YAML::Value << component->Angle;
 			out << YAML::Key << "Density" << YAML::Value << component->Density;
 			out << YAML::Key << "Friction" << YAML::Value << component->Friction;
 			out << YAML::Key << "Restitution" << YAML::Value << component->Restitution;
@@ -348,6 +349,7 @@ namespace Hazel
 					auto& component = deserializedEntity.AddComponent<BoxCollider2DComponent>();
 					component.Offset = GetValue<glm::vec2>(boxCollider2DComponent, "Offset");
 					component.Size = GetValue<glm::vec2>(boxCollider2DComponent, "Size", { 0.5f, 0.5f });
+					component.Angle = GetValue<float>(boxCollider2DComponent, "Angle", 0.0f);
 					component.Density = GetValue<float>(boxCollider2DComponent, "Density", 1.0f);
 					component.Friction = GetValue<float>(boxCollider2DComponent, "Friction", 0.5f);
 					component.Restitution = GetValue<float>(boxCollider2DComponent, "Restitution");

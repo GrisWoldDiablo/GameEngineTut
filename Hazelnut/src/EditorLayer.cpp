@@ -242,11 +242,6 @@ namespace Hazel
 		}
 		case Key::S:
 		{
-			if (_sceneState != SceneState::Edit)
-			{
-				break;
-			}
-
 			if (isControlPressed)
 			{
 				if (isShiftPressed)
@@ -362,7 +357,7 @@ namespace Hazel
 	{
 		const char* message = "You will lose current scene's unsaved progress.\nDo you want to continue?";
 		const char* title = "Warning!";
-		return FileDialogs::QuestionBox(message, title);
+		return FileDialogs::QuestionPopup(message, title);
 	}
 
 	void EditorLayer::NewScene(bool withCheck)
@@ -371,7 +366,7 @@ namespace Hazel
 		{
 			return;
 		}
-		
+
 		if (_sceneState != SceneState::Edit)
 		{
 			OnSceneStop();
@@ -432,7 +427,7 @@ namespace Hazel
 	{
 		if (_sceneState != SceneState::Edit)
 		{
-			FileDialogs::QuestionBox("You can't save while in play mode!", "Error");
+			FileDialogs::MessagePopup("You can't save while in play mode!", "Error");
 			return;
 		}
 
@@ -451,7 +446,7 @@ namespace Hazel
 	{
 		if (_sceneState != SceneState::Edit)
 		{
-			FileDialogs::QuestionBox("You can't save while in play mode!", "Error");
+			FileDialogs::MessagePopup("You can't save while in play mode!", "Error");
 			return;
 		}
 
@@ -988,10 +983,10 @@ namespace Hazel
 		_sceneState = SceneState::Play;
 
 		_activeScene = Scene::Copy(_editorScene);
-		
+
 		_activeScene->OnViewportResize((uint32_t)_sceneViewportSize.x, (uint32_t)_sceneViewportSize.y);
 		_activeScene->OnRuntimeStart();
-		
+
 		_sceneHierarchyPanel.SetScene(_activeScene);
 		_sceneHierarchyPanel.SetSelectedEntity(Entity());
 	}
@@ -999,10 +994,10 @@ namespace Hazel
 	void EditorLayer::OnSceneStop()
 	{
 		_sceneState = SceneState::Edit;
-		
+
 		_activeScene->OnRuntimeStop();
 		_activeScene = _editorScene;
-		
+
 		_sceneHierarchyPanel.SetScene(_activeScene);
 		_sceneHierarchyPanel.SetSelectedEntity(Entity());
 	}

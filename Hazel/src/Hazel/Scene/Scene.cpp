@@ -137,7 +137,13 @@ namespace Hazel
 			if (auto* bc2d = entity.TryGetComponent<BoxCollider2DComponent>(); bc2d != nullptr)
 			{
 				b2PolygonShape boxShape;
-				boxShape.SetAsBox(bc2d->Size.x * transform.Scale.x, bc2d->Size.y * transform.Scale.y);
+				boxShape.SetAsBox
+				(
+					bc2d->Size.x * transform.Scale.x,
+					bc2d->Size.y * transform.Scale.y,
+					{ bc2d->Offset.x, bc2d->Offset.y },
+					glm::radians(bc2d->Angle)
+				);
 
 				b2FixtureDef fixtureDef;
 				fixtureDef.shape = &boxShape;
@@ -279,7 +285,7 @@ namespace Hazel
 
 	Entity Scene::DuplicateEntity(Entity entity)
 	{
-		Entity newEntity = CreateEntity(entity.Name() + " (D)");
+		Entity newEntity = CreateEntity(entity.Name());
 
 		CopyComponentIfExist<TransformComponent>(newEntity, entity);
 		CopyComponentIfExist<SpriteRendererComponent>(newEntity, entity);
@@ -287,7 +293,7 @@ namespace Hazel
 		CopyComponentIfExist<NativeScriptComponent>(newEntity, entity);
 		CopyComponentIfExist<Rigidbody2DComponent>(newEntity, entity);
 		CopyComponentIfExist<BoxCollider2DComponent>(newEntity, entity);
-		
+
 		return newEntity;
 	}
 

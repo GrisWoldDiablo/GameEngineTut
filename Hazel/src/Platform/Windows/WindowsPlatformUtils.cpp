@@ -6,10 +6,25 @@
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h>
 #include "Hazel/Core/Application.h"
+#include <future>
 
 namespace Hazel
 {
-	bool FileDialogs::QuestionBox(const char* message, const char* title)
+	void FileDialogs::MessagePopup(const char* message, const char* title)
+	{
+		std::async(std::launch::async, [](const char* message, const char* title)
+		{
+			MessageBoxA
+			(
+				glfwGetWin32Window((GLFWwindow*)Application::Get().GetWindow().GetNativeWindow()),
+				message,
+				title,
+				MB_ICONWARNING | MB_OK
+			);
+		}, message, title);
+	}
+
+	bool FileDialogs::QuestionPopup(const char* message, const char* title)
 	{
 		auto result = MessageBoxA
 		(

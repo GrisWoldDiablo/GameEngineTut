@@ -74,7 +74,7 @@ namespace Hazel
 					{
 						_currentDirectory /= path.filename();
 					}
-					else if (FileDialogs::QuestionBox("Do you want to open file in external program?", "Open File"))
+					else if (FileDialogs::QuestionPopup("Do you want to open file in external program?", "Open File"))
 					{
 						FileDialogs::ExecuteFile(path.string().c_str());
 						// TODO Logic based on file extension.

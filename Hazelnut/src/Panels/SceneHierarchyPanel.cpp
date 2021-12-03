@@ -552,6 +552,7 @@ namespace Hazel
 		{
 			DrawVecControls("Offset", component->Offset, 0.0f);
 			DrawVecControls("Size", component->Size, 0.5f);
+			ImGui::DragFloat("Angle", &component->Angle, 0.01f, 0.0f, 360.0f);
 			ImGui::DragFloat("Density", &component->Density, 0.01f, 0.0f, 1.0f);
 			ImGui::DragFloat("Friction", &component->Friction, 0.01f, 0.0f, 1.0f);
 			ImGui::DragFloat("Restitution", &component->Restitution, 0.01f, 0.0f, 1.0f);

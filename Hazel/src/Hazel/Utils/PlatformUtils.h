@@ -7,8 +7,10 @@ namespace Hazel
 	class FileDialogs
 	{
 	public:
+		// Message Box with ok.
+		static void MessagePopup(const char* message, const char* title);
 		// Message Box with yes and no question.
-		static bool QuestionBox(const char* message, const char* title);
+		static bool QuestionPopup(const char* message, const char* title);
 		// Returns empty string if canceled.
 		static std::string OpenFile(const char* filter);
 		// Returns empty string if canceled.
