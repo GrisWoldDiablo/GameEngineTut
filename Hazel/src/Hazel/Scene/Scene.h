@@ -15,6 +15,7 @@ namespace Hazel
 	{
 	public:
 		Scene() = default;
+		Scene(const std::string& name);
 		~Scene();
 
 		static Ref<Scene> Copy(Ref<Scene> scene);

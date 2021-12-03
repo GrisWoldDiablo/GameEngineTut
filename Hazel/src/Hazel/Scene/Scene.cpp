@@ -25,6 +25,10 @@ namespace Hazel
 	}
 
 
+	Scene::Scene(const std::string& name)
+		:_name(name)
+	{}
+
 	Scene::~Scene()
 	{
 		_registry.clear();
@@ -54,7 +58,7 @@ namespace Hazel
 
 	Ref<Scene> Scene::Copy(Ref<Scene> other)
 	{
-		Ref<Scene> newScene = CreateRef<Scene>();
+		Ref<Scene> newScene = CreateRef<Scene>(other->_name);
 
 		newScene->_viewportWidth = other->_viewportWidth;
 		newScene->_viewportHeight = other->_viewportHeight;
