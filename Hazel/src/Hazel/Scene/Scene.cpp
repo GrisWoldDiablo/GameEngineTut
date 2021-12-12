@@ -8,6 +8,7 @@
 #include "box2d/b2_body.h"
 #include "box2d/b2_fixture.h"
 #include "box2d/b2_polygon_shape.h"
+#include "box2d/b2_circle_shape.h"
 
 namespace Hazel
 {
@@ -83,10 +84,12 @@ namespace Hazel
 		// Copy components
 		CopyComponent<TransformComponent>(dstSceneRegistry, srcSceneRegistry, enttMap);
 		CopyComponent<SpriteRendererComponent>(dstSceneRegistry, srcSceneRegistry, enttMap);
+		CopyComponent<CircleRendererComponent>(dstSceneRegistry, srcSceneRegistry, enttMap);
 		CopyComponent<CameraComponent>(dstSceneRegistry, srcSceneRegistry, enttMap);
 		CopyComponent<NativeScriptComponent>(dstSceneRegistry, srcSceneRegistry, enttMap);
 		CopyComponent<Rigidbody2DComponent>(dstSceneRegistry, srcSceneRegistry, enttMap);
 		CopyComponent<BoxCollider2DComponent>(dstSceneRegistry, srcSceneRegistry, enttMap);
+		CopyComponent<CircleCollider2DComponent>(dstSceneRegistry, srcSceneRegistry, enttMap);
 
 		return newScene;
 	}
@@ -134,6 +137,18 @@ namespace Hazel
 			body->SetFixedRotation(rb2d.IsFixedRotation);
 			rb2d.RuntimeBody = body;
 
+			auto createFixture = [&](b2Shape& shape, float density, float friction, float restitution, float renstitutionThreshold)
+			{
+				b2FixtureDef fixtureDef;
+				fixtureDef.shape = &shape;
+				fixtureDef.density = density;
+				fixtureDef.friction = friction;
+				fixtureDef.restitution = restitution;
+				fixtureDef.restitutionThreshold = renstitutionThreshold;
+
+				body->CreateFixture(&fixtureDef);
+			};
+
 			if (auto* bc2d = entity.TryGetComponent<BoxCollider2DComponent>(); bc2d != nullptr)
 			{
 				b2PolygonShape boxShape;
@@ -145,14 +160,14 @@ namespace Hazel
 					glm::radians(bc2d->Angle)
 				);
 
-				b2FixtureDef fixtureDef;
-				fixtureDef.shape = &boxShape;
-				fixtureDef.density = bc2d->Density;
-				fixtureDef.friction = bc2d->Friction;
-				fixtureDef.restitution = bc2d->Restitution;
-				fixtureDef.restitutionThreshold = bc2d->RestitutionThreshold;
+				createFixture(boxShape, bc2d->Density, bc2d->Friction, bc2d->Restitution, bc2d->RestitutionThreshold);
+			}
+			else if (auto* cc2d = entity.TryGetComponent<CircleCollider2DComponent>(); cc2d != nullptr)
+			{
+				b2CircleShape circleShape;
+				circleShape.m_radius = cc2d->Radius * glm::max(transform.Scale.x, transform.Scale.y);
 
-				body->CreateFixture(&fixtureDef);
+				createFixture(circleShape, cc2d->Density, cc2d->Friction, cc2d->Restitution, cc2d->RestitutionThreshold);
 			}
 		});
 	}
@@ -198,7 +213,8 @@ namespace Hazel
 				Entity entity = { entt, this };
 				auto& transform = entity.Transform();
 
-				if (auto* bc2d = entity.TryGetComponent<BoxCollider2DComponent>(); bc2d != nullptr)
+				if (entity.HasComponent<BoxCollider2DComponent>()
+				  || entity.HasComponent<CircleCollider2DComponent>())
 				{
 					auto* body = (b2Body*)rb2d.RuntimeBody;
 					const auto& position = body->GetPosition();
@@ -233,6 +249,7 @@ namespace Hazel
 		if (Renderer2D::BeginScene(*mainCamera, cameraTransform))
 		{
 			DrawSpriteRenderComponent(cameraPosition);
+			DrawCircleRenderComponent(cameraPosition);
 
 			Renderer2D::EndScene();
 		}
@@ -243,7 +260,7 @@ namespace Hazel
 		if (Renderer2D::BeginScene(camera))
 		{
 			DrawSpriteRenderComponent(camera.GetPosition());
-
+			DrawCircleRenderComponent(camera.GetPosition());
 			Renderer2D::EndScene();
 		}
 	}
@@ -263,6 +280,24 @@ namespace Hazel
 		{
 			auto [transform, sprite] = group.get<TransformComponent, SpriteRendererComponent>(entity);
 			Renderer2D::DrawSprite(transform.GetTransformMatrix(), sprite, (int)entity);
+		}
+	}
+
+	void Scene::DrawCircleRenderComponent(const glm::vec3& cameraPosition)
+	{
+		auto view = _registry.view<TransformComponent, CircleRendererComponent>();
+
+		//group.sort<TransformComponent>([&](const auto& lhs, const auto& rhs)
+		//{
+		//	auto lhsDistance = glm::distance(lhs.Position, cameraPosition);
+		//	auto rhsDistance = glm::distance(rhs.Position, cameraPosition);
+		//	return lhsDistance > rhsDistance;
+		//});
+
+		for (const auto entity : view)
+		{
+			auto [transform, circle] = view.get<TransformComponent, CircleRendererComponent>(entity);
+			Renderer2D::DrawCircle(transform.GetTransformMatrix(), circle.Color, circle.Thickness, circle.Fade, (int)entity);
 		}
 	}
 
@@ -289,10 +324,12 @@ namespace Hazel
 
 		CopyComponentIfExist<TransformComponent>(newEntity, entity);
 		CopyComponentIfExist<SpriteRendererComponent>(newEntity, entity);
+		CopyComponentIfExist<CircleRendererComponent>(newEntity, entity);
 		CopyComponentIfExist<CameraComponent>(newEntity, entity);
 		CopyComponentIfExist<NativeScriptComponent>(newEntity, entity);
 		CopyComponentIfExist<Rigidbody2DComponent>(newEntity, entity);
 		CopyComponentIfExist<BoxCollider2DComponent>(newEntity, entity);
+		CopyComponentIfExist<CircleCollider2DComponent>(newEntity, entity);
 
 		return newEntity;
 	}
@@ -335,6 +372,10 @@ namespace Hazel
 	{}
 
 	template<>
+	void Scene::OnComponentAdded<CircleRendererComponent>(Entity entity, CircleRendererComponent& component)
+	{}
+
+	template<>
 	void Scene::OnComponentAdded<CameraComponent>(Entity entity, CameraComponent& component)
 	{
 		if (_viewportWidth > 0 && _viewportHeight > 0)
@@ -353,5 +394,9 @@ namespace Hazel
 
 	template<>
 	void Scene::OnComponentAdded<BoxCollider2DComponent>(Entity entity, BoxCollider2DComponent& component)
+	{}
+
+	template<>
+	void Scene::OnComponentAdded<CircleCollider2DComponent>(Entity entity, CircleCollider2DComponent& component)
 	{}
 }

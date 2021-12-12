@@ -38,8 +38,8 @@ void main()
 #type fragment
 #version 450 core
 
-layout(location = 0) out vec4 color;
-layout(location = 1) out int entityID; // -1 is not an entity
+layout(location = 0) out vec4 o_Color;
+layout(location = 1) out int o_EntityID; // -1 is not an entity
 
 struct	VertexOutput
 {
@@ -113,6 +113,6 @@ void main()
 	}
 
 	// Final assignment
-	color = tempColor;
-	entityID = v_EntityID;
+	o_Color = tempColor;
+	o_EntityID = v_EntityID;
 }

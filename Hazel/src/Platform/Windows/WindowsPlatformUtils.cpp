@@ -12,7 +12,8 @@ namespace Hazel
 {
 	void FileDialogs::MessagePopup(const char* message, const char* title)
 	{
-		std::async(std::launch::async, [](const char* message, const char* title)
+		// not working anymore need to fix.
+		/*std::async(std::launch::async, [](const char* message, const char* title)
 		{
 			MessageBoxA
 			(
@@ -21,7 +22,20 @@ namespace Hazel
 				title,
 				MB_ICONWARNING | MB_OK
 			);
-		}, message, title);
+		}, message, title);*/
+
+		// Using Thread instead for now.
+		std::thread([](const char* message, const char* title)
+		{
+			MessageBoxA
+			(
+				glfwGetWin32Window((GLFWwindow*)Application::Get().GetWindow().GetNativeWindow()),
+				message,
+				title,
+				MB_ICONWARNING | MB_OK
+			);
+		}, message, title).detach();
+		
 	}
 
 	bool FileDialogs::QuestionPopup(const char* message, const char* title)

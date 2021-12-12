@@ -455,6 +455,7 @@ namespace Hazel
 
 		if (!filePath.empty())
 		{
+			_editorScenePath = std::filesystem::path(filePath);
 			SerializeScene();
 			SetWindowTitle(filePath);
 		}

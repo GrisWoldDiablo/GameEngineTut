@@ -29,7 +29,7 @@ namespace Hazel
 		static void Flush();
 		static void Reset();
 
-		// --- Primitives --- //
+		// --- Plain Quad --- //
 		static void DrawQuad(const glm::vec2& position, const glm::vec2& size, const Color& color);
 		static void DrawQuad(const glm::vec3& position, const glm::vec2& size, const Color& color);
 		static void DrawRotatedQuad(const glm::vec2& position, const glm::vec2& size, float rotation, const Color& color);
@@ -57,8 +57,15 @@ namespace Hazel
 		// --- ----------- --- //
 
 		// --- Sprite --- //
-		static void DrawSprite(const glm::mat4& transform, SpriteRendererComponent& spriteRenderComponent, int entityID);
 		// Final Draw
+		static void DrawSprite(const glm::mat4& transform, SpriteRendererComponent& spriteRenderComponent, int entityID);
+		// --- ----------- --- //
+
+		// --- Circle --- //
+		// Final Draw
+		static void DrawCircle(const glm::mat4& transform, const Color& color, float thickness = 1.0f, float fade = 0.005f, int entityID = -1);
+		// --- ----------- --- //
+
 
 		struct Statistics
 		{
@@ -76,6 +83,7 @@ namespace Hazel
 
 	private:
 		static void FlushAndReset();
-		static void UpdateData(const glm::mat4& transform, const Color& color, int entityID = -1, const glm::vec2& tilingFactor = glm::vec2(1.0f), int textureIndex = -1);
+		static void UpdateQuadData(const glm::mat4& transform, const Color& color, int entityID = -1, const glm::vec2& tilingFactor = glm::vec2(1.0f), int textureIndex = -1);
+		static void UpdateCircleData(const glm::mat4& transform, const Color& color, int entityID = -1, float thickness = 1.0f, float fade = 0.005f);
 	};
 }

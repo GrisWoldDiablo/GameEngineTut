@@ -114,6 +114,7 @@ namespace Hazel
 
 	public:
 		Color() = default;
+		Color(const Color& color) = default;
 		Color(float value);
 		Color(glm::vec4 value);
 		Color(int red, int green, int blue, float alpha = 1.0f);

@@ -95,7 +95,7 @@ namespace Hazel
 	}
 
 	template<typename T>
-	static void DrawFloatField(const char* label, T& value, float resetValue, const Color& color)
+	static void DrawFloatField(const char* label, T& value, float resetValue, const Color& color, int precision = 2)
 	{
 		auto boldFont = ImGui::GetIO().Fonts->Fonts[0];
 		float lineHeight = boldFont->FontSize + GImGui->Style.FramePadding.y * 2.0f;
@@ -121,7 +121,9 @@ namespace Hazel
 
 		ImGui::SameLine();
 		auto floatLabel = std::string("##") + label;
-		ImGui::DragFloat(floatLabel.c_str(), &value, 0.1f, 0.0f, 0.0f, "%.2f");
+		std::stringstream ss;
+		ss << "%." << precision << "f";
+		ImGui::DragFloat(floatLabel.c_str(), &value, 0.1f, 0.0f, 0.0f, ss.str().c_str());
 	}
 
 	template<typename T>
@@ -303,8 +305,10 @@ namespace Hazel
 			{
 				AddComponentMenu<CameraComponent>();
 				AddComponentMenu<SpriteRendererComponent>();
+				AddComponentMenu<CircleRendererComponent>();
 				AddComponentMenu<Rigidbody2DComponent>();
 				AddComponentMenu<BoxCollider2DComponent>();
+				AddComponentMenu<CircleCollider2DComponent>();
 				ImGui::EndPopup();
 			}
 			ImGui::PopItemWidth();
@@ -412,6 +416,15 @@ namespace Hazel
 			{
 				color = newColor;
 			}
+		});
+#pragma endregion
+
+#pragma region CircleRendererComponent
+		DrawComponent<CircleRendererComponent>(entity, "Circle Renderer", [](CircleRendererComponent* component)
+		{
+			ImGui::ColorEdit4("Color", component->Color.GetValuePtr());
+			ImGui::DragFloat("Thickness", &component->Thickness, 0.025f, 0.0f, 1.0f);
+			ImGui::DragFloat("Fade", &component->Fade, 0.00025f, 0.0f, 1.0f);
 		});
 #pragma endregion
 
@@ -553,6 +566,17 @@ namespace Hazel
 			DrawVecControls("Offset", component->Offset, 0.0f);
 			DrawVecControls("Size", component->Size, 0.5f);
 			ImGui::DragFloat("Angle", &component->Angle, 0.01f, 0.0f, 360.0f);
+			ImGui::DragFloat("Density", &component->Density, 0.01f, 0.0f, 1.0f);
+			ImGui::DragFloat("Friction", &component->Friction, 0.01f, 0.0f, 1.0f);
+			ImGui::DragFloat("Restitution", &component->Restitution, 0.01f, 0.0f, 1.0f);
+			ImGui::DragFloat("Restitution Threshold", &component->RestitutionThreshold, 0.01f, 0.0f);
+		});
+#pragma endregion
+
+#pragma region CircleCollider2DComponent
+		DrawComponent<CircleCollider2DComponent>(entity, "Circle Collider 2D", [&](CircleCollider2DComponent* component)
+		{
+			ImGui::DragFloat("Radius", &component->Radius, 0.01f, 0.0f, 0.0f);
 			ImGui::DragFloat("Density", &component->Density, 0.01f, 0.0f, 1.0f);
 			ImGui::DragFloat("Friction", &component->Friction, 0.01f, 0.0f, 1.0f);
 			ImGui::DragFloat("Restitution", &component->Restitution, 0.01f, 0.0f, 1.0f);

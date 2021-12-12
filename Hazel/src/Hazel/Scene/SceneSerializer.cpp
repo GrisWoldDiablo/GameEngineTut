@@ -133,6 +133,20 @@ namespace Hazel
 		}
 #pragma endregion
 
+#pragma region CircleRendererComponent
+		if (auto component = entity.TryGetComponent<CircleRendererComponent>(); component != nullptr)
+		{
+			out << YAML::Key << "CircleRendererComponent";
+			out << YAML::BeginMap; // CircleRendererComponent
+
+			out << YAML::Key << "Color" << YAML::Value << component->Color;
+			out << YAML::Key << "Thickness" << YAML::Value << component->Thickness;
+			out << YAML::Key << "Fade" << YAML::Value << component->Fade;
+
+			out << YAML::EndMap; // CircleRendererComponent
+		}
+#pragma endregion
+
 #pragma region Rigidbody2DComponent
 		if (auto component = entity.TryGetComponent<Rigidbody2DComponent>(); component != nullptr)
 		{
@@ -164,6 +178,21 @@ namespace Hazel
 		}
 #pragma endregion
 
+#pragma region CircleCollider2DComponent
+		if (auto component = entity.TryGetComponent<CircleCollider2DComponent>(); component != nullptr)
+		{
+			out << YAML::Key << "CircleCollider2DComponent";
+			out << YAML::BeginMap; // CircleCollider2DComponent
+
+			out << YAML::Key << "Radius" << YAML::Value << component->Radius;
+			out << YAML::Key << "Density" << YAML::Value << component->Density;
+			out << YAML::Key << "Friction" << YAML::Value << component->Friction;
+			out << YAML::Key << "Restitution" << YAML::Value << component->Restitution;
+			out << YAML::Key << "RestitutionThreshold" << YAML::Value << component->RestitutionThreshold;
+
+			out << YAML::EndMap; // CircleCollider2DComponent
+		}
+#pragma endregion
 		out << YAML::EndMap;
 	}
 
@@ -328,7 +357,18 @@ namespace Hazel
 						component.Tiling = spriteRendererComponent["Tiling"].as<glm::vec2>();
 					}
 
-					component.Color = GetValue<glm::vec4>(spriteRendererComponent, "Color", { 0.0f, 0.0f, 0.0f, 1.0f });
+					component.Color = GetValue<glm::vec4>(spriteRendererComponent, "Color", Color::White);
+				}
+#pragma endregion
+
+#pragma region CircleRendererComponent
+				auto circleRendererComponent = entity["CircleRendererComponent"];
+				if (circleRendererComponent)
+				{
+					auto& component = deserializedEntity.AddComponent<CircleRendererComponent>();
+					component.Color = GetValue<glm::vec4>(circleRendererComponent, "Color", Color::White);
+					component.Thickness = GetValue<float>(circleRendererComponent, "Thickness", 1.0f);
+					component.Fade = GetValue<float>(circleRendererComponent, "Fade", 0.005f);
 				}
 #pragma endregion
 
@@ -354,6 +394,19 @@ namespace Hazel
 					component.Friction = GetValue<float>(boxCollider2DComponent, "Friction", 0.5f);
 					component.Restitution = GetValue<float>(boxCollider2DComponent, "Restitution");
 					component.RestitutionThreshold = GetValue<float>(boxCollider2DComponent, "RestitutionThreshold", 0.5f);
+				}
+#pragma endregion
+
+#pragma region circleCollider2DComponent
+				auto circleCollider2DComponent = entity["CircleCollider2DComponent"];
+				if (circleCollider2DComponent)
+				{
+					auto& component = deserializedEntity.AddComponent<CircleCollider2DComponent>();
+					component.Radius = GetValue<float>(circleCollider2DComponent, "Radius", 0.5f);
+					component.Density = GetValue<float>(circleCollider2DComponent, "Density", 1.0f);
+					component.Friction = GetValue<float>(circleCollider2DComponent, "Friction", 0.5f);
+					component.Restitution = GetValue<float>(circleCollider2DComponent, "Restitution");
+					component.RestitutionThreshold = GetValue<float>(circleCollider2DComponent, "RestitutionThreshold", 0.5f);
 				}
 #pragma endregion
 			}
