@@ -32,7 +32,7 @@ namespace Hazel
 	{
 	public:
 		Application(std::string name = "Hazel App", ApplicationCommandLineArgs args = ApplicationCommandLineArgs());
-		virtual ~Application() = default;
+		virtual ~Application();
 
 		void Stop();
 		void OnEvent(Event& event);

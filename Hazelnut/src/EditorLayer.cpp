@@ -349,7 +349,8 @@ namespace Hazel
 		if (mouseX >= 0 && mouseY >= 0 && mouseX < (int)sceneViewpostSize.x && mouseY < (int)sceneViewpostSize.y)
 		{
 			int pixelData = _framebuffer->ReadPixel(1, mouseX, mouseY);
-			_hoveredEntity = pixelData == -1 ? Entity() : Entity((entt::entity)pixelData, _activeScene.get());
+
+			_hoveredEntity = pixelData == -1 ? Entity() : _activeScene->CheckEntityValidity((entt::entity)pixelData) ? Entity((entt::entity)pixelData, _activeScene.get()) : Entity();
 		}
 	}
 
@@ -832,11 +833,10 @@ namespace Hazel
 			lowerRightPos.y += 25.0f;
 			lowerRightPos.x += 25.0f;
 
-			Ref<Texture2D> cursorTexture = _editorCamera.IsPanning() ? _panIconTexture : _magnifierIconTexture;
+			Ref<Texture2D> cursorTexture = _editorCamera.IsPanning() ? _panIconTexture : _editorCamera.IsZooming() ? _magnifierIconTexture : _eyeIconTexture;
 
 			if (_editorCamera.IsDriving())
 			{
-				cursorTexture = _eyeIconTexture;
 				// Move Speed
 				std::stringstream ss;
 				ss << _editorCamera.GetDrivingSpeed();

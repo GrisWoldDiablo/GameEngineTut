@@ -66,6 +66,16 @@ namespace Hazel
 		static void DrawCircle(const glm::mat4& transform, const Color& color, float thickness = 1.0f, float fade = 0.005f, int entityID = -1);
 		// --- ----------- --- //
 
+		// --- Line --- //
+		// Final Draw
+		static void DrawLine(const glm::vec3& positionStart,const glm::vec3& positionEnd, const Color& color, int entityID = -1);
+		static void DrawRect(const glm::vec3& position, const glm::vec2& size, const Color& color, int entityID = -1);
+		static void DrawRect(const glm::mat4& transform, const Color& color, int entityID = -1);
+
+		static float GetLineWidth();
+		static void SetLineWidth(float width);
+		// --- ----------- --- //
+
 
 		struct Statistics
 		{

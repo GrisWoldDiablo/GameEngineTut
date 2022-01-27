@@ -35,6 +35,11 @@ namespace Hazel
 		PushOverlay(_imGuiLayer);
 	}
 
+	Application::~Application()
+	{
+		Renderer::Shutdown();
+	}
+
 	void Application::Run()
 	{
 		HZ_PROFILE_FUNCTION();

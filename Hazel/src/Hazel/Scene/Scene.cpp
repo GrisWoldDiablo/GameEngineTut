@@ -69,11 +69,15 @@ namespace Hazel
 		auto& dstSceneRegistry = newScene->_registry;
 		std::unordered_map<UUID, entt::entity> enttMap;
 
-		srcSceneRegistry.view<IDComponent>().each([&](const auto entt, IDComponent& idComponent)
+
+		auto group = srcSceneRegistry.group<IDComponent, BaseComponent>();
+		
+		// Need to run reverse to keep order of entt ID intact.
+		std::for_each(group.rbegin(), group.rend(), [&](auto entt)
 		{
+			const auto [idComponent, baseComponent] = group.get<IDComponent, BaseComponent>(entt);
 			UUID uuid = idComponent.ID;
 
-			const BaseComponent& baseComponent = srcSceneRegistry.get<BaseComponent>(entt);
 			const auto& name = baseComponent.Name;
 			const auto& tag = baseComponent.Tag;
 			const auto& layer = baseComponent.Layer;
@@ -118,6 +122,11 @@ namespace Hazel
 	void Scene::DestroyEntity(Entity entity)
 	{
 		_registry.destroy(entity);
+	}
+
+	const bool Scene::CheckEntityValidity(const entt::entity entity)
+	{
+		return _registry.valid(entity);
 	}
 
 	void Scene::OnRuntimeStart()
@@ -261,13 +270,17 @@ namespace Hazel
 		{
 			DrawSpriteRenderComponent(camera.GetPosition());
 			DrawCircleRenderComponent(camera.GetPosition());
+
+			Renderer2D::DrawLine(glm::vec3(0.0f), glm::vec3(5.0f), Color::Magenta);
+			Renderer2D::DrawRect(glm::vec3(0.0f), glm::vec3(1.0f), Color::White);
+
 			Renderer2D::EndScene();
 		}
 	}
 
 	void Scene::DrawSpriteRenderComponent(const glm::vec3& cameraPosition)
 	{
-		auto group = _registry.group<TransformComponent>(entt::get<SpriteRendererComponent>);
+		auto group = _registry.group<TransformComponent, SpriteRendererComponent>();
 
 		group.sort<TransformComponent>([&](const auto& lhs, const auto& rhs)
 		{
@@ -280,6 +293,9 @@ namespace Hazel
 		{
 			auto [transform, sprite] = group.get<TransformComponent, SpriteRendererComponent>(entity);
 			Renderer2D::DrawSprite(transform.GetTransformMatrix(), sprite, (int)entity);
+
+			// Comment out to draw the sprite bounding box for testing.
+			// Renderer2D::DrawRect(transform.GetTransformMatrix(), Color::Green, (int)entity);
 		}
 	}
 

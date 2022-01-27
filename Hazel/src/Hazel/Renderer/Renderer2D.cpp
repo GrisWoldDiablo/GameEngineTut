@@ -37,6 +37,15 @@ namespace Hazel
 		int EntityID;
 	};
 
+	struct LineVertex
+	{
+		glm::vec3 Position;
+		glm::vec4 Color;
+
+		// Editor-Only, Not used right now as lines are not entities.
+		int EntityID;
+	};
+
 	struct Renderer2DData
 	{
 		// Max for draw calls
@@ -45,21 +54,37 @@ namespace Hazel
 		static const uint32_t MaxIndices = MaxQuads * 6; // 120,000
 		static const uint32_t MaxTextureSlots = 32; // TODO: Render Capabilities
 
+#pragma region Quad
 		Ref<VertexArray> QuadVertexArray;
 		Ref<VertexBuffer> QuadVertexBuffer;
 		Ref<Shader> QuadShader;
 
+		uint32_t QuadIndexCount = 0;
+		QuadVertex* QuadVertexBufferBase = nullptr;
+		QuadVertex* QuadVertexBufferPtr = nullptr;
+#pragma endregion
+
+#pragma region Circle
 		Ref<VertexArray> CircleVertexArray;
 		Ref<VertexBuffer> CircleVertexBuffer;
 		Ref<Shader> CircleShader;
 
-		uint32_t QuadIndexCount = 0;
-		QuadVertex* QuadVertexBufferBase = nullptr;
-		QuadVertex* QuadVertexBufferPtr = nullptr;
-
 		uint32_t CircleIndexCount = 0;
 		CircleVertex* CircleVertexBufferBase = nullptr;
 		CircleVertex* CircleVertexBufferPtr = nullptr;
+#pragma endregion
+
+#pragma region Line
+		Ref<VertexArray> LineVertexArray;
+		Ref<VertexBuffer> LineVertexBuffer;
+		Ref<Shader> LineShader;
+
+		uint32_t LineVertexCount = 0;
+		LineVertex* LineVertexBufferBase = nullptr;
+		LineVertex* LineVertexBufferPtr = nullptr;
+
+		float LineWidth = 2.0f;
+#pragma endregion
 
 		std::array<Ref<Texture2D>, MaxTextureSlots> TextureSlots;
 		uint32_t TextureSlotIndex = 0; // Default index is 1 because, index 0 is White Texture.
@@ -85,7 +110,7 @@ namespace Hazel
 	{
 		HZ_PROFILE_FUNCTION();
 
-		// Quads
+#pragma region Quad
 		sData.QuadVertexArray = VertexArray::Create();
 
 		sData.QuadVertexBuffer = VertexBuffer::Create(sData.MaxVertices * sizeof(QuadVertex));
@@ -121,8 +146,9 @@ namespace Hazel
 		auto quadIndexBuffer = IndexBuffer::Create(quadIndices, sData.MaxIndices);
 		sData.QuadVertexArray->SetIndexBuffer(quadIndexBuffer);
 		delete[] quadIndices;
+#pragma endregion
 
-		// Circles
+#pragma region Circle
 		sData.CircleVertexArray = VertexArray::Create();
 
 		sData.CircleVertexBuffer = VertexBuffer::Create(sData.MaxVertices * sizeof(CircleVertex));
@@ -138,6 +164,21 @@ namespace Hazel
 		sData.CircleVertexArray->AddVertexBuffer(sData.CircleVertexBuffer);
 		sData.CircleVertexArray->SetIndexBuffer(quadIndexBuffer); // Use Quad Index Buffer
 		sData.CircleVertexBufferBase = new CircleVertex[sData.MaxVertices];
+#pragma endregion
+
+#pragma region Line
+		sData.LineVertexArray = VertexArray::Create();
+
+		sData.LineVertexBuffer = VertexBuffer::Create(sData.MaxVertices * sizeof(LineVertex));
+		sData.LineVertexBuffer->SetLayout(
+			{
+				{ ShaderDataType::Float3, "a_Position"	},
+				{ ShaderDataType::Float4, "a_Color"		},
+				{ ShaderDataType::Int,	  "a_EntityID"	},
+			});
+		sData.LineVertexArray->AddVertexBuffer(sData.LineVertexBuffer);
+		sData.LineVertexBufferBase = new LineVertex[sData.MaxVertices];
+#pragma endregion
 
 		// -- Shader loading
 #define ASYNC 1
@@ -147,10 +188,12 @@ namespace Hazel
 		{
 			sData.QuadShader = Shader::Create("assets/shaders/Renderer2D_Quad.glsl");
 			sData.CircleShader = Shader::Create("assets/shaders/Renderer2D_Circle.glsl");
+			sData.LineShader = Shader::Create("assets/shaders/Renderer2D_Line.glsl");
 		});
 #else
 		sData.QuadShader = Shader::Create("assets/shaders/Renderer2D_Quad.glsl");
 		sData.CircleShader = Shader::Create("assets/shaders/Renderer2D_Circle.glsl");
+		sData.LineShader = Shader::Create("assets/shaders/Renderer2D_Line.glsl");
 #endif // ASYNC
 
 		sData.QuadVertexPositions[0] = { -0.5f,-0.5f, 0.0f, 1.0f };
@@ -168,6 +211,7 @@ namespace Hazel
 		HZ_PROFILE_FUNCTION();
 
 		delete[] sData.QuadVertexBufferBase;
+		delete[] sData.QuadTextureCoordinates;
 	}
 
 	bool Renderer2D::BeginScene(const Camera& camera, const glm::mat4& transform)
@@ -194,12 +238,8 @@ namespace Hazel
 	{
 		HZ_PROFILE_FUNCTION();
 
-		if (sData.QuadShader == nullptr || sData.CircleShader == nullptr)
-		{
-			return false;
-		}
-
-		if (sData.QuadShader->IsLoadingCompleted())
+#pragma region Quad
+		if (sData.QuadShader != nullptr && sData.QuadShader->IsLoadingCompleted())
 		{
 			sData.QuadShader->CompleteInitialization();
 		}
@@ -207,8 +247,11 @@ namespace Hazel
 		{
 			return false;
 		}
+#pragma endregion
 
-		if (sData.CircleShader->IsLoadingCompleted())
+
+#pragma region Circle
+		if (sData.CircleShader != nullptr && sData.CircleShader->IsLoadingCompleted())
 		{
 			sData.CircleShader->CompleteInitialization();
 		}
@@ -216,6 +259,19 @@ namespace Hazel
 		{
 			return false;
 		}
+#pragma endregion
+
+#pragma region Line
+		if (sData.LineShader != nullptr && sData.LineShader->IsLoadingCompleted())
+		{
+			sData.LineShader->CompleteInitialization();
+		}
+		else
+		{
+			return false;
+		}
+#pragma endregion
+
 
 		sData.CameraBuffer.ViewProjection = viewProjection;
 		sData.CameraUniformBuffer->SetData(&sData.CameraBuffer, sizeof(Renderer2DData::CameraData));
@@ -235,11 +291,20 @@ namespace Hazel
 	{
 		HZ_PROFILE_FUNCTION();
 
+#pragma region Quad
 		sData.QuadIndexCount = 0;
 		sData.QuadVertexBufferPtr = sData.QuadVertexBufferBase;
-		
+#pragma endregion
+
+#pragma region Circle
 		sData.CircleIndexCount = 0;
 		sData.CircleVertexBufferPtr = sData.CircleVertexBufferBase;
+#pragma endregion
+
+#pragma region Line
+		sData.LineVertexCount = 0;
+		sData.LineVertexBufferPtr = sData.LineVertexBufferBase;
+#pragma endregion
 
 		sData.TextureSlotIndex = 0;
 	}
@@ -248,6 +313,7 @@ namespace Hazel
 	{
 		HZ_PROFILE_FUNCTION();
 
+#pragma region Quad
 		if (sData.QuadIndexCount > 0)
 		{
 			auto dataSize = (uint32_t)((uint8_t*)sData.QuadVertexBufferPtr - (uint8_t*)sData.QuadVertexBufferBase);
@@ -264,17 +330,34 @@ namespace Hazel
 
 			sData.Stats.DrawCalls++;
 		}
+#pragma endregion
 
+#pragma region Circle
 		if (sData.CircleIndexCount > 0)
 		{
 			auto dataSize = (uint32_t)((uint8_t*)sData.CircleVertexBufferPtr - (uint8_t*)sData.CircleVertexBufferBase);
 			sData.CircleVertexBuffer->SetData(sData.CircleVertexBufferBase, dataSize);
-			
+
 			sData.CircleShader->Bind();
 			RenderCommand::DrawIndexed(sData.CircleVertexArray, sData.CircleIndexCount);
-			
+
 			sData.Stats.DrawCalls++;
 		}
+#pragma endregion
+
+#pragma region Line
+		if (sData.LineVertexCount > 0)
+		{
+			auto dataSize = (uint32_t)((uint8_t*)sData.LineVertexBufferPtr - (uint8_t*)sData.LineVertexBufferBase);
+			sData.LineVertexBuffer->SetData(sData.LineVertexBufferBase, dataSize);
+
+			sData.LineShader->Bind();
+			RenderCommand::SetLineWidth(sData.LineWidth);
+			RenderCommand::DrawLines(sData.LineVertexArray, sData.LineVertexCount);
+
+			sData.Stats.DrawCalls++;
+		}
+#pragma endregion
 	}
 
 #pragma region Primitive
@@ -475,6 +558,61 @@ namespace Hazel
 	void Renderer2D::DrawCircle(const glm::mat4& transform, const Color& color, float thickness, float fade, int entityID)
 	{
 		UpdateCircleData(transform, color, entityID, thickness, fade);
+	}
+
+#pragma region Lines
+	void Renderer2D::DrawLine(const glm::vec3& positionStart, const glm::vec3& positionEnd, const Color& color, int entityID)
+	{
+		sData.LineVertexBufferPtr->Position = positionStart;
+		sData.LineVertexBufferPtr->Color = color;
+		sData.LineVertexBufferPtr->EntityID = entityID;
+		sData.LineVertexBufferPtr++;
+
+		sData.LineVertexBufferPtr->Position = positionEnd;
+		sData.LineVertexBufferPtr->Color = color;
+		sData.LineVertexBufferPtr->EntityID = entityID;
+		sData.LineVertexBufferPtr++;
+
+		sData.LineVertexCount += 2;
+	}
+
+	void Renderer2D::DrawRect(const glm::vec3& position, const glm::vec2& size, const Color& color, int entityID)
+	{
+		glm::vec3 p0 = glm::vec3(position.x - size.x * 0.5f, position.y - size.y * 0.5f, position.z);
+		glm::vec3 p1 = glm::vec3(position.x + size.x * 0.5f, position.y - size.y * 0.5f, position.z);
+		glm::vec3 p2 = glm::vec3(position.x + size.x * 0.5f, position.y + size.y * 0.5f, position.z);
+		glm::vec3 p3 = glm::vec3(position.x - size.x * 0.5f, position.y + size.y * 0.5f, position.z);
+
+		DrawLine(p0, p1, color);
+		DrawLine(p1, p2, color);
+		DrawLine(p2, p3, color);
+		DrawLine(p3, p0, color);
+	}
+
+	void Renderer2D::DrawRect(const glm::mat4& transform, const Color& color, int entityID)
+	{
+		glm::vec3 lineVertices[4];
+
+		for (size_t i = 0; i < 4; i++)
+		{
+			lineVertices[i] = transform * sData.QuadVertexPositions[i];
+		}
+
+		DrawLine(lineVertices[0], lineVertices[1], color);
+		DrawLine(lineVertices[1], lineVertices[2], color);
+		DrawLine(lineVertices[2], lineVertices[3], color);
+		DrawLine(lineVertices[3], lineVertices[0], color);
+	}
+#pragma endregion
+
+	float Renderer2D::GetLineWidth()
+	{
+		return sData.LineWidth;
+	}
+
+	void Renderer2D::SetLineWidth(float width)
+	{
+		sData.LineWidth = width;
 	}
 
 	void Renderer2D::ResetStats()

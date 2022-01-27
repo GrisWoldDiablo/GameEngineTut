@@ -20,11 +20,18 @@ namespace Hazel
 			_sRendererAPI->SetViewport(x, y, width, height);
 		}
 
-		static void DrawIndexed(const Ref<VertexArray>& vertexArray, uint32_t count = 0)
+		static void DrawIndexed(const Ref<VertexArray>& vertexArray, uint32_t indexCount = 0)
 		{
 			HZ_PROFILE_FUNCTION();
 
-			_sRendererAPI->DrawIndexed(vertexArray, count);
+			_sRendererAPI->DrawIndexed(vertexArray, indexCount);
+		}
+
+		static void DrawLines(const Ref<VertexArray>& vertexArray, uint32_t vertexCount)
+		{
+			HZ_PROFILE_FUNCTION();
+
+			_sRendererAPI->DrawLines(vertexArray, vertexCount);
 		}
 
 		static void SetClearColor(const Color& color)
@@ -53,6 +60,11 @@ namespace Hazel
 			HZ_PROFILE_FUNCTION();
 
 			_sRendererAPI->SetDepthMaskReadOnly();
+		}
+
+		static void SetLineWidth(float width)
+		{
+			_sRendererAPI->SetLineWidth(width);
 		}
 
 	private:
