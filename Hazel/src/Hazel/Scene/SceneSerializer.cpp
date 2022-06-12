@@ -89,7 +89,7 @@ namespace Hazel
 #pragma endregion
 
 #pragma region CameraComponent
-		if (auto component = entity.TryGetComponent<CameraComponent>(); component != nullptr)
+		if (const auto& component = entity.TryGetComponent<CameraComponent>())
 		{
 			out << YAML::Key << "CameraComponent";
 			out << YAML::BeginMap; // CameraComponent
@@ -117,7 +117,7 @@ namespace Hazel
 #pragma endregion
 
 #pragma region SpriteRendererComponent
-		if (auto component = entity.TryGetComponent<SpriteRendererComponent>(); component != nullptr)
+		if (const auto& component = entity.TryGetComponent<SpriteRendererComponent>())
 		{
 			out << YAML::Key << "SpriteRendererComponent";
 			out << YAML::BeginMap; // SpriteRendererComponent
@@ -134,7 +134,7 @@ namespace Hazel
 #pragma endregion
 
 #pragma region CircleRendererComponent
-		if (auto component = entity.TryGetComponent<CircleRendererComponent>(); component != nullptr)
+		if (const auto& component = entity.TryGetComponent<CircleRendererComponent>())
 		{
 			out << YAML::Key << "CircleRendererComponent";
 			out << YAML::BeginMap; // CircleRendererComponent
@@ -148,7 +148,7 @@ namespace Hazel
 #pragma endregion
 
 #pragma region Rigidbody2DComponent
-		if (auto component = entity.TryGetComponent<Rigidbody2DComponent>(); component != nullptr)
+		if (const auto& component = entity.TryGetComponent<Rigidbody2DComponent>())
 		{
 			out << YAML::Key << "Rigidbody2DComponent";
 			out << YAML::BeginMap; // Rigidbody2DComponent
@@ -161,7 +161,7 @@ namespace Hazel
 #pragma endregion
 
 #pragma region BoxCollider2DComponent
-		if (auto component = entity.TryGetComponent<BoxCollider2DComponent>(); component != nullptr)
+		if (const auto& component = entity.TryGetComponent<BoxCollider2DComponent>())
 		{
 			out << YAML::Key << "BoxCollider2DComponent";
 			out << YAML::BeginMap; // BoxCollider2DComponent
@@ -179,11 +179,12 @@ namespace Hazel
 #pragma endregion
 
 #pragma region CircleCollider2DComponent
-		if (auto component = entity.TryGetComponent<CircleCollider2DComponent>(); component != nullptr)
+		if (const auto& component = entity.TryGetComponent<CircleCollider2DComponent>())
 		{
 			out << YAML::Key << "CircleCollider2DComponent";
 			out << YAML::BeginMap; // CircleCollider2DComponent
 
+			out << YAML::Key << "Offset" << YAML::Value << component->Offset;
 			out << YAML::Key << "Radius" << YAML::Value << component->Radius;
 			out << YAML::Key << "Density" << YAML::Value << component->Density;
 			out << YAML::Key << "Friction" << YAML::Value << component->Friction;
@@ -199,7 +200,7 @@ namespace Hazel
 	template<typename T>
 	static T GetValue(const YAML::Node& node, const std::string& fieldName, T fallbackValue)
 	{
-		if (auto field = node[fieldName]; field)
+		if (const auto& field = node[fieldName])
 		{
 			return field.as<T>();
 		}
@@ -402,6 +403,7 @@ namespace Hazel
 				if (circleCollider2DComponent)
 				{
 					auto& component = deserializedEntity.AddComponent<CircleCollider2DComponent>();
+					component.Offset = GetValue<glm::vec2>(circleCollider2DComponent, "Offset");
 					component.Radius = GetValue<float>(circleCollider2DComponent, "Radius", 0.5f);
 					component.Density = GetValue<float>(circleCollider2DComponent, "Density", 1.0f);
 					component.Friction = GetValue<float>(circleCollider2DComponent, "Friction", 0.5f);

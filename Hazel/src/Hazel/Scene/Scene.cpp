@@ -146,19 +146,19 @@ namespace Hazel
 			body->SetFixedRotation(rb2d.IsFixedRotation);
 			rb2d.RuntimeBody = body;
 
-			auto createFixture = [&](b2Shape& shape, float density, float friction, float restitution, float renstitutionThreshold)
+			auto createFixture = [&](b2Shape& shape, float density, float friction, float restitution, float restitutionThreshold)
 			{
 				b2FixtureDef fixtureDef;
 				fixtureDef.shape = &shape;
 				fixtureDef.density = density;
 				fixtureDef.friction = friction;
 				fixtureDef.restitution = restitution;
-				fixtureDef.restitutionThreshold = renstitutionThreshold;
+				fixtureDef.restitutionThreshold = restitutionThreshold;
 
 				body->CreateFixture(&fixtureDef);
 			};
 
-			if (auto* bc2d = entity.TryGetComponent<BoxCollider2DComponent>(); bc2d != nullptr)
+			if (const auto& bc2d = entity.TryGetComponent<BoxCollider2DComponent>())
 			{
 				b2PolygonShape boxShape;
 				boxShape.SetAsBox
@@ -171,9 +171,10 @@ namespace Hazel
 
 				createFixture(boxShape, bc2d->Density, bc2d->Friction, bc2d->Restitution, bc2d->RestitutionThreshold);
 			}
-			else if (auto* cc2d = entity.TryGetComponent<CircleCollider2DComponent>(); cc2d != nullptr)
+			else if (const auto& cc2d = entity.TryGetComponent<CircleCollider2DComponent>())
 			{
 				b2CircleShape circleShape;
+				circleShape.m_p.Set(cc2d->Offset.x, cc2d->Offset.y);
 				circleShape.m_radius = cc2d->Radius * glm::max(transform.Scale.x, transform.Scale.y);
 
 				createFixture(circleShape, cc2d->Density, cc2d->Friction, cc2d->Restitution, cc2d->RestitutionThreshold);

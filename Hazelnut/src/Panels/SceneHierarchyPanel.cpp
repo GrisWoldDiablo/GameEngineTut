@@ -47,7 +47,7 @@ namespace Hazel
 	template<typename T, typename UIFunction>
 	static void DrawComponent(Entity entity, const std::string& name, UIFunction uiFunction)
 	{
-		if (auto component = entity.TryGetComponent<T>(); component != nullptr)
+		if (const auto& component = entity.TryGetComponent<T>())
 		{
 			const auto treeNodeFlags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_FramePadding;
 
@@ -576,6 +576,7 @@ namespace Hazel
 #pragma region CircleCollider2DComponent
 		DrawComponent<CircleCollider2DComponent>(entity, "Circle Collider 2D", [&](CircleCollider2DComponent* component)
 		{
+			DrawVecControls("Offset", component->Offset, 0.0f);
 			ImGui::DragFloat("Radius", &component->Radius, 0.01f, 0.0f, 0.0f);
 			ImGui::DragFloat("Density", &component->Density, 0.01f, 0.0f, 1.0f);
 			ImGui::DragFloat("Friction", &component->Friction, 0.01f, 0.0f, 1.0f);

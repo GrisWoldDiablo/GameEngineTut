@@ -752,66 +752,68 @@ namespace Hazel
 		_sceneViewportBounds[1] = { maxBound.x, maxBound.y };
 
 #pragma region Gizmo
-		if (auto selectedEntity = _sceneHierarchyPanel.GetSelectedEntity();	selectedEntity &&
-			(_gizmoType != -1 || (_hasStoredPreviousGizmoType && _previousGizmoType != -1)))
+		if (auto selectedEntity = _sceneHierarchyPanel.GetSelectedEntity())
 		{
-			glm::mat4 cameraProjection;
-			glm::mat4 cameraView;
-			if (_sceneState == SceneState::Play)
+			if (_gizmoType != -1 || (_hasStoredPreviousGizmoType && _previousGizmoType != -1))
 			{
-				if (auto cameraEntity = _activeScene->GetPrimaryCameraEntity(); cameraEntity)
+				glm::mat4 cameraProjection;
+				glm::mat4 cameraView;
+				if (_sceneState == SceneState::Play)
 				{
-					// Runtime Camera;
-					const auto& camera = cameraEntity.GetComponent<CameraComponent>().Camera;
-					cameraProjection = camera.GetProjection();
-					cameraView = glm::inverse(cameraEntity.Transform().GetTransformMatrix());
-					ImGuizmo::SetOrthographic(camera.GetProjectionType() == SceneCamera::ProjectionType::Orthographic);
+					if (auto cameraEntity = _activeScene->GetPrimaryCameraEntity())
+					{
+						// Runtime Camera;
+						const auto& camera = cameraEntity.GetComponent<CameraComponent>().Camera;
+						cameraProjection = camera.GetProjection();
+						cameraView = glm::inverse(cameraEntity.Transform().GetTransformMatrix());
+						ImGuizmo::SetOrthographic(camera.GetProjectionType() == SceneCamera::ProjectionType::Orthographic);
+					}
 				}
-			}
-			else
-			{
-				// Editor Camera
-				cameraProjection = _editorCamera.GetProjection();
-				cameraView = _editorCamera.GetViewMatrix();
-				ImGuizmo::SetOrthographic(false);
-			}
-
-			ImGuizmo::SetDrawlist();
-
-			auto windowWidth = (float)ImGui::GetWindowWidth();
-			auto windowHeight = (float)ImGui::GetWindowHeight();
-			ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, windowWidth, windowHeight);
-
-
-			// Entity transform
-			auto& transformComponent = selectedEntity.Transform();
-			auto transform = transformComponent.GetTransformMatrix();
-
-			// Snapping
-			bool snap = Input::IsKeyPressed(Key::LeftControl);
-			float snapValue = 0.5f; // Snap to 0.5m for position and scale.
-
-			// Snap to 45 degrees for rotation.
-			if (_gizmoType == ImGuizmo::ROTATE)
-			{
-				snapValue = 45.0f;
-			}
-
-			float snapValues[3] = { snapValue,snapValue,snapValue };
-			int gizmoType = _hasStoredPreviousGizmoType ? _previousGizmoType : _gizmoType;
-			ImGuizmo::Manipulate(glm::value_ptr(cameraView), glm::value_ptr(cameraProjection),
-				(ImGuizmo::OPERATION)gizmoType, (ImGuizmo::MODE)_gizmoSpace, glm::value_ptr(transform),
-				nullptr, snap ? snapValues : nullptr);
-
-			if (ImGuizmo::IsUsing() && !_hasStoredPreviousGizmoType)
-			{
-				glm::vec3 position, rotation, scale;
-				if (Math::DecomposeTransform(transform, position, rotation, scale))
+				else
 				{
-					transformComponent.Position = position;
-					auto rotationDelta = rotation - transformComponent.Rotation;
-					transformComponent.Rotation += rotationDelta;
-					transformComponent.Scale = scale;
+					// Editor Camera
+					cameraProjection = _editorCamera.GetProjection();
+					cameraView = _editorCamera.GetViewMatrix();
+					ImGuizmo::SetOrthographic(false);
+				}
+
+				ImGuizmo::SetDrawlist();
+
+				auto windowWidth = (float)ImGui::GetWindowWidth();
+				auto windowHeight = (float)ImGui::GetWindowHeight();
+				ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, windowWidth, windowHeight);
+
+
+				// Entity transform
+				auto& transformComponent = selectedEntity.Transform();
+				auto transform = transformComponent.GetTransformMatrix();
+
+				// Snapping
+				bool snap = Input::IsKeyPressed(Key::LeftControl);
+				float snapValue = 0.5f; // Snap to 0.5m for position and scale.
+
+				// Snap to 45 degrees for rotation.
+				if (_gizmoType == ImGuizmo::ROTATE)
+				{
+					snapValue = 45.0f;
+				}
+
+				float snapValues[3] = { snapValue,snapValue,snapValue };
+				int gizmoType = _hasStoredPreviousGizmoType ? _previousGizmoType : _gizmoType;
+				ImGuizmo::Manipulate(glm::value_ptr(cameraView), glm::value_ptr(cameraProjection),
+					(ImGuizmo::OPERATION)gizmoType, (ImGuizmo::MODE)_gizmoSpace, glm::value_ptr(transform),
+					nullptr, snap ? snapValues : nullptr);
+
+				if (ImGuizmo::IsUsing() && !_hasStoredPreviousGizmoType)
+				{
+					glm::vec3 position, rotation, scale;
+					if (Math::DecomposeTransform(transform, position, rotation, scale))
+					{
+						transformComponent.Position = position;
+						auto rotationDelta = rotation - transformComponent.Rotation;
+						transformComponent.Rotation += rotationDelta;
+						transformComponent.Scale = scale;
+					}
 				}
 			}
 		}
@@ -1005,7 +1007,7 @@ namespace Hazel
 
 	void EditorLayer::DuplicateEntity()
 	{
-		if (auto selectedEntity = _sceneHierarchyPanel.GetSelectedEntity(); selectedEntity)
+		if (auto selectedEntity = _sceneHierarchyPanel.GetSelectedEntity())
 		{
 			auto newEntity = _activeScene->DuplicateEntity(selectedEntity);
 			_sceneHierarchyPanel.SetSelectedEntity(newEntity);

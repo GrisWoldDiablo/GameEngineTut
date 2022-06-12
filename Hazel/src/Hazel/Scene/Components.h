@@ -149,6 +149,7 @@ namespace Hazel
 
 	struct CircleCollider2DComponent
 	{
+		glm::vec2 Offset{ 0.0f, 0.0f };
 		float Radius = 0.5f;
 
 		// TODO move into physics material
