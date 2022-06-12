@@ -33,6 +33,7 @@ namespace Hazel
 		bool OnKeyPressed(KeyPressedEvent& event);
 		bool OnMouseButtonReleased(MouseButtonReleasedEvent& event);
 		void MousePicking();
+		void OnOverlayRender();
 
 		bool ClearSceneCheck();
 		void NewScene(bool withCheck = false);
@@ -97,6 +98,7 @@ namespace Hazel
 		Entity _hoveredEntity;
 
 		// Tools
+		bool _shouldShowPhysicsColliders = false;
 		bool _isDemoWidowOpen = false;
 
 		// Hover Timer

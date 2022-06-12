@@ -127,6 +127,8 @@ namespace Hazel
 
 		MousePicking();
 
+		OnOverlayRender();
+
 		_framebuffer->Unbind();
 
 		_updateTimerElapsedMillis = _updateTimer.ElapsedMillis();
@@ -354,6 +356,75 @@ namespace Hazel
 		}
 	}
 
+	void EditorLayer::OnOverlayRender()
+	{
+		float cameraPositionZ = 1.0f;
+		if (_sceneState == SceneState::Play)
+		{
+			auto primaryCamera = _activeScene->GetPrimaryCameraEntity();
+			auto camera = primaryCamera.GetComponent<CameraComponent>().Camera;
+			auto transformComponent = primaryCamera.GetComponent<TransformComponent>();
+			auto transform = transformComponent.GetTransformMatrix();
+			if (camera.GetProjectionType() == SceneCamera::ProjectionType::Perspective)
+			{
+				cameraPositionZ = transformComponent.Position.z;
+			}
+			Renderer2D::BeginScene(camera, transform);
+		}
+		else
+		{
+			cameraPositionZ = _editorCamera.GetPosition().z;
+			Renderer2D::BeginScene(_editorCamera);
+		}
+
+		if (_shouldShowPhysicsColliders)
+		{
+			const auto identityMatrix = glm::mat4(1.0f);
+
+			// Box Colliders
+			{
+				auto view = _activeScene->GetAllEntitiesWith<TransformComponent, BoxCollider2DComponent>();
+				for (auto entity : view)
+				{
+					auto [tc, bc2d] = view.get<TransformComponent, BoxCollider2DComponent>(entity);
+
+					float sign = cameraPositionZ > tc.Position.z ? 1.0f : -1.0f;
+					glm::vec3 position = tc.Position + glm::vec3(bc2d.Offset, 0.001f * sign);
+					glm::vec3 scale = tc.Scale * glm::vec3(bc2d.Size * 2.0f, 1.0f);
+					glm::mat4 rotation = glm::toMat4(glm::quat(tc.Rotation));
+
+					glm::mat4 transform = glm::translate(identityMatrix, position)
+						* rotation
+						* glm::scale(identityMatrix, scale);
+
+					Renderer2D::DrawRect(transform, Color::Green);
+				}
+			}
+
+			// Circle Colliders
+			{
+				auto view = _activeScene->GetAllEntitiesWith<TransformComponent, CircleCollider2DComponent>();
+				for (auto entity : view)
+				{
+					auto [tc, cc2d] = view.get<TransformComponent, CircleCollider2DComponent>(entity);
+
+					float sign = cameraPositionZ > tc.Position.z ? 1.0f : -1.0f;
+					glm::vec3 position = tc.Position + glm::vec3(cc2d.Offset, 0.001f * sign);
+					glm::vec3 scale = tc.Scale * glm::vec3(cc2d.Radius * 2.0f);
+					glm::mat4 rotation = glm::toMat4(glm::quat(tc.Rotation));
+
+					glm::mat4 transform = glm::translate(identityMatrix, position)
+						//* rotation
+						* glm::scale(identityMatrix, scale);
+
+					Renderer2D::DrawCircle(transform, Color::Green, 0.01f);
+				}
+			}
+		}
+
+		Renderer2D::EndScene();
+	}
+
 	bool EditorLayer::ClearSceneCheck()
 	{
 		const char* message = "You will lose current scene's unsaved progress.\nDo you want to continue?";
@@ -441,7 +512,6 @@ namespace Hazel
 			SaveSceneAs();
 		}
 	}
-
 
 	void EditorLayer::SaveSceneAs()
 	{
@@ -642,11 +712,10 @@ namespace Hazel
 					OpenScene();
 				}
 
-				//if (ImGui::MenuItem("Save", "Ctrl+S"))
-				//{
-				//	SceneSerializer serializer(_activeScene);
-				//	serializer.Serialize("assets/scenes/Example.hazel");
-				//}
+				if (ImGui::MenuItem("Save", "Ctrl+S"))
+				{
+					SaveScene();
+				}
 
 				if (ImGui::MenuItem("Save As...", "Ctrl+Shift+S"))
 				{
@@ -885,6 +954,8 @@ namespace Hazel
 	void EditorLayer::DrawTools()
 	{
 		ImGui::Begin("Tools");
+
+		ImGui::Checkbox("Show physics colliders", &_shouldShowPhysicsColliders);
 
 		if (ImGui::Button("Show Demo Window"))
 		{

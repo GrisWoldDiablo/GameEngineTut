@@ -62,7 +62,7 @@ Entities:
         OrthographicSize: 10
         OrthographicNearClip: -1
         OrthographicFarClip: 1
-        AspectRatio: 1.67906976
+        AspectRatio: 1.70265484
       IsPrimary: true
       IsFixedAspectRatio: false
   - Entity: 1064095580862351179
@@ -102,9 +102,10 @@ Entities:
       Fade: 0.250999987
     Rigidbody2DComponent:
       BodyType: Dynamic
-      IsFixedRotation: false
+      IsFixedRotation: true
     CircleCollider2DComponent:
-      Radius: 0.5
+      Offset: [-1.39999998, 0]
+      Radius: 0.829999983
       Density: 1
       Friction: 0.5
       Restitution: 0

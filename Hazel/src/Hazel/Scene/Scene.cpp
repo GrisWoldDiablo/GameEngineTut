@@ -71,7 +71,7 @@ namespace Hazel
 
 
 		auto group = srcSceneRegistry.group<IDComponent, BaseComponent>();
-		
+
 		// Need to run reverse to keep order of entt ID intact.
 		std::for_each(group.rbegin(), group.rend(), [&](auto entt)
 		{
