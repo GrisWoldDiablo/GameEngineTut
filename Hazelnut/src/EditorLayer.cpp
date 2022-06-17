@@ -28,6 +28,7 @@ namespace Hazel
 		_localGizmoIconTexture = Texture2D::Create("Resources/Icons/Gizmo/LocalGizmo256White.png");
 		_globalGizmoIconTexture = Texture2D::Create("Resources/Icons/Gizmo/GlobalGizmo256White.png");
 		_playButtonIconTexture = Texture2D::Create("Resources/Icons/General/PlayButton256.png");
+		_simulateButtonIconTexture = Texture2D::Create("Resources/Icons/General/SimulateButton256.png");
 		_stopButtonIconTexture = Texture2D::Create("Resources/Icons/General/StopButton256.png");
 	}
 
@@ -109,7 +110,7 @@ namespace Hazel
 
 		switch (_sceneState)
 		{
-		case EditorLayer::SceneState::Edit:
+		case SceneState::Edit:
 		{
 			_editorCamera.IsEnable() =
 				(_isSceneViewportHovered && _isSceneViewportFocused && !ImGuizmo::IsUsing())
@@ -119,7 +120,17 @@ namespace Hazel
 			// Update Scene
 			_activeScene->OnUpdateEditor(_editorCamera);
 		}	break;
-		case EditorLayer::SceneState::Play:
+		case SceneState::Simulate:
+		{
+			_editorCamera.IsEnable() =
+				(_isSceneViewportHovered && _isSceneViewportFocused && !ImGuizmo::IsUsing())
+				|| _editorCamera.IsAdjusting();
+			_editorCamera.OnUpdate();
+
+			// Update Scene
+			_activeScene->OnUpdateSimulation(_editorCamera);
+		}	break;
+		case SceneState::Play:
 		{
 			_activeScene->OnUpdateRuntime();
 		}	break;
@@ -362,6 +373,11 @@ namespace Hazel
 		if (_sceneState == SceneState::Play)
 		{
 			auto primaryCamera = _activeScene->GetPrimaryCameraEntity();
+			if (!primaryCamera)
+			{
+				return;
+			}
+
 			auto camera = primaryCamera.GetComponent<CameraComponent>().Camera;
 			auto transformComponent = primaryCamera.GetComponent<TransformComponent>();
 			auto transform = transformComponent.GetTransformMatrix();
@@ -391,7 +407,7 @@ namespace Hazel
 					float sign = cameraPositionZ > tc.Position.z ? 1.0f : -1.0f;
 					glm::vec3 position = tc.Position + glm::vec3(bc2d.Offset, 0.001f * sign);
 					glm::vec3 scale = tc.Scale * glm::vec3(bc2d.Size * 2.0f, 1.0f);
-					glm::mat4 rotation = glm::toMat4(glm::quat(tc.Rotation));
+					glm::mat4 rotation = glm::toMat4(glm::quat(tc.Rotation + glm::vec3(0.0f, 0.0f, 1.0f) * glm::radians(bc2d.Angle)));
 
 					glm::mat4 transform = glm::translate(identityMatrix, position)
 						* rotation
@@ -676,17 +692,35 @@ namespace Hazel
 				ImGui::SetCursorPosX(centeredCursorPositionX);
 			}
 
-			bool isEditing = _sceneState == SceneState::Edit;
+			bool isEditing = _sceneState == SceneState::Edit || _sceneState == SceneState::Simulate;
 			auto sceneStateButton = isEditing ? _playButtonIconTexture : _stopButtonIconTexture;
 
 			if (ImGui::ImageButton((ImTextureID)(intptr_t)sceneStateButton->GetRendererID(), size, uv0, uv1, 3, isEditing ? normalColor : selectedColor, isEditing ? whiteColor : tintColor))
 			{
 				switch (_sceneState)
 				{
-				case EditorLayer::SceneState::Edit:
+				case SceneState::Edit:
 					OnScenePlay();
 					break;
-				case EditorLayer::SceneState::Play:
+				case SceneState::Play:
+					OnSceneStop();
+					break;
+				case SceneState::Simulate:
+					OnSceneStop();
+					OnScenePlay();
+					break;
+				}
+			}
+
+			ImGui::SameLine();
+			if (ImGui::ImageButton((ImTextureID)(intptr_t)_simulateButtonIconTexture->GetRendererID(), size, uv0, uv1, 3, isEditing ? normalColor : selectedColor, _sceneState != SceneState::Simulate ? whiteColor : tintColor))
+			{
+				switch (_sceneState)
+				{
+				case SceneState::Edit:
+					OnSceneSimulate();
+					break;
+				case SceneState::Simulate:
 					OnSceneStop();
 					break;
 				}
@@ -1065,11 +1099,34 @@ namespace Hazel
 		_sceneHierarchyPanel.SetSelectedEntity(Entity());
 	}
 
+	void EditorLayer::OnSceneSimulate()
+	{
+		_sceneState = SceneState::Simulate;
+
+		_activeScene = Scene::Copy(_editorScene);
+
+		_activeScene->OnViewportResize((uint32_t)_sceneViewportSize.x, (uint32_t)_sceneViewportSize.y);
+		_activeScene->OnSimulationStart();
+
+		_sceneHierarchyPanel.SetScene(_activeScene);
+		_sceneHierarchyPanel.SetSelectedEntity(Entity());
+	}
+
 	void EditorLayer::OnSceneStop()
 	{
-		_sceneState = SceneState::Edit;
+		HZ_CORE_ASSERT(_sceneState == SceneState::Play || _sceneState == SceneState::Simulate, "Invalid Scene State.");
 
-		_activeScene->OnRuntimeStop();
+		switch (_sceneState)
+		{
+		case SceneState::Play:
+			_activeScene->OnRuntimeStop();
+			break;
+		default:
+			_activeScene->OnSimulationStop();
+			break;
+		}
+
+		_sceneState = SceneState::Edit;
 		_activeScene = _editorScene;
 
 		_sceneHierarchyPanel.SetScene(_activeScene);

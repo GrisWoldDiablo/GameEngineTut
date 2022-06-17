@@ -58,6 +58,7 @@ namespace Hazel
 		void AddTooltip(const std::string& tooltipMessage);
 
 		void OnScenePlay();
+		void OnSceneSimulate();
 		void OnSceneStop();
 
 		void DuplicateEntity();
@@ -115,12 +116,14 @@ namespace Hazel
 		Ref<Texture2D> _localGizmoIconTexture;
 		Ref<Texture2D> _globalGizmoIconTexture;
 		Ref<Texture2D> _playButtonIconTexture;
+		Ref<Texture2D> _simulateButtonIconTexture;
 		Ref<Texture2D> _stopButtonIconTexture;
 
 		enum class SceneState
 		{
 			Edit = 0,
-			Play = 1
+			Play = 1,
+			Simulate = 2
 		};
 
 		SceneState _sceneState = SceneState::Edit;

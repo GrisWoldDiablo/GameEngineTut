@@ -33,6 +33,7 @@ namespace Hazel
 	Scene::~Scene()
 	{
 		_registry.clear();
+		delete _physicsWorld;
 	}
 
 	template<typename Component>
@@ -124,68 +125,29 @@ namespace Hazel
 		_registry.destroy(entity);
 	}
 
-	const bool Scene::CheckEntityValidity(const entt::entity entity)
+	bool Scene::CheckEntityValidity(const entt::entity& entity) const
 	{
 		return _registry.valid(entity);
 	}
 
 	void Scene::OnRuntimeStart()
 	{
-		_physicsWorld = new b2World({ 0.0f, -9.8f });
-		_registry.view<Rigidbody2DComponent>().each([=](const auto entt, Rigidbody2DComponent& rb2d)
-		{
-			Entity entity = { entt, this };
-			auto& transform = entity.Transform();
-
-			b2BodyDef bodyDef;
-			bodyDef.type = Rigidbody2DTypeToBox2DBody(rb2d.Type);
-			bodyDef.position.Set(transform.Position.x, transform.Position.y);
-			bodyDef.angle = transform.Rotation.z;
-
-			b2Body* body = _physicsWorld->CreateBody(&bodyDef);
-			body->SetFixedRotation(rb2d.IsFixedRotation);
-			rb2d.RuntimeBody = body;
-
-			auto createFixture = [&](b2Shape& shape, float density, float friction, float restitution, float restitutionThreshold)
-			{
-				b2FixtureDef fixtureDef;
-				fixtureDef.shape = &shape;
-				fixtureDef.density = density;
-				fixtureDef.friction = friction;
-				fixtureDef.restitution = restitution;
-				fixtureDef.restitutionThreshold = restitutionThreshold;
-
-				body->CreateFixture(&fixtureDef);
-			};
-
-			if (const auto& bc2d = entity.TryGetComponent<BoxCollider2DComponent>())
-			{
-				b2PolygonShape boxShape;
-				boxShape.SetAsBox
-				(
-					bc2d->Size.x * transform.Scale.x,
-					bc2d->Size.y * transform.Scale.y,
-					{ bc2d->Offset.x, bc2d->Offset.y },
-					glm::radians(bc2d->Angle)
-				);
-
-				createFixture(boxShape, bc2d->Density, bc2d->Friction, bc2d->Restitution, bc2d->RestitutionThreshold);
-			}
-			else if (const auto& cc2d = entity.TryGetComponent<CircleCollider2DComponent>())
-			{
-				b2CircleShape circleShape;
-				circleShape.m_p.Set(cc2d->Offset.x, cc2d->Offset.y);
-				circleShape.m_radius = cc2d->Radius * glm::max(transform.Scale.x, transform.Scale.y);
-
-				createFixture(circleShape, cc2d->Density, cc2d->Friction, cc2d->Restitution, cc2d->RestitutionThreshold);
-			}
-		});
+		OnPhysic2DStart();
 	}
 
 	void Scene::OnRuntimeStop()
 	{
-		delete _physicsWorld;
-		_physicsWorld = nullptr;
+		OnPhysic2DStop();
+	}
+
+	void Scene::OnSimulationStart()
+	{
+		OnPhysic2DStart();
+	}
+
+	void Scene::OnSimulationStop()
+	{
+		OnPhysic2DStop();
 	}
 
 	void Scene::OnUpdateRuntime()
@@ -228,7 +190,7 @@ namespace Hazel
 				{
 					auto* body = (b2Body*)rb2d.RuntimeBody;
 					const auto& position = body->GetPosition();
-					transform.Position.x = position.x;
+					transform.Position.x = position.x; 
 					transform.Position.y = position.y;
 					transform.Rotation.z = body->GetAngle();
 				}
@@ -265,18 +227,40 @@ namespace Hazel
 		}
 	}
 
-	void Scene::OnUpdateEditor(EditorCamera& camera)
+	void Scene::OnUpdateSimulation(const EditorCamera& camera)
 	{
-		if (Renderer2D::BeginScene(camera))
+
+		// Physics
 		{
-			DrawSpriteRenderComponent(camera.GetPosition());
-			DrawCircleRenderComponent(camera.GetPosition());
+			const int32_t velocityInteration = 6;
+			const int32_t positionInteration = 2;
+			_physicsWorld->Step(Time::GetTimestep(), velocityInteration, positionInteration);
 
-			Renderer2D::DrawLine(glm::vec3(0.0f), glm::vec3(5.0f), Color::Magenta);
-			Renderer2D::DrawRect(glm::vec3(0.0f), glm::vec3(1.0f), Color::White);
+			// Retrieve transform from Box2D
+			_registry.view<Rigidbody2DComponent>().each([&](const auto entt, Rigidbody2DComponent& rb2d)
+			{
+				Entity entity = { entt, this };
+				auto& transform = entity.Transform();
 
-			Renderer2D::EndScene();
+				if (entity.HasComponent<BoxCollider2DComponent>()
+				  || entity.HasComponent<CircleCollider2DComponent>())
+				{
+					auto* body = (b2Body*)rb2d.RuntimeBody;
+					const auto& position = body->GetPosition();
+					transform.Position.x = position.x;
+					transform.Position.y = position.y;
+					transform.Rotation.z = body->GetAngle();
+				}
+			});
 		}
+
+
+		RenderScene(camera);
+	}
+
+	void Scene::OnUpdateEditor(const EditorCamera& camera)
+	{
+		RenderScene(camera);
 	}
 
 	void Scene::DrawSpriteRenderComponent(const glm::vec3& cameraPosition)
@@ -364,6 +348,81 @@ namespace Hazel
 		}
 
 		return Entity();
+	}
+
+	void Scene::OnPhysic2DStart()
+	{
+		_physicsWorld = new b2World({ 0.0f, -9.8f });
+		_registry.view<Rigidbody2DComponent>().each([=](const auto entt, Rigidbody2DComponent& rb2d)
+		{
+			Entity entity = { entt, this };
+			auto& transform = entity.Transform();
+
+			b2BodyDef bodyDef;
+			bodyDef.type = Rigidbody2DTypeToBox2DBody(rb2d.Type);
+			bodyDef.position.Set(transform.Position.x, transform.Position.y);
+			bodyDef.angle = transform.Rotation.z;
+
+			b2Body* body = _physicsWorld->CreateBody(&bodyDef);
+			body->SetFixedRotation(rb2d.IsFixedRotation);
+			rb2d.RuntimeBody = body;
+
+			auto createFixture = [&](b2Shape& shape, float density, float friction, float restitution, float restitutionThreshold)
+			{
+				b2FixtureDef fixtureDef;
+				fixtureDef.shape = &shape;
+				fixtureDef.density = density;
+				fixtureDef.friction = friction;
+				fixtureDef.restitution = restitution;
+				fixtureDef.restitutionThreshold = restitutionThreshold;
+
+				body->CreateFixture(&fixtureDef);
+			};
+
+			if (const auto& bc2d = entity.TryGetComponent<BoxCollider2DComponent>())
+			{
+				b2PolygonShape boxShape;
+				boxShape.SetAsBox
+				(
+					bc2d->Size.x * transform.Scale.x,
+					bc2d->Size.y * transform.Scale.y,
+					{ bc2d->Offset.x, bc2d->Offset.y },
+					glm::radians(bc2d->Angle)
+				);
+
+
+				createFixture(boxShape, bc2d->Density, bc2d->Friction, bc2d->Restitution, bc2d->RestitutionThreshold);
+			}
+			else if (const auto& cc2d = entity.TryGetComponent<CircleCollider2DComponent>())
+			{
+				b2CircleShape circleShape;
+				circleShape.m_p.Set(cc2d->Offset.x, cc2d->Offset.y);
+				circleShape.m_radius = cc2d->Radius * glm::max(transform.Scale.x, transform.Scale.y);
+
+				createFixture(circleShape, cc2d->Density, cc2d->Friction, cc2d->Restitution, cc2d->RestitutionThreshold);
+			}
+		});
+	}
+
+	void Scene::OnPhysic2DStop()
+	{
+		delete _physicsWorld;
+		_physicsWorld = nullptr;
+	}
+
+	void Scene::RenderScene(const EditorCamera& camera)
+	{
+		if (Renderer2D::BeginScene(camera))
+		{
+			DrawSpriteRenderComponent(camera.GetPosition());
+			DrawCircleRenderComponent(camera.GetPosition());
+
+			// TESTING
+			//Renderer2D::DrawLine(glm::vec3(0.0f), glm::vec3(5.0f), Color::Magenta);
+			//Renderer2D::DrawRect(glm::vec3(0.0f), glm::vec3(1.0f), Color::White);
+
+			Renderer2D::EndScene();
+		}
 	}
 
 	template<typename T>

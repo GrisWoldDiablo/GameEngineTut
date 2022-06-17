@@ -26,8 +26,8 @@ namespace Hazel
 		Timestep _timestep;
 
 	public:
-		static const Timestep GetTimestep() { return _sInstance->_timestep; };
-		static const float GetTimeElapsed() { return _sInstance->_sTimeElapsed; };
+		static Timestep GetTimestep() { return _sInstance->_timestep; };
+		static float GetTimeElapsed() { return _sInstance->_sTimeElapsed; };
 
 	private:
 

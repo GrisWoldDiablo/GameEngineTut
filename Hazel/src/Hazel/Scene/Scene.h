@@ -23,13 +23,16 @@ namespace Hazel
 		Entity CreateEntity(const std::string& name = "Entity", int tag = 0, int layer = 0);
 		Entity CreateEntityWithUUID(UUID uuid, const std::string& name = "Entity", int tag = 0, int layer = 0);
 		void DestroyEntity(Entity entity);
-		const bool CheckEntityValidity(const entt::entity entity);
+		bool CheckEntityValidity(const entt::entity& entity) const;
 
 		void OnRuntimeStart();
 		void OnRuntimeStop();
+		void OnSimulationStart();
+		void OnSimulationStop();
 
 		void OnUpdateRuntime();
-		void OnUpdateEditor(EditorCamera& camera);
+		void OnUpdateSimulation(const EditorCamera& camera);
+		void OnUpdateEditor(const EditorCamera& camera);
 
 		void DrawSpriteRenderComponent(const glm::vec3& cameraPosition);
 		void DrawCircleRenderComponent(const glm::vec3& cameraPosition);
@@ -49,6 +52,11 @@ namespace Hazel
 	private:
 		template<typename T>
 		void OnComponentAdded(Entity entity, T& component);
+
+		void OnPhysic2DStart();
+		void OnPhysic2DStop();
+
+		void RenderScene(const EditorCamera& camera);
 
 	private:
 		entt::registry _registry;
