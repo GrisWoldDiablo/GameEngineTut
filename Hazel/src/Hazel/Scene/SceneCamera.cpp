@@ -44,12 +44,12 @@ namespace Hazel
 	{
 		switch (_projectionType)
 		{
-		case SceneCamera::ProjectionType::Perspective:
+		case ProjectionType::Perspective:
 		{
 			_projection = glm::perspective(_perspectiveFOV, _aspectRatio,
 				_perspectiveNear, _perspectiveFar);
 		}	break;
-		case SceneCamera::ProjectionType::Orthographic:
+		case ProjectionType::Orthographic:
 		{
 			float orthoLeft = -_orthographicSize * _aspectRatio * 0.5f;
 			float orthoRight = _orthographicSize * _aspectRatio * 0.5f;

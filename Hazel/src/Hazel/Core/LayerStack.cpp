@@ -27,7 +27,7 @@ namespace Hazel
 		_layers.emplace_back(overlay);
 	}
 
-	void LayerStack::PopLayer(Layer* layer)
+	void LayerStack::PopLayer(const Layer* layer)
 	{
 		auto it = std::find(_layers.begin(), _layers.end(), layer);
 		if (it != _layers.end())
@@ -37,7 +37,7 @@ namespace Hazel
 		}
 	}
 
-	void LayerStack::PopOverlay(Layer* overlay)
+	void LayerStack::PopOverlay(const Layer* overlay)
 	{
 		auto it = std::find(_layers.begin(), _layers.end(), overlay);
 		if (it != _layers.end())

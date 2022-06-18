@@ -5,7 +5,7 @@
 
 namespace Hazel
 {
-	static const uint32_t sMaxFrameBufferSize = 8192;
+	static constexpr uint32_t sMaxFrameBufferSize = 8192;
 
 	namespace Utils
 	{
@@ -232,7 +232,6 @@ namespace Hazel
 		HZ_CORE_ASSERT(attachmentIndex < _colorAttachments.size(), "Index out of range.");
 
 		auto& specification = _colorAttachmentSpecifications[attachmentIndex];
-		specification.TextureFormat;
 
 		glClearTexImage(_colorAttachments[attachmentIndex], 0,
 			Utils::HazelTextureFormatToGL(specification.TextureFormat), GL_INT, &value);

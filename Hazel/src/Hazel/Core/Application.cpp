@@ -64,7 +64,7 @@ namespace Hazel
 					// Go through the layers from bottom to top
 					for (auto* layer : _layerStack)
 					{
-						layer->OnUpdate();
+						layer->OnUpdate(timestep);
 					}
 				}
 
@@ -127,7 +127,7 @@ namespace Hazel
 		overlay->OnAttach();
 	}
 
-	bool Application::OnWindowClose(WindowCloseEvent& event)
+	bool Application::OnWindowClose(const WindowCloseEvent& windowCloseEvent)
 	{
 		HZ_PROFILE_FUNCTION();
 
@@ -136,18 +136,18 @@ namespace Hazel
 		return true;
 	}
 
-	bool Application::OnWindowResize(WindowResizeEvent& event)
+	bool Application::OnWindowResize(const WindowResizeEvent& windowResizeEvent)
 	{
 		HZ_PROFILE_FUNCTION();
 
-		if (event.GetWidth() == 0 || event.GetHeight() == 0)
+		if (windowResizeEvent.GetWidth() == 0 || windowResizeEvent.GetHeight() == 0)
 		{
 			_minimized = true;
 			return true;
 		}
 
 		_minimized = false;
-		Renderer::OnWindowResize(event.GetWidth(), event.GetHeight());
+		Renderer::OnWindowResize(windowResizeEvent.GetWidth(), windowResizeEvent.GetHeight());
 
 		return false;
 	}

@@ -8,13 +8,15 @@
 namespace Hazel
 {
 	EditorCamera::EditorCamera(float fov, float aspectRatio, float nearClip, float farClip)
-		: _FOV(fov), _aspectRatio(aspectRatio), _nearClip(nearClip), _farClip(farClip),
-		Camera(glm::perspective(glm::radians(fov), aspectRatio, nearClip, farClip))
+		: Camera(glm::perspective(glm::radians(fov), aspectRatio, nearClip, farClip)),
+		_FOV(fov), _aspectRatio(aspectRatio),
+		_nearClip(nearClip),
+		_farClip(farClip)
 	{
 		Reset();
 	}
 
-	void EditorCamera::OnUpdate()
+	void EditorCamera::OnUpdate(const Timestep& timestep)
 	{
 		const auto mousePosition = Input::GetMousePosition();
 		glm::vec2 delta = (mousePosition - _initialMousePosition) * 0.003f;
@@ -64,7 +66,7 @@ namespace Hazel
 		//_rotation = glm::vec3(0.0f); // Lock the camera's rotation
 		_focalPoint = CalculateFocalPointPosition();
 
-		auto orientation = GetOrientation();
+		//auto orientation = GetOrientation();
 		_viewMatrix = glm::lookAt(_position, _focalPoint, GetUpDirection());
 	}
 
@@ -94,7 +96,7 @@ namespace Hazel
 
 	void EditorCamera::Drive()
 	{
-		auto delta = glm::vec3(0.0f);
+		glm::vec3 delta = {};
 		delta.x = (Input::IsKeyPressed(Key::A) ? -1.0f : Input::IsKeyPressed(Key::D) ? 1.0f : 0);
 		delta.y = (Input::IsKeyPressed(Key::E) ? 1.0f : Input::IsKeyPressed(Key::Q) ? -1.0f : 0);
 		delta.z = (Input::IsKeyPressed(Key::W) ? -1.0f : Input::IsKeyPressed(Key::S) ? 1.0f : 0);
@@ -117,9 +119,9 @@ namespace Hazel
 		dispatcher.Dispatch<MouseScrolledEvent>(HZ_BIND_EVENT_FN(OnMouseScroll));
 	}
 
-	bool EditorCamera::OnMouseScroll(MouseScrolledEvent& event)
+	bool EditorCamera::OnMouseScroll(const MouseScrolledEvent& mouseScrolledEvent)
 	{
-		float delta = event.GetYOffset() * 0.1f;
+		float delta = mouseScrolledEvent.GetYOffset() * 0.1f;
 		if (!_canScrollZoom)
 		{
 			if (_isDriving)
@@ -220,7 +222,7 @@ namespace Hazel
 
 	glm::quat EditorCamera::GetOrientation() const
 	{
-		return glm::quat(_rotation);
+		return { _rotation };
 	}
 
 	void EditorCamera::Reset()

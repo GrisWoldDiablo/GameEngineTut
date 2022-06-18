@@ -23,9 +23,9 @@ namespace Hazel
 	{
 	public:
 		OrthographicCameraController(float aspectRatio, bool rotation = false);
-		~OrthographicCameraController() = default;
+		virtual ~OrthographicCameraController() = default;
 
-		virtual void OnUpdate();
+		virtual void OnUpdate(const Timestep& timestep);
 		virtual void OnEvent(Event& event);
 
 		void Resize(float width, float height);
@@ -35,7 +35,7 @@ namespace Hazel
 		const OrthographicCameraBounds& GetBounds() const { return _bounds; }
 
 		float GetZoomLevel() { return _zoomLevel; }
-		void SetZoomLevel(float value);
+		void SetZoomLevel(float level);
 		float GetZoomLevelSpeed() { return _zoomLevelSpeed; }
 		void SetZoomLevelSpeed(float value) { _zoomLevelSpeed = value; }
 		float GetZoomLevelMinimum() { return _zoomLevelMinimum; }
@@ -48,8 +48,8 @@ namespace Hazel
 		void SetDefaults();
 
 	private:
-		bool OnMouseScrolled(MouseScrolledEvent& event);
-		bool OnWindowResized(WindowResizeEvent& event);
+		bool OnMouseScrolled(const MouseScrolledEvent& mouseScrolledEvent);
+		bool OnWindowResized(const WindowResizeEvent& windowResizeEvent);
 
 		void CalculateView();
 

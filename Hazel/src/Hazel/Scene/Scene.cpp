@@ -58,7 +58,7 @@ namespace Hazel
 		}
 	}
 
-	Ref<Scene> Scene::Copy(Ref<Scene> other)
+	Ref<Scene> Scene::Copy(const Ref<Scene>& other)
 	{
 		Ref<Scene> newScene = CreateRef<Scene>(other->_name);
 
@@ -150,7 +150,7 @@ namespace Hazel
 		OnPhysic2DStop();
 	}
 
-	void Scene::OnUpdateRuntime()
+	void Scene::OnUpdateRuntime(const Timestep& timestep)
 	{
 		// Update Scripts
 		_registry.view<NativeScriptComponent>().each([=](const auto entt, auto& nsc)
@@ -170,17 +170,17 @@ namespace Hazel
 				return;
 			}
 
-			instance->OnUpdate();
+			instance->OnUpdate(timestep);
 		});
 
 		// Physics
 		{
-			const int32_t velocityInteration = 6;
-			const int32_t positionInteration = 2;
-			_physicsWorld->Step(Time::GetTimestep(), velocityInteration, positionInteration);
+			constexpr int32_t velocityInteration = 6;
+			constexpr int32_t positionInteration = 2;
+			_physicsWorld->Step(timestep, velocityInteration, positionInteration);
 
 			// Retrieve transform from Box2D
-			_registry.view<Rigidbody2DComponent>().each([&](const auto entt, Rigidbody2DComponent& rb2d)
+			_registry.view<Rigidbody2DComponent>().each([&](const auto entt, const Rigidbody2DComponent& rb2d)
 			{
 				Entity entity = { entt, this };
 				auto& transform = entity.Transform();
@@ -201,7 +201,7 @@ namespace Hazel
 		Camera* mainCamera = nullptr;
 		glm::mat4 cameraTransform;
 		glm::vec3 cameraPosition;
-		_registry.view<CameraComponent, TransformComponent>().each([&](const auto entity, CameraComponent& camera, TransformComponent& transform)
+		_registry.view<CameraComponent, TransformComponent>().each([&](const auto entity, CameraComponent& camera, const TransformComponent& transform)
 		{
 			if (camera.IsPrimary)
 			{
@@ -227,17 +227,17 @@ namespace Hazel
 		}
 	}
 
-	void Scene::OnUpdateSimulation(const EditorCamera& camera)
+	void Scene::OnUpdateSimulation(const Timestep& timestep, const EditorCamera& camera)
 	{
 
 		// Physics
 		{
 			const int32_t velocityInteration = 6;
 			const int32_t positionInteration = 2;
-			_physicsWorld->Step(Time::GetTimestep(), velocityInteration, positionInteration);
+			_physicsWorld->Step(timestep, velocityInteration, positionInteration);
 
 			// Retrieve transform from Box2D
-			_registry.view<Rigidbody2DComponent>().each([&](const auto entt, Rigidbody2DComponent& rb2d)
+			_registry.view<Rigidbody2DComponent>().each([&](const auto entt, const Rigidbody2DComponent& rb2d)
 			{
 				Entity entity = { entt, this };
 				auto& transform = entity.Transform();
@@ -258,7 +258,7 @@ namespace Hazel
 		RenderScene(camera);
 	}
 
-	void Scene::OnUpdateEditor(const EditorCamera& camera)
+	void Scene::OnUpdateEditor(const Timestep& timestep, const EditorCamera& camera)
 	{
 		RenderScene(camera);
 	}
@@ -367,7 +367,7 @@ namespace Hazel
 			body->SetFixedRotation(rb2d.IsFixedRotation);
 			rb2d.RuntimeBody = body;
 
-			auto createFixture = [&](b2Shape& shape, float density, float friction, float restitution, float restitutionThreshold)
+			auto createFixture = [&](const b2Shape& shape, float density, float friction, float restitution, float restitutionThreshold)
 			{
 				b2FixtureDef fixtureDef;
 				fixtureDef.shape = &shape;

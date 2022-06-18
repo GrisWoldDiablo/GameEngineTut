@@ -1,6 +1,7 @@
 #pragma once
 
 #include "OrthographicCamera.h"
+#include "Hazel/Core/Application.h"
 #include "Hazel/Renderer/Texture.h"
 #include "Hazel/Renderer/SubTexture2D.h"
 #include "Hazel/Renderer/Camera.h"
@@ -58,7 +59,7 @@ namespace Hazel
 
 		// --- Sprite --- //
 		// Final Draw
-		static void DrawSprite(const glm::mat4& transform, SpriteRendererComponent& spriteRenderComponent, int entityID);
+		static void DrawSprite(const glm::mat4& transform, const SpriteRendererComponent& spriteRenderComponent, int entityID);
 		// --- ----------- --- //
 
 		// --- Circle --- //
@@ -90,6 +91,7 @@ namespace Hazel
 		static Statistics GetStats();
 
 		static void LoadShader(const std::string& filePath, bool shouldRecompile = false);
+		static void LoadShadersAsync();
 
 	private:
 		static void FlushAndReset();

@@ -18,7 +18,7 @@ namespace Hazel
 		Scene(const std::string& name);
 		~Scene();
 
-		static Ref<Scene> Copy(Ref<Scene> scene);
+		static Ref<Scene> Copy(const Ref<Scene>& other);
 
 		Entity CreateEntity(const std::string& name = "Entity", int tag = 0, int layer = 0);
 		Entity CreateEntityWithUUID(UUID uuid, const std::string& name = "Entity", int tag = 0, int layer = 0);
@@ -30,9 +30,9 @@ namespace Hazel
 		void OnSimulationStart();
 		void OnSimulationStop();
 
-		void OnUpdateRuntime();
-		void OnUpdateSimulation(const EditorCamera& camera);
-		void OnUpdateEditor(const EditorCamera& camera);
+		void OnUpdateRuntime(const Timestep& timestep);
+		void OnUpdateSimulation(const Timestep& timestep, const EditorCamera& camera);
+		void OnUpdateEditor(const Timestep& timestep, const EditorCamera& camera);
 
 		void DrawSpriteRenderComponent(const glm::vec3& cameraPosition);
 		void DrawCircleRenderComponent(const glm::vec3& cameraPosition);

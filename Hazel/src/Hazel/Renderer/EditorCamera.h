@@ -12,15 +12,15 @@ namespace Hazel
 	{
 	public:
 		EditorCamera() = default;
-		EditorCamera(float fov, float aspectRation, float nearClip, float farClip);
+		EditorCamera(float fov, float aspectRatio, float nearClip, float farClip);
 
-		void OnUpdate();
+		void OnUpdate(const Timestep& timestep);
 		void OnEvent(Event& event);
 
 		inline float GetDistance() const { return _distance; }
 		inline void SetDistance(float distance) { _distance = distance; }
 
-		inline void SetViewpostSize(float width, float height) { _viewportWidth = width; _viewportHeight = height; UpdateProjection(); }
+		inline void SetViewportSize(float width, float height) { _viewportWidth = width; _viewportHeight = height; UpdateProjection(); }
 
 		const glm::mat4& GetViewMatrix() const { return _viewMatrix; }
 		glm::mat4 GetViewProjection() const { return _projection * _viewMatrix; }
@@ -49,7 +49,7 @@ namespace Hazel
 		void UpdateProjection();
 		void UpdateView();
 
-		bool OnMouseScroll(MouseScrolledEvent& event);
+		bool OnMouseScroll(const MouseScrolledEvent& mouseScrolledEvent);
 
 		void MousePan(const glm::vec2& delta);
 		void MouseRotateAround(const glm::vec2& delta);

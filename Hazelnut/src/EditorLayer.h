@@ -10,28 +10,27 @@
 
 #include "Hazel/Core/Timer.h"
 
-#include "imgui/imgui.h"
 namespace Hazel
 {
-	constexpr char* _kNewSceneName = "Untitled";
+	inline const char* kNewSceneName = "Untitled";
 
 	class EditorLayer final : public Layer
 	{
 	public:
 		EditorLayer();
-		~EditorLayer() = default;
+		virtual ~EditorLayer() override = default;
 
 		void OnAttach() override;
 		void OnDetach() override;
 
-		void OnUpdate() override;
+		void OnUpdate(const Timestep& timestep) override;
 
 		void OnImGuiRender() override;
 		void OnEvent(Event& event) override;
 
 	private:
-		bool OnKeyPressed(KeyPressedEvent& event);
-		bool OnMouseButtonReleased(MouseButtonReleasedEvent& event);
+		bool OnKeyPressed(const KeyPressedEvent& keyPressedEvent);
+		bool OnMouseButtonReleased(const MouseButtonReleasedEvent& mouseButtonReleasedEvent);
 		void MousePicking();
 		void OnOverlayRender();
 
@@ -95,7 +94,7 @@ namespace Hazel
 		int _gizmoSpace = 0;
 		int _previousGizmoType = -1;
 		bool _hasStoredPreviousGizmoType = false;
-		glm::vec2 _sceneViewportBounds[2];
+		glm::vec2 _sceneViewportBounds[2] = {};
 		Entity _hoveredEntity;
 
 		// Tools
@@ -124,8 +123,7 @@ namespace Hazel
 			Edit = 0,
 			Play = 1,
 			Simulate = 2
-		};
+		} _sceneState = SceneState::Edit;
 
-		SceneState _sceneState = SceneState::Edit;
 	};
 }

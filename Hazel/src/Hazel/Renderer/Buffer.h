@@ -1,7 +1,6 @@
-#include <utility>
-
-
 #pragma once
+
+#include <utility>
 
 namespace Hazel
 {

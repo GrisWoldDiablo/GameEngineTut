@@ -14,7 +14,7 @@ namespace Hazel
 			HZ_CORE_LINFO("Create {0}", _entity.Name());
 		}
 
-		void OnUpdate() override
+		void OnUpdate(const Timestep& timestep) override
 		{
 			if (!GetComponent<CameraComponent>().IsPrimary
 				|| !Input::IsMouseButtonPressed(MouseCode::ButtonRight))
@@ -25,7 +25,6 @@ namespace Hazel
 			auto& position = _entity.Transform().Position;
 
 			float speed = 5.0f;
-			float timestep = Time::GetTimestep();
 
 			if (Input::IsKeyPressed(KeyCode::A))
 			{
@@ -75,7 +74,7 @@ namespace Hazel
 
 		std::string GetClassFilePath() override
 		{
-			return std::string(__FILE__);
+			return { __FILE__ };
 		}
 	};
 }

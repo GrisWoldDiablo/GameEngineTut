@@ -1,6 +1,5 @@
 #pragma once
 
-#include <glm/glm.hpp>
 
 #include "VertexArray.h"
 #include "Hazel/Core/Color.h"

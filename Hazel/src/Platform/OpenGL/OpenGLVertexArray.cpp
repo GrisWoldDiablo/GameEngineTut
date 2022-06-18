@@ -60,7 +60,7 @@ namespace Hazel
 	{
 		HZ_PROFILE_FUNCTION();
 
-		HZ_CORE_ASSERT(vertexBuffer->GetLayout().GetElement().size(), "Vertex Buffer has no layout!");
+		HZ_CORE_ASSERT(!vertexBuffer->GetLayout().GetElement().empty(), "Vertex Buffer has no layout!");
 
 		glBindVertexArray(_rendererID);
 		vertexBuffer->Bind();
@@ -110,7 +110,7 @@ namespace Hazel
 			case ShaderDataType::Mat4:
 			{
 				auto count = element.GetComponentCount();
-				for (uint8_t i = 0; i < count; i++)
+				for (uint32_t i = 0; i < count; i++)
 				{
 					glEnableVertexAttribArray(_vertexBufferIndex);
 					glVertexAttribPointer
@@ -120,7 +120,7 @@ namespace Hazel
 						ShaderDataTypeToOpenGLBaseType(element.Type),
 						element.Normalized ? GL_TRUE : GL_FALSE,
 						layout.GetStride(),
-						(const void*)(size_t)(element.Offset + sizeof(float) * count * i)
+						(const void*)(element.Offset + sizeof(float) * count * i)
 					);
 					glVertexAttribDivisor(_vertexBufferIndex, 1);
 					_vertexBufferIndex++;

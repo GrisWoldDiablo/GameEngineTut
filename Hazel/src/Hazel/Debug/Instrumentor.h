@@ -9,14 +9,14 @@
 
 namespace Hazel
 {
-	using FloatingPointMircroseconds = std::chrono::duration<double, std::micro>;
+	using FloatingPointMicroseconds = std::chrono::duration<double, std::micro>;
 
 	struct ProfileResult
 	{
 		std::string Name;
 		std::string Category;
-		FloatingPointMircroseconds Start;
-		FloatingPointMircroseconds End;
+		FloatingPointMicroseconds Start;
+		FloatingPointMicroseconds End;
 		std::chrono::microseconds ElapsedTime;
 		std::thread::id ThreadID;
 	};
@@ -32,7 +32,7 @@ namespace Hazel
 		Instrumentor(const Instrumentor&) = delete;
 		Instrumentor(Instrumentor&&) = delete;
 
-		void BeginSession(std::string name, std::string filePath = "results.json")
+		void BeginSession(std::string name, const std::string& filePath = "results.json")
 		{
 			std::lock_guard lock(_mutex);
 			if (_currentSession != nullptr)
@@ -47,10 +47,10 @@ namespace Hazel
 				InternalEndSession();
 			}
 
-			_outputStream.open(std::move(filePath));
+			_outputStream.open(filePath);
 			if (_outputStream.is_open())
 			{
-				_currentSession = new InstrumentationSession{ std::move(name) };
+				_currentSession = new InstrumentationSession{ name };
 				WriteHeader();
 			}
 			else
@@ -157,7 +157,7 @@ namespace Hazel
 			_outputStream.flush();
 		}
 
-		void WriteToStream(std::stringstream& json)
+		void WriteToStream(const std::stringstream& json)
 		{
 			if (_currentSession != nullptr)
 			{
@@ -205,7 +205,7 @@ namespace Hazel
 		void Start()
 		{
 			_startTimepoint = std::chrono::steady_clock::now();
-			_profileResult.Start = FloatingPointMircroseconds{ _startTimepoint.time_since_epoch() };
+			_profileResult.Start = FloatingPointMicroseconds{ _startTimepoint.time_since_epoch() };
 
 			if (_isSnapshot)
 			{
@@ -216,7 +216,7 @@ namespace Hazel
 		void Stop()
 		{
 			auto endTimepoint = std::chrono::steady_clock::now();
-			_profileResult.End = FloatingPointMircroseconds{ endTimepoint.time_since_epoch() };
+			_profileResult.End = FloatingPointMicroseconds{ endTimepoint.time_since_epoch() };
 
 			if (_isSnapshot)
 			{
@@ -239,7 +239,7 @@ namespace Hazel
 		std::chrono::time_point<std::chrono::steady_clock> _startTimepoint;
 		bool _isSnapshot;
 		bool _isStopped;
-		struct ProfileResult _profileResult;
+		ProfileResult _profileResult;
 	};
 }
 

@@ -29,7 +29,7 @@ Entities:
       Layer: 0
     TransformComponent:
       Position: [-2.71451521, 2.47310162, 0]
-      Rotation: [0, 0, 0.659734488]
+      Rotation: [0, 0, 0]
       Scale: [0.999999821, 0.999999821, 1]
     SpriteRendererComponent:
       Color: [0.196911216, 0.913956225, 1, 1]
@@ -104,9 +104,22 @@ Entities:
       BodyType: Dynamic
       IsFixedRotation: true
     CircleCollider2DComponent:
-      Offset: [-1.39999998, 0]
-      Radius: 0.829999983
+      Offset: [0, 0]
+      Radius: 0.5
       Density: 1
       Friction: 0.5
       Restitution: 0
       RestitutionThreshold: 0.5
+  - Entity: 5985586717480783343
+    BaseComponent:
+      Name: unwrap_helper.png
+      Tag: 0
+      Layer: 0
+    TransformComponent:
+      Position: [-1.66934705, 2.46567798, 6.10351562e-05]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 1]
+      TexturePath: assets\textures\unwrap_helper.png
+      Tiling: [1, 1]

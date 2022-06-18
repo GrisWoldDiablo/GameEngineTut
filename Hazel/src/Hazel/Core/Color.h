@@ -64,14 +64,14 @@ namespace Hazel
 		/// <param name="color">RGBA Color</param>
 		/// <param name="H">Hue</param>
 		/// <param name="S">Saturation</param>
-		/// <param name="V">Lightness</param>
+		/// <param name="L">Lightness</param>
 		static void RGBtoHSL(const Color& color, float& H, float& S, float& L);
 
 		/// <summary>
 		/// Convert from Red Green Blue Color to Hue, Saturation, Value/Brightness
 		/// <para> vec4.x = Hue				</para>
 		/// <para> vec4.y = Saturation		</para>
-		/// <para> vec4.z = Vightness		</para>
+		/// <para> vec4.z = Lightness		</para>
 		/// <para> vec4.w = Alpha			</para>
 		/// </summary>
 		/// <param name="color">RGB Color</param>
@@ -87,7 +87,7 @@ namespace Hazel
 		/// Covert from hex to color
 		/// <para> "FFFFFF" = White </para>
 		/// </summary>
-		/// <param name="color">Hexadecimal value</param>
+		/// <param name="hexValue">Hexadecimal value</param>
 		static Color HEXtoRGB(const std::string& hexValue);
 
 		/// <summary>
@@ -119,6 +119,7 @@ namespace Hazel
 		Color(glm::vec4 value);
 		Color(int red, int green, int blue, float alpha = 1.0f);
 		Color(float red, float green, float blue, float alpha = 1.0f);
+		Color(double red, double green, double blue, double alpha = 1.0);
 		~Color() = default;
 
 		/// <summary>

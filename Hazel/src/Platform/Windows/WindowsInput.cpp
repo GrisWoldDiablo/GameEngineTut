@@ -6,7 +6,7 @@
 
 namespace Hazel
 {
-	bool Input::IsKeyPressed(const KeyCode key)
+	bool Input::IsKeyPressed(const KeyCode& key)
 	{
 		HZ_PROFILE_FUNCTION();
 
@@ -16,7 +16,7 @@ namespace Hazel
 		return state == GLFW_PRESS;
 	}
 
-	bool Input::IsMouseButtonPressed(const MouseCode button)
+	bool Input::IsMouseButtonPressed(const MouseCode& button)
 	{
 		HZ_PROFILE_FUNCTION();
 

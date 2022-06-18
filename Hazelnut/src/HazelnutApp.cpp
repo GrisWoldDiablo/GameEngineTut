@@ -16,7 +16,7 @@ namespace Hazel
 			PushLayer(new EditorLayer());
 		}
 
-		~Hazelnut() = default;
+		virtual ~Hazelnut() override = default;
 	};
 
 	Application* CreateApplication(ApplicationCommandLineArgs args)

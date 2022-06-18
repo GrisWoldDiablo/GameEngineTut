@@ -12,7 +12,7 @@ namespace Hazel
 	{
 	public:
 		WindowsWindow(const WindowProps& props);
-		~WindowsWindow();
+		virtual ~WindowsWindow() override;
 
 		void OnUpdate() override;
 

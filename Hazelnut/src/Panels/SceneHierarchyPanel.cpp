@@ -49,7 +49,7 @@ namespace Hazel
 	{
 		if (const auto& component = entity.TryGetComponent<T>())
 		{
-			const auto treeNodeFlags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_FramePadding;
+			constexpr auto treeNodeFlags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_FramePadding;
 
 			auto contentRegionAvailable = ImGui::GetContentRegionAvail();
 
@@ -145,7 +145,7 @@ namespace Hazel
 		ImGui::NextColumn();
 
 #pragma region FloatField
-		const char* vecLabels[4] = { {"X"}, {"Y"}, {"Z"}, {"W"}, };
+		const char* vecLabels[4] = { "X", "Y", "Z", "W" };
 		const Color vecColors[4] =
 		{
 			{ 0.8f, 0.1f, 0.15f, 1.0f }, // Red
@@ -220,8 +220,7 @@ namespace Hazel
 	{
 		if (ImGui::BeginMenuBar())
 		{
-			char buffer[256];
-			memset(buffer, 0, sizeof(buffer));
+			char buffer[256] = {};
 			strcpy_s(buffer, sizeof(buffer), _scene->_name.c_str());
 			if (ImGui::InputText(" : Scene", buffer, sizeof(buffer), ImGuiInputTextFlags_EnterReturnsTrue))
 			{
@@ -287,8 +286,7 @@ namespace Hazel
 #pragma region BaseComponent
 		if (entity)
 		{
-			char buffer[256];
-			memset(buffer, 0, sizeof(buffer));
+			char buffer[256] = {};
 			strcpy_s(buffer, sizeof(buffer), entity.Name().c_str());
 			if (ImGui::InputText("##:Name", buffer, sizeof(buffer)))
 			{
@@ -342,7 +340,7 @@ namespace Hazel
 		{
 			ImGui::Text("Sprite");
 			ImGui::SameLine();
-			bool isSpritePressed = false;
+			bool isSpritePressed;
 			if (component->Texture != nullptr)
 			{
 				isSpritePressed = ImGui::ImageButton((ImTextureID)(intptr_t)component->Texture->GetRendererID(), ImVec2(50.0f, 50.0f), ImVec2(0.0f, 1.0f), ImVec2(1.0f, 0.0f), 3);
@@ -507,7 +505,7 @@ namespace Hazel
 #pragma endregion
 
 #pragma region NativeScriptComponent
-		DrawComponent<NativeScriptComponent>(entity, "Native Script", [](NativeScriptComponent* component)
+		DrawComponent<NativeScriptComponent>(entity, "Native Script", [](const NativeScriptComponent* component)
 		{
 			ImGui::Checkbox("Active", &component->Instance->IsEnable);
 			std::string classFilePath = component->Instance->GetClassFilePath();

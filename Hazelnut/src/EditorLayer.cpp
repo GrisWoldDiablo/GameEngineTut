@@ -77,19 +77,19 @@ namespace Hazel
 		HZ_PROFILE_FUNCTION();
 	}
 
-	void EditorLayer::OnUpdate()
+	void EditorLayer::OnUpdate(const Timestep& timestep)
 	{
 		HZ_PROFILE_FUNCTION();
 		_updateTimer.Reset();
 
 		auto& frameBufferSpec = _framebuffer->GetSpecification();
 		if (_sceneViewportSize.x > 0.0f && _sceneViewportSize.y > 0.0f &&
-			(frameBufferSpec.Width != _sceneViewportSize.x || frameBufferSpec.Height != _sceneViewportSize.y))
+			(frameBufferSpec.Width != static_cast<uint32_t>(_sceneViewportSize.x) || frameBufferSpec.Height != static_cast<uint32_t>(_sceneViewportSize.y)))
 		{
-			_framebuffer->Resize((uint32_t)_sceneViewportSize.x, (uint32_t)_sceneViewportSize.y);
+			_framebuffer->Resize(static_cast<uint32_t>(_sceneViewportSize.x), static_cast<uint32_t>(_sceneViewportSize.y));
 
-			_editorCamera.SetViewpostSize(_sceneViewportSize.x, _sceneViewportSize.y);
-			_activeScene->OnViewportResize((uint32_t)_sceneViewportSize.x, (uint32_t)_sceneViewportSize.y);
+			_editorCamera.SetViewportSize(_sceneViewportSize.x, _sceneViewportSize.y);
+			_activeScene->OnViewportResize(static_cast<uint32_t>(_sceneViewportSize.x), static_cast<uint32_t>(_sceneViewportSize.y));
 		}
 
 		CalculateFPS();
@@ -115,24 +115,24 @@ namespace Hazel
 			_editorCamera.IsEnable() =
 				(_isSceneViewportHovered && _isSceneViewportFocused && !ImGuizmo::IsUsing())
 				|| _editorCamera.IsAdjusting();
-			_editorCamera.OnUpdate();
+			_editorCamera.OnUpdate(timestep);
 
 			// Update Scene
-			_activeScene->OnUpdateEditor(_editorCamera);
+			_activeScene->OnUpdateEditor(timestep, _editorCamera);
 		}	break;
 		case SceneState::Simulate:
 		{
 			_editorCamera.IsEnable() =
 				(_isSceneViewportHovered && _isSceneViewportFocused && !ImGuizmo::IsUsing())
 				|| _editorCamera.IsAdjusting();
-			_editorCamera.OnUpdate();
+			_editorCamera.OnUpdate(timestep);
 
 			// Update Scene
-			_activeScene->OnUpdateSimulation(_editorCamera);
+			_activeScene->OnUpdateSimulation(timestep, _editorCamera);
 		}	break;
 		case SceneState::Play:
 		{
-			_activeScene->OnUpdateRuntime();
+			_activeScene->OnUpdateRuntime(timestep);
 		}	break;
 		}
 
@@ -222,9 +222,9 @@ namespace Hazel
 		dispatcher.Dispatch<MouseButtonReleasedEvent>(HZ_BIND_EVENT_FN(OnMouseButtonReleased));
 	}
 
-	bool EditorLayer::OnKeyPressed(KeyPressedEvent& event)
+	bool EditorLayer::OnKeyPressed(const KeyPressedEvent& keyPressedEvent)
 	{
-		if (ImGui::GetIO().WantTextInput || event.GetRepeatCount() > 0 || Input::IsMouseButtonPressed(MouseCode::ButtonRight))
+		if (ImGui::GetIO().WantTextInput || keyPressedEvent.GetRepeatCount() > 0 || Input::IsMouseButtonPressed(MouseCode::ButtonRight))
 		{
 			return false;
 		}
@@ -234,7 +234,7 @@ namespace Hazel
 		bool isShiftPressed = Input::IsKeyPressed(Key::LeftShift) || Input::IsKeyPressed(Key::RightShift);
 		bool isModiferPressed = isControlPressed || isShiftPressed;
 
-		switch (event.GetKeyCode())
+		switch (keyPressedEvent.GetKeyCode())
 		{
 			// File Commands
 		case Key::N:
@@ -328,10 +328,10 @@ namespace Hazel
 		return true;
 	}
 
-	bool EditorLayer::OnMouseButtonReleased(MouseButtonReleasedEvent& event)
+	bool EditorLayer::OnMouseButtonReleased(const MouseButtonReleasedEvent& mouseButtonReleasedEvent)
 	{
 		// Mouse picking
-		if (event.GetMouseButton() == Mouse::ButtonLeft && _sceneState == SceneState::Edit)
+		if (mouseButtonReleasedEvent.GetMouseButton() == Mouse::ButtonLeft && _sceneState == SceneState::Edit)
 		{
 			if (_isSceneViewportHovered && (!_sceneHierarchyPanel.GetSelectedEntity() || !ImGuizmo::IsOver()) && !Input::IsKeyPressed(Key::LeftAlt))
 			{
@@ -461,7 +461,7 @@ namespace Hazel
 		}
 
 		_editorScene = CreateRef<Scene>();
-		_editorScene->SetName(_kNewSceneName);
+		_editorScene->SetName(kNewSceneName);
 
 		SetWindowTitle("Unsaved");
 
@@ -790,6 +790,12 @@ namespace Hazel
 							Renderer2D::LoadShader(filePath, true);
 						}
 					}
+
+					if (ImGui::MenuItem("Reload Shaders"))
+					{
+						Renderer2D::LoadShadersAsync();
+					}
+
 					ImGui::EndMenu();
 				}
 				ImGui::EndMenu();
@@ -821,7 +827,7 @@ namespace Hazel
 		_sceneViewportSize = { sceneViewportPanelSize.x, sceneViewportPanelSize.y };
 
 		auto textureID = _framebuffer->GetColorAttachmentRenderID();
-		ImGui::Image((void*)((uint64_t)textureID), { _sceneViewportSize.x, _sceneViewportSize.y }, ImVec2{ 0.0f, 1.0f }, ImVec2{ 1.0f, 0.0f });
+		ImGui::Image((void*)(uint64_t)textureID, { _sceneViewportSize.x, _sceneViewportSize.y }, ImVec2{ 0.0f, 1.0f }, ImVec2{ 1.0f, 0.0f });
 
 		if (ImGui::BeginDragDropTarget())
 		{
@@ -1018,7 +1024,7 @@ namespace Hazel
 			for (int i = 50 - 1; i >= 0; i--)
 			{
 				auto color = Color::Random();
-				auto& newEntity = _activeScene->CreateEntity("Square " + std::to_string(i) + ":" + color.GetHexValue());
+				auto newEntity = _activeScene->CreateEntity("Square " + std::to_string(i) + ":" + color.GetHexValue());
 				auto& spriteRendererComponent = newEntity.AddComponent<SpriteRendererComponent>();
 				spriteRendererComponent.Color = color;
 				newEntity.Transform().Position = Random::Vec3();
@@ -1070,11 +1076,10 @@ namespace Hazel
 
 	void EditorLayer::AddTooltip(const std::string& tooltipMessage)
 	{
-		const float kRequiredTime = 0.5f;
 		if (ImGui::IsItemHovered())
 		{
 			_timeSpentHovering += Time::GetTimestep();
-			if (_timeSpentHovering >= kRequiredTime)
+			if (_timeSpentHovering >= 0.5f)
 			{
 				ImGui::SetTooltip(tooltipMessage.c_str());
 			}

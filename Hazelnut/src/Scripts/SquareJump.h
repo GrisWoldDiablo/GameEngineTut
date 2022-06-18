@@ -11,9 +11,8 @@ namespace Hazel
 		bool isPressed = false;
 		float upward = 0.0f;
 
-		void OnUpdate() override
+		void OnUpdate(const Timestep& timestep) override
 		{
-			float timestep = Time::GetTimestep();
 			auto& position = _entity.Transform().Position;
 			position.y -= gravity;
 			position.y += upward * timestep;
@@ -39,7 +38,7 @@ namespace Hazel
 
 		std::string GetClassFilePath() override
 		{
-			return std::string(__FILE__);
+			return { __FILE__ };
 		}
 	};
 }

@@ -284,8 +284,7 @@ namespace Hazel
 		}
 		_scene->SetName(sceneName);
 
-		auto entities = data["Entities"];
-		if (entities)
+		if (auto entities = data["Entities"])
 		{
 			for (auto entity : entities)
 			{
@@ -295,8 +294,7 @@ namespace Hazel
 				std::string name;
 				int tag;
 				int layer;
-				auto baseComponent = entity["BaseComponent"];
-				if (baseComponent)
+				if (auto baseComponent = entity["BaseComponent"])
 				{
 					name = baseComponent["Name"].as<std::string>();
 					tag = baseComponent["Tag"].as<int>();
@@ -311,8 +309,7 @@ namespace Hazel
 				auto deserializedEntity = _scene->CreateEntityWithUUID(entityID, name, tag, layer);
 
 #pragma region TransformComponent
-				auto transformComponent = entity["TransformComponent"];
-				if (transformComponent)
+				if (auto transformComponent = entity["TransformComponent"])
 				{
 					// Entities always have transform
 					auto& component = deserializedEntity.Transform();
@@ -323,11 +320,10 @@ namespace Hazel
 #pragma endregion
 
 #pragma region CameraComponent
-				auto cameraComponent = entity["CameraComponent"];
-				if (cameraComponent)
+				if (auto cameraComponent = entity["CameraComponent"])
 				{
 					auto& component = deserializedEntity.AddComponent<CameraComponent>();
-					auto& cameraProperties = cameraComponent["Camera"];
+					auto cameraProperties = cameraComponent["Camera"];
 
 					component.Camera.SetAspectRatio(GetValue<float>(cameraProperties, "AspectRatio"));
 					component.Camera.SetProjectionType(ProjectionTypeFromString(GetValue<std::string>(cameraProperties, "ProjectionType", "Perspective")));
@@ -346,13 +342,11 @@ namespace Hazel
 #pragma endregion
 
 #pragma region SpriteRendererComponent
-				auto spriteRendererComponent = entity["SpriteRendererComponent"];
-				if (spriteRendererComponent)
+				if (auto spriteRendererComponent = entity["SpriteRendererComponent"])
 				{
 					auto& component = deserializedEntity.AddComponent<SpriteRendererComponent>();
-					auto texture = spriteRendererComponent["TexturePath"];
 
-					if (texture)
+					if (auto texture = spriteRendererComponent["TexturePath"])
 					{
 						component.Texture = Texture2D::Create(texture.as<std::string>()); // TODO not use path.
 						component.Tiling = spriteRendererComponent["Tiling"].as<glm::vec2>();
@@ -363,8 +357,7 @@ namespace Hazel
 #pragma endregion
 
 #pragma region CircleRendererComponent
-				auto circleRendererComponent = entity["CircleRendererComponent"];
-				if (circleRendererComponent)
+				if (auto circleRendererComponent = entity["CircleRendererComponent"])
 				{
 					auto& component = deserializedEntity.AddComponent<CircleRendererComponent>();
 					component.Color = GetValue<glm::vec4>(circleRendererComponent, "Color", Color::White);
@@ -374,8 +367,7 @@ namespace Hazel
 #pragma endregion
 
 #pragma region Rigidbody2DComponent
-				auto rigidbody2DComponent = entity["Rigidbody2DComponent"];
-				if (rigidbody2DComponent)
+				if (auto rigidbody2DComponent = entity["Rigidbody2DComponent"])
 				{
 					auto& component = deserializedEntity.AddComponent<Rigidbody2DComponent>();
 					component.Type = Rigidbody2DBodyTypeFromString(GetValue<std::string>(rigidbody2DComponent, "BodyType", "Static"));
@@ -384,8 +376,7 @@ namespace Hazel
 #pragma endregion
 
 #pragma region BoxCollider2DComponent
-				auto boxCollider2DComponent = entity["BoxCollider2DComponent"];
-				if (boxCollider2DComponent)
+				if (auto boxCollider2DComponent = entity["BoxCollider2DComponent"])
 				{
 					auto& component = deserializedEntity.AddComponent<BoxCollider2DComponent>();
 					component.Offset = GetValue<glm::vec2>(boxCollider2DComponent, "Offset");
@@ -399,8 +390,7 @@ namespace Hazel
 #pragma endregion
 
 #pragma region circleCollider2DComponent
-				auto circleCollider2DComponent = entity["CircleCollider2DComponent"];
-				if (circleCollider2DComponent)
+				if (auto circleCollider2DComponent = entity["CircleCollider2DComponent"])
 				{
 					auto& component = deserializedEntity.AddComponent<CircleCollider2DComponent>();
 					component.Offset = GetValue<glm::vec2>(circleCollider2DComponent, "Offset");

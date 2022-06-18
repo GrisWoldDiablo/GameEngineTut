@@ -74,7 +74,7 @@ void main()
 	}
 	
 	// Final assignment
-	o_Color = Input.Color;
+	o_Color = tempColor;
 	o_Color.a *= circle;
 
 	o_EntityID = v_EntityID;

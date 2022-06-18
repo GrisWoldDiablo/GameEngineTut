@@ -99,7 +99,7 @@ namespace Hazel
 
 	bool OpenGLTexture2D::Equals(const Texture& other) const
 	{
-		return _rendererID == ((OpenGLTexture2D&)other)._rendererID;
+		return _rendererID == dynamic_cast<const OpenGLTexture2D&>(other)._rendererID;
 	}
 
 	void OpenGLTexture2D::SetMagFilter(uint32_t magFilter)

@@ -1,7 +1,5 @@
 #pragma once
 
-#include <xhash>
-
 namespace Hazel
 {
 	class UUID
@@ -11,21 +9,18 @@ namespace Hazel
 		UUID(uint64_t uuid);
 		UUID(const UUID&) = default;
 
-		operator uint64_t() const { return _UUID; }
+		operator uint64_t() const { return _uuid; }
 
 	private:
-		uint64_t _UUID;
+		uint64_t _uuid;
 	};
 }
 
-namespace std
+template<>
+struct std::hash<Hazel::UUID>
 {
-	template<>
-	struct hash<Hazel::UUID>
+	std::size_t operator()(const Hazel::UUID& uuid) const noexcept
 	{
-		std::size_t operator()(const Hazel::UUID& uuid) const
-		{
-			return hash<uint64_t>()((uint64_t)uuid);
-		}
-	};
-}
+		return hash<uint64_t>()(uuid);
+	}
+};

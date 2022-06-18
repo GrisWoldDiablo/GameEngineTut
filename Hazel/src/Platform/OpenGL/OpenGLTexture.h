@@ -10,7 +10,7 @@ namespace Hazel
 	public:
 		OpenGLTexture2D(uint32_t width, uint32_t height);
 		OpenGLTexture2D(std::string path);
-		~OpenGLTexture2D();
+		virtual ~OpenGLTexture2D() override;
 
 		uint32_t GetWidth() const override { return _width; }
 		uint32_t GetHeight() const override { return _height; }
@@ -27,7 +27,7 @@ namespace Hazel
 
 		bool operator ==(const Texture& other) const override
 		{
-			return _rendererID == ((OpenGLTexture2D&)other)._rendererID;
+			return _rendererID == dynamic_cast<const OpenGLTexture2D&>(other)._rendererID;
 		}
 
 	private:

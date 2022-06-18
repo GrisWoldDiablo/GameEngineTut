@@ -72,7 +72,7 @@ namespace Hazel
 		}
 
 
-		return std::string();
+		return {};
 	}
 
 	std::string FileDialogs::SaveFile(const char* filter, const char* defaultFileName)
@@ -103,7 +103,7 @@ namespace Hazel
 			return ofn.lpstrFile;
 		}
 
-		return std::string();
+		return {};
 	}
 
 	void FileDialogs::ExecuteFile(const char* filePath)

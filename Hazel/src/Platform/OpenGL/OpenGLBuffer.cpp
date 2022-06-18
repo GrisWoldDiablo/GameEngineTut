@@ -16,7 +16,7 @@ namespace Hazel
 		glBufferData(GL_ARRAY_BUFFER, size, nullptr, GL_DYNAMIC_DRAW);
 	}
 
-	OpenGLVertexBuffer::OpenGLVertexBuffer(float* vertices, uint32_t size)
+	OpenGLVertexBuffer::OpenGLVertexBuffer(const float* vertices, uint32_t size)
 	{
 		HZ_PROFILE_FUNCTION();
 
@@ -55,7 +55,7 @@ namespace Hazel
 	// -----------------------------------------
 
 	// -- IndexBuffer --------------------------
-	OpenGLIndexBuffer::OpenGLIndexBuffer(uint32_t* indices, uint32_t count)
+	OpenGLIndexBuffer::OpenGLIndexBuffer(const uint32_t* indices, uint32_t count)
 		:_count(count)
 	{
 		HZ_PROFILE_FUNCTION();

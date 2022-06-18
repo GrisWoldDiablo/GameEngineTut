@@ -84,7 +84,7 @@ namespace Hazel
 			return nullptr;
 		}
 
-		static const char* GLShaderStageCachedVulkaFileExtension(uint32_t stage)
+		static const char* GLShaderStageCachedVulkanFileExtension(uint32_t stage)
 		{
 			switch (stage)
 			{
@@ -208,12 +208,11 @@ namespace Hazel
 	{
 		HZ_PROFILE_FUNCTION();
 
-		shaderc::Compiler compiler;
 		shaderc::CompileOptions options;
 		options.SetTargetEnvironment(shaderc_target_env_vulkan, shaderc_env_version_vulkan_1_2);
 
-		const bool optimize = true;
-		if (optimize)
+		constexpr bool kOptimize = true;
+		if (kOptimize)
 		{
 			options.SetOptimizationLevel(shaderc_optimization_level_performance);
 		}
@@ -225,7 +224,7 @@ namespace Hazel
 		for (auto&& [stage, source] : shaderSources)
 		{
 			std::filesystem::path shaderFilePath = _filePath;
-			std::filesystem::path cachedPath = cacheDirectory / (shaderFilePath.filename().string() + Utils::GLShaderStageCachedVulkaFileExtension(stage));
+			std::filesystem::path cachedPath = cacheDirectory / (shaderFilePath.filename().string() + Utils::GLShaderStageCachedVulkanFileExtension(stage));
 
 			std::ifstream in(cachedPath, std::ios::in | std::ios::binary);
 			if (!_shouldRecompile && in.is_open())
@@ -241,6 +240,7 @@ namespace Hazel
 			}
 			else
 			{
+				shaderc::Compiler compiler;
 				HZ_CORE_LTRACE("Compiling Vulkan binary for {0}", Utils::GLShaderStageToString(stage));
 				shaderc::SpvCompilationResult module = compiler.CompileGlslToSpv(source, Utils::GLShaderStageToShaderC(stage), _filePath.c_str(), options);
 				if (module.GetCompilationStatus() != shaderc_compilation_status_success)
@@ -275,12 +275,11 @@ namespace Hazel
 
 		auto& shaderData = _openGLSPIRV;
 
-		shaderc::Compiler compiler;
 		shaderc::CompileOptions options;
 		options.SetTargetEnvironment(shaderc_target_env_opengl, shaderc_env_version_opengl_4_5);
 
-		const bool optimize = true;
-		if (optimize)
+		constexpr bool kOptimize = true;
+		if (kOptimize)
 		{
 			options.SetOptimizationLevel(shaderc_optimization_level_performance);
 		}
@@ -308,6 +307,7 @@ namespace Hazel
 			}
 			else
 			{
+				shaderc::Compiler compiler;
 				HZ_CORE_LTRACE("Compiling OpenGL binary for {0}", Utils::GLShaderStageToString(stage));
 				spirv_cross::CompilerGLSL glslCompiler(spirv);
 				_openGLSourceCode[stage] = glslCompiler.compile();
@@ -480,49 +480,49 @@ namespace Hazel
 		UploadUniformMat4(std::move(name), value);
 	}
 
-	void OpenGLShader::UploadUniformInt(std::string name, int value)
+	void OpenGLShader::UploadUniformInt(const std::string& name, int value)
 	{
 		auto location = glGetUniformLocation(_rendererID, name.c_str());
 		glUniform1i(location, value);
 	}
 
-	void OpenGLShader::UploadUniformIntArray(std::string name, int* values, uint32_t count)
+	void OpenGLShader::UploadUniformIntArray(const std::string& name, const int* values, uint32_t count)
 	{
 		auto location = glGetUniformLocation(_rendererID, name.c_str());
 		glUniform1iv(location, count, values);
 	}
 
-	void OpenGLShader::UploadUniformFloat(std::string name, float value)
+	void OpenGLShader::UploadUniformFloat(const std::string& name, float value)
 	{
 		auto location = glGetUniformLocation(_rendererID, name.c_str());
 		glUniform1f(location, value);
 	}
 
-	void OpenGLShader::UploadUniformFloat2(std::string name, const glm::vec2& value)
+	void OpenGLShader::UploadUniformFloat2(const std::string& name, const glm::vec2& value)
 	{
 		auto location = glGetUniformLocation(_rendererID, name.c_str());
 		glUniform2f(location, value.x, value.y);
 	}
 
-	void OpenGLShader::UploadUniformFloat3(std::string name, const glm::vec3& value)
+	void OpenGLShader::UploadUniformFloat3(const std::string& name, const glm::vec3& value)
 	{
 		auto location = glGetUniformLocation(_rendererID, name.c_str());
 		glUniform3f(location, value.x, value.y, value.z);
 	}
 
-	void OpenGLShader::UploadUniformFloat4(std::string name, const glm::vec4& value)
+	void OpenGLShader::UploadUniformFloat4(const std::string& name, const glm::vec4& value)
 	{
 		auto location = glGetUniformLocation(_rendererID, name.c_str());
 		glUniform4f(location, value.x, value.y, value.z, value.w);
 	}
 
-	void OpenGLShader::UploadUniformMat3(std::string name, const glm::mat3& matrix)
+	void OpenGLShader::UploadUniformMat3(const std::string& name, const glm::mat3& matrix)
 	{
 		auto location = glGetUniformLocation(_rendererID, name.c_str());
 		glUniformMatrix3fv(location, 1, GL_FALSE, glm::value_ptr(matrix));
 	}
 
-	void OpenGLShader::UploadUniformMat4(std::string name, const glm::mat4& matrix)
+	void OpenGLShader::UploadUniformMat4(const std::string& name, const glm::mat4& matrix)
 	{
 		auto location = glGetUniformLocation(_rendererID, name.c_str());
 		glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(matrix));

@@ -50,8 +50,8 @@ namespace Hazel
 
 	private:
 		void Run();
-		bool OnWindowClose(WindowCloseEvent& event);
-		bool OnWindowResize(WindowResizeEvent& event);
+		bool OnWindowClose(const WindowCloseEvent& windowCloseEvent);
+		bool OnWindowResize(const WindowResizeEvent& windowResizeEvent);
 
 	private:
 		ApplicationCommandLineArgs _commandLineArgs;

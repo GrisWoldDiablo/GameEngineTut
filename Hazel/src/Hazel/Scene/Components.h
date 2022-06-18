@@ -19,8 +19,6 @@ namespace Hazel
 
 		IDComponent() = default;
 		IDComponent(const IDComponent&) = default;
-
-		~IDComponent() = default;
 	};
 
 	struct BaseComponent
@@ -31,8 +29,6 @@ namespace Hazel
 
 		BaseComponent() = default;
 		BaseComponent(const BaseComponent&) = default;
-
-		~BaseComponent() = default;
 	};
 
 	struct TransformComponent

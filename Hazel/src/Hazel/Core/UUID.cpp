@@ -10,10 +10,10 @@ namespace Hazel
 	static std::uniform_int_distribution<uint64_t> sUniformDistribution;
 
 	UUID::UUID()
-		:_UUID(sUniformDistribution(sEngine))
+		:_uuid(sUniformDistribution(sEngine))
 	{}
 
 	UUID::UUID(uint64_t uuid)
-		:_UUID(uuid)
+		:_uuid(uuid)
 	{}
 }

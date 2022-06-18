@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Base.h"
-
 #include <glm/glm.hpp>
 #include <random>
 
@@ -17,7 +15,7 @@ namespace Hazel
 		/// Initialize the Random machine to a specific seed
 		/// </summary>
 		/// <param name="seed">seed</param>
-		static void Init(int seed = std::time(nullptr));
+		static void Init(int seed = static_cast<int>(std::time(nullptr)));
 
 		/// <summary>
 		/// Get random float between 0.0f - 1.0f

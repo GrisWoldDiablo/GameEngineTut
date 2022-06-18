@@ -31,13 +31,13 @@ namespace Hazel
 		double V = hsv.z;
 
 		double C = S * V;
-		double Hprime = H * 6.0;
-		double X = C * (1 - abs(fmod(Hprime, 2) - 1));
+		double HPrime = H * 6.0;
+		double X = C * (1 - abs(fmod(HPrime, 2) - 1));
 		double m = V - C;
 		double R, G, B;
 
-		auto floorHprime = (int)glm::floor(Hprime);
-		switch (floorHprime)
+		auto floorHPrime = static_cast<int>(glm::floor(HPrime));
+		switch (floorHPrime)
 		{
 		case 0:
 		{
@@ -83,7 +83,7 @@ namespace Hazel
 		}
 		}
 
-		return Color((float)(R + m), (float)(G + m), (float)(B + m), hsv.a);
+		return { (R + m), (G + m), (B + m), static_cast<double>(hsv.a) };
 	}
 
 	void Color::RGBtoHSV(const Color& color, float& H, float& S, float& V)
@@ -109,32 +109,32 @@ namespace Hazel
 		double Xmin = glm::min(glm::min(r, g), b);
 		double C = Xmax - Xmin;
 
-		if (C == 0)
+		if (C == 0.0)
 		{
-			H = 0;
+			H = 0.0;
 		}
 		else if (Xmax == r)
 		{
-			H = fmod((60 * ((g - b) / C) + 360), 360.0);
+			H = fmod(60.0 * ((g - b) / C) + 360.0, 360.0);
 		}
 		else if (Xmax == g)
 		{
-			H = fmod((60 * ((b - r) / C) + 120), 360.0);
+			H = fmod(60.0 * ((b - r) / C) + 120.0, 360.0);
 		}
 		else if (Xmax == b)
 		{
-			H = fmod((60 * ((r - g) / C) + 240), 360.0);
+			H = fmod(60.0 * ((r - g) / C) + 240.0, 360.0);
 		}
 
 		H /= 360.0;
 
-		if (Xmax == 0)
+		if (Xmax == 0.0)
 		{
-			S = 0;
+			S = 0.0;
 		}
 		else
 		{
-			S = (C / Xmax);
+			S = C / Xmax;
 		}
 
 		V = Xmax;
@@ -154,9 +154,9 @@ namespace Hazel
 	{
 		HZ_PROFILE_FUNCTION();
 
-		double H = 0;
-		double S = 0;
-		double L = 0;
+		double H = 0.0;
+		double S = 0.0;
+		double L = 0.0;
 		double r = color.r;
 		double g = color.g;
 		double b = color.b;
@@ -165,35 +165,35 @@ namespace Hazel
 		double Xmin = glm::min(glm::min(r, g), b);
 		double C = Xmax - Xmin;
 
-		if (C == 0)
+		if (C == 0.0)
 		{
-			H = 0;
+			H = 0.0;
 		}
 		else if (Xmax == r)
 		{
-			H = fmod((60 * ((g - b) / C) + 360), 360.0);
+			H = fmod(60 * ((g - b) / C) + 360.0, 360.0);
 		}
 		else if (Xmax == g)
 		{
-			H = fmod((60 * ((b - r) / C) + 120), 360.0);
+			H = fmod(60 * ((b - r) / C) + 120.0, 360.0);
 		}
 		else if (Xmax == b)
 		{
-			H = fmod((60 * ((r - g) / C) + 240), 360.0);
+			H = fmod(60 * ((r - g) / C) + 240.0, 360.0);
 		}
 
 		H /= 360.0;
 
-		if (Xmax == 0)
+		if (Xmax == 0.0)
 		{
-			S = 0;
+			S = 0.0;
 		}
 		else
 		{
-			S = (C / Xmax);
+			S = C / Xmax;
 		}
 
-		L = (Xmax - Xmin) / 2.0f;
+		L = (Xmax - Xmin) / 2.0;
 
 		return { H, S, L , color.a };
 	}
@@ -203,7 +203,7 @@ namespace Hazel
 		HZ_PROFILE_FUNCTION();
 
 		auto grayscaleValue = color.GetGrayscaleValue();
-		return  Color(grayscaleValue, grayscaleValue, grayscaleValue, 1.0f);
+		return  { grayscaleValue, grayscaleValue, grayscaleValue, 1.0f };
 	}
 
 	Color Color::HEXtoRGB(const std::string& hexValue)
@@ -244,14 +244,14 @@ namespace Hazel
 		stream << std::hex << hexValue.substr(4, 2);
 		stream >> blue;
 
-		return Color(red, green, blue);
+		return { red, green, blue };
 	}
 
 	Color Color::Random()
 	{
 		HZ_PROFILE_FUNCTION();
 
-		return Color(Hazel::Random::Float(), Hazel::Random::Float(), Hazel::Random::Float(), Hazel::Random::Float());
+		return { Random::Float(), Random::Float(), Random::Float(), Random::Float() };
 	}
 
 	Color Color::Lerp(const Color& colorA, const Color& colorB, float lerpValue)
@@ -274,7 +274,7 @@ namespace Hazel
 		auto green = (colorB.g * lerpValue) + (colorA.g * (1.0f - lerpValue));
 		auto blue = (colorB.b * lerpValue) + (colorA.b * (1.0f - lerpValue));
 		auto alpha = (colorB.a * lerpValue) + (colorA.a * (1.0f - lerpValue));
-		return Color(red, green, blue, alpha);
+		return { red, green, blue, alpha };
 	}
 
 	Color::Color(float value)
@@ -286,11 +286,15 @@ namespace Hazel
 	{}
 
 	Color::Color(int red, int green, int blue, float alpha)
-		: Color(red / 255.0f, green / 255.0f, blue / 255.0f, alpha)
+		: Color(static_cast<float>(red) / 255.0f, static_cast<float>(green) / 255.0f, static_cast<float>(blue) / 255.0f, alpha)
 	{}
 
 	Color::Color(float red, float green, float blue, float alpha)
 		: r(red), g(green), b(blue), a(alpha)
+	{}
+
+	Color::Color(double red, double green, double blue, double alpha)
+		: Color(static_cast<float>(red), static_cast<float>(green), static_cast<float>(blue), static_cast<float>(alpha))
 	{}
 
 	float Color::GetGrayscaleValue() const
@@ -309,9 +313,9 @@ namespace Hazel
 	{
 		std::stringstream stream;
 		stream << std::hex << std::uppercase
-			<< std::setfill('0') << std::setw(2) << (int)(r * 255)
-			<< std::setfill('0') << std::setw(2) << (int)(g * 255)
-			<< std::setfill('0') << std::setw(2) << (int)(b * 255);
+			<< std::setfill('0') << std::setw(2) << static_cast<int>(r * 255)
+			<< std::setfill('0') << std::setw(2) << static_cast<int>(g * 255)
+			<< std::setfill('0') << std::setw(2) << static_cast<int>(b * 255);
 
 		return stream.str();
 	}
@@ -327,16 +331,12 @@ namespace Hazel
 		{
 		case 0:
 			return r;
-			break;
 		case 1:
 			return g;
-			break;
 		case 2:
 			return b;
-			break;
 		case 3:
 			return a;
-			break;
 		}
 
 		HZ_CORE_ASSERT(0, "Color index [" + std::to_string(index) + "] out of range!");
@@ -349,16 +349,12 @@ namespace Hazel
 		{
 		case 0:
 			return r;
-			break;
 		case 1:
 			return g;
-			break;
 		case 2:
 			return b;
-			break;
 		case 3:
 			return a;
-			break;
 		}
 
 		HZ_CORE_ASSERT(0, "Color index [" + std::to_string(index) + "] out of range!");
@@ -371,7 +367,7 @@ namespace Hazel
 		auto green = glm::clamp(this->g + other.g, 0.0f, 1.0f);
 		auto blue = glm::clamp(this->b + other.b, 0.0f, 1.0f);
 		auto alpha = glm::clamp(this->a + other.a, 0.0f, 1.0f);
-		return Color(red, green, blue, alpha);
+		return { red, green, blue, alpha };
 	}
 
 	Color Color::operator-(const Color& other)const
@@ -380,7 +376,7 @@ namespace Hazel
 		auto green = glm::clamp(this->g - other.g, 0.0f, 1.0f);
 		auto blue = glm::clamp(this->b - other.b, 0.0f, 1.0f);
 		auto alpha = glm::clamp(this->a - other.a, 0.0f, 1.0f);
-		return Color(red, green, blue, alpha);
+		return { red, green, blue, alpha };
 	}
 
 	Color Color::operator*(const Color& other)const
@@ -389,7 +385,7 @@ namespace Hazel
 		auto green = this->g * other.g;
 		auto blue = this->b * other.b;
 		auto alpha = this->a * other.a;
-		return Color(red, green, blue, alpha);
+		return { red, green, blue, alpha };
 	}
 
 	Color Color::operator/(float value)const
@@ -399,7 +395,7 @@ namespace Hazel
 		auto green = this->g / value;
 		auto blue = this->b / value;
 		auto alpha = this->a / value;
-		return Color(red, green, blue, alpha);
+		return { red, green, blue, alpha };
 	}
 
 	Color& Color::operator+=(const Color& other)

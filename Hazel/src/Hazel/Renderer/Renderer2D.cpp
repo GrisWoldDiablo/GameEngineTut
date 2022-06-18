@@ -49,10 +49,10 @@ namespace Hazel
 	struct Renderer2DData
 	{
 		// Max for draw calls
-		static const uint32_t MaxQuads = 20000; // 20,000
-		static const uint32_t MaxVertices = MaxQuads * 4; // 80,000
-		static const uint32_t MaxIndices = MaxQuads * 6; // 120,000
-		static const uint32_t MaxTextureSlots = 32; // TODO: Render Capabilities
+		static constexpr uint32_t MaxQuads = 20000; // 20,000
+		static constexpr uint32_t MaxVertices = MaxQuads * 4; // 80,000
+		static constexpr uint32_t MaxIndices = MaxQuads * 6; // 120,000
+		static constexpr uint32_t MaxTextureSlots = 32; // TODO: Render Capabilities
 
 #pragma region Quad
 		Ref<VertexArray> QuadVertexArray;
@@ -89,7 +89,7 @@ namespace Hazel
 		std::array<Ref<Texture2D>, MaxTextureSlots> TextureSlots;
 		uint32_t TextureSlotIndex = 0; // Default index is 1 because, index 0 is White Texture.
 
-		static const uint8_t QuadVertexCount = 4;
+		static constexpr uint8_t QuadVertexCount = 4;
 		glm::vec4 QuadVertexPositions[4];
 		glm::vec2* QuadTextureCoordinates;
 
@@ -105,6 +105,20 @@ namespace Hazel
 
 	static Renderer2DData sData;
 	static std::future<void> _asyncShaderCreation;
+
+	void Renderer2D::LoadShadersAsync()
+	{
+		sData.QuadShader = nullptr;
+		sData.CircleShader = nullptr;
+		sData.LineShader = nullptr;
+
+		_asyncShaderCreation = std::async(std::launch::async, []
+		{
+			sData.QuadShader = Shader::Create("assets/shaders/Renderer2D_Quad.glsl");
+			sData.CircleShader = Shader::Create("assets/shaders/Renderer2D_Circle.glsl");
+			sData.LineShader = Shader::Create("assets/shaders/Renderer2D_Line.glsl");
+		});
+	}
 
 	void Renderer2D::Init()
 	{
@@ -184,12 +198,7 @@ namespace Hazel
 #define ASYNC 1
 
 #if ASYNC
-		_asyncShaderCreation = std::async(std::launch::async, []
-		{
-			sData.QuadShader = Shader::Create("assets/shaders/Renderer2D_Quad.glsl");
-			sData.CircleShader = Shader::Create("assets/shaders/Renderer2D_Circle.glsl");
-			sData.LineShader = Shader::Create("assets/shaders/Renderer2D_Line.glsl");
-		});
+		LoadShadersAsync();
 #else
 		sData.QuadShader = Shader::Create("assets/shaders/Renderer2D_Quad.glsl");
 		sData.CircleShader = Shader::Create("assets/shaders/Renderer2D_Circle.glsl");
@@ -204,7 +213,7 @@ namespace Hazel
 		sData.QuadTextureCoordinates = new glm::vec2[4];
 
 		sData.CameraUniformBuffer = UniformBuffer::Create(sizeof(Renderer2DData::CameraData), 0);
-	}
+		}
 
 	void Renderer2D::Shutdown()
 	{
@@ -284,7 +293,7 @@ namespace Hazel
 	{
 		HZ_PROFILE_FUNCTION()
 
-		Flush();
+			Flush();
 	}
 
 	void Renderer2D::Reset()
@@ -543,7 +552,7 @@ namespace Hazel
 	}
 #pragma endregion
 
-	void Renderer2D::DrawSprite(const glm::mat4& transform, SpriteRendererComponent& spriteRenderComponent, int entityID)
+	void Renderer2D::DrawSprite(const glm::mat4& transform, const SpriteRendererComponent& spriteRenderComponent, int entityID)
 	{
 		if (spriteRenderComponent.Texture != nullptr)
 		{
@@ -677,10 +686,10 @@ namespace Hazel
 			FlushAndReset();
 		}*/
 
-		for (uint32_t i = 0; i < Renderer2DData::QuadVertexCount; i++)
+		for (const auto& quadVertexPosition : sData.QuadVertexPositions)
 		{
-			sData.CircleVertexBufferPtr->WorldPosition = transform * sData.QuadVertexPositions[i];
-			sData.CircleVertexBufferPtr->LocalPosition = sData.QuadVertexPositions[i] * 2.0f;
+			sData.CircleVertexBufferPtr->WorldPosition = transform * quadVertexPosition;
+			sData.CircleVertexBufferPtr->LocalPosition = quadVertexPosition * 2.0f;
 			sData.CircleVertexBufferPtr->Color = color;
 			sData.CircleVertexBufferPtr->Thickness = thickness;
 			sData.CircleVertexBufferPtr->Fade = fade;
@@ -691,4 +700,4 @@ namespace Hazel
 		sData.CircleIndexCount += 6;
 		sData.Stats.QuadCount++;
 	}
-}
+	}

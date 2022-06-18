@@ -17,7 +17,7 @@ namespace Hazel
 		void Bind() const override;
 		void Unbind() const override;
 
-		const std::string& GetName() override { return _name; };
+		const std::string& GetName() override { return _name; }
 
 		void SetInt(std::string name, int value) override;
 		void SetIntArray(std::string name, int* values, uint32_t count) override;
@@ -30,16 +30,16 @@ namespace Hazel
 
 		void SetMat4(std::string name, const glm::mat4& value) override;
 
-		void UploadUniformInt(std::string name, int value);
-		void UploadUniformIntArray(std::string name, int* values, uint32_t count);
+		void UploadUniformInt(const std::string& name, int value);
+		void UploadUniformIntArray(const std::string& name, const int* values, uint32_t count);
 
-		void UploadUniformFloat(std::string name, float value);
-		void UploadUniformFloat2(std::string name, const glm::vec2& value);
-		void UploadUniformFloat3(std::string name, const glm::vec3& value);
-		void UploadUniformFloat4(std::string name, const glm::vec4& value);
+		void UploadUniformFloat(const std::string& name, float value);
+		void UploadUniformFloat2(const std::string& name, const glm::vec2& value);
+		void UploadUniformFloat3(const std::string& name, const glm::vec3& value);
+		void UploadUniformFloat4(const std::string& name, const glm::vec4& value);
 
-		void UploadUniformMat3(std::string name, const glm::mat3& matrix);
-		void UploadUniformMat4(std::string name, const glm::mat4& matrix);
+		void UploadUniformMat3(const std::string& name, const glm::mat3& matrix);
+		void UploadUniformMat4(const std::string& name, const glm::mat4& matrix);
 
 		void CompleteInitialization() override;
 

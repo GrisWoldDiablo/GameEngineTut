@@ -1,5 +1,4 @@
 #pragma once
-#include "Base.h"
 #include "Layer.h"
 
 #include <vector>
@@ -14,8 +13,8 @@ namespace Hazel
 
 		void PushLayer(Layer* layer);
 		void PushOverlay(Layer* overlay);
-		void PopLayer(Layer* layer);
-		void PopOverlay(Layer* overlay);
+		void PopLayer(const Layer* layer);
+		void PopOverlay(const Layer* overlay);
 
 		std::vector<Layer*>::iterator begin() { return _layers.begin(); }
 		std::vector<Layer*>::iterator end() { return _layers.end(); }
