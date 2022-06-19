@@ -39,7 +39,7 @@ Entities:
     BoxCollider2DComponent:
       Offset: [0, 0]
       Size: [0.5, 0.5]
-      Angle: 0
+      Angle: 45
       Density: 1
       Friction: 0.5
       Restitution: 0.529999971
@@ -96,13 +96,13 @@ Entities:
       Position: [0, 0, 0]
       Rotation: [0, 0, 0]
       Scale: [2, 2, 1]
-    CircleRendererComponent:
-      Color: [0.821421623, 0, 1, 1]
-      Thickness: 0.324999988
-      Fade: 0.250999987
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 1]
+      TexturePath: assets\textures\ChernoLogo.png
+      Tiling: [1, 1]
     Rigidbody2DComponent:
       BodyType: Dynamic
-      IsFixedRotation: true
+      IsFixedRotation: false
     CircleCollider2DComponent:
       Offset: [0, 0]
       Radius: 0.5
@@ -123,3 +123,26 @@ Entities:
       Color: [1, 1, 1, 1]
       TexturePath: assets\textures\unwrap_helper.png
       Tiling: [1, 1]
+  - Entity: 6923272651620727073
+    BaseComponent:
+      Name: Circle
+      Tag: 0
+      Layer: 0
+    TransformComponent:
+      Position: [0.174769819, 2.1493578, 0.266410768]
+      Rotation: [0, 0, 0]
+      Scale: [2, 2, 1]
+    CircleRendererComponent:
+      Color: [0.494199753, 0, 1, 1]
+      Thickness: 0.600000024
+      Fade: 0.296999991
+    Rigidbody2DComponent:
+      BodyType: Dynamic
+      IsFixedRotation: false
+    CircleCollider2DComponent:
+      Offset: [1.20000005, 0]
+      Radius: 0.5
+      Density: 1
+      Friction: 0.5
+      Restitution: 0
+      RestitutionThreshold: 0.5

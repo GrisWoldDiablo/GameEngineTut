@@ -18,18 +18,22 @@ namespace Hazel
 		: Layer("Hazel Editor")
 	{
 		// Create Gizmo Icons texture.
-		_panIconTexture = Texture2D::Create("Resources/Icons/Gizmo/PanIcon256White.png");
-		_magnifierIconTexture = Texture2D::Create("Resources/Icons/Gizmo/MagnifierIcon256White.png");
-		_eyeIconTexture = Texture2D::Create("Resources/Icons/Gizmo/EyeIcon256White.png");
-		_nothingGizmoIconTexture = Texture2D::Create("Resources/Icons/Gizmo/NothingGizmo256White.png");
-		_positionGizmoIconTexture = Texture2D::Create("Resources/Icons/Gizmo/PositionGizmo256White.png");
-		_rotationGizmoIconTexture = Texture2D::Create("Resources/Icons/Gizmo/RotationGizmo256White.png");
-		_scaleGizmoIconTexture = Texture2D::Create("Resources/Icons/Gizmo/ScaleGizmo256White.png");
-		_localGizmoIconTexture = Texture2D::Create("Resources/Icons/Gizmo/LocalGizmo256White.png");
-		_globalGizmoIconTexture = Texture2D::Create("Resources/Icons/Gizmo/GlobalGizmo256White.png");
-		_playButtonIconTexture = Texture2D::Create("Resources/Icons/General/PlayButton256.png");
-		_simulateButtonIconTexture = Texture2D::Create("Resources/Icons/General/SimulateButton256.png");
-		_stopButtonIconTexture = Texture2D::Create("Resources/Icons/General/StopButton256.png");
+		_iconTextures =
+		{
+			{ Icons::Pan,		Texture2D::Create("Resources/Icons/Gizmo/PanIcon256White.png")			},
+			{ Icons::Magnifier, Texture2D::Create("Resources/Icons/Gizmo/MagnifierIcon256White.png")	},
+			{ Icons::Eye,		Texture2D::Create("Resources/Icons/Gizmo/EyeIcon256White.png")			},
+			{ Icons::Nothing,	Texture2D::Create("Resources/Icons/Gizmo/NothingGizmo256White.png")		},
+			{ Icons::Position,	Texture2D::Create("Resources/Icons/Gizmo/PositionGizmo256White.png")	},
+			{ Icons::Rotation,	Texture2D::Create("Resources/Icons/Gizmo/RotationGizmo256White.png")	},
+			{ Icons::Scale,		Texture2D::Create("Resources/Icons/Gizmo/ScaleGizmo256White.png")		},
+			{ Icons::Local,		Texture2D::Create("Resources/Icons/Gizmo/LocalGizmo256White.png")		},
+			{ Icons::Global,	Texture2D::Create("Resources/Icons/Gizmo/GlobalGizmo256White.png")		},
+			{ Icons::Play,		Texture2D::Create("Resources/Icons/General/PlayButton256.png")			},
+			{ Icons::Stop,		Texture2D::Create("Resources/Icons/General/StopButton256.png")			},
+			{ Icons::Simulate,	Texture2D::Create("Resources/Icons/General/SimulateButton256.png")		},
+
+		};
 	}
 
 	void EditorLayer::OnAttach()
@@ -395,7 +399,7 @@ namespace Hazel
 
 		if (_shouldShowPhysicsColliders)
 		{
-			const auto identityMatrix = glm::mat4(1.0f);
+			constexpr auto kIdentityMatrix = glm::mat4(1.0f);
 
 			// Box Colliders
 			{
@@ -405,13 +409,13 @@ namespace Hazel
 					auto [tc, bc2d] = view.get<TransformComponent, BoxCollider2DComponent>(entity);
 
 					float sign = cameraPositionZ > tc.Position.z ? 1.0f : -1.0f;
-					glm::vec3 position = tc.Position + glm::vec3(bc2d.Offset, 0.001f * sign);
-					glm::vec3 scale = tc.Scale * glm::vec3(bc2d.Size * 2.0f, 1.0f);
-					glm::mat4 rotation = glm::toMat4(glm::quat(tc.Rotation + glm::vec3(0.0f, 0.0f, 1.0f) * glm::radians(bc2d.Angle)));
 
-					glm::mat4 transform = glm::translate(identityMatrix, position)
-						* rotation
-						* glm::scale(identityMatrix, scale);
+					glm::mat4 transform = glm::translate(kIdentityMatrix, tc.Position)
+						* glm::toMat4(glm::quat(tc.Rotation))
+						* glm::translate(kIdentityMatrix, glm::vec3(bc2d.Offset, 0.001f * sign))
+						* glm::toMat4(glm::quat(glm::vec3(0.0f, 0.0f, glm::radians(bc2d.Angle))))
+						* glm::scale(kIdentityMatrix, tc.Scale * glm::vec3(bc2d.Size * 2.0f, 1.0f));
+
 
 					Renderer2D::DrawRect(transform, Color::Green);
 				}
@@ -425,13 +429,12 @@ namespace Hazel
 					auto [tc, cc2d] = view.get<TransformComponent, CircleCollider2DComponent>(entity);
 
 					float sign = cameraPositionZ > tc.Position.z ? 1.0f : -1.0f;
-					glm::vec3 position = tc.Position + glm::vec3(cc2d.Offset, 0.001f * sign);
-					glm::vec3 scale = tc.Scale * glm::vec3(cc2d.Radius * 2.0f);
-					glm::mat4 rotation = glm::toMat4(glm::quat(tc.Rotation));
+					glm::vec3 position = +glm::vec3(cc2d.Offset, 0.001f * sign);
 
-					glm::mat4 transform = glm::translate(identityMatrix, position)
-						//* rotation
-						* glm::scale(identityMatrix, scale);
+					glm::mat4 transform = glm::translate(kIdentityMatrix, tc.Position)
+						* glm::toMat4(glm::quat(tc.Rotation))
+						* glm::translate(kIdentityMatrix, glm::vec3(cc2d.Offset, 0.001f * sign))
+						* glm::scale(kIdentityMatrix, tc.Scale * glm::vec3(cc2d.Radius * 2.0f));
 
 					Renderer2D::DrawCircle(transform, Color::Green, 0.01f);
 				}
@@ -590,15 +593,15 @@ namespace Hazel
 			{
 				if (_editorCamera.IsPanning())
 				{
-					gizmoButtonTexture = _panIconTexture;
+					gizmoButtonTexture = _iconTextures[Icons::Pan];
 				}
 				else if (_editorCamera.IsZooming())
 				{
-					gizmoButtonTexture = _magnifierIconTexture;
+					gizmoButtonTexture = _iconTextures[Icons::Magnifier];
 				}
 				else
 				{
-					gizmoButtonTexture = _eyeIconTexture;
+					gizmoButtonTexture = _iconTextures[Icons::Eye];
 				}
 
 				if (!_hasStoredPreviousGizmoType)
@@ -610,7 +613,7 @@ namespace Hazel
 			}
 			else
 			{
-				gizmoButtonTexture = _nothingGizmoIconTexture;
+				gizmoButtonTexture = _iconTextures[Icons::Nothing];
 				if (_hasStoredPreviousGizmoType)
 				{
 					_gizmoType = _previousGizmoType;
@@ -629,7 +632,7 @@ namespace Hazel
 			ImGui::SameLine();
 
 			bool isTranslate = _gizmoType == ImGuizmo::TRANSLATE;
-			if (ImGui::ImageButton((ImTextureID)(intptr_t)_positionGizmoIconTexture->GetRendererID(), size, uv0, uv1, 3, isTranslate ? selectedColor : normalColor, isTranslate ? tintColor : whiteColor))
+			if (ImGui::ImageButton((ImTextureID)(intptr_t)_iconTextures[Icons::Position]->GetRendererID(), size, uv0, uv1, 3, isTranslate ? selectedColor : normalColor, isTranslate ? tintColor : whiteColor))
 			{
 				_gizmoType = ImGuizmo::TRANSLATE;
 			}
@@ -637,7 +640,7 @@ namespace Hazel
 
 			ImGui::SameLine();
 			bool isRotate = _gizmoType == ImGuizmo::ROTATE;
-			if (ImGui::ImageButton((ImTextureID)(intptr_t)_rotationGizmoIconTexture->GetRendererID(), size, uv0, uv1, 3, isRotate ? selectedColor : normalColor, isRotate ? tintColor : whiteColor))
+			if (ImGui::ImageButton((ImTextureID)(intptr_t)_iconTextures[Icons::Rotation]->GetRendererID(), size, uv0, uv1, 3, isRotate ? selectedColor : normalColor, isRotate ? tintColor : whiteColor))
 			{
 				_gizmoType = ImGuizmo::ROTATE;
 			}
@@ -645,7 +648,7 @@ namespace Hazel
 
 			ImGui::SameLine();
 			bool isScale = _gizmoType == ImGuizmo::SCALE;
-			if (ImGui::ImageButton((ImTextureID)(intptr_t)_scaleGizmoIconTexture->GetRendererID(), size, uv0, uv1, 3, isScale ? selectedColor : normalColor, isScale ? tintColor : whiteColor))
+			if (ImGui::ImageButton((ImTextureID)(intptr_t)_iconTextures[Icons::Scale]->GetRendererID(), size, uv0, uv1, 3, isScale ? selectedColor : normalColor, isScale ? tintColor : whiteColor))
 			{
 				_gizmoType = ImGuizmo::SCALE;
 				_gizmoSpace = ImGuizmo::LOCAL;
@@ -656,7 +659,7 @@ namespace Hazel
 			bool isLocal = _gizmoSpace == ImGuizmo::LOCAL;
 			if (isLocal)
 			{
-				if (ImGui::ImageButton((ImTextureID)(intptr_t)_localGizmoIconTexture->GetRendererID(), size, uv0, uv1, 3, selectedColor, tintColor))
+				if (ImGui::ImageButton((ImTextureID)(intptr_t)_iconTextures[Icons::Local]->GetRendererID(), size, uv0, uv1, 3, selectedColor, tintColor))
 				{
 					if (!isScale)
 					{
@@ -672,7 +675,7 @@ namespace Hazel
 			}
 			else
 			{
-				if (ImGui::ImageButton((ImTextureID)(intptr_t)_globalGizmoIconTexture->GetRendererID(), size, uv0, uv1, 3, selectedColor, tintColor))
+				if (ImGui::ImageButton((ImTextureID)(intptr_t)_iconTextures[Icons::Global]->GetRendererID(), size, uv0, uv1, 3, selectedColor, tintColor))
 				{
 					_gizmoSpace = ImGuizmo::LOCAL;
 				}
@@ -693,7 +696,7 @@ namespace Hazel
 			}
 
 			bool isEditing = _sceneState == SceneState::Edit || _sceneState == SceneState::Simulate;
-			auto sceneStateButton = isEditing ? _playButtonIconTexture : _stopButtonIconTexture;
+			auto sceneStateButton = isEditing ? _iconTextures[Icons::Play] : _iconTextures[Icons::Stop];
 
 			if (ImGui::ImageButton((ImTextureID)(intptr_t)sceneStateButton->GetRendererID(), size, uv0, uv1, 3, isEditing ? normalColor : selectedColor, isEditing ? whiteColor : tintColor))
 			{
@@ -713,7 +716,7 @@ namespace Hazel
 			}
 
 			ImGui::SameLine();
-			if (ImGui::ImageButton((ImTextureID)(intptr_t)_simulateButtonIconTexture->GetRendererID(), size, uv0, uv1, 3, isEditing ? normalColor : selectedColor, _sceneState != SceneState::Simulate ? whiteColor : tintColor))
+			if (ImGui::ImageButton((ImTextureID)(intptr_t)_iconTextures[Icons::Simulate]->GetRendererID(), size, uv0, uv1, 3, isEditing ? normalColor : selectedColor, _sceneState != SceneState::Simulate ? whiteColor : tintColor))
 			{
 				switch (_sceneState)
 				{
@@ -944,7 +947,7 @@ namespace Hazel
 			lowerRightPos.y += 25.0f;
 			lowerRightPos.x += 25.0f;
 
-			Ref<Texture2D> cursorTexture = _editorCamera.IsPanning() ? _panIconTexture : _editorCamera.IsZooming() ? _magnifierIconTexture : _eyeIconTexture;
+			Ref<Texture2D> cursorTexture = _editorCamera.IsPanning() ? _iconTextures[Icons::Pan] : _editorCamera.IsZooming() ? _iconTextures[Icons::Magnifier] : _iconTextures[Icons::Eye];
 
 			if (_editorCamera.IsDriving())
 			{

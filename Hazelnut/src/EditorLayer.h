@@ -98,25 +98,30 @@ namespace Hazel
 		Entity _hoveredEntity;
 
 		// Tools
-		bool _shouldShowPhysicsColliders = false;
+		bool _shouldShowPhysicsColliders = true; // TODO Set to false once we have save editor settings ability.
 		bool _isDemoWidowOpen = false;
 
 		// Hover Timer
 		float _timeSpentHovering = 0;
 
 		// Toolbar Icons
-		Ref<Texture2D> _panIconTexture;
-		Ref<Texture2D> _magnifierIconTexture;
-		Ref<Texture2D> _eyeIconTexture;
-		Ref<Texture2D> _nothingGizmoIconTexture;
-		Ref<Texture2D> _positionGizmoIconTexture;
-		Ref<Texture2D> _rotationGizmoIconTexture;
-		Ref<Texture2D> _scaleGizmoIconTexture;
-		Ref<Texture2D> _localGizmoIconTexture;
-		Ref<Texture2D> _globalGizmoIconTexture;
-		Ref<Texture2D> _playButtonIconTexture;
-		Ref<Texture2D> _simulateButtonIconTexture;
-		Ref<Texture2D> _stopButtonIconTexture;
+		enum class Icons
+		{
+			Pan,
+			Magnifier,
+			Eye,
+			Nothing,
+			Position,
+			Rotation,
+			Scale,
+			Local,
+			Global,
+			Play,
+			Stop,
+			Simulate
+		};
+
+		std::map<Icons, Ref<Texture2D>> _iconTextures;
 
 		enum class SceneState
 		{
