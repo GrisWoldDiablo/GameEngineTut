@@ -292,8 +292,8 @@ namespace Hazel
 
 #pragma region BaseComponent
 				std::string name;
-				int tag;
-				int layer;
+				int tag = 0;
+				int layer = 0;
 				if (auto baseComponent = entity["BaseComponent"])
 				{
 					name = baseComponent["Name"].as<std::string>();

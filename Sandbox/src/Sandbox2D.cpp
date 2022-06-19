@@ -80,12 +80,12 @@ void Sandbox2D::OnDetach()
 	HZ_PROFILE_FUNCTION();
 }
 
-void Sandbox2D::OnUpdate()
+void Sandbox2D::OnUpdate(const Hazel::Timestep& timestep)
 {
 	HZ_PROFILE_FUNCTION();
 	_updateTimer.Reset();
 
-	_cameraController.OnUpdate();
+	_cameraController.OnUpdate(timestep);
 
 	CalculateFPS();
 

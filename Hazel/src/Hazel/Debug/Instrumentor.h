@@ -32,7 +32,7 @@ namespace Hazel
 		Instrumentor(const Instrumentor&) = delete;
 		Instrumentor(Instrumentor&&) = delete;
 
-		void BeginSession(std::string name, const std::string& filePath = "results.json")
+		void BeginSession(const std::string& name, const std::string& filePath = "results.json")
 		{
 			std::lock_guard lock(_mutex);
 			if (_currentSession != nullptr)

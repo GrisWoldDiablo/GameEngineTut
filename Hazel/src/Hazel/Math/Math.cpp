@@ -15,15 +15,15 @@ namespace Hazel::Math
 		mat4 LocalMatrix(transform);
 
 		// Normalize the matrix.
-		if (epsilonEqual(LocalMatrix[3][3], 0.0f, epsilon<float>()))
+		if (IsNearlyEqual(LocalMatrix[3][3], 0.0f))
 		{
 			return false;
 		}
 
 		// First, isolate perspective. This is the messiest
-		if (epsilonNotEqual(LocalMatrix[0][3], 0.0f, epsilon<float>())
-			|| epsilonNotEqual(LocalMatrix[1][3], 0.0f, epsilon<float>())
-			|| epsilonNotEqual(LocalMatrix[2][3], 0.0f, epsilon<float>()))
+		if (	IsNearlyNotEqual(LocalMatrix[0][3], 0.0f)
+			||	IsNearlyNotEqual(LocalMatrix[1][3], 0.0f)
+			||	IsNearlyNotEqual(LocalMatrix[2][3], 0.0f))
 		{
 			// Clear the perspective partition
 			LocalMatrix[0][3] = LocalMatrix[1][3] = LocalMatrix[2][3] = 0.0f;

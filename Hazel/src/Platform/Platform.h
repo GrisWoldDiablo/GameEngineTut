@@ -6,7 +6,7 @@ namespace Hazel
 	class Platform
 	{
 	public:
-		Platform(Ref<RendererAPI> renderAPI)
+		Platform(const Ref<RendererAPI>& renderAPI)
 			:_rendererAPI(renderAPI)
 		{}
 

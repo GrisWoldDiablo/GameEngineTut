@@ -1,6 +1,6 @@
 #include "hzpch.h"
 #include "Scene.h"
-#include "components.h"
+#include "Components.h"
 #include "ScriptableEntity.h"
 #include "Hazel/Renderer/Renderer2D.h"
 
@@ -232,9 +232,9 @@ namespace Hazel
 
 		// Physics
 		{
-			const int32_t velocityInteration = 6;
-			const int32_t positionInteration = 2;
-			_physicsWorld->Step(timestep, velocityInteration, positionInteration);
+			constexpr int32_t kvelocityInteration = 6;
+			constexpr int32_t kPositionInteration = 2;
+			_physicsWorld->Step(timestep, kvelocityInteration, kPositionInteration);
 
 			// Retrieve transform from Box2D
 			_registry.view<Rigidbody2DComponent>().each([&](const auto entt, const Rigidbody2DComponent& rb2d)
@@ -347,7 +347,7 @@ namespace Hazel
 			}
 		}
 
-		return Entity();
+		return {};
 	}
 
 	void Scene::OnPhysic2DStart()
@@ -393,7 +393,8 @@ namespace Hazel
 
 				createFixture(boxShape, bc2d->Density, bc2d->Friction, bc2d->Restitution, bc2d->RestitutionThreshold);
 			}
-			else if (const auto& cc2d = entity.TryGetComponent<CircleCollider2DComponent>())
+
+			if (const auto& cc2d = entity.TryGetComponent<CircleCollider2DComponent>())
 			{
 				b2CircleShape circleShape;
 				circleShape.m_p.Set(cc2d->Offset.x, cc2d->Offset.y);

@@ -7,7 +7,7 @@ namespace Hazel
 	class Layer
 	{
 	public:
-		Layer(std::string debugName = "Layer");
+		Layer(const std::string& debugName = "Layer");
 		virtual ~Layer() = default;
 
 		virtual void OnAttach() {}

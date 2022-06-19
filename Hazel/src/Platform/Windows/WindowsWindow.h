@@ -38,7 +38,6 @@ namespace Hazel
 
 		struct WindowData
 		{
-		public:
 			std::string Title;
 			uint32_t Width;
 			uint32_t Height;

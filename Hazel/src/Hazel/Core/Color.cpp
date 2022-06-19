@@ -1,6 +1,7 @@
 #include "hzpch.h"
 #include "Color.h"
 #include "Random.h"
+#include "Hazel/Math/Math.h"
 
 namespace Hazel
 {
@@ -36,8 +37,7 @@ namespace Hazel
 		double m = V - C;
 		double R, G, B;
 
-		auto floorHPrime = static_cast<int>(glm::floor(HPrime));
-		switch (floorHPrime)
+		switch (static_cast<int>(glm::floor(HPrime)))
 		{
 		case 0:
 		{
@@ -109,26 +109,26 @@ namespace Hazel
 		double Xmin = glm::min(glm::min(r, g), b);
 		double C = Xmax - Xmin;
 
-		if (C == 0.0)
+		if (Math::IsNearlyZero(C))
 		{
 			H = 0.0;
 		}
-		else if (Xmax == r)
+		else if (Math::IsNearlyEqual(Xmax, r))
 		{
 			H = fmod(60.0 * ((g - b) / C) + 360.0, 360.0);
 		}
-		else if (Xmax == g)
+		else if (Math::IsNearlyEqual(Xmax, g))
 		{
 			H = fmod(60.0 * ((b - r) / C) + 120.0, 360.0);
 		}
-		else if (Xmax == b)
+		else if (Math::IsNearlyEqual(Xmax, b))
 		{
 			H = fmod(60.0 * ((r - g) / C) + 240.0, 360.0);
 		}
 
 		H /= 360.0;
 
-		if (Xmax == 0.0)
+		if (Math::IsNearlyZero(Xmax))
 		{
 			S = 0.0;
 		}
@@ -165,26 +165,26 @@ namespace Hazel
 		double Xmin = glm::min(glm::min(r, g), b);
 		double C = Xmax - Xmin;
 
-		if (C == 0.0)
+		if (Math::IsNearlyZero(C))
 		{
 			H = 0.0;
 		}
-		else if (Xmax == r)
+		else if (Math::IsNearlyEqual(Xmax, r))
 		{
 			H = fmod(60 * ((g - b) / C) + 360.0, 360.0);
 		}
-		else if (Xmax == g)
+		else if (Math::IsNearlyEqual(Xmax, g))
 		{
 			H = fmod(60 * ((b - r) / C) + 120.0, 360.0);
 		}
-		else if (Xmax == b)
+		else if (Math::IsNearlyEqual(Xmax, b))
 		{
 			H = fmod(60 * ((r - g) / C) + 240.0, 360.0);
 		}
 
 		H /= 360.0;
 
-		if (Xmax == 0.0)
+		if (Math::IsNearlyZero(Xmax))
 		{
 			S = 0.0;
 		}
@@ -203,7 +203,7 @@ namespace Hazel
 		HZ_PROFILE_FUNCTION();
 
 		auto grayscaleValue = color.GetGrayscaleValue();
-		return  { grayscaleValue, grayscaleValue, grayscaleValue, 1.0f };
+		return  { grayscaleValue, grayscaleValue, grayscaleValue, color.a };
 	}
 
 	Color Color::HEXtoRGB(const std::string& hexValue)
@@ -222,7 +222,7 @@ namespace Hazel
 			case 'D': case 'E': case 'F':
 				break;
 			default:
-				HZ_CORE_ASSERT(false, std::string("[] is not a valid Hexadecimal character.").insert(1, 1, character));
+				HZ_CORE_ASSERT(0, std::string("[] is not a valid Hexadecimal character.").insert(1, 1, character));
 				break;
 			}
 		}
@@ -339,8 +339,8 @@ namespace Hazel
 			return a;
 		}
 
-		HZ_CORE_ASSERT(0, "Color index [" + std::to_string(index) + "] out of range!");
-		throw nullptr;
+		HZ_CORE_ASSERT(0, "Color index [" + std::to_string(index) + "] out of bounds!");
+		throw std::out_of_range("Index out of bounds!");
 	}
 
 	float Color::operator[](int index) const
@@ -357,8 +357,8 @@ namespace Hazel
 			return a;
 		}
 
-		HZ_CORE_ASSERT(0, "Color index [" + std::to_string(index) + "] out of range!");
-		throw nullptr;
+		HZ_CORE_ASSERT(0, "Color index [" + std::to_string(index) + "] out of bounds!");
+		throw std::out_of_range("Index out of bounds!");
 	}
 
 	Color Color::operator+(const Color& other) const
@@ -390,7 +390,7 @@ namespace Hazel
 
 	Color Color::operator/(float value)const
 	{
-		HZ_CORE_ASSERT(value, "Cannot divive by Zero!");
+		HZ_CORE_ASSERT(!Math::IsNearlyZero(value), "Cannot divive by Zero!");
 		auto red = this->r / value;
 		auto green = this->g / value;
 		auto blue = this->b / value;
@@ -427,7 +427,7 @@ namespace Hazel
 
 	Color& Color::operator/=(float value)
 	{
-		HZ_CORE_ASSERT(value, "Cannot divive by Zero!");
+		HZ_CORE_ASSERT(!Math::IsNearlyZero(value), "Cannot divive by Zero!");
 		this->r /= value;
 		this->g /= value;
 		this->b /= value;
@@ -437,7 +437,9 @@ namespace Hazel
 
 	bool Color::operator==(const Color& other) const
 	{
-		return (this->r == other.r && this->g == other.g &&
-			this->b == other.b && this->a == other.a);
+		return Math::IsNearlyEqual(this->r, other.r)
+			&& Math::IsNearlyEqual(this->g, other.g)
+			&& Math::IsNearlyEqual(this->b, other.b)
+			&& Math::IsNearlyEqual(this->a, other.a);
 	}
 }

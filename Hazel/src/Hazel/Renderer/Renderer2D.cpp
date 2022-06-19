@@ -89,9 +89,9 @@ namespace Hazel
 		std::array<Ref<Texture2D>, MaxTextureSlots> TextureSlots;
 		uint32_t TextureSlotIndex = 0; // Default index is 1 because, index 0 is White Texture.
 
-		static constexpr uint8_t QuadVertexCount = 4;
+		static constexpr uint8_t kQuadVertexCount = 4;
 		glm::vec4 QuadVertexPositions[4];
-		glm::vec2* QuadTextureCoordinates;
+		glm::vec2* QuadTextureCoordinates = nullptr;
 
 		Renderer2D::Statistics Stats;
 
@@ -661,7 +661,7 @@ namespace Hazel
 			FlushAndReset();
 		}
 
-		for (uint32_t i = 0; i < Renderer2DData::QuadVertexCount; i++)
+		for (uint32_t i = 0; i < Renderer2DData::kQuadVertexCount; i++)
 		{
 			sData.QuadVertexBufferPtr->Position = transform * sData.QuadVertexPositions[i];
 			sData.QuadVertexBufferPtr->Color = color;

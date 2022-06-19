@@ -19,12 +19,12 @@ void GameLayer::OnAttach()
 void GameLayer::OnDetach()
 {}
 
-void GameLayer::OnUpdate()
+void GameLayer::OnUpdate(const Hazel::Timestep& timestep)
 {
-	_level.OnUpdate(Hazel::Time::GetTimestep());
+	_level.OnUpdate(timestep);
 	const auto& playerPos = _level.GetPlayer().GetPosition();
 	_cameraController.SetPosition({ playerPos.x,playerPos.y,0.0f });
-	_cameraController.OnUpdate();
+	_cameraController.OnUpdate(timestep);
 
 	Hazel::RenderCommand::SetDepthMaskReadWrite();
 	Hazel::RenderCommand::SetClearColor({ 0.4f, 0.4f, 0.4f, 1.0f });

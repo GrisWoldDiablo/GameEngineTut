@@ -4,9 +4,6 @@
 #include "Window.h"
 #include "LayerStack.h"
 #include "Hazel/Events/ApplicationEvent.h"
-
-#include "Hazel/Core/Timestep.h"
-
 #include "Hazel/ImGui/ImGuiLayer.h"
 
 int main(int argc, char** argv);
@@ -31,7 +28,7 @@ namespace Hazel
 	class Application
 	{
 	public:
-		Application(std::string name = "Hazel App", ApplicationCommandLineArgs args = ApplicationCommandLineArgs());
+		Application(const std::string& name, ApplicationCommandLineArgs args = ApplicationCommandLineArgs());
 		virtual ~Application();
 
 		void Stop();

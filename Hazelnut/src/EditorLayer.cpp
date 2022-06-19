@@ -358,12 +358,12 @@ namespace Hazel
 		imMouseX -= _sceneViewportBounds[0].x;
 		imMouseY -= _sceneViewportBounds[0].y;
 
-		glm::vec2 sceneViewpostSize = _sceneViewportBounds[1] - _sceneViewportBounds[0];
-		imMouseY = sceneViewpostSize.y - imMouseY;
+		glm::vec2 sceneViewportSize = _sceneViewportBounds[1] - _sceneViewportBounds[0];
+		imMouseY = sceneViewportSize.y - imMouseY;
 		auto mouseX = (int)imMouseX;
 		auto mouseY = (int)imMouseY;
 
-		if (mouseX >= 0 && mouseY >= 0 && mouseX < (int)sceneViewpostSize.x && mouseY < (int)sceneViewpostSize.y)
+		if (mouseX >= 0 && mouseY >= 0 && mouseX < (int)sceneViewportSize.x && mouseY < (int)sceneViewportSize.y)
 		{
 			int pixelData = _framebuffer->ReadPixel(1, mouseX, mouseY);
 
@@ -382,8 +382,8 @@ namespace Hazel
 				return;
 			}
 
-			auto camera = primaryCamera.GetComponent<CameraComponent>().Camera;
-			auto transformComponent = primaryCamera.GetComponent<TransformComponent>();
+			auto& camera = primaryCamera.GetComponent<CameraComponent>().Camera;
+			auto& transformComponent = primaryCamera.GetComponent<TransformComponent>();
 			auto transform = transformComponent.GetTransformMatrix();
 			if (camera.GetProjectionType() == SceneCamera::ProjectionType::Perspective)
 			{
@@ -429,7 +429,6 @@ namespace Hazel
 					auto [tc, cc2d] = view.get<TransformComponent, CircleCollider2DComponent>(entity);
 
 					float sign = cameraPositionZ > tc.Position.z ? 1.0f : -1.0f;
-					glm::vec3 position = +glm::vec3(cc2d.Offset, 0.001f * sign);
 
 					glm::mat4 transform = glm::translate(kIdentityMatrix, tc.Position)
 						* glm::toMat4(glm::quat(tc.Rotation))
@@ -696,7 +695,7 @@ namespace Hazel
 			}
 
 			bool isEditing = _sceneState == SceneState::Edit || _sceneState == SceneState::Simulate;
-			auto sceneStateButton = isEditing ? _iconTextures[Icons::Play] : _iconTextures[Icons::Stop];
+			auto& sceneStateButton = isEditing ? _iconTextures[Icons::Play] : _iconTextures[Icons::Stop];
 
 			if (ImGui::ImageButton((ImTextureID)(intptr_t)sceneStateButton->GetRendererID(), size, uv0, uv1, 3, isEditing ? normalColor : selectedColor, isEditing ? whiteColor : tintColor))
 			{

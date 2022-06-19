@@ -5,7 +5,7 @@
 
 namespace Hazel
 {
-	Layer::Layer(std::string debugName)
-		: _debugName(std::move(debugName))
+	Layer::Layer(const std::string& debugName)
+		: _debugName(debugName)
 	{}
 }

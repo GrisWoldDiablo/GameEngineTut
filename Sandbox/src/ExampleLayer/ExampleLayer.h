@@ -54,10 +54,10 @@ public:
 		// -- Texture
 	}
 
-	void OnUpdate() override
+	void OnUpdate(const Hazel::Timestep& timestep) override
 	{
 		// Update
-		_cameraController.OnUpdate();
+		_cameraController.OnUpdate(timestep);
 		CalculateFPS();
 
 		// Render

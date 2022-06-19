@@ -11,7 +11,7 @@ public:
 	void OnAttach() override;
 	void OnDetach() override;
 
-	void OnUpdate() override;
+	void OnUpdate(const Hazel::Timestep& timestep) override;
 
 	void SafetyShutdownCheck();
 

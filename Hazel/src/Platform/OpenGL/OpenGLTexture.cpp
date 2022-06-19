@@ -22,8 +22,8 @@ namespace Hazel
 		glTextureParameteri(_rendererID, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	}
 
-	OpenGLTexture2D::OpenGLTexture2D(std::string path)
-		:_path(std::move(path))
+	OpenGLTexture2D::OpenGLTexture2D(const std::string& path)
+		:_path(path)
 	{
 		HZ_PROFILE_FUNCTION();
 
