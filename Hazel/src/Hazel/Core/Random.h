@@ -7,8 +7,9 @@ namespace Hazel
 {
 	class Random
 	{
-	public:
+
 		Random(int seed);
+	 public:
 		~Random() = default;
 
 		/// <summary>

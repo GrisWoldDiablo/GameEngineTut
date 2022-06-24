@@ -101,7 +101,7 @@ namespace Hazel
 				{
 				case GLFW_PRESS:
 				{
-					KeyPressedEvent event(static_cast<KeyCode>(key), 0);
+					KeyPressedEvent event(static_cast<KeyCode>(key));
 					data->EventCallback(event);
 					break;
 				}
@@ -113,7 +113,7 @@ namespace Hazel
 				}
 				case GLFW_REPEAT:
 				{
-					KeyPressedEvent event(static_cast<KeyCode>(key), 1);
+					KeyPressedEvent event(static_cast<KeyCode>(key), true);
 					data->EventCallback(event);
 					break;
 				}

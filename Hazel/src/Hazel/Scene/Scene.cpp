@@ -9,6 +9,7 @@
 #include "box2d/b2_fixture.h"
 #include "box2d/b2_polygon_shape.h"
 #include "box2d/b2_circle_shape.h"
+#include "Hazel/Core/Random.h"
 
 namespace Hazel
 {
@@ -423,7 +424,7 @@ namespace Hazel
 			DrawCircleRenderComponent(camera.GetPosition());
 
 			// TESTING
-			//Renderer2D::DrawLine(glm::vec3(0.0f), glm::vec3(5.0f), Color::Magenta);
+			//Renderer2D::DrawLine(glm::vec3(Random::Float()), glm::vec3(5.0f), Color::Magenta);
 			//Renderer2D::DrawRect(glm::vec3(0.0f), glm::vec3(1.0f), Color::White);
 
 			Renderer2D::EndScene();

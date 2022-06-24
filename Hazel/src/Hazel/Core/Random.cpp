@@ -22,7 +22,7 @@ namespace Hazel
 	{
 		HZ_PROFILE_FUNCTION();
 
-		return (float)_uniformDouble(_mersenneTwister);
+		return static_cast<float>(_uniformDouble(_mersenneTwister));
 	}
 
 	double Random::DoubleImpl()

@@ -228,7 +228,7 @@ namespace Hazel
 
 	bool EditorLayer::OnKeyPressed(const KeyPressedEvent& keyPressedEvent)
 	{
-		if (ImGui::GetIO().WantTextInput || keyPressedEvent.GetRepeatCount() > 0 || Input::IsMouseButtonPressed(MouseCode::ButtonRight))
+		if (ImGui::GetIO().WantTextInput || keyPressedEvent.IsRepeat() || Input::IsMouseButtonPressed(MouseCode::ButtonRight))
 		{
 			return false;
 		}
