@@ -278,18 +278,19 @@ namespace Hazel
 
 	void Scene::DrawSpriteRenderComponent(const glm::vec3& cameraPosition)
 	{
-		auto group = _registry.group<TransformComponent, SpriteRendererComponent>();
+		auto view = _registry.view<TransformComponent, SpriteRendererComponent>();
 
-		group.sort<TransformComponent>([&](const auto& lhs, const auto& rhs)
-		{
-			auto lhsDistance = glm::distance(lhs.Position, cameraPosition);
-			auto rhsDistance = glm::distance(rhs.Position, cameraPosition);
-			return lhsDistance > rhsDistance;
-		});
+		//TODO Fix sorting. Can't have 2 groups sprite and circle render
+		//group.sort<TransformComponent>([&](const auto& lhs, const auto& rhs)
+		//{
+		//	auto lhsDistance = glm::distance(lhs.Position, cameraPosition);
+		//	auto rhsDistance = glm::distance(rhs.Position, cameraPosition);
+		//	return lhsDistance > rhsDistance;
+		//});
 
-		for (const auto entity : group)
+		for (const auto entity : view)
 		{
-			auto [transform, sprite] = group.get<TransformComponent, SpriteRendererComponent>(entity);
+			auto [transform, sprite] = view.get<TransformComponent, SpriteRendererComponent>(entity);
 			Renderer2D::DrawSprite(transform.GetTransformMatrix(), sprite, (int)entity);
 
 			// Comment out to draw the sprite bounding box for testing.
@@ -301,6 +302,7 @@ namespace Hazel
 	{
 		auto view = _registry.view<TransformComponent, CircleRendererComponent>();
 
+		//TODO Fix sorting.
 		//group.sort<TransformComponent>([&](const auto& lhs, const auto& rhs)
 		//{
 		//	auto lhsDistance = glm::distance(lhs.Position, cameraPosition);
@@ -430,6 +432,7 @@ namespace Hazel
 			Renderer2D::EndScene();
 		}
 	}
+
 
 	template<typename T>
 	void Scene::OnComponentAdded(Entity entity, T& component)
