@@ -245,9 +245,9 @@ namespace Hazel
 
 		// Physics
 		{
-			constexpr int32_t kvelocityInteration = 6;
+			constexpr int32_t kVelocityInteration = 6;
 			constexpr int32_t kPositionInteration = 2;
-			_physicsWorld->Step(timestep, kvelocityInteration, kPositionInteration);
+			_physicsWorld->Step(timestep, kVelocityInteration, kPositionInteration);
 
 			// Retrieve transform from Box2D
 			_registry.view<Rigidbody2DComponent>().each([&](const auto entt, const Rigidbody2DComponent& rb2d)
