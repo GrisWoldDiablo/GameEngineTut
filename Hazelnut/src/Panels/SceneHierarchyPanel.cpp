@@ -405,6 +405,8 @@ namespace Hazel
 					auto currentMagFilter = component->Texture->GetMagFilter();
 					component->Texture->ToggleMagFilter(currentMagFilter);
 				}
+				ImGui::SameLine();
+				ImGui::Text("%s", component->Texture->IsMagFilterLinear() ? "Linear" : "Nearest");
 				DrawVecControls("Tiling", component->Tiling, 1.0f);
 			}
 

@@ -216,7 +216,7 @@ namespace Hazel
 
 	void EditorLayer::OnEvent(Event& event)
 	{
-		if (_isSceneViewportFocused)
+		if (_isSceneViewportFocused && _sceneState == SceneState::Edit)
 		{
 			_editorCamera.OnEvent(event);
 		}
@@ -655,8 +655,7 @@ namespace Hazel
 			AddTooltip("Scale\nLocal Space Only");
 
 			ImGui::TableNextColumn();
-			bool isLocal = _gizmoSpace == ImGuizmo::LOCAL;
-			if (isLocal)
+			if (_gizmoSpace == ImGuizmo::LOCAL)
 			{
 				if (ImGui::ImageButton((ImTextureID)(intptr_t)_iconTextures[Icons::Local]->GetRendererID(), size, uv0, uv1, 3, selectedColor, tintColor))
 				{

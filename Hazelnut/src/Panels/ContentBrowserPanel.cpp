@@ -49,9 +49,7 @@ namespace Hazel
 			{
 				ImGui::TableNextColumn();
 				const auto& path = directoryEntry.path();
-				auto relativePath = std::filesystem::relative(path, gAssetsPath);
-				auto relativePathString = relativePath.string();
-				auto filenameString = relativePath.filename().string();
+				auto filenameString = path.filename().string();
 				ImGui::PushID(filenameString.c_str());
 
 				Ref<Texture2D> icon = directoryEntry.is_directory() ? _folderIconTexture : _fileIconTexture;
@@ -62,6 +60,7 @@ namespace Hazel
 
 				if (ImGui::BeginDragDropSource())
 				{
+					auto relativePath = std::filesystem::relative(path, gAssetsPath);
 					const wchar_t* itemPath = relativePath.c_str();
 					ImGui::SetDragDropPayload("CONTENT_BROWSER_ITEM", itemPath, (wcslen(itemPath) + 1) * sizeof(wchar_t));
 					ImGui::Text(filenameString.c_str());

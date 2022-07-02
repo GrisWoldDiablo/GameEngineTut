@@ -18,6 +18,7 @@ namespace Hazel
 		virtual void SetData(void* data, uint32_t size) = 0;
 		virtual void SetMagFilter(uint32_t magFilter) = 0;
 		virtual void ToggleMagFilter(uint32_t magFilter) = 0;
+		virtual bool IsMagFilterLinear() const = 0;
 
 		virtual void Bind(uint32_t slot = 0) const = 0;
 		virtual bool Equals(const Texture& other) const = 0;

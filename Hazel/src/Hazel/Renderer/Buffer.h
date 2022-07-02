@@ -1,7 +1,5 @@
 #pragma once
 
-#include <utility>
-
 namespace Hazel
 {
 	enum class ShaderDataType

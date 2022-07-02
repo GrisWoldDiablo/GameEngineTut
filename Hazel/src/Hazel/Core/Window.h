@@ -1,7 +1,5 @@
 #pragma once
 
-#include <utility>
-
 #include "hzpch.h"
 
 #include "Hazel/Events/Event.h"

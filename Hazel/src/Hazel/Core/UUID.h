@@ -21,6 +21,6 @@ struct std::hash<Hazel::UUID>
 {
 	std::size_t operator()(const Hazel::UUID& uuid) const noexcept
 	{
-		return hash<uint64_t>()(uuid);
+		return uuid;
 	}
 };

@@ -17,6 +17,7 @@ namespace Hazel
 		uint32_t GetRendererID() const override { return _rendererID; }
 		std::string GetPath() const override { return _path; }
 		uint32_t GetMagFilter() const override { return _magFilter; }
+		bool IsMagFilterLinear() const override { return _magFilter == GL_LINEAR; }
 
 		void SetData(void* data, uint32_t size) override;
 		void SetMagFilter(uint32_t magFilter) override;
