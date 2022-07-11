@@ -8,7 +8,8 @@
 class Sandbox final : public Hazel::Application
 {
 public:
-	Sandbox()
+	Sandbox(Hazel::ApplicationCommandLineArgs args)
+		:Application("Sandbox", args)
 	{
 		HZ_PROFILE_FUNCTION();
 		//PushLayer(new ExampleLayer());
@@ -25,5 +26,5 @@ Hazel::Application* Hazel::CreateApplication(ApplicationCommandLineArgs args)
 {
 	HZ_PROFILE_FUNCTION();
 
-	return new Sandbox();
+	return new Sandbox(args);
 }

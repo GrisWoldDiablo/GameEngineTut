@@ -30,7 +30,7 @@ void Sandbox2D::OnAttach()
 {
 	HZ_PROFILE_FUNCTION();
 
-	_spriteSheet = Hazel::Texture2D::Create("assets/game/textures/RPGpack_sheet_2X.png");
+	_spriteSheet = Hazel::Texture2D::Create("assets/textures/RPGpack_sheet_2X.png");
 
 	_fenceTexture = Hazel::SubTexture2D::CreateFromCoords(_spriteSheet, { 7,0 }, { 128,128 });
 	_fencePick = Hazel::SubTexture2D::CreateFromCoords(_spriteSheet, { 7,1 }, { 128,128 }, { 1.0f / 6.4f,1 });
@@ -90,7 +90,7 @@ void Sandbox2D::OnUpdate(const Hazel::Timestep& timestep)
 	CalculateFPS();
 
 #if !HZ_PROFILE
-	SafetyShutdownCheck();
+	//SafetyShutdownCheck();
 #endif // !HZ_PROFILE
 
 	Hazel::Renderer2D::ResetStats();
