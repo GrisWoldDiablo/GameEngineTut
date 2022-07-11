@@ -73,6 +73,8 @@ namespace Hazel
 		}
 
 		_editorCamera = EditorCamera(30.0f, 1.778f, 0.1f, 1000.0f);
+		Renderer2D::SetLineWidth(4.0f);
+
 		Application::Get().GetImGuiLayer()->BlockEvents(false);
 	}
 
@@ -374,6 +376,7 @@ namespace Hazel
 	void EditorLayer::OnOverlayRender()
 	{
 		float cameraPositionZ = 1.0f;
+
 		if (_sceneState == SceneState::Play)
 		{
 			auto primaryCamera = _activeScene->GetPrimaryCameraEntity();
@@ -438,6 +441,13 @@ namespace Hazel
 					Renderer2D::DrawCircle(transform, Color::Green, 0.01f);
 				}
 			}
+		}
+
+		if (auto selectedEntity = _sceneHierarchyPanel.GetSelectedEntity())
+		{
+			const auto& transform = selectedEntity.GetComponent<TransformComponent>();
+
+			Renderer2D::DrawRect(transform.GetTransformMatrix(), Color::Orange);
 		}
 
 		Renderer2D::EndScene();
@@ -952,6 +962,10 @@ namespace Hazel
 				// Move Speed
 				std::stringstream ss;
 				ss << _editorCamera.GetDrivingSpeed();
+				if (Input::IsKeyPressed(Key::LeftShift))
+				{
+					ss << "*";
+				}
 				mousePos.y += 10.0f;
 				mousePos.x += 10.0f;
 				ImGui::GetForegroundDrawList()->AddText(mousePos, IM_COL32_WHITE, ss.str().c_str());

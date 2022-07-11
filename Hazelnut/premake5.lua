@@ -38,11 +38,6 @@ project "Hazelnut"
 		runtime "Debug"
 		symbols "on"
 
-		postbuildcommands
-		{
-			"{COPYDIR} \"%{LibraryDir.VulkanSDK_DebugDLL}\" \"%{cfg.targetdir}\""
-		}
-
 	filter "configurations:Release"
 		defines "HZ_RELEASE"
 		runtime "Release"

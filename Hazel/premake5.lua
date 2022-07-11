@@ -19,7 +19,7 @@ project "Hazel"
 		"vendor/glm/glm/**.hpp",
 		"vendor/glm/glm/**.inl",
 		"vendor/ImGuizmo/ImGuizmo.h",
-		"vendor/ImGuizmo/ImGuizmo.cpp",
+		"vendor/ImGuizmo/ImGuizmo.cpp"
 	}
 
 	includedirs
@@ -35,7 +35,7 @@ project "Hazel"
 		"%{IncludeDir.entt}",
 		"%{IncludeDir.yaml_cpp}",
 		"%{IncludeDir.ImGuizmo}",
-		"%{IncludeDir.VulkanSDK}",
+		"%{IncludeDir.VulkanSDK}"
 	}
 
 	defines
@@ -55,7 +55,7 @@ project "Hazel"
 	}
 
 	filter "files:vendor/ImGuizmo/**.cpp"
-	flags{ "NoPCH" }
+	flags { "NoPCH" }
 	
 	filter "system:windows"
 		systemversion "latest"
@@ -81,7 +81,7 @@ project "Hazel"
 		{
 			"%{Library.ShaderC_Release}",
 			"%{Library.SPIRV_Cross_Release}",
-			"%{Library.SPIRV_Cross_GLSL_Release}",
+			"%{Library.SPIRV_Cross_GLSL_Release}"
 		}
 
 	filter "configurations:Dist"
@@ -93,5 +93,5 @@ project "Hazel"
 		{
 			"%{Library.ShaderC_Release}",
 			"%{Library.SPIRV_Cross_Release}",
-			"%{Library.SPIRV_Cross_GLSL_Release}",
+			"%{Library.SPIRV_Cross_GLSL_Release}"
 		}

@@ -35,8 +35,7 @@ class PythonConfiguration:
         while not permissionGranted:
             reply = str(input("Would you like to install Python package '{0:s}'? [Y/N]: ".format(packageName))).lower().strip()[:1]
             if reply == 'n':
-                print("Process aborted.")
-                quit()
+                return False
             permissionGranted = (reply == 'y')
 
         print(f"Installing {packageName} module...")

@@ -19,6 +19,7 @@ namespace Hazel
 		static const Color Magenta;	  // [0xff00ff] Color(1.0f, 0.0f, 1.0f, 1.0f);
 		static const Color Turquoise; // [0x40E0D0] Color(0.251f, 0.878f, 0.816f, 1.0f);
 		static const Color Yellow;    // [0xffea04] Color(1.0f, 0.92f, 0.016f, 1.0f);
+		static const Color Orange;    // [0xff7f00] Color(1.0f, 0.5f, 0.0f, 1.0f);
 
 		/// <summary>
 		/// Covert from Hue, Saturation, Value/Brightness to Red Green Blue Color with alpha
