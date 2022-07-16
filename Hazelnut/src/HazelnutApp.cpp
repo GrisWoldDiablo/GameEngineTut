@@ -8,8 +8,8 @@ namespace Hazel
 	class Hazelnut final : public Application
 	{
 	public:
-		Hazelnut(ApplicationCommandLineArgs args)
-			:Application("Hazel Editor", args)
+		Hazelnut(const ApplicationSpecification& spec)
+			:Application(spec)
 		{
 			HZ_PROFILE_FUNCTION();
 
@@ -23,6 +23,10 @@ namespace Hazel
 	{
 		HZ_PROFILE_FUNCTION();
 
-		return new Hazelnut(args);
+		ApplicationSpecification spec;
+		spec.Name = "Hazelnut";
+		spec.CommandLineArgs = args;
+
+		return new Hazelnut(spec);
 	}
 }

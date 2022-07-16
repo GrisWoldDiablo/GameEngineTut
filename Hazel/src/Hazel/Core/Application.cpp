@@ -9,8 +9,8 @@ namespace Hazel
 	// Static singleton access
 	Application* Application::_sInstance = nullptr;
 
-	Application::Application(const std::string& name = "Hazel App", ApplicationCommandLineArgs args)
-		:_commandLineArgs(args)
+	Application::Application(const ApplicationSpecification& specification)
+		:_specification(specification)
 	{
 		HZ_PROFILE_FUNCTION();
 
@@ -25,7 +25,12 @@ namespace Hazel
 			Time::_sInstance = new Time();
 		}
 
-		_window = Scope<Window>(Window::Create(WindowProps(name)));
+		if (!_specification.WorkingDirectory.empty())
+		{
+			std::filesystem::current_path(_specification.WorkingDirectory);
+		}
+
+		_window = Scope<Window>(Window::Create(WindowProps(_specification.Name)));
 		_window->SetEventCallback(HZ_BIND_EVENT_FN(OnEvent));
 
 		Renderer::Init();

@@ -22,13 +22,20 @@ namespace Hazel
 		}
 	};
 
+	struct ApplicationSpecification
+	{
+		std::string Name = "Hazel Application";
+		std::string WorkingDirectory;
+		ApplicationCommandLineArgs CommandLineArgs;
+	};
+
 	/// <summary>
 	/// The application class with the main run loop.
 	/// </summary>
 	class Application
 	{
 	public:
-		Application(const std::string& name, ApplicationCommandLineArgs args = ApplicationCommandLineArgs());
+		Application(const ApplicationSpecification& specification);
 		virtual ~Application();
 
 		void Stop();
@@ -43,7 +50,7 @@ namespace Hazel
 		// Get the Singleton
 		static Application& Get() { return *_sInstance; }
 
-		ApplicationCommandLineArgs GetCommandLineArgs() const { return _commandLineArgs; }
+		const ApplicationSpecification& GetSpecification() const { return _specification; }
 
 	private:
 		void Run();
@@ -51,7 +58,7 @@ namespace Hazel
 		bool OnWindowResize(const WindowResizeEvent& windowResizeEvent);
 
 	private:
-		ApplicationCommandLineArgs _commandLineArgs;
+		ApplicationSpecification _specification;
 		Scope<Window> _window;
 		ImGuiLayer* _imGuiLayer;
 		LayerStack _layerStack;

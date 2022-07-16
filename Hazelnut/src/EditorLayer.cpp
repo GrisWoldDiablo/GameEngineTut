@@ -54,7 +54,7 @@ namespace Hazel
 		};
 		_framebuffer = Framebuffer::Create(framebufferSpecification);
 
-		auto commandLineArgs = Application::Get().GetCommandLineArgs();
+		const auto commandLineArgs = Application::Get().GetSpecification().CommandLineArgs;
 		if (commandLineArgs.Count > 1)
 		{
 			auto sceneFilePath = commandLineArgs[1];
