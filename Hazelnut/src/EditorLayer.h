@@ -53,7 +53,7 @@ namespace Hazel
 		void SafetyShutdownCheck();
 		void CalculateFPS();
 
-		void SetWindowTitle(const std::string& filePath);
+		void SetWindowTitleSceneName(const std::filesystem::path& scenePath = "");
 		void AddTooltip(const std::string& tooltipMessage);
 
 		void OnScenePlay();

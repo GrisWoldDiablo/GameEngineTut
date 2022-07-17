@@ -475,7 +475,7 @@ namespace Hazel
 		_editorScene = CreateRef<Scene>();
 		_editorScene->SetName(kNewSceneName);
 
-		SetWindowTitle("Unsaved");
+		SetWindowTitleSceneName();
 
 		_activeScene = _editorScene;
 		_sceneHierarchyPanel.SetScene(_activeScene);
@@ -516,7 +516,7 @@ namespace Hazel
 		{
 			_editorScenePath = path;
 
-			SetWindowTitle(path.string());
+			SetWindowTitleSceneName(_editorScenePath);
 
 			_activeScene = _editorScene;
 			_sceneHierarchyPanel.SetScene(_activeScene);
@@ -556,7 +556,7 @@ namespace Hazel
 		{
 			_editorScenePath = std::filesystem::path(filePath);
 			SerializeScene();
-			SetWindowTitle(filePath);
+			SetWindowTitleSceneName(_editorScenePath);
 		}
 	}
 
@@ -566,11 +566,12 @@ namespace Hazel
 		serializer.Serialize(_editorScenePath.string());
 	}
 
-	void EditorLayer::SetWindowTitle(const std::string& filePath)
+	void EditorLayer::SetWindowTitleSceneName(const std::filesystem::path& scenePath)
 	{
 		auto& window = Application::Get().GetWindow();
+		auto fileName = scenePath.empty() ? "Unsaved" : scenePath.stem();
 		std::stringstream ss;
-		ss << window.GetTitle() << " " << filePath;
+		ss << window.GetTitle() << " " << fileName ;
 		window.SetTitle(ss.str());
 	}
 
