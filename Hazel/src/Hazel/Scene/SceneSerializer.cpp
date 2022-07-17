@@ -122,12 +122,14 @@ namespace Hazel
 			out << YAML::Key << "SpriteRendererComponent";
 			out << YAML::BeginMap; // SpriteRendererComponent
 
-			out << YAML::Key << "Color" << YAML::Value << component->Color;
 			if (component->Texture != nullptr)
 			{
 				out << YAML::Key << "TexturePath" << YAML::Value << component->Texture->GetPath(); // TODO not use path but actual texture asset.
-				out << YAML::Key << "Tiling" << YAML::Value << component->Tiling;
+				out << YAML::Key << "MagFilter" << YAML::Value << component->Texture->GetMagFilter();
 			}
+
+			out << YAML::Key << "Tiling" << YAML::Value << component->Tiling;
+			out << YAML::Key << "Color" << YAML::Value << component->Color;
 
 			out << YAML::EndMap; // SpriteRendererComponent
 		}
@@ -359,9 +361,10 @@ namespace Hazel
 					if (auto texture = spriteRendererComponent["TexturePath"])
 					{
 						component.Texture = Texture2D::Create(texture.as<std::string>()); // TODO not use path.
-						component.Tiling = spriteRendererComponent["Tiling"].as<glm::vec2>();
+						component.Texture->SetMagFilter(GetValue<uint32_t>(spriteRendererComponent, "MagFilter", 0x2601));
 					}
 
+					component.Tiling = GetValue<glm::vec2>(spriteRendererComponent, "Tiling", { 1.0f,1.0f });
 					component.Color = GetValue<glm::vec4>(spriteRendererComponent, "Color", Color::White);
 				}
 #pragma endregion

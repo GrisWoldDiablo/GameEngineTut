@@ -10,6 +10,7 @@ Entities:
       Rotation: [0, 0, -0.287857264]
       Scale: [21.6888866, 0.265017986, 1]
     SpriteRendererComponent:
+      Tiling: [1, 1]
       Color: [0.99227798, 0.739552617, 0.222208977, 1]
     Rigidbody2DComponent:
       BodyType: Static
@@ -32,6 +33,7 @@ Entities:
       Rotation: [0, 0, 0]
       Scale: [2.4000001, 2.4000001, 1]
     SpriteRendererComponent:
+      Tiling: [1, 1]
       Color: [0.196911216, 0.913956225, 1, 1]
     Rigidbody2DComponent:
       BodyType: Dynamic
@@ -69,7 +71,7 @@ Entities:
         OrthographicSize: 10
         OrthographicNearClip: -1
         OrthographicFarClip: 1
-        AspectRatio: 1.70265484
+        AspectRatio: 2.19861436
       IsPrimary: true
       IsFixedAspectRatio: false
   - Entity: 1064095580862351179
@@ -82,6 +84,7 @@ Entities:
       Rotation: [0, 0, 0]
       Scale: [1, 7.16579294, 1]
     SpriteRendererComponent:
+      Tiling: [1, 1]
       Color: [1, 1, 1, 1]
     Rigidbody2DComponent:
       BodyType: Static
@@ -104,9 +107,10 @@ Entities:
       Rotation: [0, 0, 0]
       Scale: [2, 2, 1]
     SpriteRendererComponent:
-      Color: [1, 1, 1, 1]
       TexturePath: assets\textures\ChernoLogo.png
+      MagFilter: 9728
       Tiling: [1, 1]
+      Color: [1, 1, 1, 1]
     Rigidbody2DComponent:
       BodyType: Dynamic
       IsFixedRotation: false
@@ -127,9 +131,10 @@ Entities:
       Rotation: [0, 0, 0]
       Scale: [0.400000006, 1, 1]
     SpriteRendererComponent:
-      Color: [1, 1, 1, 1]
       TexturePath: assets\textures\unwrap_helper.png
+      MagFilter: 9729
       Tiling: [1, 1]
+      Color: [1, 1, 1, 1]
     Rigidbody2DComponent:
       BodyType: Dynamic
       IsFixedRotation: false
