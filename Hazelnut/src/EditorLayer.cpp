@@ -416,7 +416,7 @@ namespace Hazel
 					glm::mat4 transform = glm::translate(kIdentityMatrix, tc.Position)
 						* glm::toMat4(glm::quat(tc.Rotation))
 						* glm::translate(kIdentityMatrix, glm::vec3(bc2d.Offset, 0.001f * sign))
-						* glm::toMat4(glm::quat(glm::vec3(0.0f, 0.0f, glm::radians(bc2d.Angle))))
+						* glm::toMat4(glm::quat(glm::vec3(0.0f, 0.0f, glm::radians(bc2d.Rotation))))
 						* glm::scale(kIdentityMatrix, tc.Scale * glm::vec3(bc2d.Size * 2.0f, 1.0f));
 
 

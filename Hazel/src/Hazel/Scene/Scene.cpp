@@ -394,7 +394,7 @@ namespace Hazel
 					bc2d->Size.x * transform.Scale.x,
 					bc2d->Size.y * transform.Scale.y,
 					{ bc2d->Offset.x, bc2d->Offset.y },
-					glm::radians(bc2d->Angle)
+					glm::radians(bc2d->Rotation)
 				);
 
 
