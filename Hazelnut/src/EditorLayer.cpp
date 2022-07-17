@@ -65,6 +65,7 @@ namespace Hazel
 			else
 			{
 				HZ_CORE_LERROR("No scene found at {0}", sceneFilePath);
+				NewScene();
 			}
 		}
 		else
