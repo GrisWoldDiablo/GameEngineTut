@@ -3,8 +3,9 @@ enc_temp_folder/
 
 # Binaries
 **/bin/
-!vendor/premake/bin/
 bin-int/
+Intermediates/
+!vendor/premake/bin/
 
 # Hazel files
 *.log
@@ -15,6 +16,7 @@ bin-int/
 **.vcxproj
 **.vcxproj.filters
 **.vcxproj.user
+**.csproj
 
 # Profiling
 *.json
@@ -26,3 +28,7 @@ scripts/__pycache__
 
 # Misc
 Hazel.sln.DotSettings.user
+
+# Compiled assembly from C# project.
+Hazelnut/Resources/Scripts/Hazel-ScriptCore.dll
+Hazelnut/Resources/Scripts/Hazel-ScriptCore.pdb

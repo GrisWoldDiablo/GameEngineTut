@@ -33,6 +33,15 @@ group "Dependencies"
 	include "Hazel/vendor/yaml-cpp"
 group ""
 
-include "Hazel"
-include "Hazelnut"
-include "Sandbox"
+group "Core"
+	include "Hazel"
+	include "Hazel-ScriptCore"
+group ""
+
+group "Tools"
+	include "Hazelnut"
+group ""
+
+group "Misc"
+	include "Sandbox"
+group ""

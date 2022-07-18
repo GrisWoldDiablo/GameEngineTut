@@ -2,6 +2,7 @@
 #include "Application.h"
 #include "Hazel/Events/Event.h"
 #include "Hazel/Renderer/Renderer.h"
+#include "Hazel/Scripting/ScriptEngine.h"
 #include "Platform/Platform.h"
 
 namespace Hazel
@@ -33,6 +34,7 @@ namespace Hazel
 		_window = Scope<Window>(Window::Create(WindowProps(_specification.Name)));
 		_window->SetEventCallback(HZ_BIND_EVENT_FN(OnEvent));
 
+		ScriptEngine::Init();
 		Renderer::Init();
 
 		// Create ImGui and push it to the layer stack as an overlay.
@@ -42,6 +44,7 @@ namespace Hazel
 
 	Application::~Application()
 	{
+		ScriptEngine::Shutdown();
 		Renderer::Shutdown();
 	}
 
