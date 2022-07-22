@@ -11,5 +11,7 @@ namespace Hazel
 	private:
 		static void InitMono();
 		static void ShutdownMono();
+
+		static void DemoFunctionality();
 	};
 }

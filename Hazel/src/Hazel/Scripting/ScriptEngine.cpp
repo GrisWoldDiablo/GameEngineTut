@@ -64,7 +64,7 @@ namespace Hazel
 	{
 		uint32_t fileSize = 0;
 		char* fileData = ReadBytes(assemblyPath, &fileSize);
-		
+
 		MonoImageOpenStatus status;
 		MonoImage* image = mono_image_open_from_data_full(fileData, fileSize, 1, &status, 0);
 
@@ -124,6 +124,22 @@ namespace Hazel
 
 		PrintAssemblyType(sData->CoreAssembly);
 
+		DemoFunctionality();
+	}
+
+	void ScriptEngine::ShutdownMono()
+	{
+		// TODO: unload fails, find solution.
+		//mono_domain_unload(sData->AppDomain);
+		sData->AppDomain = nullptr;
+
+		mono_jit_cleanup(sData->RootDomain);
+		sData->RootDomain = nullptr;
+	}
+
+	void ScriptEngine::DemoFunctionality()
+	{
+
 		// 0. Get the assembly 
 		MonoImage* assemblyImage = mono_assembly_get_image(sData->CoreAssembly);
 
@@ -137,13 +153,13 @@ namespace Hazel
 		mono_runtime_invoke(printMessageFunc, instance, nullptr, nullptr);
 
 		// 3. Call function with parameter
-		// Single param, only works if there is not different signature of the method (different param type)
+		// 3.1 Single param, only works if there is not different signature of the method (different param type)
 		MonoMethod* printMessageFuncParam = mono_class_get_method_from_name(monoClass, "PrintMessage", 1);
 		int value = 5;
 		void* param = &value;
 		mono_runtime_invoke(printMessageFuncParam, instance, &param, nullptr);
 
-		// Multiple param
+		// 3.2 Multiple param
 		MonoMethod* printMessageFuncParams = mono_class_get_method_from_name(monoClass, "PrintMessage", 2);
 		int value1 = 69;
 		int value2 = 420;
@@ -154,22 +170,10 @@ namespace Hazel
 		};
 		mono_runtime_invoke(printMessageFuncParams, instance, params, nullptr);
 
-		// String param
+		// 3.3 String param
 		MonoMethod* printCustomMessageFunc = mono_class_get_method_from_name(monoClass, "PrintCustomMessage", 1);
 		MonoString* monoString = mono_string_new(sData->AppDomain, "Hello World from C++!");
 		void* paramString = monoString;
 		mono_runtime_invoke(printCustomMessageFunc, instance, &paramString, nullptr);
-
-		//HZ_CORE_ASSERT(false, "");
-	}
-
-	void ScriptEngine::ShutdownMono()
-	{
-		// TODO: unload fails, find solution.
-		//mono_domain_unload(sData->AppDomain);
-		sData->AppDomain = nullptr;
-
-		mono_jit_cleanup(sData->RootDomain);
-		sData->RootDomain = nullptr;
 	}
 }
