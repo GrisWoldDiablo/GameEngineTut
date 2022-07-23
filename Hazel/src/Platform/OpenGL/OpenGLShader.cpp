@@ -108,7 +108,7 @@ namespace Hazel
 		auto source = ReadFile(filePath);
 		auto shaderSources = PreProcess(source);
 
-		HZ_CORE_LINFO("--- Preparing Shaders ---");
+		HZ_CORE_LINFO("--- Preparing Shader ---");
 		{
 			Timer timer;
 			_isLoadingCompleted = false;

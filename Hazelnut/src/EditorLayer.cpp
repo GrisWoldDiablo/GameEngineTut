@@ -377,6 +377,7 @@ namespace Hazel
 	void EditorLayer::OnOverlayRender()
 	{
 		float cameraPositionZ = 1.0f;
+		bool hasSceneBegun;
 
 		if (_sceneState == SceneState::Play)
 		{
@@ -393,12 +394,18 @@ namespace Hazel
 			{
 				cameraPositionZ = transformComponent.Position.z;
 			}
-			Renderer2D::BeginScene(camera, transform);
+
+			hasSceneBegun = Renderer2D::BeginScene(camera, transform);
 		}
 		else
 		{
 			cameraPositionZ = _editorCamera.GetPosition().z;
-			Renderer2D::BeginScene(_editorCamera);
+			hasSceneBegun = Renderer2D::BeginScene(_editorCamera);
+		}
+
+		if (!hasSceneBegun)
+		{
+			return;
 		}
 
 		if (_shouldShowPhysicsColliders)
@@ -572,7 +579,7 @@ namespace Hazel
 		auto& window = Application::Get().GetWindow();
 		auto fileName = scenePath.empty() ? "Unsaved" : scenePath.stem();
 		std::stringstream ss;
-		ss << window.GetTitle() << " " << fileName ;
+		ss << window.GetTitle() << " " << fileName;
 		window.SetTitle(ss.str());
 	}
 
@@ -786,27 +793,17 @@ namespace Hazel
 			{
 				if (ImGui::BeginMenu("Shader"))
 				{
-					if (ImGui::MenuItem("Load"))
+					for (int i = 0; i < std::size(sRendererShaderName); i++)
 					{
-						auto filePath = FileDialogs::OpenFile("Shader (*.glsl)\0*.glsl\0");
-						if (!filePath.empty())
-						{
-							Renderer2D::LoadShader(filePath);
-						}
-					}
 
-					if (ImGui::MenuItem("Load & Recompile"))
-					{
-						auto filePath = FileDialogs::OpenFile("Shader (*.glsl)\0*.glsl\0");
-						if (!filePath.empty())
-						{
-							Renderer2D::LoadShader(filePath, true);
-						}
-					}
+						std::stringstream ss;
+						const auto rendererShaderType = static_cast<RendererShader>(i);
+						ss << "Reload " << sRendererShaderName[rendererShaderType];
 
-					if (ImGui::MenuItem("Reload Shaders"))
-					{
-						Renderer2D::LoadShadersAsync();
+						if (ImGui::MenuItem(ss.str().c_str()))
+						{
+							Renderer2D::ReloadShader(rendererShaderType);
+						}
 					}
 
 					ImGui::EndMenu();

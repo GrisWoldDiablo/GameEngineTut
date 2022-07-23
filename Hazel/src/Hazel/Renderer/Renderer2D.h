@@ -12,6 +12,19 @@
 
 namespace Hazel
 {
+	enum RendererShader
+	{
+		QUAD,
+		CIRCLE,
+		LINE
+	};
+
+	constexpr const char* sRendererShaderName[] = { "Quad", "Circle", "Line" };
+
+	constexpr const char* SHADER_PATH_QUAD = "assets/shaders/Renderer2D_Quad.glsl";
+	constexpr const char* SHADER_PATH_CIRCLE = "assets/shaders/Renderer2D_Circle.glsl";
+	constexpr const char* SHADER_PATH_LINE = "assets/shaders/Renderer2D_Line.glsl";
+
 	class Renderer2D
 	{
 	private:
@@ -69,7 +82,7 @@ namespace Hazel
 
 		// --- Line --- //
 		// Final Draw
-		static void DrawLine(const glm::vec3& positionStart,const glm::vec3& positionEnd, const Color& color, int entityID = -1);
+		static void DrawLine(const glm::vec3& positionStart, const glm::vec3& positionEnd, const Color& color, int entityID = -1);
 		static void DrawRect(const glm::vec3& position, const glm::vec2& size, const Color& color, int entityID = -1);
 		static void DrawRect(const glm::mat4& transform, const Color& color, int entityID = -1);
 
@@ -90,7 +103,8 @@ namespace Hazel
 		static void ResetStats();
 		static Statistics GetStats();
 
-		static void LoadShader(const std::string& filePath, bool shouldRecompile = false);
+
+		static void ReloadShader(RendererShader rendererShader);
 		static void LoadShadersAsync();
 
 	private:

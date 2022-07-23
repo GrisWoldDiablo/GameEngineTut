@@ -104,21 +104,7 @@ namespace Hazel
 	};
 
 	static Renderer2DData sData;
-	static std::future<void> _asyncShaderCreation;
-
-	void Renderer2D::LoadShadersAsync()
-	{
-		sData.QuadShader = nullptr;
-		sData.CircleShader = nullptr;
-		sData.LineShader = nullptr;
-
-		_asyncShaderCreation = std::async(std::launch::async, []
-		{
-			sData.QuadShader = Shader::Create("assets/shaders/Renderer2D_Quad.glsl");
-			sData.CircleShader = Shader::Create("assets/shaders/Renderer2D_Circle.glsl");
-			sData.LineShader = Shader::Create("assets/shaders/Renderer2D_Line.glsl");
-		});
-	}
+	static std::future<void> sAsyncShaderCreation;
 
 	void Renderer2D::Init()
 	{
@@ -200,9 +186,9 @@ namespace Hazel
 #if ASYNC
 		LoadShadersAsync();
 #else
-		sData.QuadShader = Shader::Create("assets/shaders/Renderer2D_Quad.glsl");
-		sData.CircleShader = Shader::Create("assets/shaders/Renderer2D_Circle.glsl");
-		sData.LineShader = Shader::Create("assets/shaders/Renderer2D_Line.glsl");
+		sData.QuadShader = Shader::Create(SHADER_PATH_QUAD);
+		sData.CircleShader = Shader::Create(SHADER_PATH_CIRCLE);
+		sData.LineShader = Shader::Create(SHADER_PATH_LINE);
 #endif // ASYNC
 
 		sData.QuadVertexPositions[0] = { -0.5f,-0.5f, 0.0f, 1.0f };
@@ -213,12 +199,13 @@ namespace Hazel
 		sData.QuadTextureCoordinates = new glm::vec2[4];
 
 		sData.CameraUniformBuffer = UniformBuffer::Create(sizeof(Renderer2DData::CameraData), 0);
-		}
+	}
 
 	void Renderer2D::Shutdown()
 	{
 		HZ_PROFILE_FUNCTION();
 
+		sAsyncShaderCreation.get();
 		delete[] sData.QuadVertexBufferBase;
 		delete[] sData.QuadTextureCoordinates;
 	}
@@ -281,7 +268,6 @@ namespace Hazel
 		}
 #pragma endregion
 
-
 		sData.CameraBuffer.ViewProjection = viewProjection;
 		sData.CameraUniformBuffer->SetData(&sData.CameraBuffer, sizeof(Renderer2DData::CameraData));
 		Reset();
@@ -291,9 +277,9 @@ namespace Hazel
 
 	void Renderer2D::EndScene()
 	{
-		HZ_PROFILE_FUNCTION()
+		HZ_PROFILE_FUNCTION();
 
-			Flush();
+		Flush();
 	}
 
 	void Renderer2D::Reset()
@@ -634,14 +620,57 @@ namespace Hazel
 		return sData.Stats;
 	}
 
-	void Renderer2D::LoadShader(const std::string& filePath, bool shouldRecompile)
+	void Renderer2D::ReloadShader(RendererShader rendererShader)
 	{
-		HZ_CORE_LWARN("Reloading Shader");
-		sData.QuadShader = nullptr;
-		_asyncShaderCreation = std::async(std::launch::async, [](const std::string& filePath, bool shouldRecompile)
+		if (!sData.QuadShader || !sData.CircleShader || !sData.LineShader)
 		{
-			sData.QuadShader = Shader::Create(filePath, shouldRecompile);
-		}, filePath, shouldRecompile);
+			HZ_CORE_LERROR("Wait for previous reload to complete!");
+			return;
+		}
+
+		switch (rendererShader)
+		{
+		case Hazel::QUAD:
+			sData.QuadShader = nullptr;
+			sAsyncShaderCreation = std::async(std::launch::async, []()
+			{
+				sData.QuadShader = Shader::Create(SHADER_PATH_QUAD, true);
+			});
+			break;
+		case Hazel::CIRCLE:
+			sData.CircleShader = nullptr;
+			sAsyncShaderCreation = std::async(std::launch::async, []()
+			{
+				sData.CircleShader = Shader::Create(SHADER_PATH_CIRCLE, true);
+			});
+			break;
+		case Hazel::LINE:
+			sData.LineShader = nullptr;
+			sAsyncShaderCreation = std::async(std::launch::async, []()
+			{
+				sData.LineShader = Shader::Create(SHADER_PATH_LINE, true);
+			});
+			break;
+		default:
+			HZ_CORE_LERROR("No shader of that type exist.");
+			return;
+		}
+
+		HZ_CORE_LINFO("Reloading Shader [{0}]", sRendererShaderName[rendererShader]);
+	}
+
+	void Renderer2D::LoadShadersAsync()
+	{
+		sData.QuadShader = nullptr;
+		sData.CircleShader = nullptr;
+		sData.LineShader = nullptr;
+
+		sAsyncShaderCreation = std::async(std::launch::async, []
+		{
+			sData.QuadShader = Shader::Create(SHADER_PATH_QUAD);
+			sData.CircleShader = Shader::Create(SHADER_PATH_CIRCLE);
+			sData.LineShader = Shader::Create(SHADER_PATH_LINE);
+		});
 	}
 
 	void Renderer2D::FlushAndReset()
@@ -700,4 +729,4 @@ namespace Hazel
 		sData.CircleIndexCount += 6;
 		sData.Stats.QuadCount++;
 	}
-	}
+}

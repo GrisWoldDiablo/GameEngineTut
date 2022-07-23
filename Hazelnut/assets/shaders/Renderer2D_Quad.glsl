@@ -54,8 +54,6 @@ layout (location = 5) in flat int v_TextureIndex;
 
 layout (binding = 0) uniform sampler2D u_Texture[32];
 
-#define GRAYSCALE 0
-
 void main()
 {
 	vec4 tempColor = Input.Color;
@@ -64,7 +62,7 @@ void main()
 		tempColor *= texture(u_Texture[v_TextureIndex], Input.TextureCoord * Input.TilingFactor);
 	}
 
-#if 0
+#if 0 // Old way to retrieve texture from map.
 	switch (v_TextureIndex)
 	{
 		case  0: tempColor *= texture(u_Texture[ 0], Input.TextureCoord * Input.TilingFactor); break;
@@ -102,15 +100,19 @@ void main()
 	}
 #endif
 	
-#if GRAYSCALE
-	float grayScalevalue = (0.299 * tempColor.x) + (0.587 * tempColor.y) + (0.114 * tempColor.z);
-	tempColor = vec4(grayScalevalue, grayScalevalue, grayScalevalue, 1.0);
+#if 0 // Inverted
+	tempColor = vec4(1.0 - tempColor.x, 1.0 - tempColor.y, 1.0 - tempColor.z, tempColor.a);
 #endif
 
 	if (tempColor.a < 0.01)
 	{
 		discard;
 	}
+
+#if 0 // GRAYSCALE
+	float grayScalevalue = (0.299 * tempColor.x) + (0.587 * tempColor.y) + (0.114 * tempColor.z);
+	tempColor = vec4(grayScalevalue, grayScalevalue, grayScalevalue, 1.0);
+#endif
 
 	// Final assignment
 	o_Color = tempColor;
