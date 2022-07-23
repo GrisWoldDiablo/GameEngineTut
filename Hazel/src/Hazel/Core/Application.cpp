@@ -100,6 +100,15 @@ namespace Hazel
 		_running = false;
 	}
 
+	void Application::ReloadScriptEngine()
+	{
+		if (!ScriptEngine::TryReload())
+		{
+			HZ_CORE_LCRITICAL("ScriptEngine in error state, shutting down application!");
+			Stop();
+		}
+	}
+
 	void Application::OnEvent(Event& event)
 	{
 		HZ_PROFILE_FUNCTION();

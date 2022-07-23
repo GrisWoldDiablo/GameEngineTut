@@ -39,8 +39,9 @@ namespace Hazel
 		virtual ~Application();
 
 		void Stop();
-		void OnEvent(Event& event);
+		void ReloadScriptEngine();
 
+		void OnEvent(Event& event);
 		void PushLayer(Layer* layer);
 		void PushOverlay(Layer* overlay);
 

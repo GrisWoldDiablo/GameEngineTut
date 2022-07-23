@@ -795,7 +795,6 @@ namespace Hazel
 				{
 					for (int i = 0; i < std::size(sRendererShaderName); i++)
 					{
-
 						std::stringstream ss;
 						const auto rendererShaderType = static_cast<RendererShader>(i);
 						ss << "Reload " << sRendererShaderName[rendererShaderType];
@@ -808,6 +807,17 @@ namespace Hazel
 
 					ImGui::EndMenu();
 				}
+
+				if (ImGui::BeginMenu("Script Engine"))
+				{
+					if (ImGui::MenuItem("Reload"))
+					{
+						Application::Get().ReloadScriptEngine();
+					}
+
+					ImGui::EndMenu();
+				}
+
 				ImGui::EndMenu();
 			}
 			ImGui::EndMenuBar();
