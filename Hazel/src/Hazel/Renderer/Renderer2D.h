@@ -103,7 +103,7 @@ namespace Hazel
 		static void ResetStats();
 		static Statistics GetStats();
 
-
+		static bool IsReady();
 		static void ReloadShader(RendererShader rendererShader);
 		static void LoadShadersAsync();
 

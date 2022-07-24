@@ -32,8 +32,9 @@ namespace Hazel
 			{ Icons::Play,		Texture2D::Create("Resources/Icons/General/PlayButton256.png")			},
 			{ Icons::Stop,		Texture2D::Create("Resources/Icons/General/StopButton256.png")			},
 			{ Icons::Simulate,	Texture2D::Create("Resources/Icons/General/SimulateButton256.png")		},
-
 		};
+
+		_shaderLoadingTexture = Texture2D::Create("Resources/ShadersLoading.png");
 	}
 
 	void EditorLayer::OnAttach()
@@ -846,8 +847,15 @@ namespace Hazel
 		auto sceneViewportPanelSize = ImGui::GetContentRegionAvail();
 		_sceneViewportSize = { sceneViewportPanelSize.x, sceneViewportPanelSize.y };
 
-		auto textureID = _framebuffer->GetColorAttachmentRenderID();
-		ImGui::Image((void*)(uint64_t)textureID, { _sceneViewportSize.x, _sceneViewportSize.y }, ImVec2{ 0.0f, 1.0f }, ImVec2{ 1.0f, 0.0f });
+		if (Renderer2D::IsReady())
+		{
+			auto textureID = _framebuffer->GetColorAttachmentRenderID();
+			ImGui::Image((void*)(uint64_t)textureID, { _sceneViewportSize.x, _sceneViewportSize.y }, ImVec2{ 0.0f, 1.0f }, ImVec2{ 1.0f, 0.0f });
+		}
+		else
+		{
+			ImGui::Image((void*)(uint64_t)_shaderLoadingTexture->GetRendererID(), { _sceneViewportSize.x, _sceneViewportSize.y }, ImVec2{ 0.0f, 1.0f }, ImVec2{ 1.0f, 0.0f });
+		}
 
 		if (ImGui::BeginDragDropTarget())
 		{

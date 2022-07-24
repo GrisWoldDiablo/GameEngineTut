@@ -620,11 +620,16 @@ namespace Hazel
 		return sData.Stats;
 	}
 
+	bool Renderer2D::IsReady()
+	{
+		return sData.QuadShader && sData.CircleShader && sData.LineShader;
+	}
+
 	void Renderer2D::ReloadShader(RendererShader rendererShader)
 	{
-		if (!sData.QuadShader || !sData.CircleShader || !sData.LineShader)
+		if (!IsReady())
 		{
-			HZ_CORE_LERROR("Wait for previous reload to complete!");
+			HZ_CORE_LERROR("Wait for shaders loading completed");
 			return;
 		}
 

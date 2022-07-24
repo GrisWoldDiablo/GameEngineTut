@@ -122,6 +122,7 @@ namespace Hazel
 		};
 
 		std::map<Icons, Ref<Texture2D>> _iconTextures;
+		Ref<Texture2D> _shaderLoadingTexture;
 
 		enum class SceneState
 		{
