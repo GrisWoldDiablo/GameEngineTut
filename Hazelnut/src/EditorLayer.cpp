@@ -520,7 +520,7 @@ namespace Hazel
 
 		_editorScene = CreateRef<Scene>();
 		SceneSerializer serializer(_editorScene);
-		if (serializer.Deserialize(path.string()))
+		if (serializer.Deserialize(path.string(), withCheck))
 		{
 			_editorScenePath = path;
 

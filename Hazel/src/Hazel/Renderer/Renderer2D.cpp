@@ -628,6 +628,8 @@ namespace Hazel
 			return;
 		}
 
+		HZ_CORE_LINFO("Reloading Shader");
+
 		switch (rendererShader)
 		{
 		case Hazel::QUAD:
@@ -655,8 +657,6 @@ namespace Hazel
 			HZ_CORE_LERROR("No shader of that type exist.");
 			return;
 		}
-
-		HZ_CORE_LINFO("Reloading Shader [{0}]", sRendererShaderName[rendererShader]);
 	}
 
 	void Renderer2D::LoadShadersAsync()

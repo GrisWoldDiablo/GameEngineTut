@@ -1,5 +1,6 @@
 #include "hzpch.h"
 #include "ScriptEngine.h"
+#include "ScriptGlue.h"
 
 #include "mono/jit/jit.h"
 #include "mono/metadata/assembly.h"
@@ -7,69 +8,111 @@
 
 namespace Hazel
 {
+#define ASSEMBLY_PATH "Resources/Scripts/Hazel-ScriptCore.dll"
+
+	namespace Utils
+	{
+		// TODO: Move to FileSystem Class
+		static char* ReadBytes(const std::filesystem::path& filePath, uint32_t* outSize)
+		{
+			std::ifstream stream(filePath, std::ios::binary | std::ios::ate);
+
+			if (!stream)
+			{
+				HZ_CORE_LERROR("Fail to load filePath {0}!", filePath);
+				return nullptr;
+			}
+
+			const std::streampos end = stream.tellg();
+			stream.seekg(0, std::ios::beg);
+			const auto size = static_cast<uint32_t>(end - stream.tellg());
+
+			if (size == 0)
+			{
+				HZ_CORE_LERROR("File empty!");
+				return nullptr;
+			}
+
+			char* buffer = new char[size];
+			stream.read(buffer, size);
+			stream.close();
+
+			*outSize = size;
+
+			return buffer;
+		}
+
+		static MonoAssembly* LoadMonoAssembly(const std::filesystem::path& filePath)
+		{
+			uint32_t fileSize = 0;
+			char* fileData = ReadBytes(filePath.string(), &fileSize);
+
+			MonoImageOpenStatus status;
+			MonoImage* image = mono_image_open_from_data_full(fileData, fileSize, 1, &status, 0);
+
+			if (status != MONO_IMAGE_OK)
+			{
+				const char* errorMessage = mono_image_strerror(status);
+				HZ_CORE_LERROR("Mono Error: {}", errorMessage);
+				return nullptr;
+			}
+
+			MonoAssembly* assembly = mono_assembly_load_from_full(image, filePath.string().c_str(), &status, 0);
+			mono_image_close(image);
+
+			delete[] fileData;
+			return assembly;
+		}
+
+		static void PrintAssemblyType(MonoAssembly* assembly)
+		{
+			MonoImage* image = mono_assembly_get_image(assembly);
+			const MonoTableInfo* typeDefinitionsTable = mono_image_get_table_info(image, MONO_TABLE_TYPEDEF);
+			int32_t numTypes = mono_table_info_get_rows(typeDefinitionsTable);
+
+			HZ_CORE_LINFO("Mono Assembly:");
+			for (int32_t i = 0; i < numTypes; i++)
+			{
+				uint32_t cols[MONO_TYPEDEF_SIZE];
+				mono_metadata_decode_row(typeDefinitionsTable, i, cols, MONO_TYPEDEF_SIZE);
+
+				const char* nameSpace = mono_metadata_string_heap(image, cols[MONO_TYPEDEF_NAMESPACE]);
+				const char* name = mono_metadata_string_heap(image, cols[MONO_TYPEDEF_NAME]);
+
+				HZ_CORE_LTRACE("{0}.{1}", nameSpace, name);
+			}
+		}
+	}
+
 	struct StriptEngineData
 	{
 		MonoDomain* RootDomain = nullptr;
 		MonoDomain* AppDomain = nullptr;
 
 		MonoAssembly* CoreAssembly = nullptr;
+		MonoImage* CoreAssemblyImage = nullptr;
+
+		ScriptClass EntityClass;
 	};
 
 	static StriptEngineData* sData = nullptr;
 
-	char* ReadBytes(const std::string& filePath, uint32_t* outSize)
-	{
-		std::ifstream stream(filePath, std::ios::binary | std::ios::ate);
-
-		if (!stream)
-		{
-			HZ_CORE_LERROR("Fail to load filePath {0}!", filePath);
-			return nullptr;
-		}
-
-		const std::streampos end = stream.tellg();
-		stream.seekg(0, std::ios::beg);
-		const auto size = static_cast<uint32_t>(end - stream.tellg());
-
-		if (size == 0)
-		{
-			HZ_CORE_LERROR("File empty!");
-			return nullptr;
-		}
-
-		char* buffer = new char[size];
-		stream.read(buffer, size);
-		stream.close();
-
-		*outSize = size;
-
-		return buffer;
-	}
-
-	void PrintAssemblyType(MonoAssembly* assembly)
-	{
-		MonoImage* image = mono_assembly_get_image(assembly);
-		const MonoTableInfo* typeDefinitionsTable = mono_image_get_table_info(image, MONO_TABLE_TYPEDEF);
-		int32_t numTypes = mono_table_info_get_rows(typeDefinitionsTable);
-
-		HZ_CORE_LINFO("Mono Assembly:");
-		for (int32_t i = 0; i < numTypes; i++)
-		{
-			uint32_t cols[MONO_TYPEDEF_SIZE];
-			mono_metadata_decode_row(typeDefinitionsTable, i, cols, MONO_TYPEDEF_SIZE);
-
-			const char* nameSpace = mono_metadata_string_heap(image, cols[MONO_TYPEDEF_NAMESPACE]);
-			const char* name = mono_metadata_string_heap(image, cols[MONO_TYPEDEF_NAME]);
-
-			HZ_CORE_LTRACE("{0}.{1}", nameSpace, name);
-		}
-	}
+	///////////////////////////
+	/// SCRIPT ENGINE
+	///////////////////////////
 
 	void ScriptEngine::Init()
 	{
 		sData = new StriptEngineData();
 
 		InitMono();
+
+		if (!TryLoadCSharpAssembly(ASSEMBLY_PATH))
+		{
+			return;
+		}
+
+		DemoFunctionality();
 	}
 
 	void ScriptEngine::Shutdown()
@@ -79,10 +122,50 @@ namespace Hazel
 		delete sData;
 	}
 
+	bool ScriptEngine::TryLoadCSharpAssembly(const std::filesystem::path& filePath)
+	{
+		constexpr char* domainName = "HazelScriptRuntime";
+		MonoDomain* appDomain = mono_domain_create_appdomain(domainName, nullptr);
+		if (mono_domain_set(appDomain, false))
+		{
+			sData->AppDomain = appDomain;
+
+			if (MonoAssembly* coreAssembly = Utils::LoadMonoAssembly(filePath))
+			{
+				sData->CoreAssembly = coreAssembly;
+
+				sData->CoreAssemblyImage = mono_assembly_get_image(sData->CoreAssembly);
+
+				// Utils::PrintAssemblyType(sData->CoreAssembly);
+
+				ScriptGlue::RegisterFunctions();
+
+				return true;
+			}
+
+			HZ_CORE_LCRITICAL("Failed to load assembly {0}", filePath);
+			return false;
+		}
+
+		HZ_CORE_LCRITICAL("Failed to set domain {0}", domainName);
+		return false;
+	}
+
 	bool ScriptEngine::TryReload()
 	{
 		HZ_CORE_LINFO("Reloading ScriptEngine");
-		if (!TryCreateAppDomain())
+
+		mono_domain_set(mono_get_root_domain(), false);
+
+		MonoObject* exc = NULL;
+		mono_domain_try_unload(sData->AppDomain, &exc);
+		if (exc)
+		{
+			return false;
+		}
+
+
+		if (!TryLoadCSharpAssembly(ASSEMBLY_PATH))
 		{
 			HZ_CORE_LERROR("Fail to reload assembly");
 			return false;
@@ -90,34 +173,9 @@ namespace Hazel
 
 		HZ_CORE_LINFO("ScriptEngine Reloaded");
 
-		// Print assembly
-		PrintAssemblyType(sData->CoreAssembly);
-
 		DemoFunctionality();
 
 		return true;
-	}
-
-	MonoAssembly* LoadCSharpAssembly(const std::string& assemblyPath)
-	{
-		uint32_t fileSize = 0;
-		char* fileData = ReadBytes(assemblyPath, &fileSize);
-
-		MonoImageOpenStatus status;
-		MonoImage* image = mono_image_open_from_data_full(fileData, fileSize, 1, &status, 0);
-
-		if (status != MONO_IMAGE_OK)
-		{
-			const char* errorMessage = mono_image_strerror(status);
-			HZ_CORE_LERROR("Mono Error: {}", errorMessage);
-			return nullptr;
-		}
-
-		MonoAssembly* assembly = mono_assembly_load_from_full(image, assemblyPath.c_str(), &status, 0);
-		mono_image_close(image);
-
-		delete[] fileData;
-		return assembly;
 	}
 
 	void ScriptEngine::InitMono()
@@ -129,16 +187,6 @@ namespace Hazel
 
 		// Store the root Domain
 		sData->RootDomain = rootDomain;
-
-		if (!TryCreateAppDomain())
-		{
-			return;
-		}
-
-		// Print assembly
-		PrintAssemblyType(sData->CoreAssembly);
-
-		DemoFunctionality();
 	}
 
 	void ScriptEngine::ShutdownMono()
@@ -153,60 +201,26 @@ namespace Hazel
 		sData->RootDomain = nullptr;
 	}
 
-	bool ScriptEngine::TryCreateAppDomain()
-	{
-		// Create an App Domain
-		MonoDomain* appDomain = mono_domain_create_appdomain("HazelScriptRuntime", nullptr);
-		if (mono_domain_set(appDomain, false))
-		{
-			// Set Assembly
-			if (MonoAssembly* coreAssembly = LoadCSharpAssembly("Resources/Scripts/Hazel-ScriptCore.dll"))
-			{
-				// If the an app domain already existed we need to make sure to unload to clear memory.
-				if (sData->AppDomain != nullptr)
-				{
-					MonoObject* exc = NULL;
-					mono_domain_try_unload(sData->AppDomain, &exc);
-					if (exc)
-					{
-						return false;
-					}
-				}
-
-				sData->AppDomain = appDomain;
-				sData->CoreAssembly = coreAssembly;
-
-				return true;
-			}
-		}
-
-		return false;
-	}
-
 	void ScriptEngine::DemoFunctionality()
 	{
-
-		// 0. Get the assembly 
-		MonoImage* assemblyImage = mono_assembly_get_image(sData->CoreAssembly);
-
 		// 1. Create an object (and call constructor)
-		MonoClass* monoClass = mono_class_from_name(assemblyImage, "Hazel", "Main");
-		MonoObject* instance = mono_object_new(sData->AppDomain, monoClass);
-		mono_runtime_object_init(instance);
+		sData->EntityClass = ScriptClass("Hazel", "Entity");
+
+		MonoObject* instance = sData->EntityClass.Instanciate();
 
 		// 2. Call function
-		MonoMethod* printMessageFunc = mono_class_get_method_from_name(monoClass, "PrintMessage", 0);
-		mono_runtime_invoke(printMessageFunc, instance, nullptr, nullptr);
+		MonoMethod* printMessageFunc = sData->EntityClass.GetMethod("PrintMessage", 0);
+		sData->EntityClass.InvokeMethod(instance, printMessageFunc);
 
 		// 3. Call function with parameter
 		// 3.1 Single param, only works if there is not different signature of the method (different param type)
-		MonoMethod* printMessageFuncParam = mono_class_get_method_from_name(monoClass, "PrintMessage", 1);
+		MonoMethod* printMessageFuncParam = sData->EntityClass.GetMethod("PrintMessage", 1);
 		int value = 5;
 		void* param = &value;
-		mono_runtime_invoke(printMessageFuncParam, instance, &param, nullptr);
+		sData->EntityClass.InvokeMethod(instance, printMessageFuncParam, &param);
 
 		// 3.2 Multiple param
-		MonoMethod* printMessageFuncParams = mono_class_get_method_from_name(monoClass, "PrintMessage", 2);
+		MonoMethod* printMessageFuncParams = sData->EntityClass.GetMethod("PrintMessage", 2);
 		int value1 = 69;
 		int value2 = 420;
 		void* params[2] =
@@ -214,12 +228,46 @@ namespace Hazel
 			&value1,
 			&value2
 		};
-		mono_runtime_invoke(printMessageFuncParams, instance, params, nullptr);
+		sData->EntityClass.InvokeMethod(instance, printMessageFuncParams, params);
 
 		// 3.3 String param
-		MonoMethod* printCustomMessageFunc = mono_class_get_method_from_name(monoClass, "PrintCustomMessage", 1);
+		MonoMethod* printCustomMessageFunc = sData->EntityClass.GetMethod("PrintCustomMessage", 1);
 		MonoString* monoString = mono_string_new(sData->AppDomain, "Hello World from C++!");
 		void* paramString = monoString;
-		mono_runtime_invoke(printCustomMessageFunc, instance, &paramString, nullptr);
+		sData->EntityClass.InvokeMethod(instance, printCustomMessageFunc, &paramString);
+	}
+
+	MonoObject* ScriptEngine::InstanciateClass(MonoClass* monoClass)
+	{
+		MonoObject* monoObject = mono_object_new(sData->AppDomain, monoClass);
+		mono_runtime_object_init(monoObject);
+
+		return monoObject;
+	}
+
+	///////////////////////////
+	/// SCRIPT CLASS
+	///////////////////////////
+
+	ScriptClass::ScriptClass(const std::string& classNamespace, const std::string& className)
+		:_classNamespace(classNamespace), _className(className)
+	{
+		_monoClass = mono_class_from_name(sData->CoreAssemblyImage, classNamespace.c_str(), className.c_str());
+	}
+
+	MonoObject* ScriptClass::Instanciate()
+	{
+		return ScriptEngine::InstanciateClass(_monoClass);
+	}
+
+	MonoMethod* ScriptClass::GetMethod(const std::string& name, int parameterCount)
+	{
+		return mono_class_get_method_from_name(_monoClass, name.c_str(), parameterCount);
+	}
+
+	MonoObject* ScriptClass::InvokeMethod(MonoObject* instance, MonoMethod* monoMethod, void** params)
+	{
+		return mono_runtime_invoke(monoMethod, instance, params, nullptr);
+
 	}
 }

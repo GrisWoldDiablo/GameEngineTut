@@ -12,6 +12,8 @@
 
 #include "Hazel/Core/Timer.h"
 
+#define SHADER_LOG 0
+
 namespace Hazel
 {
 	namespace Utils
@@ -108,7 +110,13 @@ namespace Hazel
 		auto source = ReadFile(filePath);
 		auto shaderSources = PreProcess(source);
 
-		HZ_CORE_LINFO("--- Preparing Shader ---");
+		auto lastSlash = filePath.find_last_of("/\\");
+		lastSlash = lastSlash == std::string::npos ? 0 : lastSlash + 1;
+		auto lastDot = filePath.rfind('.');
+		auto count = lastDot == std::string::npos ? filePath.size() - lastSlash : lastDot - lastSlash;
+		_name = filePath.substr(lastSlash, count);
+
+		HZ_CORE_LINFO("--- Preparing Shader {0} ---", _name);
 		{
 			Timer timer;
 			_isLoadingCompleted = false;
@@ -125,12 +133,6 @@ namespace Hazel
 				HZ_CORE_LWARN("Shader creation took {0} seconds.", timer.Elapsed());
 			}
 		}
-
-		auto lastSlash = filePath.find_last_of("/\\");
-		lastSlash = lastSlash == std::string::npos ? 0 : lastSlash + 1;
-		auto lastDot = filePath.rfind('.');
-		auto count = lastDot == std::string::npos ? filePath.size() - lastSlash : lastDot - lastSlash;
-		_name = filePath.substr(lastSlash, count);
 	}
 
 	OpenGLShader::OpenGLShader(const std::string& name, const std::string& vertexSrc, const std::string& fragmentSrc)
@@ -229,7 +231,9 @@ namespace Hazel
 			std::ifstream in(cachedPath, std::ios::in | std::ios::binary);
 			if (!_shouldRecompile && in.is_open())
 			{
+#if SHADER_LOG
 				HZ_CORE_LTRACE("Loading Vulkan binary for {0}", Utils::GLShaderStageToString(stage));
+#endif // SHADER_LOG
 				in.seekg(0, std::ios::end);
 				auto size = in.tellg();
 				in.seekg(0, std::ios::beg);
@@ -241,7 +245,9 @@ namespace Hazel
 			else
 			{
 				shaderc::Compiler compiler;
+#if SHADER_LOG
 				HZ_CORE_LTRACE("Compiling Vulkan binary for {0}", Utils::GLShaderStageToString(stage));
+#endif // SHADER_LOG
 				shaderc::SpvCompilationResult module = compiler.CompileGlslToSpv(source, Utils::GLShaderStageToShaderC(stage), _filePath.c_str(), options);
 				if (module.GetCompilationStatus() != shaderc_compilation_status_success)
 				{
@@ -296,7 +302,9 @@ namespace Hazel
 			std::ifstream in(cachedPath, std::ios::in | std::ios::binary);
 			if (!_shouldRecompile && in.is_open())
 			{
+#if SHADER_LOG
 				HZ_CORE_LTRACE("Loading OpenGL binary for {0}", Utils::GLShaderStageToString(stage));
+#endif // SHADER_LOG
 				in.seekg(0, std::ios::end);
 				auto size = in.tellg();
 				in.seekg(0, std::ios::beg);
@@ -308,7 +316,9 @@ namespace Hazel
 			else
 			{
 				shaderc::Compiler compiler;
+#if SHADER_LOG
 				HZ_CORE_LTRACE("Compiling OpenGL binary for {0}", Utils::GLShaderStageToString(stage));
+#endif // SHADER_LOG
 				spirv_cross::CompilerGLSL glslCompiler(spirv);
 				_openGLSourceCode[stage] = glslCompiler.compile();
 				auto& source = _openGLSourceCode[stage];
@@ -387,6 +397,7 @@ namespace Hazel
 		spirv_cross::Compiler compiler(shaderData);
 		spirv_cross::ShaderResources resources = compiler.get_shader_resources();
 
+#if SHADER_LOG
 		HZ_CORE_LTRACE("OpenGLShader::Reflect - {0} {1}", Utils::GLShaderStageToString(stage), _filePath);
 		HZ_CORE_LTRACE("    {0} Uniform buffer(s)", resources.uniform_buffers.size());
 		HZ_CORE_LTRACE("    {0} Resource(s)", resources.sampled_images.size());
@@ -395,6 +406,7 @@ namespace Hazel
 		{
 			HZ_CORE_LTRACE("Uniform buffer(s):");
 		}
+#endif // SHADER_LOG
 
 		for (const auto& resource : resources.uniform_buffers)
 		{
@@ -403,10 +415,12 @@ namespace Hazel
 			auto binding = compiler.get_decoration(resource.id, spv::DecorationBinding);
 			auto memberCount = bufferType.member_types.size();
 
+#if SHADER_LOG
 			HZ_CORE_LTRACE("  {0}", resource.name);
 			HZ_CORE_LTRACE("    Size = {0}", bufferSize);
 			HZ_CORE_LTRACE("    Binding = {0}", binding);
 			HZ_CORE_LTRACE("    Members = {0}", memberCount);
+#endif // SHADER_LOG
 		}
 	}
 

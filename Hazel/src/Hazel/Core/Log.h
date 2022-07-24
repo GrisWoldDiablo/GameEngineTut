@@ -1,10 +1,10 @@
 #pragma once
 
-#include "spdlog/spdlog.h"
-
 #define  GLM_ENABLE_EXPERIMENTAL
 #include "glm/gtx/string_cast.hpp"
 
+#include <spdlog/spdlog.h>
+#include <spdlog/fmt/ostr.h>
 
 namespace Hazel
 {
@@ -19,6 +19,25 @@ namespace Hazel
 		static std::shared_ptr<spdlog::logger> _sCoreLogger;
 		static std::shared_ptr<spdlog::logger> _sClientLogger;
 	};
+}
+
+// String formatters for glm structs
+template<typename OStream, glm::length_t L, typename T, glm::qualifier Q>
+inline OStream& operator<<(OStream& os, const glm::vec<L, T, Q>& vector)
+{
+	return os << glm::to_string(vector);
+}
+
+template<typename OStream, glm::length_t C, glm::length_t R, typename T, glm::qualifier Q>
+inline OStream& operator<<(OStream& os, const glm::mat<C, R, T, Q>& matrix)
+{
+	return os << glm::to_string(matrix);
+}
+
+template<typename OStream, typename T, glm::qualifier Q>
+inline OStream& operator<<(OStream& os, const glm::qua<T, Q>& quaternion)
+{
+	return os << glm::to_string(quaternion);
 }
 
 // To place fields in message use curly brackets : MACRO("my field here =>{0}", field);
@@ -37,23 +56,3 @@ namespace Hazel
 #define HZ_LWARN(...)		::Hazel::Log::GetClientLogger()->warn(__VA_ARGS__)		// Yellow text
 #define HZ_LERROR(...)		::Hazel::Log::GetClientLogger()->error(__VA_ARGS__)		// Red text
 #define HZ_LCRITICAL(...)	::Hazel::Log::GetClientLogger()->critical(__VA_ARGS__)	// White text Red background
-
-// String formatters for glm structs
-
-template<typename OStream, glm::length_t L, typename T, glm::qualifier Q>
-inline OStream& operator<<(OStream& os, const glm::vec<L, T, Q>& vector)
-{
-	return os << glm::to_string(vector);
-}
-
-template<typename OStream, glm::length_t C, glm::length_t R, typename T, glm::qualifier Q>
-inline OStream& operator<<(OStream& os, const glm::mat<C, R, T, Q>& matrix)
-{
-	return os << glm::to_string(matrix);
-}
-
-template<typename OStream, typename T, glm::qualifier Q>
-inline OStream& operator<<(OStream& os, const glm::qua<T, Q>& quaternion)
-{
-	return os << glm::to_string(quaternion);
-}

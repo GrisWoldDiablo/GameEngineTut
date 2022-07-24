@@ -12,7 +12,7 @@ namespace Hazel
 
 		void Serialize(const std::string& filepath) override;
 		void SerializeRuntime() override;
-		bool Deserialize(const std::string& filepath) override;
+		bool Deserialize(const std::string& filepath, bool isWithLog = true) override;
 		bool DeserializeRuntime() override;
 
 	private:

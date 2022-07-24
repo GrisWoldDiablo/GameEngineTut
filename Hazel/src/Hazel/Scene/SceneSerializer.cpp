@@ -260,7 +260,7 @@ namespace Hazel
 		out << YAML::EndMap;
 	}
 
-	bool SceneSerializer::Deserialize(const std::string& filepath)
+	bool SceneSerializer::Deserialize(const std::string& filepath, bool isWithLog)
 	{
 		YAML::Node data;
 		try
@@ -273,7 +273,7 @@ namespace Hazel
 			return false;
 		}
 
-		return DeserializeData(data);
+		return DeserializeData(data, isWithLog);
 	}
 
 	bool SceneSerializer::DeserializeRuntime()
