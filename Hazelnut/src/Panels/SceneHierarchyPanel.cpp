@@ -1,6 +1,8 @@
 #include "SceneHierarchyPanel.h"
 #include "Hazel/Scene/Components.h"
 #include "Hazel/Scene/ScriptableEntity.h"
+#include "Hazel/Utils/PlatformUtils.h"
+#include "Hazel/Scripting/ScriptEngine.h"
 
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
@@ -9,8 +11,6 @@
 
 #include <fstream>
 #include <filesystem>
-
-#include "Hazel/Utils/PlatformUtils.h"
 
 namespace Hazel
 {
@@ -302,6 +302,7 @@ namespace Hazel
 			if (ImGui::BeginPopup("AddComponent"))
 			{
 				AddComponentMenu<CameraComponent>();
+				AddComponentMenu<ScriptComponent>();
 				AddComponentMenu<SpriteRendererComponent>();
 				AddComponentMenu<CircleRendererComponent>();
 				AddComponentMenu<Rigidbody2DComponent>();
@@ -333,6 +334,30 @@ namespace Hazel
 
 			DrawVecControls("Scale", component->Scale, 1.0f);
 		});
+#pragma endregion
+
+#pragma region ScriptComponent
+		DrawComponent<ScriptComponent>(entity, "Script", [](ScriptComponent* component)
+		{
+			bool scriptClassExists = ScriptEngine::EntityClassExist(component->ClassName);
+
+			if (!scriptClassExists)
+			{
+				ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(Color::Red.r, Color::Red.g, Color::Red.b, Color::Red.a));
+			}
+
+			static char buffer[64];
+			strcpy_s(buffer, component->ClassName.c_str());
+			if (ImGui::InputText("Class", buffer, sizeof(buffer)))
+			{
+				component->ClassName = buffer;
+			}
+
+			if (!scriptClassExists)
+			{
+				ImGui::PopStyleColor();
+			}
+					});
 #pragma endregion
 
 #pragma region SpriteRendererComponent

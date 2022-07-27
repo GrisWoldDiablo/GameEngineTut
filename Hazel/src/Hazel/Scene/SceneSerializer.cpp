@@ -116,6 +116,18 @@ namespace Hazel
 		}
 #pragma endregion
 
+#pragma region ScriptComponent
+		if (const auto& component = entity.TryGetComponent<ScriptComponent>())
+		{
+			out << YAML::Key << "ScriptComponent";
+			out << YAML::BeginMap; // ScriptComponent
+
+			out << YAML::Key << "ClassName" << YAML::Value << component->ClassName;
+
+			out << YAML::EndMap; // ScriptComponent  
+		}
+#pragma endregion
+
 #pragma region SpriteRendererComponent
 		if (const auto& component = entity.TryGetComponent<SpriteRendererComponent>())
 		{
@@ -350,6 +362,14 @@ namespace Hazel
 
 					component.IsPrimary = cameraComponent["IsPrimary"].as<bool>();
 					component.IsFixedAspectRatio = cameraComponent["IsFixedAspectRatio"].as<bool>();
+				}
+#pragma endregion
+
+#pragma region ScriptComponent
+				if (auto scriptComponent = entity["ScriptComponent"])
+				{
+					auto& component = deserializedEntity.AddComponent<ScriptComponent>();
+					component.ClassName = GetValue<std::string>(scriptComponent, "ClassName");
 				}
 #pragma endregion
 

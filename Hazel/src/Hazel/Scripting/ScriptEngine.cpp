@@ -1,6 +1,7 @@
 #include "hzpch.h"
 #include "ScriptEngine.h"
 #include "ScriptGlue.h"
+#include "Hazel/Scene/Scene.h"
 
 #include "mono/jit/jit.h"
 #include "mono/metadata/assembly.h"
@@ -8,8 +9,6 @@
 
 namespace Hazel
 {
-#define ASSEMBLY_PATH "Resources/Scripts/Hazel-ScriptCore.dll"
-
 	namespace Utils
 	{
 		// TODO: Move to FileSystem Class
@@ -93,6 +92,11 @@ namespace Hazel
 		MonoImage* CoreAssemblyImage = nullptr;
 
 		ScriptClass EntityClass;
+
+		std::unordered_map<std::string, Ref<ScriptClass>> EntityClasses;
+
+		// Runtime
+		Scene* SceneContext = nullptr;
 	};
 
 	static StriptEngineData* sData = nullptr;
@@ -100,6 +104,8 @@ namespace Hazel
 	///////////////////////////
 	/// SCRIPT ENGINE
 	///////////////////////////
+
+#define ASSEMBLY_PATH "Resources/Scripts/Hazel-ScriptCore.dll"
 
 	void ScriptEngine::Init()
 	{
@@ -111,6 +117,10 @@ namespace Hazel
 		{
 			return;
 		}
+
+		LoadAssemblyClasses(sData->CoreAssembly);
+
+		ScriptGlue::RegisterFunctions();
 
 		DemoFunctionality();
 	}
@@ -136,9 +146,7 @@ namespace Hazel
 
 				sData->CoreAssemblyImage = mono_assembly_get_image(sData->CoreAssembly);
 
-				// Utils::PrintAssemblyType(sData->CoreAssembly);
-
-				ScriptGlue::RegisterFunctions();
+				Utils::PrintAssemblyType(sData->CoreAssembly);
 
 				return true;
 			}
@@ -149,6 +157,16 @@ namespace Hazel
 
 		HZ_CORE_LCRITICAL("Failed to set domain {0}", domainName);
 		return false;
+	}
+
+	void ScriptEngine::OnRuntimeStart(Scene* scene)
+	{
+		sData->SceneContext = scene;
+	}
+
+	void ScriptEngine::OnRuntimeStop()
+	{
+		sData->SceneContext = nullptr;
 	}
 
 	bool ScriptEngine::TryReload()
@@ -171,11 +189,25 @@ namespace Hazel
 			return false;
 		}
 
+		LoadAssemblyClasses(sData->CoreAssembly);
+
+		ScriptGlue::RegisterFunctions();
+
 		HZ_CORE_LINFO("ScriptEngine Reloaded");
 
 		DemoFunctionality();
 
 		return true;
+	}
+
+	bool ScriptEngine::EntityClassExist(const std::string& fullClassName)
+	{
+		return sData->EntityClasses.find(fullClassName) != sData->EntityClasses.end();
+	}
+
+	std::unordered_map<std::string, Ref<ScriptClass>> ScriptEngine::GetEntityClasses()
+	{
+		return sData->EntityClasses;
 	}
 
 	void ScriptEngine::InitMono()
@@ -203,6 +235,13 @@ namespace Hazel
 
 	void ScriptEngine::DemoFunctionality()
 	{
+		//MonoObject* instance = sData->EntityClass.Instanciate();
+
+		//// 2. Call function
+		//MonoMethod* onCreateFunc = sData->EntityClass.GetMethod("OnCreate", 0);
+		//sData->EntityClass.InvokeMethod(instance, onCreateFunc);
+		
+#if 0
 		// 1. Create an object (and call constructor)
 		sData->EntityClass = ScriptClass("Hazel", "Entity");
 
@@ -235,6 +274,8 @@ namespace Hazel
 		MonoString* monoString = mono_string_new(sData->AppDomain, "Hello World from C++!");
 		void* paramString = monoString;
 		sData->EntityClass.InvokeMethod(instance, printCustomMessageFunc, &paramString);
+#endif // 0
+
 	}
 
 	MonoObject* ScriptEngine::InstanciateClass(MonoClass* monoClass)
@@ -243,6 +284,50 @@ namespace Hazel
 		mono_runtime_object_init(monoObject);
 
 		return monoObject;
+	}
+
+	void ScriptEngine::LoadAssemblyClasses(MonoAssembly* assembly)
+	{
+		sData->EntityClasses.clear();
+
+		MonoImage* image = mono_assembly_get_image(assembly);
+		const MonoTableInfo* typeDefinitionsTable = mono_image_get_table_info(image, MONO_TABLE_TYPEDEF);
+		int32_t numTypes = mono_table_info_get_rows(typeDefinitionsTable);
+		MonoClass* entityClass = mono_class_from_name(image, "Hazel", "Entity");
+
+		HZ_CORE_LINFO("Mono Assembly:");
+		for (int32_t i = 0; i < numTypes; i++)
+		{
+			uint32_t cols[MONO_TYPEDEF_SIZE];
+			mono_metadata_decode_row(typeDefinitionsTable, i, cols, MONO_TYPEDEF_SIZE);
+
+
+			const char* nameSpace = mono_metadata_string_heap(image, cols[MONO_TYPEDEF_NAMESPACE]);
+			const char* name = mono_metadata_string_heap(image, cols[MONO_TYPEDEF_NAME]);
+
+			std::string fullName;
+			if (strlen(nameSpace) != 0)
+			{
+				fullName = fmt::format("{}.{}", nameSpace, name);
+			}
+			else
+			{
+				fullName = name;
+			}
+
+			MonoClass* monoClass = mono_class_from_name(image, nameSpace, name);
+			if (monoClass == entityClass)
+			{
+				continue;
+			}
+
+			bool isEntity = mono_class_is_subclass_of(monoClass, entityClass, false);
+			if (isEntity)
+			{
+				sData->EntityClasses[fullName] = CreateRef<ScriptClass>(nameSpace, name);
+			}
+			
+		}
 	}
 
 	///////////////////////////
@@ -269,5 +354,28 @@ namespace Hazel
 	{
 		return mono_runtime_invoke(monoMethod, instance, params, nullptr);
 
+	}
+
+	///////////////////////////
+	/// SCRIPT INSTANCE
+	///////////////////////////
+
+	ScriptInstance::ScriptInstance(Ref<ScriptClass> scriptClass)
+		:_scriptClass(scriptClass)
+	{
+		_instance = scriptClass->Instanciate();
+		_onCreateMethod = scriptClass->GetMethod("OnCreate", 0);
+		_onUpdateMethod = scriptClass->GetMethod("OnUpdate", 1);
+	}
+
+	void ScriptInstance::InvokeOnCreate()
+	{
+		_scriptClass->InvokeMethod(_instance, _onCreateMethod);
+	}
+
+	void ScriptInstance::InvokeOnUpdate(float ts)
+	{
+		void* param = &ts;
+		_scriptClass->InvokeMethod(_instance, _onUpdateMethod, &param);
 	}
 }

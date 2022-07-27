@@ -3,6 +3,7 @@
 #include "Components.h"
 #include "ScriptableEntity.h"
 #include "Hazel/Renderer/Renderer2D.h"
+#include "Hazel/Scripting/ScriptEngine.h"
 
 #include "box2d/b2_world.h"
 #include "box2d/b2_body.h"
@@ -146,11 +147,27 @@ namespace Hazel
 	void Scene::OnRuntimeStart()
 	{
 		OnPhysic2DStart();
+
+		// Scripting
+		{
+			ScriptEngine::OnRuntimeStart(this);
+			// Instanciate all script entities
+			// Retrieve transform from Box2D
+			_registry.view<ScriptComponent>().each([&](const auto entt, const ScriptComponent& scriptComponent)
+			{
+				if (ScriptEngine::EntityClassExist(scriptComponent.ClassName))
+				{
+					//ScriptEngine::OnCreateEntity
+				}
+			});
+		}
 	}
 
 	void Scene::OnRuntimeStop()
 	{
 		OnPhysic2DStop();
+
+		ScriptEngine::OnRuntimeStop();
 	}
 
 	void Scene::OnSimulationStart()
@@ -468,6 +485,10 @@ namespace Hazel
 			component.Camera.SetViewportSize(_viewportWidth, _viewportHeight);
 		}
 	}
+
+	template<>
+	void Scene::OnComponentAdded<ScriptComponent>(Entity entity, ScriptComponent& component)
+	{}
 
 	template<>
 	void Scene::OnComponentAdded<NativeScriptComponent>(Entity entity, NativeScriptComponent& component)

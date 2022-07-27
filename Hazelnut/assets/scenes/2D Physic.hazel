@@ -71,7 +71,7 @@ Entities:
         OrthographicSize: 10
         OrthographicNearClip: -1
         OrthographicFarClip: 1
-        AspectRatio: 2.19861436
+        AspectRatio: 1.72706425
       IsPrimary: true
       IsFixedAspectRatio: false
   - Entity: 1064095580862351179
@@ -106,6 +106,8 @@ Entities:
       Position: [0, 0, 0]
       Rotation: [0, 0, 0]
       Scale: [2, 2, 1]
+    ScriptComponent:
+      ClassName: Sandbox.Player
     SpriteRendererComponent:
       TexturePath: assets\textures\ChernoLogo.png
       MagFilter: 9728
