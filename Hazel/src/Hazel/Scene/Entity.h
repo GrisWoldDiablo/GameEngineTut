@@ -42,12 +42,6 @@ namespace Hazel
 			return _scene->_registry.get<T>(_entityHandle);
 		}
 
-		template<typename T>
-		T* TryGetComponent()
-		{
-			return _scene->_registry.try_get<T>(_entityHandle);
-		}
-
 		template<typename... T>
 		bool HasComponent()
 		{
@@ -61,7 +55,7 @@ namespace Hazel
 
 		operator bool() const { return _entityHandle != entt::null; }
 		operator entt::entity() const { return _entityHandle; }
-		operator uint32_t() const { return (uint32_t)_entityHandle; }
+		operator uint32_t() const { return static_cast<uint32_t>(_entityHandle); }
 
 		bool operator==(const Entity& other) const
 		{
@@ -78,6 +72,7 @@ namespace Hazel
 		int& Layer();
 
 		TransformComponent& Transform();
+
 	private:
 		entt::entity _entityHandle{ entt::null };
 		Scene* _scene = nullptr;

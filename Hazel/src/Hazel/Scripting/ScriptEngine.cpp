@@ -7,6 +7,8 @@
 #include "mono/metadata/assembly.h"
 #include "mono/metadata/object.h"
 
+#include <string>
+
 namespace Hazel
 {
 	namespace Utils
@@ -94,6 +96,7 @@ namespace Hazel
 		ScriptClass EntityClass;
 
 		std::unordered_map<std::string, Ref<ScriptClass>> EntityClasses;
+		std::unordered_map<UUID, Ref<ScriptInstance>> EntityInstances;
 
 		// Runtime
 		Scene* SceneContext = nullptr;
@@ -146,6 +149,8 @@ namespace Hazel
 
 				sData->CoreAssemblyImage = mono_assembly_get_image(sData->CoreAssembly);
 
+				sData->EntityClass = ScriptClass("Hazel", "Entity");
+
 				Utils::PrintAssemblyType(sData->CoreAssembly);
 
 				return true;
@@ -167,6 +172,8 @@ namespace Hazel
 	void ScriptEngine::OnRuntimeStop()
 	{
 		sData->SceneContext = nullptr;
+
+		sData->EntityInstances.clear();
 	}
 
 	bool ScriptEngine::TryReload()
@@ -205,6 +212,32 @@ namespace Hazel
 		return sData->EntityClasses.find(fullClassName) != sData->EntityClasses.end();
 	}
 
+	void ScriptEngine::OnCreateEntity(Entity entity)
+	{
+		const auto& scriptComponent = entity.GetComponent<ScriptComponent>();
+		if (EntityClassExist(scriptComponent.ClassName))
+		{
+			auto instance = CreateRef<ScriptInstance>(sData->EntityClasses[scriptComponent.ClassName], entity);
+			sData->EntityInstances[entity.GetUUID()] = instance;
+
+			instance->InvokeOnCreate();
+		}
+	}
+
+	void ScriptEngine::OnUpdateEntity(Entity entity, Timestep timestep)
+	{
+		const auto& entityUUID = entity.GetUUID();
+		HZ_CORE_ASSERT(sData->EntityInstances.find(entityUUID) != sData->EntityInstances.end(), "entity UUID [{0}] missing", entityUUID);
+
+		auto instance = sData->EntityInstances[entityUUID];
+		instance->InvokeOnUpdate(static_cast<float>(timestep));
+	}
+
+	Scene* ScriptEngine::GetSceneContext()
+	{
+		return sData->SceneContext;
+	}
+
 	std::unordered_map<std::string, Ref<ScriptClass>> ScriptEngine::GetEntityClasses()
 	{
 		return sData->EntityClasses;
@@ -235,12 +268,6 @@ namespace Hazel
 
 	void ScriptEngine::DemoFunctionality()
 	{
-		//MonoObject* instance = sData->EntityClass.Instanciate();
-
-		//// 2. Call function
-		//MonoMethod* onCreateFunc = sData->EntityClass.GetMethod("OnCreate", 0);
-		//sData->EntityClass.InvokeMethod(instance, onCreateFunc);
-		
 #if 0
 		// 1. Create an object (and call constructor)
 		sData->EntityClass = ScriptClass("Hazel", "Entity");
@@ -278,11 +305,16 @@ namespace Hazel
 
 	}
 
-	MonoObject* ScriptEngine::InstanciateClass(MonoClass* monoClass)
+	MonoObject* ScriptEngine::InstanciateClass(MonoClass* monoClass, MonoMethod* constructor, void** params)
 	{
 		MonoObject* monoObject = mono_object_new(sData->AppDomain, monoClass);
-		mono_runtime_object_init(monoObject);
+		if (constructor)
+		{
+			mono_runtime_invoke(constructor, monoObject, params, nullptr);
+			return monoObject;
+		}
 
+		mono_runtime_object_init(monoObject);
 		return monoObject;
 	}
 
@@ -326,7 +358,6 @@ namespace Hazel
 			{
 				sData->EntityClasses[fullName] = CreateRef<ScriptClass>(nameSpace, name);
 			}
-			
 		}
 	}
 
@@ -340,9 +371,9 @@ namespace Hazel
 		_monoClass = mono_class_from_name(sData->CoreAssemblyImage, classNamespace.c_str(), className.c_str());
 	}
 
-	MonoObject* ScriptClass::Instanciate()
+	MonoObject* ScriptClass::Instanciate(MonoMethod* constructor, void** params)
 	{
-		return ScriptEngine::InstanciateClass(_monoClass);
+		return ScriptEngine::InstanciateClass(_monoClass, constructor, params);
 	}
 
 	MonoMethod* ScriptClass::GetMethod(const std::string& name, int parameterCount)
@@ -353,19 +384,25 @@ namespace Hazel
 	MonoObject* ScriptClass::InvokeMethod(MonoObject* instance, MonoMethod* monoMethod, void** params)
 	{
 		return mono_runtime_invoke(monoMethod, instance, params, nullptr);
-
 	}
 
 	///////////////////////////
 	/// SCRIPT INSTANCE
 	///////////////////////////
 
-	ScriptInstance::ScriptInstance(Ref<ScriptClass> scriptClass)
+	ScriptInstance::ScriptInstance(Ref<ScriptClass> scriptClass, Entity entity)
 		:_scriptClass(scriptClass)
 	{
-		_instance = scriptClass->Instanciate();
-		_onCreateMethod = scriptClass->GetMethod("OnCreate", 0);
+		// Base constructor
+		_constructor = sData->EntityClass.GetMethod(".ctor", 1);
+
+		_onCreateMethod = scriptClass->GetMethod("OnCreate");
 		_onUpdateMethod = scriptClass->GetMethod("OnUpdate", 1);
+
+		// Call Entity Constructor
+		auto entityId = entity.GetUUID();
+		void* param = &entityId;
+		_instance = scriptClass->Instanciate(_constructor, &param);
 	}
 
 	void ScriptInstance::InvokeOnCreate()

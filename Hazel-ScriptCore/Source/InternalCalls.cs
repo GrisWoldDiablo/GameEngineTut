@@ -13,6 +13,23 @@ namespace Hazel
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern static float NativeLog_Vector3Dot(ref Vector3 position);
 
+		//////////////
+		// Entity
+		//////////////
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern static void Entity_GetPosition(ulong entityId, out Vector3 position);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern static void Entity_SetPosition(ulong entityId, ref Vector3 position);
+
+		//////////////
+		// Inputs
+		//////////////
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern static bool Input_IsKeyDown(KeyCode keyCode);
+
 		// Returning struct might be bad for memory.k
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern static Vector3 NativeLog_Vector3Struct(ref Vector3 position);

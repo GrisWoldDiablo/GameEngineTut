@@ -7,9 +7,9 @@ namespace Hazel
 	class Input
 	{
 	public:
-		static bool IsKeyPressed(const KeyCode& key);
+		static bool IsKeyPressed(KeyCode keyCode);
 
-		static bool IsMouseButtonPressed(const MouseCode& button);
+		static bool IsMouseButtonPressed(MouseCode button);
 		static glm::vec2 GetMousePosition();
 		static float GetMouseX();
 		static float GetMouseY();

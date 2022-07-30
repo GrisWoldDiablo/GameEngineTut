@@ -130,12 +130,15 @@ namespace Hazel
 
 		entity.AddComponent<TransformComponent>();
 
+		_entityMap[uuid] = entity;
+
 		return entity;
 	}
 
 	void Scene::DestroyEntity(Entity entity)
 	{
 		_registry.destroy(entity);
+		_entityMap.erase(entity.GetUUID());
 	}
 
 	bool Scene::CheckEntityValidity(const entt::entity& entity) const
@@ -151,12 +154,12 @@ namespace Hazel
 		{
 			ScriptEngine::OnRuntimeStart(this);
 			// Instanciate all script entities
-			// Retrieve transform from Box2D
 			_registry.view<ScriptComponent>().each([&](const auto entt, const ScriptComponent& scriptComponent)
 			{
 				if (ScriptEngine::EntityClassExist(scriptComponent.ClassName))
 				{
-					//ScriptEngine::OnCreateEntity
+					Entity entity = { entt, this };
+					ScriptEngine::OnCreateEntity(entity);
 				}
 			});
 		}
@@ -179,9 +182,18 @@ namespace Hazel
 		OnPhysic2DStop();
 	}
 
-	void Scene::OnUpdateRuntime(const Timestep& timestep)
+	void Scene::OnUpdateRuntime(Timestep timestep)
 	{
-		// Update Scripts
+		// C# OnUpdate Script
+		_registry.view<ScriptComponent>().each([&](const auto entt, const ScriptComponent& scriptComponent)
+		{
+			if (ScriptEngine::EntityClassExist(scriptComponent.ClassName))
+			{
+				Entity entity = { entt, this };
+				ScriptEngine::OnUpdateEntity(entity, timestep);
+			}
+		});
+
 		_registry.view<NativeScriptComponent>().each([=](const auto entt, auto& nsc)
 		{
 			auto& instance = nsc.Instance;
@@ -358,6 +370,17 @@ namespace Hazel
 		return newEntity;
 	}
 
+	Entity Scene::GetEntityByUUID(UUID uuid)
+	{
+		// Maybe assert?
+		if (_entityMap.find(uuid) != _entityMap.end())
+		{
+			return { _entityMap.at(uuid), this };
+		}
+
+		return {};
+	}
+
 	Entity Scene::GetPrimaryCameraEntity()
 	{
 		auto view = _registry.view<CameraComponent>();
@@ -402,28 +425,30 @@ namespace Hazel
 				body->CreateFixture(&fixtureDef);
 			};
 
-			if (const auto& bc2d = entity.TryGetComponent<BoxCollider2DComponent>())
+			if (entity.HasComponent<BoxCollider2DComponent>())
 			{
+				const auto& bc2d = entity.GetComponent<BoxCollider2DComponent>();
 				b2PolygonShape boxShape;
 				boxShape.SetAsBox
 				(
-					bc2d->Size.x * transform.Scale.x,
-					bc2d->Size.y * transform.Scale.y,
-					{ bc2d->Offset.x, bc2d->Offset.y },
-					glm::radians(bc2d->Rotation)
+					bc2d.Size.x * transform.Scale.x,
+					bc2d.Size.y * transform.Scale.y,
+					{ bc2d.Offset.x, bc2d.Offset.y },
+					glm::radians(bc2d.Rotation)
 				);
 
 
-				createFixture(boxShape, bc2d->Density, bc2d->Friction, bc2d->Restitution, bc2d->RestitutionThreshold);
+				createFixture(boxShape, bc2d.Density, bc2d.Friction, bc2d.Restitution, bc2d.RestitutionThreshold);
 			}
 
-			if (const auto& cc2d = entity.TryGetComponent<CircleCollider2DComponent>())
+			if (entity.HasComponent<CircleCollider2DComponent>())
 			{
+				const auto& cc2d = entity.GetComponent<CircleCollider2DComponent>();
 				b2CircleShape circleShape;
-				circleShape.m_p.Set(cc2d->Offset.x, cc2d->Offset.y);
-				circleShape.m_radius = cc2d->Radius * glm::max(transform.Scale.x, transform.Scale.y);
+				circleShape.m_p.Set(cc2d.Offset.x, cc2d.Offset.y);
+				circleShape.m_radius = cc2d.Radius * glm::max(transform.Scale.x, transform.Scale.y);
 
-				createFixture(circleShape, cc2d->Density, cc2d->Friction, cc2d->Restitution, cc2d->RestitutionThreshold);
+				createFixture(circleShape, cc2d.Density, cc2d.Friction, cc2d.Restitution, cc2d.RestitutionThreshold);
 			}
 		});
 	}

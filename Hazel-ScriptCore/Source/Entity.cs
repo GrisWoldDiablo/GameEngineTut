@@ -1,5 +1,3 @@
-using System;
-
 namespace Hazel
 {
 	public struct Vector3
@@ -8,6 +6,8 @@ namespace Hazel
 		public float Y;
 		public float Z;
 
+		public static Vector3 Zero => new Vector3(0.0f);
+
 		public Vector3(float x, float y, float z)
 		{
 			X = x;
@@ -15,59 +15,52 @@ namespace Hazel
 			Z = z;
 		}
 
+		public Vector3(float scalar)
+		{
+			X = scalar;
+			Y = scalar;
+			Z = scalar;
+		}
+
 		public override string ToString()
 		{
-			return $"({X:F2},{Y},{Z})";
+			return $"({X:F2},{Y:F2},{Z:F2})";
+		}
+
+		public static Vector3 operator *(Vector3 vector, float scalar)
+		{
+			return new Vector3(vector.X * scalar, vector.Y * scalar, vector.Z * scalar);
+		}
+
+		public static Vector3 operator +(Vector3 lhs, Vector3 rhs)
+		{
+			return new Vector3(lhs.X + rhs.X, lhs.Y + rhs.Y, lhs.Z + rhs.Z);
 		}
 	}
 
 	public class Entity
 	{
-		public Entity()
+		protected Entity()
 		{
-			Console.WriteLine("Entity Constructor!");
-			Log("GrisWold", 69420);
-
-			var position = new Vector3(5f, 2.5f, 1.0f);
-			Console.WriteLine($"Result = {Log(position)}");
-			Console.WriteLine("{0}", InternalCalls.NativeLog_Vector3Dot(ref position));
-			Console.WriteLine("{0}", InternalCalls.NativeLog_Vector3Struct(ref position));
+			Id = 0;
 		}
 
-		~Entity()
+		internal Entity(ulong id)
 		{
-			Console.WriteLine("Entity Destructor!");
+			Id = id;
 		}
 
-		public void PrintMessage()
-		{
-			Console.WriteLine("Hello World from C#!");
-		}
+		public readonly ulong Id;
 
-		public void PrintMessage(int value)
+		public Vector3 Position
 		{
-			Console.WriteLine($"C# int: {value}");
-		}
+			get
+			{
+				InternalCalls.Entity_GetPosition(Id, out Vector3 position);
+				return position;
+			}
 
-		public void PrintMessage(int value1, int value2)
-		{
-			Console.WriteLine($"C# ints: {value1} and {value2}");
-		}
-
-		public void PrintCustomMessage(string message)
-		{
-			Console.WriteLine($"C# string: {message}");
-		}
-
-		private void Log(string text, int parameter)
-		{
-			InternalCalls.NativeLog(text, parameter);
-		}
-
-		private Vector3 Log(Vector3 position)
-		{
-			InternalCalls.NativeLog_Vector3(ref position, out Vector3 result);
-			return result;
+			set => InternalCalls.Entity_SetPosition(Id, ref value);
 		}
 	}
 }

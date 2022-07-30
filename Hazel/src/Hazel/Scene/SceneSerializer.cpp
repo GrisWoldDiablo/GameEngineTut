@@ -89,12 +89,14 @@ namespace Hazel
 #pragma endregion
 
 #pragma region CameraComponent
-		if (const auto& component = entity.TryGetComponent<CameraComponent>())
+		if (entity.HasComponent<CameraComponent>())
 		{
+			const auto& component = entity.GetComponent<CameraComponent>();
+
 			out << YAML::Key << "CameraComponent";
 			out << YAML::BeginMap; // CameraComponent
 
-			auto& camera = component->Camera;
+			auto& camera = component.Camera;
 
 			out << YAML::Key << "Camera" << YAML::Value;
 			out << YAML::BeginMap; // Camera
@@ -109,101 +111,113 @@ namespace Hazel
 			out << YAML::Key << "AspectRatio" << YAML::Value << camera.GetAspectRatio();
 			out << YAML::EndMap; // Camera
 
-			out << YAML::Key << "IsPrimary" << YAML::Value << component->IsPrimary;
-			out << YAML::Key << "IsFixedAspectRatio" << YAML::Value << component->IsFixedAspectRatio;
+			out << YAML::Key << "IsPrimary" << YAML::Value << component.IsPrimary;
+			out << YAML::Key << "IsFixedAspectRatio" << YAML::Value << component.IsFixedAspectRatio;
 
 			out << YAML::EndMap; // CameraComponent
 		}
 #pragma endregion
 
 #pragma region ScriptComponent
-		if (const auto& component = entity.TryGetComponent<ScriptComponent>())
+		if (entity.HasComponent<ScriptComponent>())
 		{
+			const auto& component = entity.GetComponent<ScriptComponent>();
+
 			out << YAML::Key << "ScriptComponent";
 			out << YAML::BeginMap; // ScriptComponent
 
-			out << YAML::Key << "ClassName" << YAML::Value << component->ClassName;
+			out << YAML::Key << "ClassName" << YAML::Value << component.ClassName;
 
 			out << YAML::EndMap; // ScriptComponent  
 		}
 #pragma endregion
 
 #pragma region SpriteRendererComponent
-		if (const auto& component = entity.TryGetComponent<SpriteRendererComponent>())
+		if (entity.HasComponent<SpriteRendererComponent>())
 		{
+			const auto& component = entity.GetComponent<SpriteRendererComponent>();
+
 			out << YAML::Key << "SpriteRendererComponent";
 			out << YAML::BeginMap; // SpriteRendererComponent
 
-			if (component->Texture != nullptr)
+			if (component.Texture != nullptr)
 			{
-				out << YAML::Key << "TexturePath" << YAML::Value << component->Texture->GetPath(); // TODO not use path but actual texture asset.
-				out << YAML::Key << "MagFilter" << YAML::Value << component->Texture->GetMagFilter();
+				out << YAML::Key << "TexturePath" << YAML::Value << component.Texture->GetPath(); // TODO not use path but actual texture asset.
+				out << YAML::Key << "MagFilter" << YAML::Value << component.Texture->GetMagFilter();
 			}
 
-			out << YAML::Key << "Tiling" << YAML::Value << component->Tiling;
-			out << YAML::Key << "Color" << YAML::Value << component->Color;
+			out << YAML::Key << "Tiling" << YAML::Value << component.Tiling;
+			out << YAML::Key << "Color" << YAML::Value << component.Color;
 
 			out << YAML::EndMap; // SpriteRendererComponent
 		}
 #pragma endregion
 
 #pragma region CircleRendererComponent
-		if (const auto& component = entity.TryGetComponent<CircleRendererComponent>())
+		if (entity.HasComponent<CircleRendererComponent>())
 		{
+			const auto& component = entity.GetComponent<CircleRendererComponent>();
+
 			out << YAML::Key << "CircleRendererComponent";
 			out << YAML::BeginMap; // CircleRendererComponent
 
-			out << YAML::Key << "Color" << YAML::Value << component->Color;
-			out << YAML::Key << "Thickness" << YAML::Value << component->Thickness;
-			out << YAML::Key << "Fade" << YAML::Value << component->Fade;
+			out << YAML::Key << "Color" << YAML::Value << component.Color;
+			out << YAML::Key << "Thickness" << YAML::Value << component.Thickness;
+			out << YAML::Key << "Fade" << YAML::Value << component.Fade;
 
 			out << YAML::EndMap; // CircleRendererComponent
 		}
 #pragma endregion
 
 #pragma region Rigidbody2DComponent
-		if (const auto& component = entity.TryGetComponent<Rigidbody2DComponent>())
+		if (entity.HasComponent<Rigidbody2DComponent>())
 		{
+			const auto& component = entity.GetComponent<Rigidbody2DComponent>();
+
 			out << YAML::Key << "Rigidbody2DComponent";
 			out << YAML::BeginMap; // Rigidbody2DComponent
 
-			out << YAML::Key << "BodyType" << YAML::Value << Rigidbody2DBodyTypeToString(component->Type);
-			out << YAML::Key << "IsFixedRotation" << YAML::Value << component->IsFixedRotation;
+			out << YAML::Key << "BodyType" << YAML::Value << Rigidbody2DBodyTypeToString(component.Type);
+			out << YAML::Key << "IsFixedRotation" << YAML::Value << component.IsFixedRotation;
 
 			out << YAML::EndMap; // Rigidbody2DComponent
 		}
 #pragma endregion
 
 #pragma region BoxCollider2DComponent
-		if (const auto& component = entity.TryGetComponent<BoxCollider2DComponent>())
+		if (entity.HasComponent<BoxCollider2DComponent>())
 		{
+			const auto& component = entity.GetComponent<BoxCollider2DComponent>();
+
 			out << YAML::Key << "BoxCollider2DComponent";
 			out << YAML::BeginMap; // BoxCollider2DComponent
 
-			out << YAML::Key << "Offset" << YAML::Value << component->Offset;
-			out << YAML::Key << "Size" << YAML::Value << component->Size;
-			out << YAML::Key << "Rotation" << YAML::Value << component->Rotation;
-			out << YAML::Key << "Density" << YAML::Value << component->Density;
-			out << YAML::Key << "Friction" << YAML::Value << component->Friction;
-			out << YAML::Key << "Restitution" << YAML::Value << component->Restitution;
-			out << YAML::Key << "RestitutionThreshold" << YAML::Value << component->RestitutionThreshold;
+			out << YAML::Key << "Offset" << YAML::Value << component.Offset;
+			out << YAML::Key << "Size" << YAML::Value << component.Size;
+			out << YAML::Key << "Rotation" << YAML::Value << component.Rotation;
+			out << YAML::Key << "Density" << YAML::Value << component.Density;
+			out << YAML::Key << "Friction" << YAML::Value << component.Friction;
+			out << YAML::Key << "Restitution" << YAML::Value << component.Restitution;
+			out << YAML::Key << "RestitutionThreshold" << YAML::Value << component.RestitutionThreshold;
 
 			out << YAML::EndMap; // BoxCollider2DComponent
 		}
 #pragma endregion
 
 #pragma region CircleCollider2DComponent
-		if (const auto& component = entity.TryGetComponent<CircleCollider2DComponent>())
+		if (entity.HasComponent<CircleCollider2DComponent>())
 		{
+			const auto& component = entity.GetComponent<CircleCollider2DComponent>();
+
 			out << YAML::Key << "CircleCollider2DComponent";
 			out << YAML::BeginMap; // CircleCollider2DComponent
 
-			out << YAML::Key << "Offset" << YAML::Value << component->Offset;
-			out << YAML::Key << "Radius" << YAML::Value << component->Radius;
-			out << YAML::Key << "Density" << YAML::Value << component->Density;
-			out << YAML::Key << "Friction" << YAML::Value << component->Friction;
-			out << YAML::Key << "Restitution" << YAML::Value << component->Restitution;
-			out << YAML::Key << "RestitutionThreshold" << YAML::Value << component->RestitutionThreshold;
+			out << YAML::Key << "Offset" << YAML::Value << component.Offset;
+			out << YAML::Key << "Radius" << YAML::Value << component.Radius;
+			out << YAML::Key << "Density" << YAML::Value << component.Density;
+			out << YAML::Key << "Friction" << YAML::Value << component.Friction;
+			out << YAML::Key << "Restitution" << YAML::Value << component.Restitution;
+			out << YAML::Key << "RestitutionThreshold" << YAML::Value << component.RestitutionThreshold;
 
 			out << YAML::EndMap; // CircleCollider2DComponent
 		}

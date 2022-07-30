@@ -103,11 +103,9 @@ Entities:
       Tag: 0
       Layer: 0
     TransformComponent:
-      Position: [0, 0, 0]
+      Position: [-2.13000011, -0.361146927, 0]
       Rotation: [0, 0, 0]
       Scale: [2, 2, 1]
-    ScriptComponent:
-      ClassName: Sandbox.Player
     SpriteRendererComponent:
       TexturePath: assets\textures\ChernoLogo.png
       MagFilter: 9728
@@ -171,3 +169,19 @@ Entities:
       Friction: 0.5
       Restitution: 0
       RestitutionThreshold: 0.5
+  - Entity: 14263202880808732667
+    BaseComponent:
+      Name: Ship.png
+      Tag: 0
+      Layer: 0
+    TransformComponent:
+      Position: [-2.51970673, 1.25817871, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    ScriptComponent:
+      ClassName: Sandbox.Player
+    SpriteRendererComponent:
+      TexturePath: assets\textures\Ship.png
+      MagFilter: 9728
+      Tiling: [1, 1]
+      Color: [1, 1, 1, 1]

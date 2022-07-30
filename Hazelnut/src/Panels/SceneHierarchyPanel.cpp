@@ -47,8 +47,9 @@ namespace Hazel
 	template<typename T, typename UIFunction>
 	static void DrawComponent(Entity entity, const std::string& name, UIFunction uiFunction)
 	{
-		if (const auto& component = entity.TryGetComponent<T>())
+		if (entity.HasComponent<T>())
 		{
+			auto& component = entity.GetComponent<T>();
 			constexpr auto treeNodeFlags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_FramePadding;
 
 			auto contentRegionAvailable = ImGui::GetContentRegionAvail();
@@ -129,7 +130,7 @@ namespace Hazel
 	template<typename T>
 	static void DrawVecControls(const std::string& label, T& values, float resetValue = 0.0f, float columnWidth = 100.0f)
 	{
-		int valuesSize = sizeof(T) / 4;
+		int valuesSize = sizeof(values) / sizeof(values[0]);
 
 		ImGui::PushID(label.c_str());
 
@@ -283,7 +284,6 @@ namespace Hazel
 
 	void SceneHierarchyPanel::DrawComponents(Entity entity)
 	{
-#pragma region BaseComponent
 		if (entity)
 		{
 			char buffer[256] = {};
@@ -301,8 +301,8 @@ namespace Hazel
 
 			if (ImGui::BeginPopup("AddComponent"))
 			{
-				AddComponentMenu<CameraComponent>();
 				AddComponentMenu<ScriptComponent>();
+				AddComponentMenu<CameraComponent>();
 				AddComponentMenu<SpriteRendererComponent>();
 				AddComponentMenu<CircleRendererComponent>();
 				AddComponentMenu<Rigidbody2DComponent>();
@@ -313,33 +313,32 @@ namespace Hazel
 			ImGui::PopItemWidth();
 
 			const char* tags[] = { "Default" }; // TODO Keep tags list somewhere else
-			ImGui::Combo("##Tag", &entity.Tag(), tags, IM_ARRAYSIZE(tags));
+			ImGui::Combo("##Tag", &entity.Tag(), tags, static_cast<int>(std::size(tags)));
 
 			ImGui::PushItemWidth(-1);
 			ImGui::SameLine();
 			const char* layers[] = { "Default" }; // TODO Keep layers list somewhere else
-			ImGui::Combo("##Layer", &entity.Layer(), layers, IM_ARRAYSIZE(layers));
+			ImGui::Combo("##Layer", &entity.Layer(), layers, static_cast<int>(std::size(layers)));// IM_ARRAYSIZE(layers));
 			ImGui::PopItemWidth();
 		}
-#pragma endregion
 
 #pragma region TransformComponent
-		DrawComponent<TransformComponent>(entity, "Transform", [&](TransformComponent* component)
+		DrawComponent<TransformComponent>(entity, "Transform", [&](TransformComponent& component)
 		{
-			DrawVecControls("Position", component->Position);
+			DrawVecControls("Position", component.Position);
 
-			glm::vec3 rotation = glm::degrees(component->Rotation);
+			glm::vec3 rotation = glm::degrees(component.Rotation);
 			DrawVecControls("Rotation", rotation);
-			component->Rotation = glm::radians(rotation);
+			component.Rotation = glm::radians(rotation);
 
-			DrawVecControls("Scale", component->Scale, 1.0f);
+			DrawVecControls("Scale", component.Scale, 1.0f);
 		});
 #pragma endregion
 
 #pragma region ScriptComponent
-		DrawComponent<ScriptComponent>(entity, "Script", [](ScriptComponent* component)
+		DrawComponent<ScriptComponent>(entity, "Script", [](ScriptComponent& component)
 		{
-			bool scriptClassExists = ScriptEngine::EntityClassExist(component->ClassName);
+			bool scriptClassExists = ScriptEngine::EntityClassExist(component.ClassName);
 
 			if (!scriptClassExists)
 			{
@@ -347,10 +346,10 @@ namespace Hazel
 			}
 
 			static char buffer[64];
-			strcpy_s(buffer, component->ClassName.c_str());
+			strcpy_s(buffer, component.ClassName.c_str());
 			if (ImGui::InputText("Class", buffer, sizeof(buffer)))
 			{
-				component->ClassName = buffer;
+				component.ClassName = buffer;
 			}
 
 			if (!scriptClassExists)
@@ -360,104 +359,11 @@ namespace Hazel
 					});
 #pragma endregion
 
-#pragma region SpriteRendererComponent
-		DrawComponent<SpriteRendererComponent>(entity, "Sprite Renderer", [](SpriteRendererComponent* component)
-		{
-			ImGui::Text("Sprite");
-			ImGui::SameLine();
-			bool isSpritePressed;
-			if (component->Texture != nullptr)
-			{
-				isSpritePressed = ImGui::ImageButton((ImTextureID)(intptr_t)component->Texture->GetRendererID(), ImVec2(50.0f, 50.0f), ImVec2(0.0f, 1.0f), ImVec2(1.0f, 0.0f), 3);
-			}
-			else
-			{
-				auto& color = component->Color;
-				isSpritePressed = ImGui::ColorButton("None", ImVec4(color.r, color.g, color.b, color.a), 0, ImVec2(56.0f, 56.0f));
-			}
-
-			std::string filePath;
-
-			if (ImGui::BeginDragDropTarget())
-			{
-				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
-				{
-					const auto* path = (const wchar_t*)payload->Data;
-					auto fileSystemPath = gAssetsPath / path;
-
-					if (fileSystemPath.extension() == ".png")
-					{
-						filePath = fileSystemPath.string();
-					}
-				}
-				ImGui::EndDragDropTarget();
-			}
-
-			if (isSpritePressed)
-			{
-				filePath = FileDialogs::OpenFile("PNG (*.png)\0*.png\0");
-			}
-
-			if (component->Texture != nullptr && ImGui::BeginPopupContextItem())
-			{
-				ImGui::Text("Clear Texture?");
-				ImGui::Separator();
-				if (ImGui::Button("Yes"))
-				{
-					component->Texture = nullptr;
-					ImGui::CloseCurrentPopup();
-				}
-				ImGui::SameLine();
-				ImGui::Text(" ");
-				ImGui::SameLine();
-				if (ImGui::Button("No"))
-				{
-					ImGui::CloseCurrentPopup();
-				}
-				ImGui::EndPopup();
-			}
-
-			if (!filePath.empty())
-			{
-				component->Texture = Texture2D::Create(filePath);
-			}
-
-			if (component->Texture != nullptr)
-			{
-				if (ImGui::Button("Mag Filter Toggle"))
-				{
-					// TODO serialize Mag Filter
-					auto currentMagFilter = component->Texture->GetMagFilter();
-					component->Texture->ToggleMagFilter(currentMagFilter);
-				}
-				ImGui::SameLine();
-				ImGui::Text("%s", component->Texture->IsMagFilterLinear() ? "Linear" : "Nearest");
-				DrawVecControls("Tiling", component->Tiling, 1.0f);
-			}
-
-			auto& color = component->Color;
-			auto& newColor = color;
-			if (ImGui::ColorEdit4("Color", newColor.GetValuePtr()))
-			{
-				color = newColor;
-			}
-		});
-#pragma endregion
-
-#pragma region CircleRendererComponent
-		DrawComponent<CircleRendererComponent>(entity, "Circle Renderer", [](CircleRendererComponent* component)
-		{
-			ImGui::ColorEdit4("Color", component->Color.GetValuePtr());
-			ImGui::DragFloat("Thickness", &component->Thickness, 0.025f, 0.0f, 1.0f);
-			ImGui::DragFloat("Fade", &component->Fade, 0.00025f, 0.0f, 1.0f);
-		});
-#pragma endregion
-
 #pragma region CameraComponent
-		DrawComponent<CameraComponent>(entity, "Camera", [&](CameraComponent* component)
+		DrawComponent<CameraComponent>(entity, "Camera", [&](CameraComponent& component)
 		{
-			auto& camera = component->Camera;
-			ImGui::Checkbox("Primary", &component->IsPrimary);
+			auto& camera = component.Camera;
+			ImGui::Checkbox("Primary", &component.IsPrimary);
 			const char* projectionTypeStrings[] = { "Perspective","Orthographic" };
 			const char* currentProjectionTypeString = projectionTypeStrings[(int)camera.GetProjectionType()];
 			if (ImGui::BeginCombo("Projection", currentProjectionTypeString))
@@ -524,18 +430,164 @@ namespace Hazel
 			}	break;
 			}
 
-			if (ImGui::Checkbox("Fixed Aspect Ratio", &component->IsFixedAspectRatio) && !component->IsFixedAspectRatio)
+			if (ImGui::Checkbox("Fixed Aspect Ratio", &component.IsFixedAspectRatio) && !component.IsFixedAspectRatio)
 			{
 				camera.SetViewportSize(_scene->_viewportWidth, _scene->_viewportHeight);
 			}
 		});
 #pragma endregion
 
-#pragma region NativeScriptComponent
-		DrawComponent<NativeScriptComponent>(entity, "Native Script", [](const NativeScriptComponent* component)
+#pragma region SpriteRendererComponent
+		DrawComponent<SpriteRendererComponent>(entity, "Sprite Renderer", [](SpriteRendererComponent& component)
 		{
-			ImGui::Checkbox("Active", &component->Instance->IsEnable);
-			std::string classFilePath = component->Instance->GetClassFilePath();
+			ImGui::Text("Sprite");
+			ImGui::SameLine();
+			bool isSpritePressed;
+			if (component.Texture != nullptr)
+			{
+				isSpritePressed = ImGui::ImageButton((ImTextureID)(intptr_t)component.Texture->GetRendererID(), ImVec2(50.0f, 50.0f), ImVec2(0.0f, 1.0f), ImVec2(1.0f, 0.0f), 3);
+			}
+			else
+			{
+				auto& color = component.Color;
+				isSpritePressed = ImGui::ColorButton("None", ImVec4(color.r, color.g, color.b, color.a), 0, ImVec2(56.0f, 56.0f));
+			}
+
+			std::string filePath;
+
+			if (ImGui::BeginDragDropTarget())
+			{
+				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
+				{
+					const auto* path = (const wchar_t*)payload->Data;
+					auto fileSystemPath = gAssetsPath / path;
+
+					if (fileSystemPath.extension() == ".png")
+					{
+						filePath = fileSystemPath.string();
+					}
+				}
+				ImGui::EndDragDropTarget();
+			}
+
+			if (isSpritePressed)
+			{
+				filePath = FileDialogs::OpenFile("PNG (*.png)\0*.png\0");
+			}
+
+			if (component.Texture != nullptr && ImGui::BeginPopupContextItem())
+			{
+				ImGui::Text("Clear Texture?");
+				ImGui::Separator();
+				if (ImGui::Button("Yes"))
+				{
+					component.Texture = nullptr;
+					ImGui::CloseCurrentPopup();
+				}
+				ImGui::SameLine();
+				ImGui::Text(" ");
+				ImGui::SameLine();
+				if (ImGui::Button("No"))
+				{
+					ImGui::CloseCurrentPopup();
+				}
+				ImGui::EndPopup();
+			}
+
+			if (!filePath.empty())
+			{
+				component.Texture = Texture2D::Create(filePath);
+			}
+
+			if (component.Texture != nullptr)
+			{
+				if (ImGui::Button("Mag Filter Toggle"))
+				{
+					// TODO serialize Mag Filter
+					auto currentMagFilter = component.Texture->GetMagFilter();
+					component.Texture->ToggleMagFilter(currentMagFilter);
+				}
+				ImGui::SameLine();
+				ImGui::Text("%s", component.Texture->IsMagFilterLinear() ? "Linear" : "Nearest");
+				DrawVecControls("Tiling", component.Tiling, 1.0f);
+			}
+
+			auto& color = component.Color;
+			auto& newColor = color;
+			if (ImGui::ColorEdit4("Color", newColor.GetValuePtr()))
+			{
+				color = newColor;
+			}
+		});
+#pragma endregion
+
+#pragma region CircleRendererComponent
+		DrawComponent<CircleRendererComponent>(entity, "Circle Renderer", [](CircleRendererComponent& component)
+		{
+			ImGui::ColorEdit4("Color", component.Color.GetValuePtr());
+			ImGui::DragFloat("Thickness", &component.Thickness, 0.025f, 0.0f, 1.0f);
+			ImGui::DragFloat("Fade", &component.Fade, 0.00025f, 0.0f, 1.0f);
+		});
+#pragma endregion
+
+#pragma region Rigidbody2DComponent
+		DrawComponent<Rigidbody2DComponent>(entity, "Rigidbody 2D", [](Rigidbody2DComponent& component)
+		{
+			const char* bodyType[] = { "Static","Dynamic","Kinematic" };
+			const char* currentBodyType = bodyType[(int)component.Type];
+			if (ImGui::BeginCombo("Type", currentBodyType))
+			{
+				for (int i = 0; i < 3; i++)
+				{
+					bool isSelected = currentBodyType == bodyType[i];
+					if (ImGui::Selectable(bodyType[i], isSelected))
+					{
+						currentBodyType = bodyType[i];
+						component.Type = (Rigidbody2DComponent::BodyType)i;
+					}
+
+					if (isSelected)
+					{
+						ImGui::SetItemDefaultFocus();
+					}
+				}
+				ImGui::EndCombo();
+			}
+
+			ImGui::Checkbox("Fixed Rotation", &component.IsFixedRotation);
+		});
+#pragma endregion
+
+#pragma region BoxCollider2DComponent
+		DrawComponent<BoxCollider2DComponent>(entity, "Box Collider 2D", [](BoxCollider2DComponent& component)
+		{
+			DrawVecControls("Offset", component.Offset, 0.0f);
+			DrawVecControls("Size", component.Size, 0.5f);
+			ImGui::DragFloat("Rotation", &component.Rotation, 0.01f, 0.0f, 360.0f);
+			ImGui::DragFloat("Density", &component.Density, 0.01f, 0.0f, 1.0f);
+			ImGui::DragFloat("Friction", &component.Friction, 0.01f, 0.0f, 1.0f);
+			ImGui::DragFloat("Restitution", &component.Restitution, 0.01f, 0.0f, 1.0f);
+			ImGui::DragFloat("Restitution Threshold", &component.RestitutionThreshold, 0.01f, 0.0f);
+		});
+#pragma endregion
+
+#pragma region CircleCollider2DComponent
+		DrawComponent<CircleCollider2DComponent>(entity, "Circle Collider 2D", [](CircleCollider2DComponent& component)
+		{
+			DrawVecControls("Offset", component.Offset, 0.0f);
+			ImGui::DragFloat("Radius", &component.Radius, 0.01f, 0.0f, 0.0f);
+			ImGui::DragFloat("Density", &component.Density, 0.01f, 0.0f, 1.0f);
+			ImGui::DragFloat("Friction", &component.Friction, 0.01f, 0.0f, 1.0f);
+			ImGui::DragFloat("Restitution", &component.Restitution, 0.01f, 0.0f, 1.0f);
+			ImGui::DragFloat("Restitution Threshold", &component.RestitutionThreshold, 0.01f, 0.0f);
+		});
+#pragma endregion
+
+#pragma region NativeScriptComponent
+		DrawComponent<NativeScriptComponent>(entity, "Native Script", [](const NativeScriptComponent& component)
+		{
+			ImGui::Checkbox("Active", &component.Instance->IsEnable);
+			std::string classFilePath = component.Instance->GetClassFilePath();
 			auto lastSlash = classFilePath.find("\\src\\");
 			auto count = classFilePath.size() - lastSlash;
 			auto fileName = classFilePath.substr(lastSlash, count);
@@ -554,59 +606,6 @@ namespace Hazel
 				ImGui::Text(result.c_str());
 				ImGui::EndChild();
 			}
-		});
-#pragma endregion
-
-#pragma region Rigidbody2DComponent
-		DrawComponent<Rigidbody2DComponent>(entity, "Rigidbody 2D", [&](Rigidbody2DComponent* component)
-		{
-			const char* bodyType[] = { "Static","Dynamic","Kinematic" };
-			const char* currentBodyType = bodyType[(int)component->Type];
-			if (ImGui::BeginCombo("Type", currentBodyType))
-			{
-				for (int i = 0; i < 3; i++)
-				{
-					bool isSelected = currentBodyType == bodyType[i];
-					if (ImGui::Selectable(bodyType[i], isSelected))
-					{
-						currentBodyType = bodyType[i];
-						component->Type = (Rigidbody2DComponent::BodyType)i;
-					}
-
-					if (isSelected)
-					{
-						ImGui::SetItemDefaultFocus();
-					}
-				}
-				ImGui::EndCombo();
-			}
-
-			ImGui::Checkbox("Fixed Rotation", &component->IsFixedRotation);
-		});
-#pragma endregion
-
-#pragma region BoxCollider2DComponent
-		DrawComponent<BoxCollider2DComponent>(entity, "Box Collider 2D", [&](BoxCollider2DComponent* component)
-		{
-			DrawVecControls("Offset", component->Offset, 0.0f);
-			DrawVecControls("Size", component->Size, 0.5f);
-			ImGui::DragFloat("Rotation", &component->Rotation, 0.01f, 0.0f, 360.0f);
-			ImGui::DragFloat("Density", &component->Density, 0.01f, 0.0f, 1.0f);
-			ImGui::DragFloat("Friction", &component->Friction, 0.01f, 0.0f, 1.0f);
-			ImGui::DragFloat("Restitution", &component->Restitution, 0.01f, 0.0f, 1.0f);
-			ImGui::DragFloat("Restitution Threshold", &component->RestitutionThreshold, 0.01f, 0.0f);
-		});
-#pragma endregion
-
-#pragma region CircleCollider2DComponent
-		DrawComponent<CircleCollider2DComponent>(entity, "Circle Collider 2D", [&](CircleCollider2DComponent* component)
-		{
-			DrawVecControls("Offset", component->Offset, 0.0f);
-			ImGui::DragFloat("Radius", &component->Radius, 0.01f, 0.0f, 0.0f);
-			ImGui::DragFloat("Density", &component->Density, 0.01f, 0.0f, 1.0f);
-			ImGui::DragFloat("Friction", &component->Friction, 0.01f, 0.0f, 1.0f);
-			ImGui::DragFloat("Restitution", &component->Restitution, 0.01f, 0.0f, 1.0f);
-			ImGui::DragFloat("Restitution Threshold", &component->RestitutionThreshold, 0.01f, 0.0f);
 		});
 #pragma endregion
 	}

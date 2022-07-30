@@ -40,6 +40,7 @@ namespace Hazel
 		void OnViewportResize(uint32_t  width, uint32_t height);
 
 		Entity DuplicateEntity(Entity entity);
+		Entity GetEntityByUUID(UUID uuid);
 
 		std::string GetName() const { return _name; }
 		void SetName(const std::string& name) { _name = name; }
@@ -65,6 +66,8 @@ namespace Hazel
 		std::string _name;
 
 		b2World* _physicsWorld = nullptr;
+
+		std::unordered_map<UUID, entt::entity> _entityMap;
 
 		friend class Entity;
 		friend class SceneSerializer;

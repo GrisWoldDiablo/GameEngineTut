@@ -6,17 +6,17 @@
 
 namespace Hazel
 {
-	bool Input::IsKeyPressed(const KeyCode& key)
+	bool Input::IsKeyPressed(KeyCode keyCode)
 	{
 		HZ_PROFILE_FUNCTION();
 
 		auto* window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
-		auto state = glfwGetKey(window, static_cast<int32_t>(key));
+		auto state = glfwGetKey(window, static_cast<int32_t>(keyCode));
 
 		return state == GLFW_PRESS;
 	}
 
-	bool Input::IsMouseButtonPressed(const MouseCode& button)
+	bool Input::IsMouseButtonPressed(MouseCode button)
 	{
 		HZ_PROFILE_FUNCTION();
 

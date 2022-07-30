@@ -1,12 +1,15 @@
 #include "hzpch.h"
 #include "ScriptGlue.h"
+#include "ScriptEngine.h"
+
+#include "Hazel.h"
 
 #include "mono/metadata/object.h"
 
-namespace Hazel
-{
 #define HZ_ADD_INTERNAL_CALL(Name) mono_add_internal_call("Hazel.InternalCalls::" #Name, Name)
 
+namespace Hazel
+{
 	static void NativeLog(MonoString* string, int parameter)
 	{
 		char* cStr = mono_string_to_utf8(string);
@@ -29,6 +32,25 @@ namespace Hazel
 		return glm::dot(*parameter, *parameter);
 	}
 
+	static void Entity_GetPosition(UUID entityId, glm::vec3* outPosition)
+	{
+		auto* scene = ScriptEngine::GetSceneContext();
+		Entity entity = scene->GetEntityByUUID(entityId);
+		*outPosition = entity.Transform().Position;
+	}
+
+	static void Entity_SetPosition(UUID entityId, glm::vec3* position)
+	{
+		auto* scene = ScriptEngine::GetSceneContext();
+		Entity entity = scene->GetEntityByUUID(entityId);
+		entity.Transform().Position = *position;
+	}
+
+	static bool Input_IsKeyDown(KeyCode keyCode)
+	{
+		return Input::IsKeyPressed(keyCode);
+	}
+
 	// Returning struct might be bad for memory
 	static glm::vec3 NativeLog_Vector3Struct(glm::vec3* parameter)
 	{
@@ -43,6 +65,15 @@ namespace Hazel
 		HZ_ADD_INTERNAL_CALL(NativeLog_Vector3);
 		HZ_ADD_INTERNAL_CALL(NativeLog_Vector3Dot);
 
-		mono_add_internal_call("Hazel.InternalCalls::NativeLog_Vector3Struct", NativeLog_Vector3Struct);
+		HZ_ADD_INTERNAL_CALL(Entity_GetPosition);
+		HZ_ADD_INTERNAL_CALL(Entity_SetPosition);
+
+		HZ_ADD_INTERNAL_CALL(Input_IsKeyDown);
+
+		// Returning struct might be bad for memory
+		HZ_ADD_INTERNAL_CALL(NativeLog_Vector3Struct);
+
+		// Old ways
+		//mono_add_internal_call("Hazel.InternalCalls::NativeLog_Vector3Struct", NativeLog_Vector3Struct);
 	}
 }

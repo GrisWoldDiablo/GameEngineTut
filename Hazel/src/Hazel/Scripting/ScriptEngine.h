@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Hazel/Scene/Entity.h"
+
 extern "C" // Forward declare of class from C
 {
 	typedef struct _MonoClass MonoClass;
@@ -16,8 +18,8 @@ namespace Hazel
 		ScriptClass() = default;
 		ScriptClass(const std::string& classNamespace, const std::string& className);
 
-		MonoObject* Instanciate();
-		MonoMethod* GetMethod(const std::string& name, int parameterCount);
+		MonoObject* Instanciate(MonoMethod* constructor = nullptr, void** params = nullptr);
+		MonoMethod* GetMethod(const std::string& name, int parameterCount = 0);
 		MonoObject* InvokeMethod(MonoObject* instance, MonoMethod* monoMethod, void** params = nullptr);
 
 	private:
@@ -29,7 +31,7 @@ namespace Hazel
 	class ScriptInstance
 	{
 	public:
-		ScriptInstance(Ref<ScriptClass> scriptClass);
+		ScriptInstance(Ref<ScriptClass> scriptClass, Entity entity);
 		void InvokeOnCreate();
 		void InvokeOnUpdate(float ts);
 
@@ -37,6 +39,7 @@ namespace Hazel
 		Ref<ScriptClass> _scriptClass;
 
 		MonoObject* _instance = nullptr;
+		MonoMethod* _constructor = nullptr;
 		MonoMethod* _onCreateMethod = nullptr;
 		MonoMethod* _onUpdateMethod = nullptr;
 	};
@@ -54,7 +57,10 @@ namespace Hazel
 		static bool TryReload();
 
 		static bool EntityClassExist(const std::string& fullClassName);
+		static void OnCreateEntity(Entity entity);
+		static void OnUpdateEntity(Entity entity, Timestep timestep);
 
+		static Scene* GetSceneContext();
 		static std::unordered_map<std::string, Ref<ScriptClass>> GetEntityClasses();
 
 	private:
@@ -63,7 +69,7 @@ namespace Hazel
 
 		static bool TryLoadCSharpAssembly(const std::filesystem::path& filePath);
 
-		static MonoObject* InstanciateClass(MonoClass* monoClass);
+		static MonoObject* InstanciateClass(MonoClass* monoClass, MonoMethod* constructor = nullptr, void** params = nullptr);
 
 		static void LoadAssemblyClasses(MonoAssembly* assembly);
 
