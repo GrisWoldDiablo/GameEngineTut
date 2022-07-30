@@ -811,9 +811,21 @@ namespace Hazel
 
 				if (ImGui::BeginMenu("Script Engine"))
 				{
-					if (ImGui::MenuItem("Reload"))
+					switch (_sceneState)
 					{
-						Application::Get().ReloadScriptEngine();
+					case Hazel::EditorLayer::SceneState::Edit:
+					{
+						if (ImGui::MenuItem("Reload"))
+						{
+							Application::Get().ReloadScriptEngine();
+						}
+						break;
+					}
+					case Hazel::EditorLayer::SceneState::Play:
+					case Hazel::EditorLayer::SceneState::Simulate:
+					default:
+						ImGui::TextDisabled("Reload");
+						break;
 					}
 
 					ImGui::EndMenu();
