@@ -19,7 +19,7 @@ void GameLayer::OnAttach()
 void GameLayer::OnDetach()
 {}
 
-void GameLayer::OnUpdate(const Hazel::Timestep& timestep)
+void GameLayer::OnUpdate(Hazel::Timestep timestep)
 {
 	_level.OnUpdate(timestep);
 	const auto& playerPos = _level.GetPlayer().GetPosition();

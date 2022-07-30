@@ -46,6 +46,7 @@ namespace Hazel
 	{
 		ScriptEngine::Shutdown();
 		Renderer::Shutdown();
+		delete Time::_sInstance;
 	}
 
 	void Application::Run()

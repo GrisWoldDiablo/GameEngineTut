@@ -16,7 +16,7 @@ namespace Hazel
 		Reset();
 	}
 
-	void EditorCamera::OnUpdate(const Timestep& timestep)
+	void EditorCamera::OnUpdate(Timestep timestep)
 	{
 		const auto mousePosition = Input::GetMousePosition();
 		glm::vec2 delta = (mousePosition - _initialMousePosition) * 0.003f;

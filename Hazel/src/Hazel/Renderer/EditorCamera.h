@@ -14,7 +14,7 @@ namespace Hazel
 		EditorCamera() = default;
 		EditorCamera(float fov, float aspectRatio, float nearClip, float farClip);
 
-		void OnUpdate(const Timestep& timestep);
+		void OnUpdate(Timestep timestep);
 		void OnEvent(Event& event);
 
 		inline float GetDistance() const { return _distance; }

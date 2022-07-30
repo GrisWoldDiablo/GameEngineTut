@@ -11,7 +11,7 @@ namespace Hazel
 		:_aspectRatio(aspectRatio), _bounds({ -_aspectRatio * _zoomLevel, _aspectRatio * _zoomLevel, -_zoomLevel, _zoomLevel }), _camera(_bounds.Left, _bounds.Right, _bounds.Bottom, _bounds.Top), _rotation(rotation)
 	{}
 
-	void OrthographicCameraController::OnUpdate(const Timestep& timestep)
+	void OrthographicCameraController::OnUpdate(Timestep timestep)
 	{
 		HZ_PROFILE_FUNCTION();
 		if (Input::IsKeyPressed(HZ_KEY_W))

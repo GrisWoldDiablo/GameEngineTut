@@ -8,13 +8,13 @@ public:
 	GameLayer();
 	virtual ~GameLayer() = default;
 
-	void OnAttach() override;
-	void OnDetach() override;
-
-	void OnUpdate(const Hazel::Timestep& timestep) override;
-
-	void OnImGuiRender() override;
-	void OnEvent(Hazel::Event& event) override;
+	virtual void OnAttach() override;
+	virtual void OnDetach() override;
+	 
+	virtual void OnUpdate(Hazel::Timestep timestep) override;
+	 
+	virtual void OnImGuiRender() override;
+	virtual void OnEvent(Hazel::Event& event) override;
 
 private:
 	Hazel::OrthographicCameraController _cameraController;

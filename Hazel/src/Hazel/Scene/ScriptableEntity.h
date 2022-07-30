@@ -19,7 +19,7 @@ namespace Hazel
 
 		virtual void OnCreate() {}
 		virtual void OnDestroy() {}
-		virtual void OnUpdate(const Timestep& timestep) {}
+		virtual void OnUpdate(Timestep timestep) {}
 		virtual std::string GetClassFilePath() = 0;
 
 	protected:

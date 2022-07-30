@@ -54,7 +54,7 @@ public:
 		// -- Texture
 	}
 
-	void OnUpdate(const Hazel::Timestep& timestep) override
+	virtual void OnUpdate(Hazel::Timestep timestep) override
 	{
 		// Update
 		_cameraController.OnUpdate(timestep);
@@ -100,7 +100,7 @@ public:
 		Hazel::Renderer::EndScene();
 	}
 
-	void OnImGuiRender() override
+	virtual void OnImGuiRender() override
 	{
 		ImGui::Begin("Title", nullptr, ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoTitleBar);
 		if (ImGui::BeginMenuBar())
@@ -144,7 +144,7 @@ public:
 		}
 	}
 
-	void OnEvent(Hazel::Event& event) override
+	virtual void OnEvent(Hazel::Event& event) override
 	{
 		_cameraController.OnEvent(event);
 	}

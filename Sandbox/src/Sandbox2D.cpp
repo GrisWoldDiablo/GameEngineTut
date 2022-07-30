@@ -80,7 +80,7 @@ void Sandbox2D::OnDetach()
 	HZ_PROFILE_FUNCTION();
 }
 
-void Sandbox2D::OnUpdate(const Hazel::Timestep& timestep)
+void Sandbox2D::OnUpdate(Hazel::Timestep timestep)
 {
 	HZ_PROFILE_FUNCTION();
 	_updateTimer.Reset();

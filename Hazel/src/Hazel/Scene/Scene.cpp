@@ -91,7 +91,6 @@ namespace Hazel
 		auto& dstSceneRegistry = newScene->_registry;
 		std::unordered_map<UUID, entt::entity> enttMap;
 
-
 		auto group = srcSceneRegistry.group<IDComponent, BaseComponent>();
 
 		// Need to run reverse to keep order of entt ID intact.
@@ -257,7 +256,7 @@ namespace Hazel
 		}
 	}
 
-	void Scene::OnUpdateSimulation(const Timestep& timestep, const EditorCamera& camera)
+	void Scene::OnUpdateSimulation(Timestep timestep, const EditorCamera& camera)
 	{
 
 		// Physics
@@ -288,7 +287,7 @@ namespace Hazel
 		RenderScene(camera);
 	}
 
-	void Scene::OnUpdateEditor(const Timestep& timestep, const EditorCamera& camera)
+	void Scene::OnUpdateEditor(Timestep timestep, const EditorCamera& camera)
 	{
 		RenderScene(camera);
 	}

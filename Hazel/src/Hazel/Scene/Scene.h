@@ -30,9 +30,9 @@ namespace Hazel
 		void OnSimulationStart();
 		void OnSimulationStop();
 
-		void OnUpdateRuntime(const Timestep& timestep);
-		void OnUpdateSimulation(const Timestep& timestep, const EditorCamera& camera);
-		void OnUpdateEditor(const Timestep& timestep, const EditorCamera& camera);
+		void OnUpdateRuntime(Timestep timestep);
+		void OnUpdateSimulation(Timestep timestep, const EditorCamera& camera);
+		void OnUpdateEditor(Timestep timestep, const EditorCamera& camera);
 
 		void DrawSpriteRenderComponent(const glm::vec3& cameraPosition);
 		void DrawCircleRenderComponent(const glm::vec3& cameraPosition);

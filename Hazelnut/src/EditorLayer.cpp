@@ -85,7 +85,7 @@ namespace Hazel
 		HZ_PROFILE_FUNCTION();
 	}
 
-	void EditorLayer::OnUpdate(const Timestep& timestep)
+	void EditorLayer::OnUpdate(Timestep timestep)
 	{
 		HZ_PROFILE_FUNCTION();
 		_updateTimer.Reset();

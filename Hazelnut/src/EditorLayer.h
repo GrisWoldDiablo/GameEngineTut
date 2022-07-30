@@ -20,13 +20,13 @@ namespace Hazel
 		EditorLayer();
 		virtual ~EditorLayer() override = default;
 
-		void OnAttach() override;
-		void OnDetach() override;
+		virtual void OnAttach() override;
+		virtual void OnDetach() override;
 
-		void OnUpdate(const Timestep& timestep) override;
+		virtual void OnUpdate(Timestep timestep) override;
 
-		void OnImGuiRender() override;
-		void OnEvent(Event& event) override;
+		virtual void OnImGuiRender() override;
+		virtual void OnEvent(Event& event) override;
 
 	private:
 		bool OnKeyPressed(const KeyPressedEvent& keyPressedEvent);

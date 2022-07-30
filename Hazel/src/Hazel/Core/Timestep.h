@@ -31,7 +31,7 @@ namespace Hazel
 
 	private:
 
-		static void SetTimestep(const Timestep& timestep) { _sInstance->_timestep = timestep; }
+		static void SetTimestep(Timestep timestep) { _sInstance->_timestep = timestep; }
 		static void SetTimeElapsed(float time) { _sTimeElapsed = time; }
 
 	private:

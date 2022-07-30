@@ -9,12 +9,12 @@ namespace Hazel
 	class CameraController : public ScriptableEntity
 	{
 	public:
-		void OnCreate() override
+		virtual void OnCreate() override
 		{
 			HZ_CORE_LINFO("Create {0}", _entity.Name());
 		}
 
-		void OnUpdate(const Timestep& timestep) override
+		virtual void OnUpdate(Timestep timestep) override
 		{
 			if (!GetComponent<CameraComponent>().IsPrimary
 				|| !Input::IsMouseButtonPressed(MouseCode::ButtonRight))
@@ -72,7 +72,7 @@ namespace Hazel
 			}
 		}
 
-		std::string GetClassFilePath() override
+		virtual std::string GetClassFilePath() override
 		{
 			return { __FILE__ };
 		}
