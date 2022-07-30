@@ -44,6 +44,7 @@ project "Hazelnut"
 		optimize "on"
 
 	filter "configurations:Dist"
+		kind "WindowedApp"
 		defines "HZ_DIST"
 		runtime "Release"
 		optimize "on"

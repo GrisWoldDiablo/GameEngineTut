@@ -6,10 +6,10 @@
 #include "Hazel/Events/ApplicationEvent.h"
 #include "Hazel/ImGui/ImGuiLayer.h"
 
-int main(int argc, char** argv);
-
 namespace Hazel
 {
+	int Main(int argc, char** argv);
+
 	struct ApplicationCommandLineArgs
 	{
 		int Count = 0;
@@ -70,7 +70,7 @@ namespace Hazel
 	private:
 		// Singleton related.
 		static Application* _sInstance;
-		friend int ::main(int argc, char** argv);
+		friend int Hazel::Main(int argc, char** argv);
 	};
 
 	// To be define by the client.
