@@ -8,43 +8,13 @@ extern "C" // Forward declare of class from C
 	typedef struct _MonoObject MonoObject;
 	typedef struct _MonoMethod MonoMethod;
 	typedef struct _MonoAssembly MonoAssembly;
+	typedef struct _MonoImage MonoImage;
 }
 
 namespace Hazel
 {
-	class ScriptClass
-	{
-	public:
-		ScriptClass() = default;
-		ScriptClass(const std::string& classNamespace, const std::string& className);
-
-		MonoObject* Instanciate(MonoMethod* constructor = nullptr, void** params = nullptr);
-		MonoMethod* GetMethod(const std::string& name, int parameterCount = 0);
-		MonoObject* InvokeMethod(MonoObject* instance, MonoMethod* monoMethod, void** params = nullptr);
-
-	private:
-		std::string _classNamespace;
-		std::string _className;
-		MonoClass* _monoClass = nullptr;
-	};
-
-	class ScriptInstance
-	{
-	public:
-		ScriptInstance(Ref<ScriptClass> scriptClass, Entity entity);
-		void InvokeOnCreate();
-		void InvokeOnUpdate(float ts);
-
-	private:
-		Ref<ScriptClass> _scriptClass;
-
-		MonoObject* _instance = nullptr;
-		MonoMethod* _constructor = nullptr;
-		MonoMethod* _onCreateMethod = nullptr;
-		MonoMethod* _onUpdateMethod = nullptr;
-	};
-
 	class Scene;
+	class ScriptClass;
 
 	class ScriptEngine
 	{
@@ -67,14 +37,16 @@ namespace Hazel
 		static void InitMono();
 		static void ShutdownMono();
 
+		static bool TrySetupEngine();
 		static bool TryLoadCSharpAssembly(const std::filesystem::path& filePath);
+		static void LoadAssemblyClasses(MonoAssembly* assembly);
 
 		static MonoObject* InstanciateClass(MonoClass* monoClass, MonoMethod* constructor = nullptr, void** params = nullptr);
 
-		static void LoadAssemblyClasses(MonoAssembly* assembly);
-
-		static void DemoFunctionality();
+		static MonoImage* GetAssemblyImage();
+		static Ref<ScriptClass> GetEntityClass();
 
 		friend class ScriptClass;
+		friend class ScriptInstance;
 	};
 }

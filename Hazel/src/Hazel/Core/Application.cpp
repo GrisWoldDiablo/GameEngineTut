@@ -105,8 +105,7 @@ namespace Hazel
 	{
 		if (!ScriptEngine::TryReload())
 		{
-			HZ_CORE_LCRITICAL("ScriptEngine in error state, shutting down application!");
-			Stop();
+			HZ_CORE_LCRITICAL("ScriptEngine will need reloading.");
 		}
 	}
 
