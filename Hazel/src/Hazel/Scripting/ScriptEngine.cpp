@@ -238,6 +238,7 @@ namespace Hazel
 		sScriptData->EntityBaseClass = CreateRef<ScriptClass>("Hazel", "Entity");
 		LoadAssemblyClasses(sScriptData->CoreAssembly);
 
+		ScriptGlue::RegisterComponents();
 		ScriptGlue::RegisterFunctions();
 
 		return true;
@@ -325,7 +326,7 @@ namespace Hazel
 		return monoObject;
 	}
 
-	MonoImage* ScriptEngine::GetAssemblyImage()
+	MonoImage* ScriptEngine::GetCoreAssemblyImage()
 	{
 		return sScriptData->CoreAssemblyImage;
 	}

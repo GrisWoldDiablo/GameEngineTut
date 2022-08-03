@@ -1,6 +1,9 @@
+﻿
+using System;
+
 namespace Hazel
 {
-	public struct Vector3
+	public struct Vector3 : IEquatable<Vector3>
 	{
 		public float X;
 		public float Y;
@@ -22,11 +25,6 @@ namespace Hazel
 			Z = scalar;
 		}
 
-		public override string ToString()
-		{
-			return $"({X:F2},{Y:F2},{Z:F2})";
-		}
-
 		public static Vector3 operator *(Vector3 vector, float scalar)
 		{
 			return new Vector3(vector.X * scalar, vector.Y * scalar, vector.Z * scalar);
@@ -36,31 +34,30 @@ namespace Hazel
 		{
 			return new Vector3(lhs.X + rhs.X, lhs.Y + rhs.Y, lhs.Z + rhs.Z);
 		}
-	}
 
-	public class Entity
-	{
-		protected Entity()
+		public override string ToString()
 		{
-			Id = 0;
+			return $"({X:F2},{Y:F2},{Z:F2})";
 		}
 
-		internal Entity(ulong id)
+		public override int GetHashCode()
 		{
-			Id = id;
+			return X.GetHashCode() ^ Y.GetHashCode() ^ Z.GetHashCode();
 		}
 
-		public readonly ulong Id;
-
-		public Vector3 Position
+		public override bool Equals(object other)
 		{
-			get
+			if (!(other is Vector3))
 			{
-				InternalCalls.Entity_GetPosition(Id, out Vector3 position);
-				return position;
+				return false;
 			}
 
-			set => InternalCalls.Entity_SetPosition(Id, ref value);
+			return Equals((Vector3)other);
+		}
+
+		public bool Equals(Vector3 other)
+		{
+			return X == other.X && Y == other.Y && Z == other.Z;
 		}
 	}
 }

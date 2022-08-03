@@ -1,22 +1,29 @@
 ﻿using Hazel;
 using System;
+using System.Reflection;
 
 namespace Sandbox
 {
 	public class Player : Entity
 	{
+		private TransformComponent _transform;
+
 		void OnCreate()
 		{
-			Console.WriteLine($"Player.OnCreate - {Id}");
+			Console.WriteLine($"{GetType().FullName}.{MethodBase.GetCurrentMethod().Name} - {Id}");
+
+			_transform = GetComponent<TransformComponent>();
+			_transform.Position = new Vector3(0.0f);
 		}
 
 		void OnUpdate(float timestep)
 		{
-			Console.WriteLine($"Player.OnUpdate: {timestep}");
-
-
 			float speed = 1.0f;
 			Vector3 velocity = Vector3.Zero;
+			if (Input.IsKeyDown(KeyCode.LeftShift))
+			{
+				speed = 5.0f;
+			}
 
 			if (Input.IsKeyDown(KeyCode.W))
 			{
@@ -33,6 +40,10 @@ namespace Sandbox
 			if (Input.IsKeyDown(KeyCode.D))
 			{
 				velocity.X = 1.0f;
+			}
+			if (Input.IsKeyDown(KeyCode.SPACE))
+			{
+				Console.WriteLine("Jump!");
 			}
 
 			Vector3 position = Position;
