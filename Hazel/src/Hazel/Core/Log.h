@@ -3,21 +3,37 @@
 #define  GLM_ENABLE_EXPERIMENTAL
 #include "glm/gtx/string_cast.hpp"
 
+#include <vector>
+
 #include <spdlog/spdlog.h>
 #include <spdlog/fmt/ostr.h>
 
 namespace Hazel
 {
+	typedef std::function<void(const std::string&)> LogDelegate;
+	
+	class LoggerContainer;
+	class Logger;
+
 	class Log
+
 	{
 	public:
+
 		static void Init();
 		static std::shared_ptr<spdlog::logger>& GetCoreLogger() { return _sCoreLogger; }
 		static std::shared_ptr<spdlog::logger>& GetClientLogger() { return _sClientLogger; }
 
+		static void LogIt(const std::string& msg);
+		static void Bind(const std::string& name, const Ref<LogDelegate>& logDelegate);
+		static void Unbind(const Ref<LogDelegate>& logDelegate);
+		static Ref<std::ostringstream> GetSS(const std::string& name);
+		static Ref<Logger> GetLogger(const std::string& name);
+
 	private:
-		static std::shared_ptr<spdlog::logger> _sCoreLogger;
-		static std::shared_ptr<spdlog::logger> _sClientLogger;
+		static Ref<LoggerContainer> _loggerContainer;
+		static Ref<spdlog::logger> _sCoreLogger;
+		static Ref<spdlog::logger> _sClientLogger;
 	};
 }
 
@@ -48,6 +64,11 @@ inline OStream& operator<<(OStream& os, const glm::qua<T, Q>& quaternion)
 #define HZ_CORE_LWARN(...)		::Hazel::Log::GetCoreLogger()->warn(__VA_ARGS__)	 // Yellow text
 #define HZ_CORE_LERROR(...)		::Hazel::Log::GetCoreLogger()->error(__VA_ARGS__)	 // Red text
 #define HZ_CORE_LCRITICAL(...)	::Hazel::Log::GetCoreLogger()->critical(__VA_ARGS__) // White text Red background
+
+// Normal text also called bound delegates.	
+#define HZ_CORE_LLOGIT(msg)				::Hazel::Log::LogIt(msg)
+#define HZ_CORE_LBIND(name, deleg)	::Hazel::Log::Bind(name, deleg)
+#define HZ_CORE_LUNBIND(deleg)		::Hazel::Log::Unbind(deleg)
 
 // Client application log Macros
 #define HZ_LTRACE(...)		::Hazel::Log::GetClientLogger()->trace(__VA_ARGS__)		// Normal text

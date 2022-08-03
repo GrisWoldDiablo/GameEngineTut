@@ -14,6 +14,8 @@ namespace Hazel
 {
 	inline const char* kNewSceneName = "Untitled";
 
+	class Logger;
+	
 	class EditorLayer final : public Layer
 	{
 	public:
@@ -45,22 +47,32 @@ namespace Hazel
 		void SaveSceneAs();
 
 	private:
-		void DrawToolbar();
+		// Menu
 		void DrawFileMenu();
-		void DrawSceneViewport();
-		void DrawStats();
-		void DrawTools();
-		void SafetyShutdownCheck();
-		void CalculateFPS();
+		void DrawToolbar();
+
+		// Window
+		void DrawSceneViewportWindow();
+		void DrawStatsWindow();
+		void DrawToolsWindow();
+		// Editor Log
+		void DrawLogsWindow();
+		void EditorLog(const std::string& message);
 
 		void SetWindowTitleSceneName(const std::filesystem::path& scenePath = "");
 		void AddTooltip(const std::string& tooltipMessage);
 
+		// Scene
 		void OnScenePlay();
 		void OnSceneSimulate();
 		void OnSceneStop();
-
+		
+		// Entity
 		void DuplicateEntity();
+
+		// Misc
+		void SafetyShutdownCheck();
+		void CalculateFPS();
 
 	private:
 		Color _clearColor = { 0.13f, 0.13f, 0.13f, 1.0f };
@@ -131,5 +143,12 @@ namespace Hazel
 			Simulate = 2
 		} _sceneState = SceneState::Edit;
 
+		// Windows
+		bool _isLogsWindowOpen = true;
+
+		Ref<LogDelegate> _logDelegate;
+		std::stringstream _logString;
+		Ref<std::ostringstream> _ss;
+		Ref<Logger> _logger;
 	};
 }

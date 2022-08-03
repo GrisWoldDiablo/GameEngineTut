@@ -1,14 +1,13 @@
 #include "EditorLayer.h"
 #include "NativeScripts.h"
+#include "Hazel/Scene/SceneSerializer.h"
+#include "Hazel/Utils/PlatformUtils.h"
+#include "Hazel/Math/Math.h"
+#include "Hazel/Log/Logger.h"
 
 #include <imgui/imgui.h>
 #include <glm/gtc/type_ptr.hpp>
-
-#include "Hazel/Scene/SceneSerializer.h"
-#include "Hazel/Utils/PlatformUtils.h"
-
-#include "ImGuizmo.h"
-#include "Hazel/Math/Math.h"
+#include <ImGuizmo.h>
 
 namespace Hazel
 {
@@ -35,11 +34,18 @@ namespace Hazel
 		};
 
 		_shaderLoadingTexture = Texture2D::Create("Resources/ShadersLoading.png");
+
+		//_logDelegate = CreateRef<LogDelegate>(std::bind(&EditorLayer::EditorLog, this, std::placeholders::_1));
+		//_ss = Log::GetSS("Editor");
+
+		_logger = Log::GetLogger("Editor");
 	}
 
 	void EditorLayer::OnAttach()
 	{
 		HZ_PROFILE_FUNCTION();
+
+		HZ_CORE_LBIND("Editor", _logDelegate);
 
 		// Set Fonts
 		auto imGuiLayer = Application::Get().GetImGuiLayer();
@@ -83,6 +89,8 @@ namespace Hazel
 	void EditorLayer::OnDetach()
 	{
 		HZ_PROFILE_FUNCTION();
+
+		HZ_CORE_LUNBIND(_logDelegate);
 	}
 
 	void EditorLayer::OnUpdate(Timestep timestep)
@@ -186,6 +194,8 @@ namespace Hazel
 		ImGui::Begin("DockSpace", &dockSpaceOpen, window_flags | ImGuiWindowFlags_NoNavInputs);
 		ImGui::PopStyleVar();
 
+		DrawFileMenu();
+
 		DrawToolbar();
 
 		if (opt_fullscreen)
@@ -207,14 +217,15 @@ namespace Hazel
 
 		style.WindowMinSize = originalWindowMinSize;
 
-		DrawFileMenu();
-		DrawSceneViewport();
-		DrawTools();
+		DrawSceneViewportWindow();
 
 		_sceneHierarchyPanel.OnImGuiRender();
 		_contentBrowserPanel.OnImGuiRender();
 
-		DrawStats();
+		DrawLogsWindow();
+		DrawToolsWindow();
+		DrawStatsWindow();
+
 		ImGui::End();
 	}
 
@@ -276,6 +287,15 @@ namespace Hazel
 			}
 			break;
 		}
+		// Window Commands
+		case Key::L:
+		{
+			if (isControlPressed)
+			{
+				_isLogsWindowOpen = true;
+			}
+			break;
+		}
 		// Gizmos Commands
 		case Key::Q: // Nothing
 		{
@@ -284,7 +304,9 @@ namespace Hazel
 				_gizmoType = -1;
 			}
 			break;
+		}
 		case Key::W: // Position
+		{
 			if (!isModiferPressed && !isImGuizmoInUse)
 			{
 				_gizmoType = ImGuizmo::TRANSLATE;
@@ -292,11 +314,13 @@ namespace Hazel
 			break;
 		}
 		case Key::E: // Rotation
+		{
 			if (!isModiferPressed && !isImGuizmoInUse)
 			{
 				_gizmoType = ImGuizmo::ROTATE;
 			}
 			break;
+		}
 		case Key::R: // Scale
 		{
 			if (!isModiferPressed && !isImGuizmoInUse)
@@ -584,6 +608,91 @@ namespace Hazel
 		window.SetTitle(ss.str());
 	}
 
+	void EditorLayer::DrawFileMenu()
+	{
+		if (ImGui::BeginMenuBar())
+		{
+			if (ImGui::BeginMenu("File"))
+			{
+				if (ImGui::MenuItem("New", "Ctrl+N"))
+				{
+					NewScene(true);
+				}
+
+				if (ImGui::MenuItem("Open...", "Ctrl+O"))
+				{
+					OpenScene();
+				}
+
+				if (ImGui::MenuItem("Save", "Ctrl+S"))
+				{
+					SaveScene();
+				}
+
+				if (ImGui::MenuItem("Save As...", "Ctrl+Shift+S"))
+				{
+					SaveSceneAs();
+				}
+
+				ImGui::Separator();
+
+				if (ImGui::MenuItem("Exit"))
+				{
+					HZ_LCRITICAL("Exiting application.");
+					Application::Get().Stop();
+				}
+
+				ImGui::EndMenu();
+			}
+
+			if (ImGui::BeginMenu("Window"))
+			{
+				ImGui::MenuItem("Console", "Ctrl+L", &_isLogsWindowOpen);
+
+
+				ImGui::EndMenu();
+			}
+
+			if (ImGui::BeginMenu("Extra"))
+			{
+				if (ImGui::BeginMenu("Shader"))
+				{
+					for (int i = 0; i < std::size(sRendererShaderName); i++)
+					{
+						std::stringstream ss;
+						const auto rendererShaderType = static_cast<RendererShader>(i);
+						ss << "Reload " << sRendererShaderName[rendererShaderType];
+
+						if (ImGui::MenuItem(ss.str().c_str()))
+						{
+							Renderer2D::ReloadShader(rendererShaderType);
+						}
+					}
+
+					ImGui::EndMenu();
+				}
+
+				if (ImGui::BeginMenu("Script Engine"))
+				{
+					if (ImGui::MenuItem("Reload", "", nullptr, _sceneState == SceneState::Edit))
+					{
+						Application::Get().ReloadScriptEngine();
+					}
+
+					ImGui::EndMenu();
+				}
+
+				ImGui::EndMenu();
+			}
+
+			ImGui::Spacing();
+
+			ImGui::Text("\tFPS : %i", _currentFPS);
+
+			ImGui::EndMenuBar();
+		}
+	}
+
 	void EditorLayer::DrawToolbar()
 	{
 		const auto size = ImVec2(25.0f, 25.0f);
@@ -751,93 +860,7 @@ namespace Hazel
 		}
 	}
 
-	void EditorLayer::DrawFileMenu()
-	{
-		if (ImGui::BeginMenuBar())
-		{
-			if (ImGui::BeginMenu("File"))
-			{
-				if (ImGui::MenuItem("New", "Ctrl+N"))
-				{
-					NewScene(true);
-				}
-
-				if (ImGui::MenuItem("Open...", "Ctrl+O"))
-				{
-					OpenScene();
-				}
-
-				if (ImGui::MenuItem("Save", "Ctrl+S"))
-				{
-					SaveScene();
-				}
-
-				if (ImGui::MenuItem("Save As...", "Ctrl+Shift+S"))
-				{
-					SaveSceneAs();
-				}
-
-				ImGui::Separator();
-
-				if (ImGui::MenuItem("Exit"))
-				{
-					HZ_LCRITICAL("Exiting application.");
-					Application::Get().Stop();
-				}
-				ImGui::EndMenu();
-			}
-			ImGui::Text("\tFPS : %i", _currentFPS);
-
-			ImGui::Spacing();
-
-			if (ImGui::BeginMenu("Extra"))
-			{
-				if (ImGui::BeginMenu("Shader"))
-				{
-					for (int i = 0; i < std::size(sRendererShaderName); i++)
-					{
-						std::stringstream ss;
-						const auto rendererShaderType = static_cast<RendererShader>(i);
-						ss << "Reload " << sRendererShaderName[rendererShaderType];
-
-						if (ImGui::MenuItem(ss.str().c_str()))
-						{
-							Renderer2D::ReloadShader(rendererShaderType);
-						}
-					}
-
-					ImGui::EndMenu();
-				}
-
-				if (ImGui::BeginMenu("Script Engine"))
-				{
-					switch (_sceneState)
-					{
-					case Hazel::EditorLayer::SceneState::Edit:
-					{
-						if (ImGui::MenuItem("Reload"))
-						{
-							Application::Get().ReloadScriptEngine();
-						}
-						break;
-					}
-					case Hazel::EditorLayer::SceneState::Play:
-					case Hazel::EditorLayer::SceneState::Simulate:
-					default:
-						ImGui::TextDisabled("Reload");
-						break;
-					}
-
-					ImGui::EndMenu();
-				}
-
-				ImGui::EndMenu();
-			}
-			ImGui::EndMenuBar();
-		}
-	}
-
-	void EditorLayer::DrawSceneViewport()
+	void EditorLayer::DrawSceneViewportWindow()
 	{
 		HZ_PROFILE_FUNCTION();
 
@@ -1009,7 +1032,7 @@ namespace Hazel
 		ImGui::PopStyleVar();
 	}
 
-	void EditorLayer::DrawStats()
+	void EditorLayer::DrawStatsWindow()
 	{
 		auto stats = Renderer2D::GetStats();
 
@@ -1035,13 +1058,13 @@ namespace Hazel
 		ImGui::End();
 	}
 
-	void EditorLayer::DrawTools()
+	void EditorLayer::DrawToolsWindow()
 	{
 		ImGui::Begin("Tools");
 
 		ImGui::Checkbox("Show physics colliders", &_shouldShowPhysicsColliders);
 
-		if (ImGui::Button("Show Demo Window"))
+		if (ImGui::Button("Show ImGui Demo Window"))
 		{
 			_isDemoWidowOpen = !_isDemoWidowOpen;
 		}
@@ -1076,6 +1099,54 @@ namespace Hazel
 		}
 
 		ImGui::End();
+	}
+
+	void EditorLayer::DrawLogsWindow()
+	{
+		if (!_isLogsWindowOpen)
+		{
+			return;
+		}
+
+		ImGui::Begin("LogsWindow", &_isLogsWindowOpen);
+		{
+			if (ImGui::Button("Clear"))
+			{
+				//_logString.str(std::string());
+				//_ss->str(std::string());
+				_logger->ClearData();
+			}
+			ImGui::SameLine();
+			//_ss->seekp(0, std::ios::end);
+			//_ss->seekp(0, std::ios::beg);
+			ImGui::Text("Size: %d", _logger->GetSize());
+
+			ImGui::BeginChild("LogString", { 0,0 }, false, ImGuiWindowFlags_HorizontalScrollbar);
+			{
+				//ImGui::Text(_logString.str().c_str());
+				//ImGui::Text(_ss->str().c_str());
+
+				ImGui::TextUnformatted(_logger->GetData().c_str());
+				if (ImGui::GetScrollY() >= ImGui::GetScrollMaxY())
+				{
+					ImGui::SetScrollHereY(1.0f);
+				}
+			}
+			ImGui::EndChild();
+
+		}
+		ImGui::End();
+	}
+
+	void EditorLayer::EditorLog(const std::string& message)
+	{
+		if (_logString.str().empty())
+		{
+			_logString << message;
+			return;
+		}
+
+		_logString << "\n" << message;
 	}
 
 	/// <summary>
@@ -1137,6 +1208,9 @@ namespace Hazel
 
 	void EditorLayer::OnScenePlay()
 	{
+		_logger->Log("Play {0}", 69);
+		//HZ_CORE_LLOGIT("Play");
+
 		_sceneState = SceneState::Play;
 
 		_activeScene = Scene::Copy(_editorScene);
@@ -1150,6 +1224,9 @@ namespace Hazel
 
 	void EditorLayer::OnSceneSimulate()
 	{
+		_logger->Log("Simulate {0}", 420);
+		//HZ_CORE_LLOGIT("Simulate");
+
 		_sceneState = SceneState::Simulate;
 
 		_activeScene = Scene::Copy(_editorScene);
@@ -1163,6 +1240,9 @@ namespace Hazel
 
 	void EditorLayer::OnSceneStop()
 	{
+		_logger->Error("Edit {0}", 42069);
+		//HZ_CORE_LLOGIT("Edit");
+
 		HZ_CORE_ASSERT(_sceneState == SceneState::Play || _sceneState == SceneState::Simulate, "Invalid Scene State.");
 
 		switch (_sceneState)
