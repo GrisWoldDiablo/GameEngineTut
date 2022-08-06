@@ -1,13 +1,18 @@
 #pragma once
+#include "Hazel/Scene/Components.h"
 
 namespace Hazel
 {
 	class ScriptGlue
 	{
 	public:
-		template<typename T>
-		static void RegisterComponent();
 		static void RegisterComponents();
 		static void RegisterFunctions();
+
+	private:
+		template<typename... TComponent>
+		static void RegisterComponent();
+		template<typename... TComponent>
+		static void RegisterComponents(ComponentGroup<TComponent...>);
 	};
 }

@@ -6,7 +6,14 @@ namespace Hazel
 	internal class InternalCalls
 	{
 		//////////////
-		// Entity
+		// Inputs
+		//////////////
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern static bool Input_IsKeyDown(KeyCode keyCode);
+
+		//////////////
+		// Entities
 		//////////////
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -18,11 +25,10 @@ namespace Hazel
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern static void TransformComponent_SetPosition(ulong entityId, ref Vector3 position);
 
-		//////////////
-		// Inputs
-		//////////////
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern static void Rigidbody2DComponent_ApplyLinearImpulse(ulong entityId, ref Vector2 impulse, ref Vector2 point, bool wake);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern static bool Input_IsKeyDown(KeyCode keyCode);
+		internal extern static void Rigidbody2DComponent_ApplyLinearImpulseToCenter(ulong entityId, ref Vector2 impulse, bool wake);
 	}
 }

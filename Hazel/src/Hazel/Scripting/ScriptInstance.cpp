@@ -22,12 +22,18 @@ namespace Hazel
 
 	void ScriptInstance::InvokeOnCreate()
 	{
-		_scriptClass->InvokeMethod(_instance, _onCreateMethod);
+		if (_onCreateMethod)
+		{
+			_scriptClass->InvokeMethod(_instance, _onCreateMethod);
+		}
 	}
 
 	void ScriptInstance::InvokeOnUpdate(float timestep)
 	{
-		void* param = &timestep;
-		_scriptClass->InvokeMethod(_instance, _onUpdateMethod, &param);
+		if (_onUpdateMethod)
+		{
+			void* param = &timestep;
+			_scriptClass->InvokeMethod(_instance, _onUpdateMethod, &param);
+		}
 	}
 }

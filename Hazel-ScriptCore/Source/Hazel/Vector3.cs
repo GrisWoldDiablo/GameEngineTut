@@ -27,6 +27,16 @@ namespace Hazel
 			Z = scalar;
 		}
 
+		public Vector2 XY
+		{
+			get => new Vector2(X, Y);
+			set
+			{
+				X = value.X;
+				Y = value.Y;
+			}
+		}
+
 		public static Vector3 operator *(Vector3 vector, float scalar)
 		{
 			return new Vector3(vector.X * scalar, vector.Y * scalar, vector.Z * scalar);
@@ -35,6 +45,11 @@ namespace Hazel
 		public static Vector3 operator +(Vector3 lhs, Vector3 rhs)
 		{
 			return new Vector3(lhs.X + rhs.X, lhs.Y + rhs.Y, lhs.Z + rhs.Z);
+		}
+
+		public static implicit operator Vector3(Vector2 vector2)
+		{
+			return new Vector3(vector2.X, vector2.Y, 0.0f);
 		}
 
 		public override string ToString()
