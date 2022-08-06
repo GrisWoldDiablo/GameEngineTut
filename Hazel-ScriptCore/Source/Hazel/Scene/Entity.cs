@@ -1,10 +1,26 @@
-
-using System;
-
 namespace Hazel
 {
 	public class Entity
 	{
+		public readonly ulong Id;
+
+		private TransformComponent _transform;
+
+		public TransformComponent Transform
+		{
+			get
+			{
+				if (_transform == null)
+				{
+					_transform = GetComponent<TransformComponent>();
+				}
+
+				return _transform;
+			}
+
+			private set => _transform = value;
+		}
+
 		protected Entity()
 		{
 			Id = 0;
@@ -15,24 +31,9 @@ namespace Hazel
 			Id = id;
 		}
 
-		public readonly ulong Id;
-
-		public Vector3 Position
-		{
-			get
-			{
-				InternalCalls.TransformComponent_GetPosition(Id, out Vector3 position);
-				return position;
-			}
-
-			set => InternalCalls.TransformComponent_SetPosition(Id, ref value);
-		}
-
 		public bool HasComponent<T>() where T : Component, new()
 		{
-			Type componentType = typeof(T);
-			return InternalCalls.Entity_HasComponent(Id, componentType);
-
+			return InternalCalls.Entity_HasComponent(Id, typeof(T));
 		}
 
 		public T GetComponent<T>() where T : Component, new()
@@ -42,8 +43,7 @@ namespace Hazel
 				return null;
 			}
 
-			T component = new T() { Entity = this };
-			return component;
+			return new T() { Entity = this };
 		}
 	}
 }

@@ -11,7 +11,7 @@
 		{
 			get
 			{
-				InternalCalls.TransformComponent_GetPosition(Entity.Id, out Vector3 position);
+				InternalCalls.TransformComponent_GetPosition(Entity.Id, out var position);
 				return position;
 			}
 

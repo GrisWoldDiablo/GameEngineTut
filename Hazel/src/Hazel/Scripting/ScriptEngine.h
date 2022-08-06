@@ -24,7 +24,7 @@ namespace Hazel
 
 		static void OnRuntimeStart(Scene* scene);
 		static void OnRuntimeStop();
-		static bool TryReload();
+		static bool TryReload(bool shouldLog = true);
 
 		static bool EntityClassExist(const std::string& fullClassName);
 		static void OnCreateEntity(Entity entity);

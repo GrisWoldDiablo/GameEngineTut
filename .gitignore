@@ -17,6 +17,7 @@ Intermediates/
 **.vcxproj.filters
 **.vcxproj.user
 **.csproj
+**.csproj.user
 
 # Profiling
 *.json

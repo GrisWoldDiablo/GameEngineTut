@@ -71,7 +71,7 @@ Entities:
         OrthographicSize: 10
         OrthographicNearClip: -1
         OrthographicFarClip: 1
-        AspectRatio: 1.72706425
+        AspectRatio: 1.86041188
       IsPrimary: true
       IsFixedAspectRatio: false
   - Entity: 1064095580862351179
@@ -171,7 +171,7 @@ Entities:
       RestitutionThreshold: 0.5
   - Entity: 14263202880808732667
     BaseComponent:
-      Name: Ship.png
+      Name: Player
       Tag: 0
       Layer: 0
     TransformComponent:

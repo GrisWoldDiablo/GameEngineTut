@@ -120,6 +120,8 @@ namespace Hazel
 		{
 			return;
 		}
+
+		Utils::PrintAssemblyType(sScriptData->CoreAssembly);
 	}
 
 	void ScriptEngine::Shutdown()
@@ -139,11 +141,16 @@ namespace Hazel
 		sScriptData->SceneContext = nullptr;
 
 		sScriptData->EntityInstances.clear();
+
+		TryReload(false);
 	}
 
-	bool ScriptEngine::TryReload()
+	bool ScriptEngine::TryReload(bool shouldLog)
 	{
-		HZ_CORE_LINFO("Reloading ScriptEngine");
+		if (shouldLog)
+		{
+			HZ_CORE_LINFO("Reloading ScriptEngine");
+		}
 
 		mono_domain_set(sScriptData->RootDomain, false);
 
@@ -159,7 +166,12 @@ namespace Hazel
 			return false;
 		}
 
-		HZ_CORE_LINFO("ScriptEngine Reloaded");
+		if (shouldLog)
+		{
+			HZ_CORE_LINFO("ScriptEngine Reloaded");
+
+			Utils::PrintAssemblyType(sScriptData->CoreAssembly);
+		}
 
 		return true;
 	}
@@ -265,8 +277,6 @@ namespace Hazel
 
 		sScriptData->CoreAssembly = coreAssembly;
 
-		Utils::PrintAssemblyType(sScriptData->CoreAssembly);
-
 		return true;
 	}
 
@@ -279,12 +289,10 @@ namespace Hazel
 		int32_t numTypes = mono_table_info_get_rows(typeDefinitionsTable);
 		MonoClass* entityClass = mono_class_from_name(image, "Hazel", "Entity");
 
-		HZ_CORE_LINFO("Mono Assembly:");
 		for (int32_t i = 0; i < numTypes; i++)
 		{
 			uint32_t cols[MONO_TYPEDEF_SIZE];
 			mono_metadata_decode_row(typeDefinitionsTable, i, cols, MONO_TYPEDEF_SIZE);
-
 
 			const char* nameSpace = mono_metadata_string_heap(image, cols[MONO_TYPEDEF_NAMESPACE]);
 			const char* name = mono_metadata_string_heap(image, cols[MONO_TYPEDEF_NAME]);
@@ -300,7 +308,7 @@ namespace Hazel
 			}
 
 			MonoClass* monoClass = mono_class_from_name(image, nameSpace, name);
-			if (monoClass == entityClass)
+			if (!monoClass || monoClass == entityClass)
 			{
 				continue;
 			}

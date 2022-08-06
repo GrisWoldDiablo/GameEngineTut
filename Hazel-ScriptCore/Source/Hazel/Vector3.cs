@@ -10,6 +10,8 @@ namespace Hazel
 		public float Z;
 
 		public static Vector3 Zero => new Vector3(0.0f);
+		public static Vector3 Up => new Vector3(0.0f, 1.0f, 0.0f);
+		public static Vector3 Right => new Vector3(1.0f, 0.0f, 0.0f);
 
 		public Vector3(float x, float y, float z)
 		{
@@ -37,7 +39,7 @@ namespace Hazel
 
 		public override string ToString()
 		{
-			return $"({X:F2},{Y:F2},{Z:F2})";
+			return $"({X:f},{Y:f},{Z:f})";
 		}
 
 		public override int GetHashCode()
