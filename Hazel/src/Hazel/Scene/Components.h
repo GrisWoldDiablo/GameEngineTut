@@ -87,7 +87,7 @@ namespace Hazel
 
 	struct ScriptComponent
 	{
-		std::string ClassName;
+		std::string ClassName = "No Script";
 
 		ScriptComponent() = default;
 		ScriptComponent(const ScriptComponent&) = default;
