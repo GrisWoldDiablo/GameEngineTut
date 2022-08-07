@@ -99,6 +99,9 @@ namespace Hazel
 		MonoAssembly* CoreAssembly = nullptr;
 		MonoImage* CoreAssemblyImage = nullptr;
 
+		MonoAssembly* SecondaryAssembly = nullptr;
+		MonoImage* SecondaryAssemblyImage = nullptr;
+
 		Ref<ScriptClass> EntityBaseClass;
 
 		std::unordered_map<std::string, Ref<ScriptClass>> EntityClasses;
@@ -246,9 +249,20 @@ namespace Hazel
 			return false;
 		}
 
+		
+
 		sScriptData->CoreAssemblyImage = mono_assembly_get_image(sScriptData->CoreAssembly);
 		sScriptData->EntityBaseClass = CreateRef<ScriptClass>("Hazel", "Entity");
 		LoadAssemblyClasses(sScriptData->CoreAssembly);
+
+		MonoAssembly* secondaryAssembly = Utils::LoadMonoAssembly("Resources/Scripts/HazelProjectCsharp.dll");
+		if (secondaryAssembly)
+		{
+			sScriptData->SecondaryAssembly = secondaryAssembly;
+			sScriptData->SecondaryAssemblyImage = mono_assembly_get_image(secondaryAssembly);
+			Utils::PrintAssemblyType(secondaryAssembly);
+			LoadAssemblyClasses(secondaryAssembly);
+		}
 
 		ScriptGlue::RegisterComponents();
 		ScriptGlue::RegisterFunctions();
@@ -282,12 +296,16 @@ namespace Hazel
 
 	void ScriptEngine::LoadAssemblyClasses(MonoAssembly* assembly)
 	{
-		sScriptData->EntityClasses.clear();
+		//sScriptData->EntityClasses.clear();
 
 		MonoImage* image = mono_assembly_get_image(assembly);
 		const MonoTableInfo* typeDefinitionsTable = mono_image_get_table_info(image, MONO_TABLE_TYPEDEF);
 		int32_t numTypes = mono_table_info_get_rows(typeDefinitionsTable);
 		MonoClass* entityClass = mono_class_from_name(image, "Hazel", "Entity");
+		if (!entityClass)
+		{
+			entityClass = sScriptData->EntityBaseClass->GetMonoClass();
+		}
 
 		for (int32_t i = 0; i < numTypes; i++)
 		{
@@ -337,6 +355,11 @@ namespace Hazel
 	MonoImage* ScriptEngine::GetCoreAssemblyImage()
 	{
 		return sScriptData->CoreAssemblyImage;
+	}
+
+	MonoImage* ScriptEngine::GetSecondaryAssemblyImage()
+	{
+		return sScriptData->SecondaryAssemblyImage;
 	}
 
 	Ref<ScriptClass> ScriptEngine::GetEntityClass()

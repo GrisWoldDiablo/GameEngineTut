@@ -44,6 +44,7 @@ namespace Hazel
 		static MonoObject* InstanciateClass(MonoClass* monoClass, MonoMethod* constructor = nullptr, void** params = nullptr);
 
 		static MonoImage* GetCoreAssemblyImage();
+		static MonoImage* GetSecondaryAssemblyImage();
 		static Ref<ScriptClass> GetEntityClass();
 
 		friend class ScriptGlue;

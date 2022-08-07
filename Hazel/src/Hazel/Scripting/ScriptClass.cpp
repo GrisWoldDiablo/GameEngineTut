@@ -12,6 +12,10 @@ namespace Hazel
 		:_classNamespace(classNamespace), _className(className)
 	{
 		_monoClass = mono_class_from_name(ScriptEngine::GetCoreAssemblyImage(), classNamespace.c_str(), className.c_str());
+		if (!_monoClass)
+		{
+			_monoClass = mono_class_from_name(ScriptEngine::GetSecondaryAssemblyImage(), classNamespace.c_str(), className.c_str());
+		}
 	}
 
 	MonoObject* ScriptClass::Instanciate(MonoMethod* constructor, void** params)

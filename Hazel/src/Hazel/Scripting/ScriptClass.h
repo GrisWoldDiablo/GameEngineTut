@@ -18,7 +18,7 @@ namespace Hazel
 		MonoObject* Instanciate(MonoMethod* constructor = nullptr, void** params = nullptr);
 		MonoMethod* GetMethod(const std::string& name, int paramsCount = 0);
 		MonoObject* InvokeMethod(MonoObject* instance, MonoMethod* monoMethod, void** params = nullptr);
-
+		MonoClass* GetMonoClass() const { return _monoClass; }
 	private:
 		std::string _classNamespace;
 		std::string _className;
