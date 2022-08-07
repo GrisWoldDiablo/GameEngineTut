@@ -318,7 +318,7 @@ namespace Hazel
 			ImGui::PushItemWidth(-1);
 			ImGui::SameLine();
 			const char* layers[] = { "Default" }; // TODO Keep layers list somewhere else
-			ImGui::Combo("##Layer", &entity.Layer(), layers, static_cast<int>(std::size(layers)));// IM_ARRAYSIZE(layers));
+			ImGui::Combo("##Layer", &entity.Layer(), layers, static_cast<int>(std::size(layers)));
 			ImGui::PopItemWidth();
 		}
 
@@ -345,18 +345,52 @@ namespace Hazel
 				ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(Color::Red.r, Color::Red.g, Color::Red.b, Color::Red.a));
 			}
 
-			static char buffer[64];
-			strcpy_s(buffer, component.ClassName.c_str());
-			if (ImGui::InputText("Class", buffer, sizeof(buffer)))
+			const auto* className = component.ClassName.c_str();
+			if (ImGui::Button(className))
 			{
-				component.ClassName = buffer;
+				ImGui::OpenPopup(className);
 			}
 
 			if (!scriptClassExists)
 			{
 				ImGui::PopStyleColor();
 			}
-					});
+
+			if (ImGui::BeginPopup(className))
+			{
+				const std::string noScript = "No Script";
+				if (component.ClassName != noScript)
+				{
+					if (ImGui::Selectable(fmt::format("{0} [X]", component.ClassName).c_str()))
+					{
+						component.ClassName = noScript;
+					}
+					ImGui::Separator();
+				}
+
+				if (ImGui::BeginListBox("##Classes Name"))
+				{
+					for (const auto& scriptClass : ScriptEngine::GetEntityClasses())
+					{
+						if (component.ClassName == scriptClass.first)
+						{
+							continue;
+						}
+
+						const auto* itemName = scriptClass.first.c_str();
+						if (ImGui::Selectable(itemName))
+						{
+							component.ClassName = itemName;
+							ImGui::CloseCurrentPopup();
+						}
+					}
+
+					ImGui::EndListBox();
+				}
+
+				ImGui::EndPopup();
+			}
+		});
 #pragma endregion
 
 #pragma region CameraComponent

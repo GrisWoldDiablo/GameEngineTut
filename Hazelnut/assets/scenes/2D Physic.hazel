@@ -71,7 +71,7 @@ Entities:
         OrthographicSize: 10
         OrthographicNearClip: -1
         OrthographicFarClip: 1
-        AspectRatio: 1.87090158
+        AspectRatio: 1.86450386
       IsPrimary: true
       IsFixedAspectRatio: false
     ScriptComponent:
@@ -110,7 +110,7 @@ Entities:
       Scale: [2, 2, 1]
     SpriteRendererComponent:
       TexturePath: assets\textures\ChernoLogo.png
-      MagFilter: 9728
+      MagFilter: 9729
       Tiling: [1, 1]
       Color: [1, 1, 1, 1]
     Rigidbody2DComponent:
