@@ -324,13 +324,13 @@ namespace Hazel
 	MonoObject* ScriptEngine::InstanciateClass(MonoClass* monoClass, MonoMethod* constructor, void** params)
 	{
 		MonoObject* monoObject = mono_object_new(sScriptData->AppDomain, monoClass);
+		mono_runtime_object_init(monoObject);
+		
 		if (constructor)
 		{
 			mono_runtime_invoke(constructor, monoObject, params, nullptr);
-			return monoObject;
 		}
 
-		mono_runtime_object_init(monoObject);
 		return monoObject;
 	}
 
