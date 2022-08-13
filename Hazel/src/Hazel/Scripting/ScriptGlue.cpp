@@ -43,6 +43,7 @@ namespace Hazel
 	/// Components
 	/////////////////
 
+#pragma region Transform
 	static void TransformComponent_GetPosition(UUID entityId, glm::vec3* outPosition)
 	{
 		auto* scene = ScriptEngine::GetSceneContext();
@@ -63,6 +64,28 @@ namespace Hazel
 		entity.Transform().Position = *position;
 	}
 
+	static void TransformComponent_GetRotation(UUID entityId, glm::vec3* outRotation)
+	{
+		auto* scene = ScriptEngine::GetSceneContext();
+		HZ_CORE_ASSERT(scene, "Scene is null!");
+		auto entity = scene->GetEntityByUUID(entityId);
+		HZ_CORE_ASSERT(entity, "Entity is null!");
+
+		*outRotation = glm::degrees(entity.Transform().Rotation);
+	}
+
+	static void TransformComponent_SetRotation(UUID entityId, glm::vec3* rotation)
+	{
+		auto* scene = ScriptEngine::GetSceneContext();
+		HZ_CORE_ASSERT(scene, "Scene is null!");
+		auto entity = scene->GetEntityByUUID(entityId);
+		HZ_CORE_ASSERT(entity, "Entity is null!");
+
+		entity.Transform().Rotation = glm::radians(*rotation);
+	}
+#pragma endregion
+
+#pragma region Rigibody2D
 	static void Rigidbody2DComponent_ApplyLinearImpulse(UUID entityId, glm::vec2* impulse, glm::vec2* worldPoint, bool wake)
 	{
 		auto* scene = ScriptEngine::GetSceneContext();
@@ -88,6 +111,7 @@ namespace Hazel
 
 		body->ApplyLinearImpulseToCenter(b2Vec2(impulse->x, impulse->y), wake);
 	}
+#pragma endregion
 
 	/////////////////
 	/// Registers
@@ -134,6 +158,9 @@ namespace Hazel
 
 		HZ_ADD_INTERNAL_CALL(TransformComponent_GetPosition);
 		HZ_ADD_INTERNAL_CALL(TransformComponent_SetPosition);
+
+		HZ_ADD_INTERNAL_CALL(TransformComponent_GetRotation);
+		HZ_ADD_INTERNAL_CALL(TransformComponent_SetRotation);
 
 		HZ_ADD_INTERNAL_CALL(Rigidbody2DComponent_ApplyLinearImpulse);
 		HZ_ADD_INTERNAL_CALL(Rigidbody2DComponent_ApplyLinearImpulseToCenter);

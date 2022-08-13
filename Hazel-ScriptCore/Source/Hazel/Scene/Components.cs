@@ -17,6 +17,17 @@
 
 			set => InternalCalls.TransformComponent_SetPosition(Entity.Id, ref value);
 		}
+
+		public Vector3 Rotation
+		{
+			get
+			{
+				InternalCalls.TransformComponent_GetRotation(Entity.Id, out var rotation);
+				return rotation;
+			}
+
+			set => InternalCalls.TransformComponent_SetRotation(Entity.Id, ref value);
+		}
 	}
 
 	public class Rigidbody2DComponent : Component
