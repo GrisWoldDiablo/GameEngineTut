@@ -18,9 +18,13 @@ namespace Hazel
 
 		public Vector3(Vector2 value, float z = 0.0f) : this(value.X, value.Y, z) { }
 
+		public Vector3(Vector4 value) : this(value.X, value.Y, value.Z) { }
+
 		public float Lenght() => Lenght(this);
 
 		public void Normalize() => this = Normalize(this);
+
+		public Vector3 Normalized() => Normalize(this);
 
 		public override string ToString()
 		{
@@ -29,7 +33,7 @@ namespace Hazel
 
 		public override int GetHashCode()
 		{
-			return X.GetHashCode() ^ Y.GetHashCode() ^ Z.GetHashCode();
+			return (X.GetHashCode() << 2) ^ (Y.GetHashCode() >> 1) ^ (Z.GetHashCode() << 2);
 		}
 
 		public override bool Equals(object other)
@@ -44,7 +48,7 @@ namespace Hazel
 
 		public bool Equals(Vector3 other)
 		{
-			return X == other.X && Y == other.Y && Z == other.Z;
+			return X.Equals(other.X) && Y.Equals(other.Y) && Z.Equals(other.Z);
 		}
 
 		public float this[int index]
@@ -107,6 +111,21 @@ namespace Hazel
 			return (float)System.Math.Sqrt(Dot(vector, vector));
 		}
 
+		public static float SquaredLenght(Vector3 vector)
+		{
+			return Dot(vector, vector);
+		}
+
+		public static Vector3 ClampLenght(Vector3 vector, float maxLenght)
+		{
+			if (SquaredLenght(vector) < maxLenght * maxLenght)
+			{
+				return Normalize(vector) * maxLenght;
+			}
+
+			return vector;
+		}
+
 		public static float Distance(Vector3 lhs, Vector3 rhs)
 		{
 			return Lenght(lhs - rhs);
@@ -133,16 +152,16 @@ namespace Hazel
 		public static Vector3 Clamp(Vector3 value, Vector3 min, Vector3 max)
 		{
 			var x = value.X;
-			x = x < min.X ? min.X : x;
 			x = x > max.X ? max.X : x;
+			x = x < min.X ? min.X : x;
 
 			var y = value.Y;
-			y = y < min.Y ? min.Y : y;
 			y = y > max.Y ? max.Y : y;
+			y = y < min.Y ? min.Y : y;
 
 			var z = value.Z;
-			z = z < min.Z ? min.Z : z;
 			z = z > max.Z ? max.Z : z;
+			z = z < min.Z ? min.Z : z;
 
 			return new Vector3(x, y, z);
 		}
@@ -159,6 +178,10 @@ namespace Hazel
 
 		public static Vector3 operator /(Vector3 value, float divisor)
 		{
+			if (divisor.IsNearlyZero())
+			{
+				return Zero;
+			}
 			return new Vector3(value.X / divisor, value.Y / divisor, value.Z / divisor);
 		}
 
@@ -189,7 +212,10 @@ namespace Hazel
 
 		public static Vector3 operator /(Vector3 lhs, Vector3 rhs)
 		{
-			return new Vector3(lhs.X / rhs.X, lhs.Y / rhs.Y, lhs.Z / rhs.Z);
+			var x = rhs.X.IsNearlyZero() ? 0.0f : lhs.X / rhs.X;
+			var y = rhs.Y.IsNearlyZero() ? 0.0f : lhs.Y / rhs.Y;
+			var z = rhs.Z.IsNearlyZero() ? 0.0f : lhs.Z / rhs.Z;
+			return new Vector3(x, y, z);
 		}
 
 		public static Vector3 operator -(Vector3 value)
@@ -212,6 +238,11 @@ namespace Hazel
 		}
 
 		public static implicit operator Vector3(Vector2 value)
+		{
+			return new Vector3(value);
+		}
+
+		public static implicit operator Vector3(Vector4 value)
 		{
 			return new Vector3(value);
 		}

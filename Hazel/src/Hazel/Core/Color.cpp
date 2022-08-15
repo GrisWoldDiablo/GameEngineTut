@@ -223,7 +223,7 @@ namespace Hazel
 			case 'D': case 'E': case 'F':
 				break;
 			default:
-				HZ_CORE_ASSERT(0, std::string("[] is not a valid Hexadecimal character.").insert(1, 1, character));
+				HZ_CORE_ASSERT(0, fmt::format("[{0}] is not a valid Hexadecimal character.", character));
 				break;
 			}
 		}
@@ -340,7 +340,7 @@ namespace Hazel
 			return a;
 		}
 
-		HZ_CORE_ASSERT(0, "Color index [" + std::to_string(index) + "] out of bounds!");
+		HZ_CORE_ASSERT(0, fmt::format("Color index [{0}] out of bounds!", index));
 		throw std::out_of_range("Index out of bounds!");
 	}
 
@@ -358,7 +358,7 @@ namespace Hazel
 			return a;
 		}
 
-		HZ_CORE_ASSERT(0, "Color index [" + std::to_string(index) + "] out of bounds!");
+		HZ_CORE_ASSERT(0, fmt::format("Color index [{0}] out of bounds!", index));
 		throw std::out_of_range("Index out of bounds!");
 	}
 

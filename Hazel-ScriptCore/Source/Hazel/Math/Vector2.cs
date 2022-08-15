@@ -15,9 +15,13 @@
 
 		public Vector2(Vector3 vector3) : this(vector3.X, vector3.Y) { }
 
+		public Vector2(Vector4 vector4) : this(vector4.X, vector4.X) { }
+
 		public float Lenght() => Lenght(this);
 
 		public void Normalize() => this = Normalize(this);
+
+		public Vector2 Normalized() => Normalize(this);
 
 		public override string ToString()
 		{
@@ -26,7 +30,7 @@
 
 		public override int GetHashCode()
 		{
-			return X.GetHashCode() ^ Y.GetHashCode();
+			return (X.GetHashCode() << 2) ^ (Y.GetHashCode() >> 1);
 		}
 
 		public override bool Equals(object other)
@@ -41,7 +45,7 @@
 
 		public bool Equals(Vector2 other)
 		{
-			return X == other.X && Y == other.Y;
+			return X.Equals(other.X) && Y.Equals(other.Y);
 		}
 
 		public float this[int index]
@@ -100,6 +104,21 @@
 			return (float)System.Math.Sqrt(Dot(vector, vector));
 		}
 
+		public static float SquaredLenght(Vector2 vector)
+		{
+			return Dot(vector, vector);
+		}
+
+		public static Vector2 ClampLenght(Vector2 vector, float maxLenght)
+		{
+			if (SquaredLenght(vector) < maxLenght * maxLenght)
+			{
+				return Normalize(vector) * maxLenght;
+			}
+
+			return vector;
+		}
+
 		public static float Distance(Vector2 lhs, Vector2 rhs)
 		{
 			return Lenght(lhs - rhs);
@@ -118,12 +137,12 @@
 		public static Vector2 Clamp(Vector2 value, Vector2 min, Vector2 max)
 		{
 			var x = value.X;
-			x = x < min.X ? min.X : x;
 			x = x > max.X ? max.X : x;
+			x = x < min.X ? min.X : x;
 
 			var y = value.Y;
-			y = y < min.Y ? min.Y : y;
 			y = y > max.Y ? max.Y : y;
+			y = y < min.Y ? min.Y : y;
 
 			return new Vector2(x, y);
 		}
@@ -140,6 +159,10 @@
 
 		public static Vector2 operator /(Vector2 value, float divisor)
 		{
+			if (divisor.IsNearlyZero())
+			{
+				return Zero;
+			}
 			return new Vector2(value.X / divisor, value.Y / divisor);
 		}
 
@@ -170,7 +193,9 @@
 
 		public static Vector2 operator /(Vector2 lhs, Vector2 rhs)
 		{
-			return new Vector2(lhs.X / rhs.X, lhs.Y / rhs.Y);
+			var x = rhs.X.IsNearlyZero() ? 0.0f : lhs.X / rhs.X;
+			var y = rhs.Y.IsNearlyZero() ? 0.0f : lhs.Y / rhs.Y;
+			return new Vector2(x, y);
 		}
 
 		public static Vector2 operator -(Vector2 value)
@@ -190,9 +215,14 @@
 					lhs.Y == rhs.Y);
 		}
 
-		public static implicit operator Vector2(Vector3 vector3)
+		public static implicit operator Vector2(Vector3 value)
 		{
-			return new Vector2(vector3);
+			return new Vector2(value);
+		}
+
+		public static implicit operator Vector2(Vector4 value)
+		{
+			return new Vector2(value);
 		}
 		#endregion
 	}
