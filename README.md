@@ -9,4 +9,4 @@ use `git clone --recursive https://github.com/GrisWoldDiablo/GameEngineTut` to p
 
 `--recursive` will get all the submodules initialized also.
 
-Then run the bat file in ./script to create the visual studio 2022 solution and projects
+Then run the Setup.bat file in ./scripts to create the visual studio 2022 solution and projects. Will also check for Vulkan SDK
