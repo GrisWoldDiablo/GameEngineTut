@@ -40,7 +40,7 @@ namespace Hazel
 
 		public override string ToString()
 		{
-			return $"({R:f3},{G:f3},{B:f3},{A:f3})";
+			return $"R({R:f3}), G({G:f3}), B({B:f3}), A({A:f3})";
 		}
 
 		public override int GetHashCode()
