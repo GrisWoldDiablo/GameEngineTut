@@ -13,7 +13,7 @@ namespace Hazel
 	{
 	public:
 		ScriptClass() = default;
-		ScriptClass(const std::string& classNamespace, const std::string& className);
+		ScriptClass(const std::string& classNamespace, const std::string& className, bool isCore = false);
 
 		MonoObject* Instanciate(MonoMethod* constructor = nullptr, void** params = nullptr);
 		MonoMethod* GetMethod(const std::string& name, int paramsCount = 0);

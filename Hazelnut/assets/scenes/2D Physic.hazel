@@ -71,7 +71,7 @@ Entities:
         OrthographicSize: 10
         OrthographicNearClip: -1
         OrthographicFarClip: 1
-        AspectRatio: 1.86450386
+        AspectRatio: 1.71374047
       IsPrimary: true
       IsFixedAspectRatio: false
     ScriptComponent:
@@ -198,3 +198,19 @@ Entities:
       Friction: 0.5
       Restitution: 0
       RestitutionThreshold: 0.300000012
+  - Entity: 10121501930715311659
+    BaseComponent:
+      Name: Player2 Rotate
+      Tag: 0
+      Layer: 0
+    TransformComponent:
+      Position: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    ScriptComponent:
+      ClassName: Sandbox.Player2
+    SpriteRendererComponent:
+      TexturePath: assets\textures\Triangle.png
+      MagFilter: 9729
+      Tiling: [1, 1]
+      Color: [1, 1, 1, 1]

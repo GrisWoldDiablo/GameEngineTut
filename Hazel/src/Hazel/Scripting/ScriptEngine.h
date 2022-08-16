@@ -38,12 +38,14 @@ namespace Hazel
 		static void ShutdownMono();
 
 		static bool TrySetupEngine();
-		static bool TryLoadCSharpAssembly(const std::filesystem::path& filePath);
-		static void LoadAssemblyClasses(MonoAssembly* assembly);
+		static bool TryLoadAssembly(const std::filesystem::path& filePath);
+		static bool TryLoadAppAssembly(const std::filesystem::path& filePath);
+		static void LoadAssemblyClasses();
 
 		static MonoObject* InstanciateClass(MonoClass* monoClass, MonoMethod* constructor = nullptr, void** params = nullptr);
 
 		static MonoImage* GetCoreAssemblyImage();
+		static MonoImage* GetAppAssemblyImage();
 		static Ref<ScriptClass> GetEntityClass();
 
 		friend class ScriptGlue;

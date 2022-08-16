@@ -4,6 +4,7 @@ enc_temp_folder/
 # Binaries
 **/bin/
 bin-int/
+Binaries/
 Intermediates/
 !vendor/premake/bin/
 

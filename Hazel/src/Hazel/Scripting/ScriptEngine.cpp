@@ -99,6 +99,9 @@ namespace Hazel
 		MonoAssembly* CoreAssembly = nullptr;
 		MonoImage* CoreAssemblyImage = nullptr;
 
+		MonoAssembly* AppAssembly = nullptr;
+		MonoImage* AppAssemblyImage = nullptr;
+
 		Ref<ScriptClass> EntityBaseClass;
 
 		std::unordered_map<std::string, Ref<ScriptClass>> EntityClasses;
@@ -122,6 +125,7 @@ namespace Hazel
 		}
 
 		Utils::PrintAssemblyType(sScriptData->CoreAssembly);
+		Utils::PrintAssemblyType(sScriptData->AppAssembly);
 	}
 
 	void ScriptEngine::Shutdown()
@@ -171,6 +175,7 @@ namespace Hazel
 			HZ_CORE_LINFO("ScriptEngine Reloaded");
 
 			Utils::PrintAssemblyType(sScriptData->CoreAssembly);
+			Utils::PrintAssemblyType(sScriptData->AppAssembly);
 		}
 
 		return true;
@@ -240,23 +245,29 @@ namespace Hazel
 		sScriptData->EntityBaseClass.reset();
 		sScriptData->EntityClasses.clear();
 		sScriptData->CoreAssembly = nullptr;
+		sScriptData->AppAssembly = nullptr;
 
-		if (!TryLoadCSharpAssembly("Resources/Scripts/Hazel-ScriptCore.dll"))
+		if (!TryLoadAssembly("Resources/Scripts/Hazel-ScriptCore.dll"))
 		{
 			return false;
 		}
 
-		sScriptData->CoreAssemblyImage = mono_assembly_get_image(sScriptData->CoreAssembly);
-		sScriptData->EntityBaseClass = CreateRef<ScriptClass>("Hazel", "Entity");
-		LoadAssemblyClasses(sScriptData->CoreAssembly);
+		if (!TryLoadAppAssembly("SandboxProject/Assets/Scripts/Binaries/Sandbox.dll"))
+		{
+			return false;
+		}
+
+		LoadAssemblyClasses();
 
 		ScriptGlue::RegisterComponents();
 		ScriptGlue::RegisterFunctions();
 
+		sScriptData->EntityBaseClass = CreateRef<ScriptClass>("Hazel", "Entity", true);
+
 		return true;
 	}
 
-	bool ScriptEngine::TryLoadCSharpAssembly(const std::filesystem::path& filePath)
+	bool ScriptEngine::TryLoadAssembly(const std::filesystem::path& filePath)
 	{
 		constexpr char* domainName = "HazelScriptRuntime";
 		MonoDomain* appDomain = mono_domain_create_appdomain(domainName, nullptr);
@@ -276,26 +287,43 @@ namespace Hazel
 		}
 
 		sScriptData->CoreAssembly = coreAssembly;
+		sScriptData->CoreAssemblyImage = mono_assembly_get_image(coreAssembly);
 
 		return true;
 	}
 
-	void ScriptEngine::LoadAssemblyClasses(MonoAssembly* assembly)
+	bool ScriptEngine::TryLoadAppAssembly(const std::filesystem::path& filePath)
+	{
+		MonoAssembly* appAssembly = Utils::LoadMonoAssembly(filePath);
+
+		if (!appAssembly)
+		{
+			HZ_CORE_LCRITICAL("Failed to load assembly.");
+			return false;
+		}
+
+		sScriptData->AppAssembly = appAssembly;
+		sScriptData->AppAssemblyImage = mono_assembly_get_image(appAssembly);
+
+		return true;
+	}
+
+	void ScriptEngine::LoadAssemblyClasses()
 	{
 		sScriptData->EntityClasses.clear();
 
-		MonoImage* image = mono_assembly_get_image(assembly);
-		const MonoTableInfo* typeDefinitionsTable = mono_image_get_table_info(image, MONO_TABLE_TYPEDEF);
+		const MonoTableInfo* typeDefinitionsTable = mono_image_get_table_info(sScriptData->AppAssemblyImage, MONO_TABLE_TYPEDEF);
 		int32_t numTypes = mono_table_info_get_rows(typeDefinitionsTable);
-		MonoClass* entityClass = mono_class_from_name(image, "Hazel", "Entity");
+		//MonoClass* entityClass = mono_class_from_name(image, "Hazel", "Entity");
+		MonoClass* entityClass = mono_class_from_name(sScriptData->CoreAssemblyImage, "Hazel", "Entity");
 
 		for (int32_t i = 0; i < numTypes; i++)
 		{
 			uint32_t cols[MONO_TYPEDEF_SIZE];
 			mono_metadata_decode_row(typeDefinitionsTable, i, cols, MONO_TYPEDEF_SIZE);
 
-			const char* nameSpace = mono_metadata_string_heap(image, cols[MONO_TYPEDEF_NAMESPACE]);
-			const char* name = mono_metadata_string_heap(image, cols[MONO_TYPEDEF_NAME]);
+			const char* nameSpace = mono_metadata_string_heap(sScriptData->AppAssemblyImage, cols[MONO_TYPEDEF_NAMESPACE]);
+			const char* name = mono_metadata_string_heap(sScriptData->AppAssemblyImage, cols[MONO_TYPEDEF_NAME]);
 
 			std::string fullName;
 			if (strlen(nameSpace) != 0)
@@ -307,7 +335,7 @@ namespace Hazel
 				fullName = name;
 			}
 
-			MonoClass* monoClass = mono_class_from_name(image, nameSpace, name);
+			MonoClass* monoClass = mono_class_from_name(sScriptData->AppAssemblyImage, nameSpace, name);
 			if (!monoClass || monoClass == entityClass)
 			{
 				continue;
@@ -337,6 +365,11 @@ namespace Hazel
 	MonoImage* ScriptEngine::GetCoreAssemblyImage()
 	{
 		return sScriptData->CoreAssemblyImage;
+	}
+
+	MonoImage* ScriptEngine::GetAppAssemblyImage()
+	{
+		return sScriptData->AppAssemblyImage;
 	}
 
 	Ref<ScriptClass> ScriptEngine::GetEntityClass()

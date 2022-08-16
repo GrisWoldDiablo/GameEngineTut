@@ -8,10 +8,10 @@
 
 namespace Hazel
 {
-	ScriptClass::ScriptClass(const std::string& classNamespace, const std::string& className)
+	ScriptClass::ScriptClass(const std::string& classNamespace, const std::string& className, bool isCore)
 		:_classNamespace(classNamespace), _className(className)
 	{
-		_monoClass = mono_class_from_name(ScriptEngine::GetCoreAssemblyImage(), classNamespace.c_str(), className.c_str());
+		_monoClass = mono_class_from_name(isCore ? ScriptEngine::GetCoreAssemblyImage() : ScriptEngine::GetAppAssemblyImage(), classNamespace.c_str(), className.c_str());
 	}
 
 	MonoObject* ScriptClass::Instanciate(MonoMethod* constructor, void** params)
