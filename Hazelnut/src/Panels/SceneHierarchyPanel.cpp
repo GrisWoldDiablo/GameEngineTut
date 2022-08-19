@@ -487,7 +487,7 @@ namespace Hazel
 				isSpritePressed = ImGui::ColorButton("None", ImVec4(color.r, color.g, color.b, color.a), 0, ImVec2(56.0f, 56.0f));
 			}
 
-			std::string filePath;
+			std::string textureFilePath;
 
 			if (ImGui::BeginDragDropTarget())
 			{
@@ -498,7 +498,7 @@ namespace Hazel
 
 					if (fileSystemPath.extension() == ".png")
 					{
-						filePath = fileSystemPath.string();
+						textureFilePath = fileSystemPath.string();
 					}
 				}
 				ImGui::EndDragDropTarget();
@@ -506,7 +506,7 @@ namespace Hazel
 
 			if (isSpritePressed)
 			{
-				filePath = FileDialogs::OpenFile("PNG (*.png)\0*.png\0");
+				textureFilePath = FileDialogs::OpenFile("PNG (*.png)\0*.png\0");
 			}
 
 			if (component.Texture != nullptr && ImGui::BeginPopupContextItem())
@@ -528,9 +528,19 @@ namespace Hazel
 				ImGui::EndPopup();
 			}
 
-			if (!filePath.empty())
+			if (!textureFilePath.empty())
 			{
-				component.Texture = Texture2D::Create(filePath);
+				uint32_t magFilter = 0;
+				if (component.Texture)
+				{
+					magFilter = component.Texture->GetMagFilter();
+				}
+
+				component.Texture = Texture2D::Create(textureFilePath);
+				if (magFilter && component.Texture != nullptr)
+				{
+					component.Texture->SetMagFilter(magFilter);
+				}
 			}
 
 			if (component.Texture != nullptr)

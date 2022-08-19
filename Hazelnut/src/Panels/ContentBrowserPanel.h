@@ -15,5 +15,8 @@ namespace Hazel
 
 		Ref<Texture2D> _folderIconTexture;
 		Ref<Texture2D> _fileIconTexture;
+
+		bool ContainDirectory(const std::filesystem::path& currentPath);
+		void LoopDirectory(const std::filesystem::path& currentPath);
 	};
 }

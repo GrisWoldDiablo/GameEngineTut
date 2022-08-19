@@ -182,7 +182,6 @@ namespace Hazel
 			window_flags |= ImGuiWindowFlags_NoBackground;
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-
 		ImGui::Begin("DockSpace", &dockSpaceOpen, window_flags | ImGuiWindowFlags_NoNavInputs);
 		ImGui::PopStyleVar();
 
@@ -212,9 +211,14 @@ namespace Hazel
 		DrawTools();
 
 		_sceneHierarchyPanel.OnImGuiRender();
+
+		auto frameBgColor = Color::Gray * 0.25f;
+		ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(frameBgColor.r, frameBgColor.g, frameBgColor.b, frameBgColor.a));
 		_contentBrowserPanel.OnImGuiRender();
+		ImGui::PopStyleColor();
 
 		DrawStats();
+
 		ImGui::End();
 	}
 
