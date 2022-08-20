@@ -1,4 +1,4 @@
-#include "hzpch.h"
+﻿#include "hzpch.h"
 #include "ContentBrowserPanel.h"
 #include "Hazel/Core/Color.h"
 #include "Hazel/Utils/PlatformUtils.h"
@@ -103,15 +103,28 @@ namespace Hazel
 
 		if (ImGui::BeginMenuBar())
 		{
-			auto currentPath = _currentDirectory.string();
-			if (ImGui::Button(currentPath.c_str()))
+			if (_currentDirectory != gAssetsPath)
 			{
-				if (_currentDirectory != std::filesystem::path(gAssetsPath))
+				if (ImGui::Button("^"))
 				{
 					_currentDirectory = _currentDirectory.parent_path();
 				}
 			}
+			else
+			{
+				// TODO add disable button function.
+				ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImGui::GetStyleColorVec4(ImGuiCol_Button));
+				ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImGui::GetStyleColorVec4(ImGuiCol_Button));
+				ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyleColorVec4(ImGuiCol_TextDisabled));
 
+				ImGui::Button("^");
+				
+				ImGui::PopStyleColor();
+				ImGui::PopStyleColor();
+				ImGui::PopStyleColor();
+			}
+			
+			ImGui::Text(_currentDirectory.string().c_str());
 			ImGui::EndMenuBar();
 		}
 
