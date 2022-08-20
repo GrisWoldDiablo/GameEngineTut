@@ -19,12 +19,13 @@ namespace Hazel
 
 	void ContentBrowserPanel::OnImGuiRender()
 	{
-		ImGui::Begin("Content Browser", nullptr, ImGuiWindowFlags_MenuBar);
+		const float footer = ImGui::GetFrameHeightWithSpacing();
+		ImGui::Begin("Content Browser", nullptr, ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoScrollbar);
 		auto panelSize = ImGui::GetContentRegionAvail();
-		if (ImGui::BeginChildFrame(ImGui::GetID("Folders"), ImVec2(panelSize.x * 0.25f, panelSize.y), ImGuiWindowFlags_NoMove | ImGuiWindowFlags_HorizontalScrollbar))
+		if (ImGui::BeginChild(ImGui::GetID("Folders"), ImVec2(panelSize.x * 0.25f, panelSize.y - footer), true, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_HorizontalScrollbar))
 		{
 			LoopDirectory(gAssetsPath);
-			ImGui::EndChildFrame();
+			ImGui::EndChild();
 		}
 
 		const auto uv0 = ImVec2(0.0f, 1.0f);
@@ -37,7 +38,7 @@ namespace Hazel
 		columnCount = columnCount < 1 ? 1 : columnCount;
 
 		ImGui::SameLine();
-		if (ImGui::BeginChildFrame(ImGui::GetID("FolderContent"), ImVec2(panelWidth, panelSize.y), ImGuiWindowFlags_NoMove))
+		if (ImGui::BeginChild(ImGui::GetID("FolderContent"), ImVec2(panelWidth, panelSize.y - footer), false, ImGuiWindowFlags_NoMove))
 		{
 			if (!std::filesystem::exists(_currentDirectory))
 			{
@@ -93,12 +94,15 @@ namespace Hazel
 				ImGui::EndTable();
 			}
 
-			ImGui::EndChildFrame();
+			ImGui::EndChild();
 		}
+
+		ImGui::PushItemWidth(-80);
+		ImGui::SliderFloat("Thumbnail", &thumbnailSize, 56.0f, 512.0f, "%.0f");
+		ImGui::PopItemWidth();
 
 		if (ImGui::BeginMenuBar())
 		{
-			//ImGui::SetCursorPosX(ImGui::GetContentRegionMax().x);
 			auto currentPath = _currentDirectory.string();
 			if (ImGui::Button(currentPath.c_str()))
 			{
@@ -107,10 +111,6 @@ namespace Hazel
 					_currentDirectory = _currentDirectory.parent_path();
 				}
 			}
-
-			ImGui::PushItemWidth(-100);
-			ImGui::SliderFloat("Thumbnail Size", &thumbnailSize, 56.0f, 512.0f);
-			ImGui::PopItemWidth();
 
 			ImGui::EndMenuBar();
 		}
