@@ -17,6 +17,11 @@ IncludeDir["mono"] = "%{wks.location}/Hazel/vendor/mono/include"
 --IncludeDir["shaderc"] = "%{wks.location}/Hazel/vendor/shaderc/include"
 --IncludeDir["SPIRV_Cross"] = "%{wks.location}/Hazel/vendor/SPIRV-Cross"
 IncludeDir["VulkanSDK"] = "%{VULKAN_SDK}/Include"
+--Audio
+IncludeDir["OpenALSoft"] = "%{wks.location}/Hazel/vendor/OpenAL-Soft/include"
+IncludeDir["libogg"] = "%{wks.location}/Hazel/vendor/libogg/include"
+IncludeDir["Vorbis"] = "%{wks.location}/Hazel/vendor/Vorbis/include"
+IncludeDir["minimp3"] = "%{wks.location}/Hazel/vendor/minimp3"
 
 LibraryDir = {}
 LibraryDir["mono"] = "%{wks.location}/Hazel/vendor/mono/lib/%{cfg.buildcfg}"
@@ -35,7 +40,6 @@ Library["SPIRV_Tools_Debug"] = "%{LibraryDir.VulkanSDK}/SPIRV-Toolsd.lib"
 Library["ShaderC_Release"] = "%{LibraryDir.VulkanSDK}/shaderc_shared.lib"
 Library["SPIRV_Cross_Release"] = "%{LibraryDir.VulkanSDK}/spirv-cross-core.lib"
 Library["SPIRV_Cross_GLSL_Release"] = "%{LibraryDir.VulkanSDK}/spirv-cross-glsl.lib"
-
 
 --Windows
 Library["WinSock"] = "Ws2_32.lib"

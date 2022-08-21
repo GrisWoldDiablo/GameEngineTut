@@ -36,13 +36,19 @@ project "Hazel"
 		"%{IncludeDir.mono}",
 		"%{IncludeDir.yaml_cpp}",
 		"%{IncludeDir.ImGuizmo}",
+		"%{IncludeDir.OpenALSoft}",
+		"%{IncludeDir.libogg}",
+		"%{IncludeDir.Vorbis}",
+		"%{IncludeDir.minimp3}",
 		"%{IncludeDir.VulkanSDK}"
 	}
 
 	defines
 	{
 		"_CRT_SECURE_NO_WARNINGS",
-		"GLFW_INCLUDE_NONE"
+		"GLFW_INCLUDE_NONE",
+		"AL_LIBTYPE_STATIC",
+		"RESTRICT=__restrict"
 	}
 	
 	links
