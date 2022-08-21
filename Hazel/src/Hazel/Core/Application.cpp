@@ -3,6 +3,7 @@
 #include "Hazel/Events/Event.h"
 #include "Hazel/Renderer/Renderer.h"
 #include "Hazel/Scripting/ScriptEngine.h"
+#include "Hazel/Audio/AudioEngine.h"
 #include "Platform/Platform.h"
 
 namespace Hazel
@@ -34,6 +35,7 @@ namespace Hazel
 		_window = Scope<Window>(Window::Create(WindowProps(_specification.Name)));
 		_window->SetEventCallback(HZ_BIND_EVENT_FN(OnEvent));
 
+		AudioEngine::Init();
 		ScriptEngine::Init();
 		Renderer::Init();
 
@@ -44,6 +46,7 @@ namespace Hazel
 
 	Application::~Application()
 	{
+		AudioEngine::Shutdown();
 		ScriptEngine::Shutdown();
 		Renderer::Shutdown();
 		delete Time::_sInstance;

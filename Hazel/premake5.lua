@@ -59,6 +59,8 @@ project "Hazel"
 		"ImGui",
 		"yaml-cpp",
 		"opengl32.lib",
+		"OpenAL-Soft",
+		"Vorbis",
 
 		"%{Library.mono}"
 	}

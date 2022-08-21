@@ -22,7 +22,7 @@ project "Hazelnut"
 		"%{IncludeDir.glm}",
 		"%{IncludeDir.entt}",
 		"%{IncludeDir.ImGuizmo}",
-		"%{IncludeDir.yaml_cpp}",
+		"%{IncludeDir.yaml_cpp}"
 	}
 
 	links
