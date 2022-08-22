@@ -18,7 +18,7 @@ IncludeDir["mono"] = "%{wks.location}/Hazel/vendor/mono/include"
 --IncludeDir["SPIRV_Cross"] = "%{wks.location}/Hazel/vendor/SPIRV-Cross"
 IncludeDir["VulkanSDK"] = "%{VULKAN_SDK}/Include"
 --Audio
-IncludeDir["OpenALSoft"] = "%{wks.location}/Hazel/vendor/OpenAL-Soft/include"
+IncludeDir["OpenALSoft"] = "%{wks.location}/Hazel/vendor/OpenAL-Soft"
 IncludeDir["libogg"] = "%{wks.location}/Hazel/vendor/libogg/include"
 IncludeDir["Vorbis"] = "%{wks.location}/Hazel/vendor/Vorbis/include"
 IncludeDir["minimp3"] = "%{wks.location}/Hazel/vendor/minimp3"
