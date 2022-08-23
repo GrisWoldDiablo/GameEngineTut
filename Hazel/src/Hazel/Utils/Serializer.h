@@ -81,6 +81,26 @@ namespace YAML
 			return true;
 		}
 	};
+
+	template<>
+	struct convert<std::filesystem::path>
+	{
+		static Node encode(const std::filesystem::path& rhs)
+		{
+			return Node(rhs.string());
+		}
+
+		static bool decode(const Node& node, std::filesystem::path& rhs)
+		{
+			if (!node.IsScalar())
+			{
+				return false;
+			}
+
+			rhs = node.Scalar();
+			return true;
+		}
+	};
 }
 
 namespace Hazel
@@ -104,6 +124,11 @@ namespace Hazel
 		out << YAML::Flow;
 		out << YAML::BeginSeq << v.x << v.y << v.z << v.w << YAML::EndSeq;
 		return out;
+	}
+
+	inline YAML::Emitter& operator<<(YAML::Emitter& out, const std::filesystem::path& path)
+	{
+		return  out.Write(path.string());
 	}
 
 	class Serializer

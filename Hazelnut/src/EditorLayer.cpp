@@ -12,8 +12,6 @@
 
 namespace Hazel
 {
-	extern const std::filesystem::path gAssetsPath;
-
 	EditorLayer::EditorLayer()
 		: Layer("Hazel Editor")
 	{
@@ -873,8 +871,7 @@ namespace Hazel
 		{
 			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
 			{
-				const auto* path = (const wchar_t*)payload->Data;
-				auto filePath = gAssetsPath / path;
+				std::filesystem::path filePath = (const wchar_t*)payload->Data;
 
 				if (filePath.extension() == ".hazel")
 				{

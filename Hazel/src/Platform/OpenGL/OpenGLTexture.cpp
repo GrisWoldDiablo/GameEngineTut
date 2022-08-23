@@ -22,7 +22,7 @@ namespace Hazel
 		glTextureParameteri(_rendererID, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	}
 
-	OpenGLTexture2D::OpenGLTexture2D(const std::string& path)
+	OpenGLTexture2D::OpenGLTexture2D(const std::filesystem::path& path)
 		:_path(path)
 	{
 		HZ_PROFILE_FUNCTION();
@@ -33,7 +33,7 @@ namespace Hazel
 		stbi_uc* data = nullptr;
 		{
 			HZ_PROFILE_SCOPE("stbi_load");
-			data = stbi_load(_path.c_str(), &width, &height, &channels, 0);
+			data = stbi_load(_path.string().c_str(), &width, &height, &channels, 0);
 		}
 		HZ_CORE_ASSERT(data, "Failed to load image!");
 

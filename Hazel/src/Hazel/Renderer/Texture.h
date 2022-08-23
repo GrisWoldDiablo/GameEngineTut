@@ -12,7 +12,7 @@ namespace Hazel
 		virtual uint32_t GetWidth() const = 0;
 		virtual uint32_t GetHeight() const = 0;
 		virtual uint32_t GetRendererID() const = 0;
-		virtual const std::string& GetPath() const = 0;
+		virtual const std::filesystem::path& GetPath() const = 0;
 		virtual uint32_t GetMagFilter() const = 0;
 
 		virtual void SetData(void* data, uint32_t size) = 0;
@@ -29,6 +29,6 @@ namespace Hazel
 	{
 	public:
 		static Ref<Texture2D> Create(uint32_t width, uint32_t height);
-		static Ref<Texture2D> Create(const std::string& path);
+		static Ref<Texture2D> Create(const std::filesystem::path& path);
 	};
 }

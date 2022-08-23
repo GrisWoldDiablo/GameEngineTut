@@ -1,6 +1,6 @@
 #include "hzpch.h"
 #include "AudioEngine.h"
-#include "AudioFileFormat.h"
+#include "AudioEnum.h"
 #include "AudioSource.h"
 
 #include "alhelpers.h"
@@ -23,7 +23,6 @@ namespace Hazel
 {
 	namespace Utils
 	{
-
 		static AudioFileFormat GetAudioFileFormat(const std::filesystem::path& filePath)
 		{
 			auto extension = filePath.extension().string();
@@ -49,6 +48,7 @@ namespace Hazel
 			case 2: return AL_FORMAT_STEREO16;
 			default:
 				HZ_ASSERT(false, "Unsupported ALFormat for the amount of channels [{}]", channels);
+				return AL_NONE;
 				break;
 			}
 		}
@@ -87,7 +87,7 @@ namespace Hazel
 
 		// TODO remove this is only for Audio testing
 		test1 = LoadAudioSource("assets/audio/rocavaco-Bass17w19.mp3");
-		Play(test1);
+		//Play(test1);
 
 		test2 = LoadAudioSource("assets/audio/Splash.ogg");
 		Play(test2);
@@ -96,7 +96,9 @@ namespace Hazel
 			HZ_CORE_LINFO("{0}", test2->GetOffset());
 			using namespace std::literals::chrono_literals;
 			std::this_thread::sleep_for(5ms);
-		} while (test2->GetState() != AL_STOPPED);
+		} while (test2->GetState() != AudioSourceState::STOPPED);
+		
+		test2->Play();
 	}
 
 	void AudioEngine::Shutdown()
@@ -110,6 +112,12 @@ namespace Hazel
 
 	Ref<AudioSource> AudioEngine::LoadAudioSource(const std::filesystem::path& filePath)
 	{
+		if (!std::filesystem::exists(filePath))
+		{
+			HZ_CORE_LERROR("[{0}] file not found", filePath.string());
+			return nullptr;
+		}
+
 		switch (Utils::GetAudioFileFormat(filePath))
 		{
 		case AudioFileFormat::MP3:	
@@ -130,6 +138,36 @@ namespace Hazel
 		if (audioSource)
 		{
 			alSourcePlay(audioSource->_alSource);
+		}
+	}
+
+	void AudioEngine::Stop(const Ref<AudioSource>& audioSource)
+	{
+		HZ_ASSERT(audioSource, "Audio Source is Invalid!");
+
+		if (audioSource)
+		{
+			alSourceStop(audioSource->_alSource);
+		}
+	}
+
+	void AudioEngine::Pause(const Ref<AudioSource>& audioSource)
+	{
+		HZ_ASSERT(audioSource, "Audio Source is Invalid!");
+
+		if (audioSource)
+		{
+			alSourcePause(audioSource->_alSource);
+		}
+	}
+
+	void AudioEngine::Rewind(const Ref<AudioSource>& audioSource)
+	{
+		HZ_ASSERT(audioSource, "Audio Source is Invalid!");
+
+		if (audioSource)
+		{
+			alSourceRewind(audioSource->_alSource);
 		}
 	}
 
@@ -189,7 +227,10 @@ namespace Hazel
 		if (loadResult < 0)
 		{
 			HZ_CORE_LERROR("OpenAl-Soft failed to open: [{0}]", filePath.string());
-			fclose(file);
+			if (file)
+			{
+				fclose(file);
+			}
 			return nullptr;
 		}
 
@@ -216,7 +257,7 @@ namespace Hazel
 		while (true)
 		{
 			int currentSection;
-			long lenght = ov_read(&vorbisFile, (char*)bufferPtr, sizeof(bufferPtr), 0, 2, 1, &currentSection);
+			long lenght = ov_read(&vorbisFile, (char*)bufferPtr, 4096, 0, 2, 1, &currentSection);
 
 			if (lenght == 0)
 			{

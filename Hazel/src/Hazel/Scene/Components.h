@@ -4,6 +4,7 @@
 #include "SceneCamera.h"
 #include "Hazel/Core/UUID.h"
 #include "Hazel/Renderer/Texture.h"
+#include "Hazel/Audio/AudioSource.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -169,6 +170,16 @@ namespace Hazel
 		CircleCollider2DComponent(const CircleCollider2DComponent&) = default;
 	};
 
+	// Audio
+
+	struct AudioSourceComponent
+	{
+		Ref<AudioSource> AudioSource;
+
+		AudioSourceComponent() = default;
+		AudioSourceComponent(const AudioSourceComponent&) = default;
+	};
+
 	template<typename... Component>
 	struct ComponentGroup {};
 
@@ -176,5 +187,6 @@ namespace Hazel
 		ComponentGroup<TransformComponent, SpriteRendererComponent,
 		CircleRendererComponent, CameraComponent,
 		ScriptComponent, NativeScriptComponent,
-		Rigidbody2DComponent, BoxCollider2DComponent, CircleCollider2DComponent>;
+		Rigidbody2DComponent, BoxCollider2DComponent, CircleCollider2DComponent,
+		AudioSourceComponent>;
 }

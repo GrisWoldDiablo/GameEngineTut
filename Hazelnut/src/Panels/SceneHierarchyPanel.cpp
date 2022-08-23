@@ -14,8 +14,6 @@
 
 namespace Hazel
 {
-	extern const std::filesystem::path gAssetsPath;
-
 	template<typename T>
 	static void ResetButton(const std::string& label, T& values, float resetValue, ImVec2 size)
 	{
@@ -308,6 +306,7 @@ namespace Hazel
 				AddComponentMenu<Rigidbody2DComponent>();
 				AddComponentMenu<BoxCollider2DComponent>();
 				AddComponentMenu<CircleCollider2DComponent>();
+				AddComponentMenu<AudioSourceComponent>();
 				ImGui::EndPopup();
 			}
 			ImGui::PopItemWidth();
@@ -487,18 +486,17 @@ namespace Hazel
 				isSpritePressed = ImGui::ColorButton("None", ImVec4(color.r, color.g, color.b, color.a), 0, ImVec2(56.0f, 56.0f));
 			}
 
-			std::string textureFilePath;
+			std::filesystem::path textureFilePath;
 
 			if (ImGui::BeginDragDropTarget())
 			{
 				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
 				{
-					const auto* path = (const wchar_t*)payload->Data;
-					auto fileSystemPath = gAssetsPath / path;
+					std::filesystem::path fileSystemPath = (const wchar_t*)payload->Data;
 
 					if (fileSystemPath.extension() == ".png")
 					{
-						textureFilePath = fileSystemPath.string();
+						textureFilePath = fileSystemPath;
 					}
 				}
 				ImGui::EndDragDropTarget();
@@ -507,6 +505,7 @@ namespace Hazel
 			if (isSpritePressed)
 			{
 				textureFilePath = FileDialogs::OpenFile("PNG (*.png)\0*.png\0");
+				textureFilePath = std::filesystem::relative(textureFilePath);
 			}
 
 			if (component.Texture != nullptr && ImGui::BeginPopupContextItem())
@@ -652,6 +651,92 @@ namespace Hazel
 			}
 		});
 #pragma endregion
+
+#pragma region  AudioSourceComponent
+		DrawComponent<AudioSourceComponent>(entity, "Audio Source", [](AudioSourceComponent& component)
+		{
+			ImGui::Text("Audio Clip : ");
+			ImGui::SameLine();
+			bool isClipButtonPressed;
+
+			if (component.AudioSource)
+			{
+				isClipButtonPressed = ImGui::Button(component.AudioSource->GetFilePath().filename().string().c_str());
+			}
+			else
+			{
+				isClipButtonPressed = ImGui::Button("Select Clip");
+			}
+
+			std::filesystem::path audioClipFilePath;
+
+			if (ImGui::BeginDragDropTarget())
+			{
+				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
+				{
+					std::filesystem::path fileSystemPath = (const wchar_t*)payload->Data;
+					const auto extension = fileSystemPath.extension();
+					if (extension == ".ogg" || extension == ".mp3")
+					{
+						audioClipFilePath = fileSystemPath;
+					}
+				}
+				ImGui::EndDragDropTarget();
+			}
+
+			if (isClipButtonPressed)
+			{
+				audioClipFilePath = FileDialogs::OpenFile("Audio Clip (*.ogg,*.mp3)\0*.ogg;*.mp3\0");
+				audioClipFilePath = std::filesystem::relative(audioClipFilePath);
+			}
+
+			if (!audioClipFilePath.empty())
+			{
+				component.AudioSource = AudioSource::Create(audioClipFilePath);
+			}
+
+			if (component.AudioSource != nullptr)
+			{
+				ImGui::Text("Lenght: %.3f sec", component.AudioSource->GetLenght());
+
+				auto state = component.AudioSource->GetState();
+
+				switch (state)
+				{
+				case AudioSourceState::INITIAL:
+				case AudioSourceState::STOPPED:
+				case AudioSourceState::PAUSED:
+					if (ImGui::Button("Play"))
+					{
+						component.AudioSource->Play();
+					}
+					break;
+				case AudioSourceState::PLAYING:
+					if (ImGui::Button("Pause"))
+					{
+						component.AudioSource->Pause();
+					}
+					break;
+				default:
+					break;
+				}
+
+				ImGui::SameLine();
+				if (ImGui::Button("Stop"))
+				{
+					component.AudioSource->Stop();
+				}
+
+				if (state == AudioSourceState::PLAYING || state == AudioSourceState::PAUSED)
+				{
+					float offset = component.AudioSource->GetOffset();
+					float lenght = component.AudioSource->GetLenght();
+					ImGui::SliderFloat("Track", &offset, 0.0f, lenght, "%.3f", ImGuiSliderFlags_NoInput);
+				}
+			}
+		});
+#pragma endregion
+
 	}
 
 	template<typename T>

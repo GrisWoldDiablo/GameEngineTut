@@ -394,7 +394,7 @@ namespace Hazel
 
 					if (auto texture = spriteRendererComponent["TexturePath"])
 					{
-						component.Texture = Texture2D::Create(texture.as<std::string>()); // TODO not use path.
+						component.Texture = Texture2D::Create(texture.as<std::filesystem::path>()); // TODO not use path use asset.
 						component.Texture->SetMagFilter(GetValue<uint32_t>(spriteRendererComponent, "MagFilter", 0x2601));
 					}
 

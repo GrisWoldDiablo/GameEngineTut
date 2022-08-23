@@ -62,8 +62,7 @@ namespace Hazel
 
 					if (ImGui::BeginDragDropSource())
 					{
-						auto relativePath = std::filesystem::relative(path, gAssetsPath);
-						const wchar_t* itemPath = relativePath.c_str();
+						const wchar_t* itemPath = path.c_str();
 						ImGui::SetDragDropPayload("CONTENT_BROWSER_ITEM", itemPath, (wcslen(itemPath) + 1) * sizeof(wchar_t));
 						ImGui::Text(filenameString.c_str());
 						ImGui::EndDragDropSource();

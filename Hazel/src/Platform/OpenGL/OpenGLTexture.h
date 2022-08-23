@@ -9,13 +9,13 @@ namespace Hazel
 	{
 	public:
 		OpenGLTexture2D(uint32_t width, uint32_t height);
-		OpenGLTexture2D(const std::string& path);
+		OpenGLTexture2D(const std::filesystem::path& path);
 		virtual ~OpenGLTexture2D() override;
 
 		uint32_t GetWidth() const override { return _width; }
 		uint32_t GetHeight() const override { return _height; }
 		uint32_t GetRendererID() const override { return _rendererID; }
-		const std::string& GetPath() const override { return _path; }
+		const std::filesystem::path& GetPath() const override { return _path; }
 		uint32_t GetMagFilter() const override { return _magFilter; }
 		bool IsMagFilterLinear() const override { return _magFilter == GL_LINEAR; }
 
@@ -32,7 +32,7 @@ namespace Hazel
 		}
 
 	private:
-		std::string _path;
+		std::filesystem::path _path;
 		uint32_t _width;
 		uint32_t _height;
 		uint32_t _rendererID;

@@ -16,11 +16,31 @@ namespace Hazel
 		alDeleteBuffers(1, &_alBuffer);
 	}
 
-	int AudioSource::GetState() const
+	void AudioSource::Play()
+	{
+		AudioEngine::Play(shared_from_this());
+	}
+
+	void AudioSource::Stop()
+	{
+		AudioEngine::Stop(shared_from_this());
+	}
+
+	void AudioSource::Pause()
+	{
+		AudioEngine::Pause(shared_from_this());
+	}
+
+	void AudioSource::Rewind()
+	{
+		AudioEngine::Pause(shared_from_this());
+	}
+
+	AudioSourceState AudioSource::GetState() const
 	{
 		ALenum state;
 		alGetSourcei(_alSource, AL_SOURCE_STATE, &state);
-		return state;
+		return static_cast<AudioSourceState>(state);
 	}
 
 	float AudioSource::GetOffset() const

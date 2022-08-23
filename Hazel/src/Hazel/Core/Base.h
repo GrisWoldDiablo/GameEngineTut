@@ -13,7 +13,7 @@
 #endif // HZ_DEBUG
 
 // TODO: Make no arguments version of this macro.
-#ifdef HZ_ENABLE_ASSERTS // This is a if function
+#ifdef HZ_ENABLE_ASSERTS // This is an (if not) function
 #	define HZ_CORE_ASSERT(x, ...) { if(!(x)) { HZ_CORE_LERROR("Assertion Failed: {0}", __VA_ARGS__); HZ_DEBUG_BREAK();} }
 #	define HZ_ASSERT(x, ...) { if(!(x)) { HZ_LERROR("Assertion Failed: {0}", __VA_ARGS__); HZ_DEBUG_BREAK();} }
 #else

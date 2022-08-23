@@ -12,6 +12,9 @@ namespace Hazel
 
 		static Ref<AudioSource> LoadAudioSource(const std::filesystem::path& filePath);
 		static void Play(const Ref<AudioSource>& audioSource);
+		static void Stop(const Ref<AudioSource>& audioSource);
+		static void Pause(const Ref<AudioSource>& audioSource);
+		static void Rewind(const Ref<AudioSource>& audioSource);
 
 	private:
 		static void PrintDeviceInfo();
