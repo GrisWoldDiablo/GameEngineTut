@@ -16,6 +16,8 @@ namespace Hazel
 		void PopLayer(const Layer* layer);
 		void PopOverlay(const Layer* overlay);
 
+		void CleanUp();
+
 		std::vector<Layer*>::iterator begin() { return _layers.begin(); }
 		std::vector<Layer*>::iterator end() { return _layers.end(); }
 

@@ -9,10 +9,21 @@ namespace Hazel
 	{
 		HZ_PROFILE_FUNCTION();
 
-		for (auto* layer : _layers)
+		CleanUp();
+	}
+
+	void LayerStack::CleanUp()
+	{
+		if (!_layers.empty())
 		{
-			layer->OnDetach();
-			delete layer;
+			for (auto* layer : _layers)
+			{
+				layer->OnDetach();
+				delete layer;
+			}
+
+			_layers.clear();
+			_layerInsertIndex = 0;
 		}
 	}
 

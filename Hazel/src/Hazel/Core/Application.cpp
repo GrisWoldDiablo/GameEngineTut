@@ -46,8 +46,7 @@ namespace Hazel
 
 	Application::~Application()
 	{
-		// TODO fix AudioSourceComponent had to do this to release the AudioSource before shutting AudioEngine.
-		_layerStack.~LayerStack();
+		_layerStack.CleanUp();
 
 		AudioEngine::Shutdown();
 		ScriptEngine::Shutdown();
