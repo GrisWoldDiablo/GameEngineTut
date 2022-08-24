@@ -222,6 +222,24 @@ namespace Hazel
 			out << YAML::EndMap; // CircleCollider2DComponent
 		}
 #pragma endregion
+
+#pragma region AudioSourceComponent
+		if (entity.HasComponent<AudioSourceComponent>())
+		{
+			const auto& component = entity.GetComponent<AudioSourceComponent>();
+
+			out << YAML::Key << "AudioSourceComponent";
+			out << YAML::BeginMap; // AudioSourceComponent
+
+			if (component.AudioSource != nullptr)
+			{
+				out << YAML::Key << "AudioClipPath" << YAML::Value << component.AudioSource->GetPath(); // TODO not use path but actual texture asset.
+			}
+
+			out << YAML::EndMap; // AudioSourceComponent
+		}
+#pragma endregion
+
 		out << YAML::EndMap;
 	}
 
@@ -392,9 +410,9 @@ namespace Hazel
 				{
 					auto& component = deserializedEntity.AddComponent<SpriteRendererComponent>();
 
-					if (auto texture = spriteRendererComponent["TexturePath"])
+					if (auto texturePath = spriteRendererComponent["TexturePath"])
 					{
-						component.Texture = Texture2D::Create(texture.as<std::filesystem::path>()); // TODO not use path use asset.
+						component.Texture = Texture2D::Create(texturePath.as<std::filesystem::path>()); // TODO not use path use asset.
 						component.Texture->SetMagFilter(GetValue<uint32_t>(spriteRendererComponent, "MagFilter", 0x2601));
 					}
 
@@ -446,6 +464,18 @@ namespace Hazel
 					component.Friction = GetValue<float>(circleCollider2DComponent, "Friction", 0.5f);
 					component.Restitution = GetValue<float>(circleCollider2DComponent, "Restitution");
 					component.RestitutionThreshold = GetValue<float>(circleCollider2DComponent, "RestitutionThreshold", 0.5f);
+				}
+#pragma endregion
+
+#pragma region AudioSourceComponent
+				if (auto audioSourceComponent = entity["AudioSourceComponent"])
+				{
+					auto& component = deserializedEntity.AddComponent<AudioSourceComponent>();
+
+					if (auto audioClipPath = audioSourceComponent["AudioClipPath"])
+					{
+						component.AudioSource = AudioSource::Create(audioClipPath.as<std::filesystem::path>()); // TODO not use path use asset.
+					}
 				}
 #pragma endregion
 			}

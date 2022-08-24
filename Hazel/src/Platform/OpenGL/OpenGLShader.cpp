@@ -398,7 +398,7 @@ namespace Hazel
 		spirv_cross::ShaderResources resources = compiler.get_shader_resources();
 
 #if SHADER_LOG
-		HZ_CORE_LTRACE("OpenGLShader::Reflect - {0} {1}", Utils::GLShaderStageToString(stage), _filePath);
+		HZ_CORE_LTRACE("OpenGLShader::Reflect - {0} {1}", Utils::GLShaderStageToString(stage), _path);
 		HZ_CORE_LTRACE("    {0} Uniform buffer(s)", resources.uniform_buffers.size());
 		HZ_CORE_LTRACE("    {0} Resource(s)", resources.sampled_images.size());
 

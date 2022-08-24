@@ -16,7 +16,7 @@ namespace Hazel
 		void OnImGuiRender();
 
 		Entity GetSelectedEntity() const { return _selectedEntity; }
-		void SetSelectedEntity(Entity entity) { _selectedEntity = entity; }
+		void SetSelectedEntity(Entity entity) { CleanUpComponents(_selectedEntity); _selectedEntity = entity; }
 
 	private:
 		void DrawSceneName();
@@ -24,10 +24,12 @@ namespace Hazel
 		void DrawComponents(Entity entity);
 		template<typename T>
 		void AddComponentMenu();
+		void CleanUpComponents(Entity entity);
 
 	private:
 		Ref<Scene> _scene;
 		Entity _selectedEntity;
 		bool _isDebug = false;
+		Weak<AudioSource> _playedSource;
 	};
 }

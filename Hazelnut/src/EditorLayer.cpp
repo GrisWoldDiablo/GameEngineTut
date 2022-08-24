@@ -1142,7 +1142,6 @@ namespace Hazel
 		_activeScene->OnRuntimeStart();
 
 		_sceneHierarchyPanel.SetScene(_activeScene);
-		_sceneHierarchyPanel.SetSelectedEntity(Entity());
 	}
 
 	void EditorLayer::OnSceneSimulate()
@@ -1155,7 +1154,6 @@ namespace Hazel
 		_activeScene->OnSimulationStart();
 
 		_sceneHierarchyPanel.SetScene(_activeScene);
-		_sceneHierarchyPanel.SetSelectedEntity(Entity());
 	}
 
 	void EditorLayer::OnSceneStop()
@@ -1176,7 +1174,6 @@ namespace Hazel
 		_activeScene = _editorScene;
 
 		_sceneHierarchyPanel.SetScene(_activeScene);
-		_sceneHierarchyPanel.SetSelectedEntity(Entity());
 	}
 
 	void EditorLayer::DuplicateEntity()

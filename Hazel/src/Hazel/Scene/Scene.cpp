@@ -4,6 +4,7 @@
 #include "ScriptableEntity.h"
 #include "Hazel/Renderer/Renderer2D.h"
 #include "Hazel/Scripting/ScriptEngine.h"
+#include "Hazel/Audio/AudioEngine.h"
 
 #include "box2d/b2_world.h"
 #include "box2d/b2_body.h"
@@ -137,8 +138,8 @@ namespace Hazel
 
 	void Scene::DestroyEntity(Entity entity)
 	{
-		_registry.destroy(entity);
 		_entityMap.erase(entity.GetUUID());
+		_registry.destroy(entity);
 	}
 
 	bool Scene::CheckEntityValidity(const entt::entity& entity) const
@@ -532,5 +533,11 @@ namespace Hazel
 
 	template<>
 	void Scene::OnComponentAdded<AudioSourceComponent>(Entity entity, AudioSourceComponent& component)
-	{}
+	{
+		if (component.AudioSource)
+		{
+			const auto path = component.AudioSource->GetPath();
+			component.AudioSource = AudioSource::Create(path);
+		}
+	}
 }

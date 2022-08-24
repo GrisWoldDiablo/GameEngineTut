@@ -15,10 +15,6 @@
 #include "vorbis/codec.h"
 #include "vorbis/vorbisfile.h"
 
-// TODO remove this is only for Audio testing
-#include <thread>		
-#include <chrono>
-
 namespace Hazel
 {
 	namespace Utils
@@ -26,7 +22,7 @@ namespace Hazel
 		static AudioFileFormat GetAudioFileFormat(const std::filesystem::path& filePath)
 		{
 			auto extension = filePath.extension().string();
-			
+
 			if (extension == ".mp3")
 			{
 				return AudioFileFormat::MP3;
@@ -84,28 +80,10 @@ namespace Hazel
 		mp3dec_init(&sAudioData->Mp3d);
 
 		PrintDeviceInfo();
-
-		// TODO remove this is only for Audio testing
-		test1 = LoadAudioSource("assets/audio/rocavaco-Bass17w19.mp3");
-		//Play(test1);
-
-		test2 = LoadAudioSource("assets/audio/Splash.ogg");
-		Play(test2);
-		do 
-		{
-			HZ_CORE_LINFO("{0}", test2->GetOffset());
-			using namespace std::literals::chrono_literals;
-			std::this_thread::sleep_for(5ms);
-		} while (test2->GetState() != AudioSourceState::STOPPED);
-		
-		test2->Play();
 	}
 
 	void AudioEngine::Shutdown()
 	{
-		// TODO remove this is only for Audio testing
-		test1.reset();
-		test2.reset();
 		CloseAL();
 		delete sAudioData;
 	}
@@ -171,6 +149,45 @@ namespace Hazel
 		}
 	}
 
+	AudioSourceState AudioEngine::GetState(const Ref<AudioSource>& audioSource)
+	{
+		HZ_ASSERT(audioSource, "Audio Source is Invalid!");
+
+		if (audioSource)
+		{
+			ALenum state;
+			alGetSourcei(audioSource->_alSource, AL_SOURCE_STATE, &state);
+			return static_cast<AudioSourceState>(state);
+		}
+
+		return AudioSourceState::NONE;
+	}
+
+	float AudioEngine::GetOffset(const Ref<AudioSource>& audioSource)
+	{
+		HZ_ASSERT(audioSource, "Audio Source is Invalid!");
+
+		if (audioSource)
+		{
+			ALfloat offset;
+			alGetSourcef(audioSource->_alSource, AL_SEC_OFFSET, &offset);
+			return offset;
+
+		}
+
+		return 0.0f;
+	}
+
+	void AudioEngine::SetOffset(const Ref<AudioSource>& audioSource, float offset)
+	{
+		HZ_ASSERT(audioSource, "Audio Source is Invalid!");
+
+		if (audioSource && GetOffset(audioSource) != offset)
+		{
+			alSourcef(audioSource->_alSource, AL_SEC_OFFSET, offset);
+		}
+	}
+
 	void AudioEngine::PrintDeviceInfo()
 	{
 		if (sAudioData->AudioDevice)
@@ -199,6 +216,7 @@ namespace Hazel
 		auto sampleRate = info.hz;
 		auto channels = info.channels;
 		ALenum alFormat = Utils::GetOpenALFormat(channels);
+		// TODO investigate, this is not giving an accurate length.
 		float lenghtSeconds = size / (info.avg_bitrate_kbps * 1024.0f);
 
 		ALuint alBuffer;

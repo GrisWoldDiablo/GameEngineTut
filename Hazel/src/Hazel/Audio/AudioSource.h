@@ -8,7 +8,7 @@ namespace Hazel
 	{
 	public:
 		AudioSource() = default;
-		AudioSource(uint32_t alBuffer, const std::filesystem::path& filePath, float lenght, AudioFileFormat fileFormat);
+		AudioSource(uint32_t alBuffer, const std::filesystem::path& path, float length, AudioFileFormat fileFormat);
 		~AudioSource();
 
 		void Play();
@@ -16,19 +16,20 @@ namespace Hazel
 		void Pause();
 		void Rewind();
 
-		AudioSourceState GetState() const;
-		float GetOffset() const;
-		const std::filesystem::path& GetFilePath() const { return _filePath; }
-		float GetLenght() const { return _lenght; }
+		AudioSourceState GetState();
+		float GetOffset();
+		void SetOffset(float offset);
+		const std::filesystem::path& GetPath() const { return _path; }
+		float GetLength() const { return _length; }
 
-		static Ref<AudioSource> Create(const std::filesystem::path& filePath);
+		static Ref<AudioSource> Create(const std::filesystem::path& path);
 
 	private:
 		uint32_t _alBuffer = 0;
 		uint32_t _alSource = 0;
 
-		std::filesystem::path _filePath;
-		float _lenght;
+		std::filesystem::path _path;
+		float _length;
 		AudioFileFormat _fileFormat;
 
 		friend class AudioEngine;

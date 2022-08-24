@@ -71,7 +71,7 @@ Entities:
         OrthographicSize: 10
         OrthographicNearClip: -1
         OrthographicFarClip: 1
-        AspectRatio: 1.71374047
+        AspectRatio: 1.94431555
       IsPrimary: true
       IsFixedAspectRatio: false
     ScriptComponent:
@@ -214,3 +214,5 @@ Entities:
       MagFilter: 9729
       Tiling: [1, 1]
       Color: [1, 1, 1, 1]
+    AudioSourceComponent:
+      AudioClipPath: assets\audio\rocavaco-Bass17w19.mp3

@@ -9,6 +9,7 @@ enum class AudioFileFormat : uint8_t
 
 enum class AudioSourceState : int
 {
+	NONE = 0,
 	INITIAL = 0x1011,
 	PLAYING = 0x1012,
 	PAUSED = 0x1013,

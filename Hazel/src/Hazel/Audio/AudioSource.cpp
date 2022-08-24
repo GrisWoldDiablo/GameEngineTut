@@ -6,8 +6,8 @@
 
 namespace Hazel
 {
-	AudioSource::AudioSource(uint32_t alBuffer, const std::filesystem::path& filename, float lenght, AudioFileFormat fileFormat)
-		: _alBuffer(alBuffer), _filePath(filename), _lenght(lenght), _fileFormat(fileFormat)
+	AudioSource::AudioSource(uint32_t alBuffer, const std::filesystem::path& path, float length, AudioFileFormat fileFormat)
+		: _alBuffer(alBuffer), _path(path), _length(length), _fileFormat(fileFormat)
 	{}
 
 	AudioSource::~AudioSource()
@@ -36,22 +36,23 @@ namespace Hazel
 		AudioEngine::Pause(shared_from_this());
 	}
 
-	AudioSourceState AudioSource::GetState() const
+	AudioSourceState AudioSource::GetState()
 	{
-		ALenum state;
-		alGetSourcei(_alSource, AL_SOURCE_STATE, &state);
-		return static_cast<AudioSourceState>(state);
+		return AudioEngine::GetState(shared_from_this());
 	}
 
-	float AudioSource::GetOffset() const
+	float AudioSource::GetOffset()
 	{
-		ALfloat offset;
-		alGetSourcef(_alSource, AL_SEC_OFFSET, &offset);
-		return offset;
+		return AudioEngine::GetOffset(shared_from_this());
 	}
 
-	Ref<AudioSource> AudioSource::Create(const std::filesystem::path& filePath)
+	void AudioSource::SetOffset(float offset)
 	{
-		return AudioEngine::LoadAudioSource(filePath);
+		AudioEngine::SetOffset(shared_from_this(), offset);
+	}
+
+	Ref<AudioSource> AudioSource::Create(const std::filesystem::path& path)
+	{
+		return AudioEngine::LoadAudioSource(path);
 	}
 }

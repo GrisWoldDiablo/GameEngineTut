@@ -173,8 +173,8 @@ namespace Hazel
 
 	void SceneHierarchyPanel::SetScene(const Ref<Scene>& scene)
 	{
+		SetSelectedEntity(Entity());
 		_scene = scene;
-		_selectedEntity = Entity();
 	}
 
 	void SceneHierarchyPanel::OnImGuiRender()
@@ -191,7 +191,7 @@ namespace Hazel
 
 		if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
 		{
-			_selectedEntity = Entity();
+			SetSelectedEntity(Entity());
 		}
 
 		// Right-Click on blank space.
@@ -252,7 +252,7 @@ namespace Hazel
 
 		if (ImGui::IsItemClicked())
 		{
-			_selectedEntity = entity;
+			SetSelectedEntity(entity);
 		}
 
 		bool shouldDeleteEntity = false;
@@ -275,7 +275,7 @@ namespace Hazel
 			_scene->DestroyEntity(entity);
 			if (_selectedEntity == entity)
 			{
-				_selectedEntity = Entity();
+				SetSelectedEntity(Entity());
 			}
 		}
 	}
@@ -653,7 +653,7 @@ namespace Hazel
 #pragma endregion
 
 #pragma region  AudioSourceComponent
-		DrawComponent<AudioSourceComponent>(entity, "Audio Source", [](AudioSourceComponent& component)
+		DrawComponent<AudioSourceComponent>(entity, "Audio Source", [this](AudioSourceComponent& component)
 		{
 			ImGui::Text("Audio Clip : ");
 			ImGui::SameLine();
@@ -661,7 +661,7 @@ namespace Hazel
 
 			if (component.AudioSource)
 			{
-				isClipButtonPressed = ImGui::Button(component.AudioSource->GetFilePath().filename().string().c_str());
+				isClipButtonPressed = ImGui::Button(component.AudioSource->GetPath().filename().string().c_str());
 			}
 			else
 			{
@@ -697,7 +697,7 @@ namespace Hazel
 
 			if (component.AudioSource != nullptr)
 			{
-				ImGui::Text("Lenght: %.3f sec", component.AudioSource->GetLenght());
+				ImGui::Text("Lenght: %.3f sec", component.AudioSource->GetLength());
 
 				auto state = component.AudioSource->GetState();
 
@@ -705,18 +705,31 @@ namespace Hazel
 				{
 				case AudioSourceState::INITIAL:
 				case AudioSourceState::STOPPED:
-				case AudioSourceState::PAUSED:
+				{
 					if (ImGui::Button("Play"))
 					{
 						component.AudioSource->Play();
+						_playedSource = component.AudioSource;
 					}
 					break;
+				}
+				case AudioSourceState::PAUSED:
+				{
+					if (ImGui::Button("Unpause"))
+					{
+						component.AudioSource->Play();
+						_playedSource = component.AudioSource;
+					}
+					break;
+				}
 				case AudioSourceState::PLAYING:
+				{
 					if (ImGui::Button("Pause"))
 					{
 						component.AudioSource->Pause();
 					}
 					break;
+				}
 				default:
 					break;
 				}
@@ -727,16 +740,54 @@ namespace Hazel
 					component.AudioSource->Stop();
 				}
 
-				if (state == AudioSourceState::PLAYING || state == AudioSourceState::PAUSED)
+				float offset = component.AudioSource->GetOffset();
+				float lenght = component.AudioSource->GetLength();
+				int min = offset / 60;
+				float secs = (offset - (min * 60));
+				int sec = secs;
+				int ms = (secs - sec) * 1000;
+
+				ImGui::Text("%i:%i:%i", min, sec, ms);
+				ImGui::SliderFloat("Track", &offset, 0.0f, lenght, "%.3f", ImGuiSliderFlags_NoInput);
+
+				if (state == AudioSourceState::PAUSED || state == AudioSourceState::PLAYING)
 				{
-					float offset = component.AudioSource->GetOffset();
-					float lenght = component.AudioSource->GetLenght();
-					ImGui::SliderFloat("Track", &offset, 0.0f, lenght, "%.3f", ImGuiSliderFlags_NoInput);
+					component.AudioSource->SetOffset(offset);
 				}
 			}
 		});
 #pragma endregion
 
+	}
+
+	template<typename T, typename Function>
+	static void CleanUpComponent(Entity entity, Function function)
+	{
+		if (entity.HasComponent<T>())
+		{
+			auto& component = entity.GetComponent<T>();
+			function(component);
+		}
+	}
+
+	void SceneHierarchyPanel::CleanUpComponents(Entity entity)
+	{
+		if (!entity)
+		{
+			return;
+		}
+
+		CleanUpComponent<AudioSourceComponent>(entity, [this](AudioSourceComponent& component)
+		{
+			if (component.AudioSource && !_playedSource.expired())
+			{
+				if (component.AudioSource == std::shared_ptr(_playedSource))
+				{
+					component.AudioSource->Stop();
+					_playedSource.reset();
+				}
+			}
+		});
 	}
 
 	template<typename T>
