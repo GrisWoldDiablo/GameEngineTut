@@ -741,16 +741,18 @@ namespace Hazel
 				}
 
 				float offset = component.AudioSource->GetOffset();
+				const float savedOffset = offset;
 				float lenght = component.AudioSource->GetLength();
-				int min = offset / 60;
+				int min = static_cast<int>(offset / 60);
 				float secs = (offset - (min * 60));
-				int sec = secs;
-				int ms = (secs - sec) * 1000;
+				int sec = static_cast<int>(secs);
+				int ms = static_cast<int>((secs - sec) * 1000);
 
-				ImGui::Text("%i:%i:%i", min, sec, ms);
-				ImGui::SliderFloat("Track", &offset, 0.0f, lenght, "%.3f", ImGuiSliderFlags_NoInput);
+				ImGui::Text("%2im:%2is:%3ims", min, sec, ms);
+				ImGui::SliderFloat("Track", &offset, 0.0f, lenght, "", ImGuiSliderFlags_NoInput);
 
-				if (state == AudioSourceState::PAUSED || state == AudioSourceState::PLAYING)
+				if ((state == AudioSourceState::PAUSED || state == AudioSourceState::PLAYING)
+					&& savedOffset != offset)
 				{
 					component.AudioSource->SetOffset(offset);
 				}
