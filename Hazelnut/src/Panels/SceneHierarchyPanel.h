@@ -30,6 +30,6 @@ namespace Hazel
 		Ref<Scene> _scene;
 		Entity _selectedEntity;
 		bool _isDebug = false;
-		Weak<AudioSource> _playedSource;
+		Weak<AudioSource> _previousAudioSource;
 	};
 }

@@ -1,12 +1,42 @@
 #include "hzpch.h"
-#include "Math.h"
+#include "HMath.h"
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/matrix_decompose.hpp>
 
-namespace Hazel::Math
+namespace Hazel
 {
-	bool DecomposeTransform(const glm::mat4& transform, glm::vec3& outPosition, glm::vec3& outRotation, glm::vec3& outScale)
+	bool HMath::IsNearlyZero(float A)
+	{
+		return glm::epsilonEqual(A, glm::zero<float>(), glm::epsilon<float>());
+	}
+
+	bool HMath::IsNearlyEqual(float A, float B)
+	{
+		return glm::epsilonEqual(A, B, glm::epsilon<float>());
+	}
+
+	bool HMath::IsNearlyNotEqual(float A, float B)
+	{
+		return glm::epsilonNotEqual(A, B, glm::epsilon<float>());
+	}
+
+	bool HMath::IsNearlyZero(double A)
+	{
+		return glm::epsilonEqual(A, glm::zero<double>(), glm::epsilon<double>());
+	}
+
+	bool HMath::IsNearlyEqual(double A, double B)
+	{
+		return glm::epsilonEqual(A, B, glm::epsilon<double>());
+	}
+
+	bool HMath::IsNearlyNotEqual(double A, double B)
+	{
+		return glm::epsilonNotEqual(A, B, glm::epsilon<double>());
+	}
+
+	bool HMath::DecomposeTransform(const glm::mat4& transform, glm::vec3& outPosition, glm::vec3& outRotation, glm::vec3& outScale)
 	{
 		// From glm::decompose in matrix_decompose.inl
 

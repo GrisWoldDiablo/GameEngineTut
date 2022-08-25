@@ -1,7 +1,7 @@
 #include "hzpch.h"
 #include "Color.h"
 #include "Random.h"
-#include "Hazel/Math/Math.h"
+#include "Hazel/Math/HMath.h"
 
 namespace Hazel
 {
@@ -110,26 +110,26 @@ namespace Hazel
 		double Xmin = glm::min(glm::min(r, g), b);
 		double C = Xmax - Xmin;
 
-		if (Math::IsNearlyZero(C))
+		if (HMath::IsNearlyZero(C))
 		{
 			H = 0.0;
 		}
-		else if (Math::IsNearlyEqual(Xmax, r))
+		else if (HMath::IsNearlyEqual(Xmax, r))
 		{
 			H = fmod(60.0 * ((g - b) / C) + 360.0, 360.0);
 		}
-		else if (Math::IsNearlyEqual(Xmax, g))
+		else if (HMath::IsNearlyEqual(Xmax, g))
 		{
 			H = fmod(60.0 * ((b - r) / C) + 120.0, 360.0);
 		}
-		else if (Math::IsNearlyEqual(Xmax, b))
+		else if (HMath::IsNearlyEqual(Xmax, b))
 		{
 			H = fmod(60.0 * ((r - g) / C) + 240.0, 360.0);
 		}
 
 		H /= 360.0;
 
-		if (Math::IsNearlyZero(Xmax))
+		if (HMath::IsNearlyZero(Xmax))
 		{
 			S = 0.0;
 		}
@@ -166,26 +166,26 @@ namespace Hazel
 		double Xmin = glm::min(glm::min(r, g), b);
 		double C = Xmax - Xmin;
 
-		if (Math::IsNearlyZero(C))
+		if (HMath::IsNearlyZero(C))
 		{
 			H = 0.0;
 		}
-		else if (Math::IsNearlyEqual(Xmax, r))
+		else if (HMath::IsNearlyEqual(Xmax, r))
 		{
 			H = fmod(60 * ((g - b) / C) + 360.0, 360.0);
 		}
-		else if (Math::IsNearlyEqual(Xmax, g))
+		else if (HMath::IsNearlyEqual(Xmax, g))
 		{
 			H = fmod(60 * ((b - r) / C) + 120.0, 360.0);
 		}
-		else if (Math::IsNearlyEqual(Xmax, b))
+		else if (HMath::IsNearlyEqual(Xmax, b))
 		{
 			H = fmod(60 * ((r - g) / C) + 240.0, 360.0);
 		}
 
 		H /= 360.0;
 
-		if (Math::IsNearlyZero(Xmax))
+		if (HMath::IsNearlyZero(Xmax))
 		{
 			S = 0.0;
 		}
@@ -391,7 +391,7 @@ namespace Hazel
 
 	Color Color::operator/(float value)const
 	{
-		HZ_CORE_ASSERT(!Math::IsNearlyZero(value), "Cannot divive by Zero!");
+		HZ_CORE_ASSERT(!HMath::IsNearlyZero(value), "Cannot divive by Zero!");
 		auto red = this->r / value;
 		auto green = this->g / value;
 		auto blue = this->b / value;
@@ -428,7 +428,7 @@ namespace Hazel
 
 	Color& Color::operator/=(float value)
 	{
-		HZ_CORE_ASSERT(!Math::IsNearlyZero(value), "Cannot divive by Zero!");
+		HZ_CORE_ASSERT(!HMath::IsNearlyZero(value), "Cannot divive by Zero!");
 		this->r /= value;
 		this->g /= value;
 		this->b /= value;
@@ -438,9 +438,9 @@ namespace Hazel
 
 	bool Color::operator==(const Color& other) const
 	{
-		return Math::IsNearlyEqual(this->r, other.r)
-			&& Math::IsNearlyEqual(this->g, other.g)
-			&& Math::IsNearlyEqual(this->b, other.b)
-			&& Math::IsNearlyEqual(this->a, other.a);
+		return HMath::IsNearlyEqual(this->r, other.r)
+			&& HMath::IsNearlyEqual(this->g, other.g)
+			&& HMath::IsNearlyEqual(this->b, other.b)
+			&& HMath::IsNearlyEqual(this->a, other.a);
 	}
 }

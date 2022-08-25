@@ -697,6 +697,8 @@ namespace Hazel
 
 			if (component.AudioSource != nullptr)
 			{
+				_previousAudioSource = component.AudioSource;
+
 				ImGui::Text("Lenght: %.3f sec", component.AudioSource->GetLength());
 
 				auto state = component.AudioSource->GetState();
@@ -709,7 +711,6 @@ namespace Hazel
 					if (ImGui::Button("Play"))
 					{
 						component.AudioSource->Play();
-						_playedSource = component.AudioSource;
 					}
 					break;
 				}
@@ -718,7 +719,6 @@ namespace Hazel
 					if (ImGui::Button("Unpause"))
 					{
 						component.AudioSource->Play();
-						_playedSource = component.AudioSource;
 					}
 					break;
 				}
@@ -781,12 +781,12 @@ namespace Hazel
 
 		CleanUpComponent<AudioSourceComponent>(entity, [this](AudioSourceComponent& component)
 		{
-			if (component.AudioSource && !_playedSource.expired())
+			if (component.AudioSource && !_previousAudioSource.expired())
 			{
-				if (component.AudioSource == std::shared_ptr(_playedSource))
+				if (component.AudioSource == std::shared_ptr(_previousAudioSource))
 				{
 					component.AudioSource->Stop();
-					_playedSource.reset();
+					_previousAudioSource.reset();
 				}
 			}
 		});

@@ -8,7 +8,7 @@
 #include "Hazel/Utils/PlatformUtils.h"
 
 #include "ImGuizmo.h"
-#include "Hazel/Math/Math.h"
+#include "Hazel/Math/HMath.h"
 
 namespace Hazel
 {
@@ -953,7 +953,7 @@ namespace Hazel
 				if (ImGuizmo::IsUsing() && !_hasStoredPreviousGizmoType)
 				{
 					glm::vec3 position, rotation, scale;
-					if (Math::DecomposeTransform(transform, position, rotation, scale))
+					if (HMath::DecomposeTransform(transform, position, rotation, scale))
 					{
 						transformComponent.Position = position;
 						auto rotationDelta = rotation - transformComponent.Rotation;

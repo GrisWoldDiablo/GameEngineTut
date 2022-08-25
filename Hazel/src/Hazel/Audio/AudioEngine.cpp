@@ -1,6 +1,6 @@
 #include "hzpch.h"
 #include "AudioEngine.h"
-#include "AudioEnum.h"
+#include "AudioTypes.h"
 #include "AudioSource.h"
 
 #include "alhelpers.h"
@@ -106,85 +106,6 @@ namespace Hazel
 		default:
 			HZ_CORE_LERROR("No supported format for [{0}]", filePath.string());
 			return nullptr;
-		}
-	}
-
-	void AudioEngine::Play(const Ref<AudioSource>& audioSource)
-	{
-		HZ_ASSERT(audioSource, "Audio Source is Invalid!");
-
-		if (audioSource)
-		{
-			alSourcePlay(audioSource->_alSource);
-		}
-	}
-
-	void AudioEngine::Stop(const Ref<AudioSource>& audioSource)
-	{
-		HZ_ASSERT(audioSource, "Audio Source is Invalid!");
-
-		if (audioSource)
-		{
-			alSourceStop(audioSource->_alSource);
-		}
-	}
-
-	void AudioEngine::Pause(const Ref<AudioSource>& audioSource)
-	{
-		HZ_ASSERT(audioSource, "Audio Source is Invalid!");
-
-		if (audioSource)
-		{
-			alSourcePause(audioSource->_alSource);
-		}
-	}
-
-	void AudioEngine::Rewind(const Ref<AudioSource>& audioSource)
-	{
-		HZ_ASSERT(audioSource, "Audio Source is Invalid!");
-
-		if (audioSource)
-		{
-			alSourceRewind(audioSource->_alSource);
-		}
-	}
-
-	AudioSourceState AudioEngine::GetState(const Ref<AudioSource>& audioSource)
-	{
-		HZ_ASSERT(audioSource, "Audio Source is Invalid!");
-
-		if (audioSource)
-		{
-			ALenum state;
-			alGetSourcei(audioSource->_alSource, AL_SOURCE_STATE, &state);
-			return static_cast<AudioSourceState>(state);
-		}
-
-		return AudioSourceState::NONE;
-	}
-
-	float AudioEngine::GetOffset(const Ref<AudioSource>& audioSource)
-	{
-		HZ_ASSERT(audioSource, "Audio Source is Invalid!");
-
-		if (audioSource)
-		{
-			ALfloat offset;
-			alGetSourcef(audioSource->_alSource, AL_SEC_OFFSET, &offset);
-			return offset;
-
-		}
-
-		return 0.0f;
-	}
-
-	void AudioEngine::SetOffset(const Ref<AudioSource>& audioSource, float offset)
-	{
-		HZ_ASSERT(audioSource, "Audio Source is Invalid!");
-
-		if (audioSource && GetOffset(audioSource) != offset)
-		{
-			alSourcef(audioSource->_alSource, AL_SEC_OFFSET, offset);
 		}
 	}
 
