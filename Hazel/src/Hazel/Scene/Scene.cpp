@@ -4,7 +4,6 @@
 #include "ScriptableEntity.h"
 #include "Hazel/Renderer/Renderer2D.h"
 #include "Hazel/Scripting/ScriptEngine.h"
-#include "Hazel/Audio/AudioEngine.h"
 
 #include "box2d/b2_world.h"
 #include "box2d/b2_body.h"
@@ -474,7 +473,6 @@ namespace Hazel
 			Renderer2D::EndScene();
 		}
 	}
-
 
 	template<typename T>
 	void Scene::OnComponentAdded(Entity entity, T& component)

@@ -149,11 +149,22 @@ namespace Hazel
 		_framebuffer->Unbind();
 
 		_updateTimerElapsedMillis = _updateTimer.ElapsedMillis();
+		if (_updateTimerElapsedMillis > _updateTimerSlowestElapsedMillis)
+		{
+			_updateTimerSlowestElapsedMillis = _updateTimerElapsedMillis;
+		}
+
+		if (_updateTimerElapsedMillis < _updateTimerFastestElapsedMillis)
+		{
+			_updateTimerFastestElapsedMillis = _updateTimerElapsedMillis;
+		}
 	}
 
 	void EditorLayer::OnImGuiRender()
 	{
 		HZ_PROFILE_FUNCTION();
+
+		_imGuiTimer.Reset();
 
 		static bool dockSpaceOpen = true;
 		static bool opt_fullscreen_persistant = true;
@@ -214,6 +225,17 @@ namespace Hazel
 		DrawStats();
 
 		ImGui::End();
+
+		_imGuiTimerElapsedMillis = _imGuiTimer.ElapsedMillis();
+		if (_imGuiTimerElapsedMillis > _imGuiTimerSlowestElapsedMillis)
+		{
+			_imGuiTimerSlowestElapsedMillis = _imGuiTimerElapsedMillis;
+		}
+
+		if (_imGuiTimerElapsedMillis < _imGuiTimerFastestElapsedMillis)
+		{
+			_imGuiTimerFastestElapsedMillis = _imGuiTimerElapsedMillis;
+		}
 	}
 
 	void EditorLayer::OnEvent(Event& event)
@@ -1027,7 +1049,26 @@ namespace Hazel
 		ImGui::Text("Indices: %d", stats.GetTotalIndexCount());
 
 		ImGui::Separator();
+		ImGui::Text("Viewport Update");
 		ImGui::Text("Ms per frame: %.3f", _updateTimerElapsedMillis);
+		ImGui::Text("Slowest frame: %.3f", _updateTimerSlowestElapsedMillis);
+		ImGui::Text("Fasted frame: %.3f", _updateTimerFastestElapsedMillis);
+		if (ImGui::Button("Reset##UPDATE"))
+		{
+			_updateTimerFastestElapsedMillis = FLT_MAX;
+			_updateTimerSlowestElapsedMillis = -FLT_MAX;
+		}
+
+		ImGui::Separator();
+		ImGui::Text("ImGui Render");
+		ImGui::Text("Ms per frame: %.3f", _imGuiTimerElapsedMillis);
+		ImGui::Text("Slowest frame: %.3f", _imGuiTimerSlowestElapsedMillis);
+		ImGui::Text("Fasted frame: %.3f", _imGuiTimerFastestElapsedMillis);
+		if (ImGui::Button("Reset##IMGUI"))
+		{
+			_imGuiTimerFastestElapsedMillis = FLT_MAX;
+			_imGuiTimerSlowestElapsedMillis = -FLT_MAX;
+		}
 
 		ImGui::End();
 	}

@@ -84,6 +84,13 @@ namespace Hazel
 		int _lowFrames = 0;
 		Timer _updateTimer;
 		float _updateTimerElapsedMillis = 0.0f;
+		float _updateTimerFastestElapsedMillis = FLT_MAX;
+		float _updateTimerSlowestElapsedMillis = -FLT_MAX;
+
+		Timer _imGuiTimer;
+		float _imGuiTimerElapsedMillis = 0.0f;
+		float _imGuiTimerFastestElapsedMillis = FLT_MAX;
+		float _imGuiTimerSlowestElapsedMillis = -FLT_MAX;
 
 		// Panels
 		SceneHierarchyPanel _sceneHierarchyPanel;

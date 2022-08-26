@@ -36,14 +36,12 @@ namespace Hazel
 		const std::filesystem::path& GetPath() const { return _path; }
 		float GetLength() const { return _length; }
 
-
 	private:
 		uint32_t _alBuffer = 0;
 		uint32_t _alSource = 0;
 		std::filesystem::path _path;
 		float _length;
 		AudioFileFormat _fileFormat;
-
 
 		float _gain = 1.0f;
 		float _pitch = 1.0f;

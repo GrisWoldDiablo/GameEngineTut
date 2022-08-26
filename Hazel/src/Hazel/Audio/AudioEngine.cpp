@@ -3,6 +3,8 @@
 #include "AudioTypes.h"
 #include "AudioSource.h"
 
+#include "Hazel/Core/Timer.h"
+
 #include "alhelpers.h"
 #include "AL/alext.h"
 #include "alc/device.h"
@@ -58,6 +60,8 @@ namespace Hazel
 		mp3dec_t Mp3d{};
 		uint8_t* AudioScratchBuffer = nullptr;
 		uint32_t AudioScratchBufferSize = 10 * 1024 * 1024;
+
+		std::unordered_map<std::filesystem::path, Ref<AudioSource>> UnassignedAudioSources;
 	};
 
 	static AudioEngineData* sAudioData = nullptr;
@@ -84,6 +88,7 @@ namespace Hazel
 
 	void AudioEngine::Shutdown()
 	{
+		sAudioData->UnassignedAudioSources.clear();
 		CloseAL();
 		delete sAudioData;
 	}
@@ -98,15 +103,35 @@ namespace Hazel
 
 		switch (Utils::GetAudioFileFormat(filePath))
 		{
-		case AudioFileFormat::MP3:	
+		case AudioFileFormat::MP3:
 			return LoadMP3(filePath);
-		case AudioFileFormat::OGG:	
+		case AudioFileFormat::OGG:
 			return LoadOgg(filePath);
 		case AudioFileFormat::NONE:
 		default:
 			HZ_CORE_LERROR("No supported format for [{0}]", filePath.string());
 			return nullptr;
 		}
+	}
+
+	void AudioEngine::ReleaseAudioSource(Ref<AudioSource> audioSource)
+	{
+		audioSource->Stop();
+		// TODO setup a pool, Max size of map.
+		sAudioData->UnassignedAudioSources.emplace(audioSource->GetPath(), audioSource);
+	}
+
+	bool AudioEngine::TryFindAudioSource(Ref<AudioSource>& audioSource, const std::filesystem::path& filePath)
+	{
+		auto foundPair = sAudioData->UnassignedAudioSources.find(filePath);
+		if (foundPair != sAudioData->UnassignedAudioSources.end())
+		{
+			audioSource = foundPair->second;
+			sAudioData->UnassignedAudioSources.erase(filePath);
+			return true;
+		}
+
+		return false;
 	}
 
 	void AudioEngine::PrintDeviceInfo()
@@ -124,6 +149,14 @@ namespace Hazel
 
 	Ref<AudioSource> AudioEngine::LoadMP3(const std::filesystem::path& filePath)
 	{
+		Timer timer;
+
+		Ref<AudioSource> audioSource;
+		if (TryFindAudioSource(audioSource, filePath))
+		{
+			return audioSource;
+		}
+
 		mp3dec_file_info_t info;
 		int loadResult = mp3dec_load(&sAudioData->Mp3d, filePath.string().c_str(), &info, nullptr, nullptr);
 		if (loadResult < 0)
@@ -144,7 +177,7 @@ namespace Hazel
 		alGenBuffers(1, &alBuffer);
 		alBufferData(alBuffer, alFormat, info.buffer, size, sampleRate);
 
-		auto audioSource = CreateRef<AudioSource>(alBuffer, filePath, lenghtSeconds, AudioFileFormat::MP3);
+		audioSource = CreateRef<AudioSource>(alBuffer, filePath, lenghtSeconds, AudioFileFormat::MP3);
 		alGenSources(1, &audioSource->_alSource);
 		alSourcei(audioSource->_alSource, AL_BUFFER, alBuffer);
 
@@ -154,11 +187,21 @@ namespace Hazel
 			return nullptr;
 		}
 
+		HZ_CORE_LINFO("MP3 loading took {0}ms for [{1}]", timer.ElapsedMillis(), filePath.filename().string());
+
 		return audioSource;
 	}
 
 	Ref<AudioSource> AudioEngine::LoadOgg(const std::filesystem::path& filePath)
 	{
+		Timer timer;
+
+		Ref<AudioSource> audioSource;
+		if (TryFindAudioSource(audioSource, filePath))
+		{
+			return audioSource;
+		}
+
 		FILE* file = fopen(filePath.string().c_str(), "rb");
 		OggVorbis_File vorbisFile;
 
@@ -227,7 +270,7 @@ namespace Hazel
 		alGenBuffers(1, &alBuffer);
 		alBufferData(alBuffer, alFormat, oggBuffer, size, sampleRate);
 
-		auto audioSource = CreateRef<AudioSource>(alBuffer, filePath, lenghtSeconds, AudioFileFormat::OGG);
+		audioSource = CreateRef<AudioSource>(alBuffer, filePath, lenghtSeconds, AudioFileFormat::OGG);
 		alGenSources(1, &audioSource->_alSource);
 		alSourcei(audioSource->_alSource, AL_BUFFER, alBuffer);
 
@@ -236,6 +279,9 @@ namespace Hazel
 			HZ_CORE_LERROR("OpenAl-Soft failed to create the source: [{0}]", filePath.string());
 			return nullptr;
 		}
+
+		HZ_CORE_LINFO("OGG loading took {0}ms for [{1}]", timer.ElapsedMillis(), filePath.filename().string());
+
 
 		return audioSource;
 	}

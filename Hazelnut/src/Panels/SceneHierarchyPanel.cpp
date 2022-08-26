@@ -3,6 +3,7 @@
 #include "Hazel/Scene/ScriptableEntity.h"
 #include "Hazel/Utils/PlatformUtils.h"
 #include "Hazel/Scripting/ScriptEngine.h"
+#include "Hazel/Audio/AudioEngine.h"
 
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
@@ -668,6 +669,26 @@ namespace Hazel
 				isClipButtonPressed = ImGui::Button("Select Clip");
 			}
 
+			if (component.AudioSource != nullptr && ImGui::BeginPopupContextItem())
+			{
+				ImGui::Text("Clear AudioSource?");
+				ImGui::Separator();
+				if (ImGui::Button("Yes"))
+				{
+					AudioEngine::ReleaseAudioSource(component.AudioSource);
+					component.AudioSource.reset();
+					ImGui::CloseCurrentPopup();
+				}
+				ImGui::SameLine();
+				ImGui::Text(" ");
+				ImGui::SameLine();
+				if (ImGui::Button("No"))
+				{
+					ImGui::CloseCurrentPopup();
+				}
+				ImGui::EndPopup();
+			}
+
 			std::filesystem::path audioClipFilePath;
 
 			if (ImGui::BeginDragDropTarget())
@@ -692,7 +713,18 @@ namespace Hazel
 
 			if (!audioClipFilePath.empty())
 			{
-				component.AudioSource = AudioSource::Create(audioClipFilePath);
+				if (component.AudioSource)
+				{
+					if (component.AudioSource->GetPath() != audioClipFilePath)
+					{
+						AudioEngine::ReleaseAudioSource(component.AudioSource);
+						component.AudioSource = AudioSource::Create(audioClipFilePath);
+					}
+				}
+				else
+				{
+					component.AudioSource = AudioSource::Create(audioClipFilePath);
+				}
 			}
 
 			if (component.AudioSource != nullptr)
