@@ -13,6 +13,8 @@ namespace Sandbox
 			Console.WriteLine($"{GetType().FullName}.{MethodBase.GetCurrentMethod().Name} - {Id}");
 
 			_rigidbody = GetComponent<Rigidbody2DComponent>();
+			Console.WriteLine($"The entity Name: {Name}");
+			Name = "C# name Player";
 		}
 
 		private void OnUpdate(float timestep)

@@ -71,7 +71,7 @@ Entities:
         OrthographicSize: 10
         OrthographicNearClip: -1
         OrthographicFarClip: 1
-        AspectRatio: 1.94431555
+        AspectRatio: 2.19274378
       IsPrimary: true
       IsFixedAspectRatio: false
     ScriptComponent:
@@ -214,5 +214,18 @@ Entities:
       MagFilter: 9729
       Tiling: [1, 1]
       Color: [1, 1, 1, 1]
-    AudioSourceComponent:
-      AudioClipPath: assets\audio\rocavaco-Bass17w19.mp3
+  - Entity: 5051573955425461706
+    BaseComponent:
+      Name: Circle Player
+      Tag: 0
+      Layer: 0
+    TransformComponent:
+      Position: [1.62836075, 0.024299562, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    ScriptComponent:
+      ClassName: Sandbox.CirclePlayer
+    CircleRendererComponent:
+      Color: [1, 1, 1, 1]
+      Thickness: 1
+      Fade: 0.00499999989

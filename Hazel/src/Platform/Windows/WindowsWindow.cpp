@@ -66,7 +66,6 @@ namespace Hazel
 			_window = glfwCreateWindow((int)_data.Width, (int)_data.Height, _data.Title.c_str(), nullptr, nullptr);
 		}
 
-
 		_context = CreateScope<OpenGLContext>(_window);
 		_context->Init();
 

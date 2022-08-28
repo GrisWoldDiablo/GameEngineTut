@@ -22,8 +22,8 @@ namespace Hazel
 	class KeyPressedEvent : public KeyEvent
 	{
 	public:
-		KeyPressedEvent(const KeyCode keyCode, const uint16_t repeatCount = false)
-			: KeyEvent(keyCode), _isRepeat(repeatCount)
+		KeyPressedEvent(const KeyCode keyCode, const bool isRepeat = false)
+			: KeyEvent(keyCode), _isRepeat(isRepeat)
 		{}
 
 		bool IsRepeat() const { return _isRepeat; }
@@ -38,7 +38,7 @@ namespace Hazel
 		EVENT_CLASS_TYPE(KeyPressed)
 
 	private:
-		uint16_t _isRepeat;
+		bool _isRepeat;
 	};
 
 	class KeyReleasedEvent : public KeyEvent

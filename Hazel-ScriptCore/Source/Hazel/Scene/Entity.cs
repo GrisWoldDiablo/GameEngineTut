@@ -4,6 +4,17 @@ namespace Hazel
 	{
 		public readonly ulong Id;
 
+		public string Name
+		{
+			get
+			{
+				InternalCalls.Entity_GetName(Id, out var name);
+				return name;
+			}
+
+			set => InternalCalls.Entity_SetName(Id, ref value);
+		}
+
 		private TransformComponent _transform;
 
 		public TransformComponent Transform

@@ -28,6 +28,78 @@
 
 			set => InternalCalls.TransformComponent_SetRotation(Entity.Id, ref value);
 		}
+
+		public Vector2 Scale
+		{
+			get
+			{
+				InternalCalls.TransformComponent_GetScale(Entity.Id, out var scale);
+				return scale;
+			}
+
+			set => InternalCalls.TransformComponent_SetScale(Entity.Id, ref value);
+		}
+	}
+
+	public class SpriteRendererComponent : Component
+	{
+		public Color Color
+		{
+			get
+			{
+				InternalCalls.SpriteRendererComponent_GetColor(Entity.Id, out var color);
+				return color;
+			}
+
+			set => InternalCalls.SpriteRendererComponent_SetColor(Entity.Id, ref value);
+		}
+
+		public Vector2 Tiling
+		{
+			get
+			{
+				InternalCalls.SpriteRendererComponent_GetTiling(Entity.Id, out var tiling);
+				return tiling;
+			}
+
+			set => InternalCalls.SpriteRendererComponent_SetTiling(Entity.Id, ref value);
+		}
+	}
+
+	public class CircleRendererComponent : Component
+	{
+		public Color Color
+		{
+			get
+			{
+				InternalCalls.CircleRendererComponent_GetColor(Entity.Id, out var color);
+				return color;
+			}
+
+			set => InternalCalls.CircleRendererComponent_SetColor(Entity.Id, ref value);
+		}
+
+		public float Thickness
+		{
+			get
+			{
+				InternalCalls.CircleRendererComponent_GetThickness(Entity.Id, out var thickness);
+				return thickness;
+			}
+
+			set => InternalCalls.CircleRendererComponent_SetThickness(Entity.Id, ref value);
+		}
+
+		public float Fade
+		{
+			get
+			{
+				InternalCalls.CircleRendererComponent_GetFade(Entity.Id, out var fade);
+				return fade;
+			}
+
+			set => InternalCalls.CircleRendererComponent_SetFade(Entity.Id, ref value);
+		}
 	}
 
 	public class Rigidbody2DComponent : Component
