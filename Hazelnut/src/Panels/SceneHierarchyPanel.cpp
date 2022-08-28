@@ -308,6 +308,7 @@ namespace Hazel
 				AddComponentMenu<BoxCollider2DComponent>();
 				AddComponentMenu<CircleCollider2DComponent>();
 				AddComponentMenu<AudioSourceComponent>();
+				AddComponentMenu<AudioListenerComponent>();
 				ImGui::EndPopup();
 			}
 			ImGui::PopItemWidth();
@@ -654,29 +655,27 @@ namespace Hazel
 #pragma endregion
 
 #pragma region  AudioSourceComponent
-		DrawComponent<AudioSourceComponent>(entity, "Audio Source", [this](AudioSourceComponent& component)
+		DrawComponent<AudioSourceComponent>(entity, "Audio Source", [&](AudioSourceComponent& component)
 		{
-			ImGui::Text("Audio Clip : ");
-			ImGui::SameLine();
-			bool isClipButtonPressed;
-
-			if (component.AudioSource)
+			bool isButtonPressed;
+			auto& audioSource = component.AudioSource;
+			if (audioSource)
 			{
-				isClipButtonPressed = ImGui::Button(component.AudioSource->GetPath().filename().string().c_str());
+				isButtonPressed = ImGui::Button(audioSource->GetPath().filename().string().c_str());
 			}
 			else
 			{
-				isClipButtonPressed = ImGui::Button("Select Clip");
+				isButtonPressed = ImGui::Button("Select Clip");
 			}
 
-			if (component.AudioSource != nullptr && ImGui::BeginPopupContextItem())
+			if (audioSource != nullptr && ImGui::BeginPopupContextItem())
 			{
-				ImGui::Text("Clear AudioSource?");
+				ImGui::Text("Clear Audio Clip?");
 				ImGui::Separator();
 				if (ImGui::Button("Yes"))
 				{
-					AudioEngine::ReleaseAudioSource(component.AudioSource);
-					component.AudioSource.reset();
+					AudioEngine::ReleaseAudioSource(audioSource);
+					audioSource.reset();
 					ImGui::CloseCurrentPopup();
 				}
 				ImGui::SameLine();
@@ -690,6 +689,12 @@ namespace Hazel
 			}
 
 			std::filesystem::path audioClipFilePath;
+
+			if (isButtonPressed)
+			{
+				audioClipFilePath = FileDialogs::OpenFile("Audio Clip (*.ogg,*.mp3)\0*.ogg;*.mp3\0");
+				audioClipFilePath = std::filesystem::relative(audioClipFilePath);
+			}
 
 			if (ImGui::BeginDragDropTarget())
 			{
@@ -705,90 +710,152 @@ namespace Hazel
 				ImGui::EndDragDropTarget();
 			}
 
-			if (isClipButtonPressed)
-			{
-				audioClipFilePath = FileDialogs::OpenFile("Audio Clip (*.ogg,*.mp3)\0*.ogg;*.mp3\0");
-				audioClipFilePath = std::filesystem::relative(audioClipFilePath);
-			}
+			ImGui::SameLine();
+			ImGui::Text("Audio Clip");
 
 			if (!audioClipFilePath.empty())
 			{
-				if (component.AudioSource)
+				if (audioSource)
 				{
-					if (component.AudioSource->GetPath() != audioClipFilePath)
+					if (audioSource->GetPath() != audioClipFilePath)
 					{
-						AudioEngine::ReleaseAudioSource(component.AudioSource);
-						component.AudioSource = AudioSource::Create(audioClipFilePath);
+						AudioEngine::ReleaseAudioSource(audioSource);
+						audioSource = AudioSource::Create(audioClipFilePath);
 					}
 				}
 				else
 				{
-					component.AudioSource = AudioSource::Create(audioClipFilePath);
+					audioSource = AudioSource::Create(audioClipFilePath);
 				}
 			}
 
-			if (component.AudioSource != nullptr)
+			if (audioSource == nullptr)
 			{
-				_previousAudioSource = component.AudioSource;
+				return;
+			}
 
-				ImGui::Text("Lenght: %.3f sec", component.AudioSource->GetLength());
+			_previousAudioSource = audioSource;
 
-				auto state = component.AudioSource->GetState();
-
-				switch (state)
+			auto floatValueField = [&](const char* label, float min, float max, auto getValue, auto setValue)
+			{
+				float value = getValue();
+				ImGui::DragFloat(label, &value, 0.01f, min, max, "%.3f");
+				if (value != getValue())
 				{
-				case AudioSourceState::INITIAL:
-				case AudioSourceState::STOPPED:
-				{
-					if (ImGui::Button("Play"))
-					{
-						component.AudioSource->Play();
-					}
-					break;
+					setValue(value);
 				}
-				case AudioSourceState::PAUSED:
-				{
-					if (ImGui::Button("Unpause"))
-					{
-						component.AudioSource->Play();
-					}
-					break;
-				}
-				case AudioSourceState::PLAYING:
-				{
-					if (ImGui::Button("Pause"))
-					{
-						component.AudioSource->Pause();
-					}
-					break;
-				}
-				default:
-					break;
-				}
+			};
 
-				ImGui::SameLine();
-				if (ImGui::Button("Stop"))
+			floatValueField("Gain (Volume)", 0.0f, 1.0f,
+				[&]() { return audioSource->GetGain(); },
+				[&](float valueToSet) { audioSource->SetGain(valueToSet); });
+			floatValueField("Pitch (Speed)", 0.0f, 0.0f,
+				[&]() { return audioSource->GetPitch(); },
+				[&](float valueToSet) { audioSource->SetPitch(valueToSet); });
+
+			auto boolValueField = [&](const char* label, auto getValue, auto setValue)
+			{
+				bool value = getValue();
+				ImGui::Checkbox(label, &value);
+				if (value != getValue())
 				{
-					component.AudioSource->Stop();
+					setValue(value);
 				}
+			};
 
-				float offset = component.AudioSource->GetOffset();
-				const float savedOffset = offset;
-				float lenght = component.AudioSource->GetLength();
-				int min = static_cast<int>(offset / 60);
-				float secs = (offset - (min * 60));
-				int sec = static_cast<int>(secs);
-				int ms = static_cast<int>((secs - sec) * 1000);
+			boolValueField("Loop",
+				[&]() { return audioSource->GetLoop(); },
+				[&](auto valueToSet) { audioSource->SetLoop(valueToSet); });
+			boolValueField("3D",
+				[&]() { return audioSource->Get3D(); },
+				[&](auto valueToSet) { audioSource->Set3D(valueToSet); });
 
-				ImGui::Text("%2im:%2is:%3ims", min, sec, ms);
-				ImGui::SliderFloat("Track", &offset, 0.0f, lenght, "", ImGuiSliderFlags_NoInput);
+			if (audioSource->Get3D())
+			{
+				audioSource->SetPosition(entity.Transform().Position);
+			}
 
-				if ((state == AudioSourceState::PAUSED || state == AudioSourceState::PLAYING)
-					&& savedOffset != offset)
+			ImGui::Text("Lenght: %.3f sec", audioSource->GetLength());
+
+			auto state = audioSource->GetState();
+			switch (state)
+			{
+			case AudioSourceState::INITIAL:
+			case AudioSourceState::STOPPED:
+			{
+				if (ImGui::Button("Play"))
 				{
-					component.AudioSource->SetOffset(offset);
+					audioSource->Play();
+				}
+				break;
+			}
+			case AudioSourceState::PAUSED:
+			{
+				if (ImGui::Button("Unpause"))
+				{
+					audioSource->Play();
+				}
+				break;
+			}
+			case AudioSourceState::PLAYING:
+			{
+				if (ImGui::Button("Pause"))
+				{
+					audioSource->Pause();
+				}
+				break;
+			}
+			default:
+				break;
+			}
+
+			ImGui::SameLine();
+			if (ImGui::Button("Stop"))
+			{
+				audioSource->Stop();
+			}
+
+			float offset = audioSource->GetOffset();
+			const float savedOffset = offset;
+			float lenght = audioSource->GetLength();
+			int min = static_cast<int>(offset / 60);
+			float secs = (offset - (min * 60));
+			int sec = static_cast<int>(secs);
+			int ms = static_cast<int>((secs - sec) * 1000);
+
+			auto trackValue = fmt::format("{}m:{:02d}s:{:02d}ms", min, sec, ms);
+			ImGui::SliderFloat("Track", &offset, 0.0f, lenght, trackValue.c_str(), ImGuiSliderFlags_NoInput);
+
+			if ((state == AudioSourceState::PAUSED || state == AudioSourceState::PLAYING)
+				&& savedOffset != offset)
+			{
+				audioSource->SetOffset(offset);
+			}
+
+			ImGui::Checkbox("Visible In Game##AudioSource", &component.IsVisibleInGame);
+		});
+#pragma endregion
+
+#pragma region  AudioListenerComponent
+		DrawComponent<AudioListenerComponent>(entity, "Audio Listener", [&](AudioListenerComponent& component)
+		{
+			ImGui::TextWrapped("AudioListener are only required if you have 3D Audio Sources.");
+			ImGui::Checkbox("Visible In Game##AudioListener", &component.IsVisibleInGame);
+
+			for (auto listener : _scene->GetAllEntitiesWith<AudioListenerComponent>())
+			{
+				if (listener != entity)
+				{
+					ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(Color::Red.r, Color::Red.g, Color::Red.b, Color::Red.a));
+					ImGui::TextWrapped("ERROR!");
+					ImGui::TextWrapped("There is more than one listeners in the scene!");
+					ImGui::TextWrapped("Please remove one!");
+					ImGui::PopStyleColor();
+					return;
 				}
 			}
+
+			AudioEngine::SetListenerPosition(entity.Transform().Position);
 		});
 #pragma endregion
 
@@ -811,8 +878,13 @@ namespace Hazel
 			return;
 		}
 
-		CleanUpComponent<AudioSourceComponent>(entity, [this](AudioSourceComponent& component)
+		CleanUpComponent<AudioSourceComponent>(entity, [&](AudioSourceComponent& component)
 		{
+			if (_shouldKeepPlaying)
+			{
+				return;
+			}
+
 			if (component.AudioSource && !_previousAudioSource.expired())
 			{
 				if (component.AudioSource == std::shared_ptr(_previousAudioSource))
@@ -842,6 +914,20 @@ namespace Hazel
 		else
 		{
 			ImGui::TextDisabled(nameId.c_str());
+		}
+	}
+
+	void SceneHierarchyPanel::SetShouldKeepPlaying(bool value)
+	{
+		if (_shouldKeepPlaying == value)
+		{
+			return;
+		}
+
+		_shouldKeepPlaying = value;
+		if (!_shouldKeepPlaying)
+		{
+			AudioEngine::StopAllAudioSources();
 		}
 	}
 }

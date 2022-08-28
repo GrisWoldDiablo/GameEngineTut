@@ -4,6 +4,7 @@
 #include "ScriptableEntity.h"
 #include "Hazel/Renderer/Renderer2D.h"
 #include "Hazel/Scripting/ScriptEngine.h"
+#include "Hazel/Audio/AudioEngine.h"
 
 #include "box2d/b2_world.h"
 #include "box2d/b2_body.h"
@@ -14,6 +15,9 @@
 
 namespace Hazel
 {
+	Ref<Texture2D> Scene::_sAudioSourceIcon;
+	Ref<Texture2D> Scene::_sAudioListenerIcon;
+
 	static b2BodyType Rigidbody2DTypeToBox2DBody(Rigidbody2DComponent::BodyType bodyType)
 	{
 		switch (bodyType)
@@ -27,6 +31,15 @@ namespace Hazel
 		return b2_staticBody;
 	}
 
+	Scene::Scene()
+	{
+		// TODO create an Icon Manager.
+		if (_sAudioSourceIcon == nullptr)
+		{
+			_sAudioSourceIcon = Texture2D::Create("Resources/Icons/General/AudioSource256.png");
+			_sAudioListenerIcon = Texture2D::Create("Resources/Icons/General/AudioListener256.png");
+		}
+	}
 
 	Scene::Scene(const std::string& name)
 		:_name(name)
@@ -137,6 +150,7 @@ namespace Hazel
 
 	void Scene::DestroyEntity(Entity entity)
 	{
+		OnEntityDestroy(entity);
 		_entityMap.erase(entity.GetUUID());
 		_registry.destroy(entity);
 	}
@@ -263,6 +277,7 @@ namespace Hazel
 		{
 			DrawSpriteRenderComponent(cameraPosition);
 			DrawCircleRenderComponent(cameraPosition);
+			DrawAudioComponent(cameraPosition, true);
 
 			Renderer2D::EndScene();
 		}
@@ -308,7 +323,7 @@ namespace Hazel
 	{
 		auto view = _registry.view<TransformComponent, SpriteRendererComponent>();
 
-		//TODO Fix sorting. Can't have 2 groups sprite and circle render
+		//TODO Fix sorting?. Can't have 2 groups sprite and circle render
 		//group.sort<TransformComponent>([&](const auto& lhs, const auto& rhs)
 		//{
 		//	auto lhsDistance = glm::distance(lhs.Position, cameraPosition);
@@ -330,18 +345,47 @@ namespace Hazel
 	{
 		auto view = _registry.view<TransformComponent, CircleRendererComponent>();
 
-		//TODO Fix sorting.
-		//group.sort<TransformComponent>([&](const auto& lhs, const auto& rhs)
-		//{
-		//	auto lhsDistance = glm::distance(lhs.Position, cameraPosition);
-		//	auto rhsDistance = glm::distance(rhs.Position, cameraPosition);
-		//	return lhsDistance > rhsDistance;
-		//});
-
 		for (const auto entity : view)
 		{
 			auto [transform, circle] = view.get<TransformComponent, CircleRendererComponent>(entity);
 			Renderer2D::DrawCircle(transform.GetTransformMatrix(), circle.Color, circle.Thickness, circle.Fade, (int)entity);
+		}
+	}
+
+	void Scene::DrawAudioComponent(const glm::vec3& cameraPosition, bool isRuntime)
+	{
+		//TODO create draw Icon generic.
+
+		float cameraPositionZ = cameraPosition.z;
+
+		auto viewAudioSource = _registry.view<TransformComponent, AudioSourceComponent>();
+		for (const auto entity : viewAudioSource)
+		{
+			auto [transform, audioSource] = viewAudioSource.get<TransformComponent, AudioSourceComponent>(entity);
+			if (!isRuntime || audioSource.IsVisibleInGame)
+			{
+				float sign = cameraPositionZ > transform.Position.z ? 1.0f : -1.0f;
+				auto position = transform.Position;
+				position.z += 0.001f * sign;
+				auto scale = glm::vec3(1.0f);
+				scale.x *= sign;
+				Renderer2D::DrawQuad(position, scale, _sAudioSourceIcon, glm::vec2(1.0f), Color::White, (int)entity);
+			}
+		}
+
+		auto viewAudioListener = _registry.view<TransformComponent, AudioListenerComponent>();
+		for (const auto entity : viewAudioListener)
+		{
+			auto [transform, audioListene] = viewAudioListener.get<TransformComponent, AudioListenerComponent>(entity);
+			if (!isRuntime || audioListene.IsVisibleInGame)
+			{
+				float sign = cameraPositionZ > transform.Position.z ? 1.0f : -1.0f;
+				auto position = transform.Position;
+				position.z += 0.001f * sign;
+				auto scale = glm::vec3(1.0f);
+				scale.x *= sign;
+				Renderer2D::DrawQuad(position, scale, _sAudioListenerIcon, glm::vec2(1.0f), Color::White, (int)entity);
+			}
 		}
 	}
 
@@ -465,6 +509,7 @@ namespace Hazel
 		{
 			DrawSpriteRenderComponent(camera.GetPosition());
 			DrawCircleRenderComponent(camera.GetPosition());
+			DrawAudioComponent(camera.GetPosition());
 
 			// TESTING
 			//Renderer2D::DrawLine(glm::vec3(Random::Float()), glm::vec3(5.0f), Color::Magenta);
@@ -474,6 +519,7 @@ namespace Hazel
 		}
 	}
 
+#pragma region OnComponentAdded
 	template<typename T>
 	void Scene::OnComponentAdded(Entity entity, T& component)
 	{
@@ -537,5 +583,119 @@ namespace Hazel
 			const auto path = component.AudioSource->GetPath();
 			component.AudioSource = AudioSource::Create(path);
 		}
+	}
+
+	template<>
+	void Scene::OnComponentAdded<AudioListenerComponent>(Entity entity, AudioListenerComponent& component)
+	{
+		for (auto listener : GetAllEntitiesWith<AudioListenerComponent>())
+		{
+			if (listener != entity)
+			{
+				return;
+			}
+		}
+
+		AudioEngine::SetListenerPosition(entity.Transform().Position);
+	}
+#pragma endregion
+
+#pragma region OnComponentRemoved
+	template<typename T>
+	void Scene::OnComponentRemoved(Entity entity, T& component)
+	{
+		static_assert(false);
+	}
+
+	template<>
+	void Scene::OnComponentRemoved<IDComponent>(Entity entity, IDComponent& component)
+	{}
+
+	template<>
+	void Scene::OnComponentRemoved<BaseComponent>(Entity entity, BaseComponent& component)
+	{}
+
+	template<>
+	void Scene::OnComponentRemoved<TransformComponent>(Entity entity, TransformComponent& component)
+	{}
+
+	template<>
+	void Scene::OnComponentRemoved<SpriteRendererComponent>(Entity entity, SpriteRendererComponent& component)
+	{}
+
+	template<>
+	void Scene::OnComponentRemoved<CircleRendererComponent>(Entity entity, CircleRendererComponent& component)
+	{}
+
+	template<>
+	void Scene::OnComponentRemoved<CameraComponent>(Entity entity, CameraComponent& component)
+	{}
+
+	template<>
+	void Scene::OnComponentRemoved<ScriptComponent>(Entity entity, ScriptComponent& component)
+	{}
+
+	template<>
+	void Scene::OnComponentRemoved<NativeScriptComponent>(Entity entity, NativeScriptComponent& component)
+	{}
+
+	template<>
+	void Scene::OnComponentRemoved<Rigidbody2DComponent>(Entity entity, Rigidbody2DComponent& component)
+	{}
+
+	template<>
+	void Scene::OnComponentRemoved<BoxCollider2DComponent>(Entity entity, BoxCollider2DComponent& component)
+	{}
+
+	template<>
+	void Scene::OnComponentRemoved<CircleCollider2DComponent>(Entity entity, CircleCollider2DComponent& component)
+	{}
+
+	template<>
+	void Scene::OnComponentRemoved<AudioSourceComponent>(Entity entity, AudioSourceComponent& component)
+	{}
+
+	template<>
+	void Scene::OnComponentRemoved<AudioListenerComponent>(Entity entity, AudioListenerComponent& component)
+	{
+		auto listeners = GetAllEntitiesWith<TransformComponent, AudioListenerComponent>();
+
+		glm::vec3 position{};
+
+		for (auto listener : listeners)
+		{
+			if (listener != entity)
+			{
+				position = listeners.get<TransformComponent>(listener).Position;
+				break;
+			}
+		}
+
+		HZ_CORE_LINFO("Listener removed. Audio Listener position set to {0}", position);
+		AudioEngine::SetListenerPosition(position);
+	}
+#pragma endregion
+
+	template<typename T, typename Function>
+	static void CleanUpComponent(Entity entity, Function function)
+	{
+		if (entity.HasComponent<T>())
+		{
+			auto& component = entity.GetComponent<T>();
+			function(component);
+		}
+	}
+
+	void Scene::OnEntityDestroy(Entity entity)
+	{
+		if (!entity)
+		{
+			return;
+		}
+
+		CleanUpComponent<AudioListenerComponent>(entity, [&](AudioListenerComponent& component)
+		{
+			OnComponentRemoved(entity, component);
+		});
 	}
 }

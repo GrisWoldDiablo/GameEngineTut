@@ -1,14 +1,15 @@
 #include "EditorLayer.h"
 #include "NativeScripts.h"
 
-#include <imgui/imgui.h>
-#include <glm/gtc/type_ptr.hpp>
-
 #include "Hazel/Scene/SceneSerializer.h"
 #include "Hazel/Utils/PlatformUtils.h"
-
-#include "ImGuizmo.h"
 #include "Hazel/Math/HMath.h"
+#include "Hazel/Audio/AudioEngine.h"
+
+#include <imgui/imgui.h>
+#include "ImGuizmo.h"
+
+#include <glm/gtc/type_ptr.hpp>
 
 namespace Hazel
 {
@@ -1078,6 +1079,9 @@ namespace Hazel
 		ImGui::Begin("Tools");
 
 		ImGui::Checkbox("Show physics colliders", &_shouldShowPhysicsColliders);
+		bool shouldKeepPlaying = _sceneHierarchyPanel.GetShouldKeepPlaying();
+		ImGui::Checkbox("Play AudioSource without selection", &shouldKeepPlaying);
+		_sceneHierarchyPanel.SetShouldKeepPlaying(shouldKeepPlaying);
 
 		if (ImGui::Button("Show Demo Window"))
 		{
@@ -1175,6 +1179,11 @@ namespace Hazel
 
 	void EditorLayer::OnScenePlay()
 	{
+		if (_sceneHierarchyPanel.GetShouldKeepPlaying())
+		{
+			AudioEngine::StopAllAudioSources();
+		}
+
 		_sceneState = SceneState::Play;
 
 		_activeScene = Scene::Copy(_editorScene);
@@ -1187,6 +1196,8 @@ namespace Hazel
 
 	void EditorLayer::OnSceneSimulate()
 	{
+		AudioEngine::StopAllAudioSources();
+
 		_sceneState = SceneState::Simulate;
 
 		_activeScene = Scene::Copy(_editorScene);
@@ -1199,6 +1210,8 @@ namespace Hazel
 
 	void EditorLayer::OnSceneStop()
 	{
+		AudioEngine::StopAllAudioSources();
+
 		HZ_CORE_ASSERT(_sceneState == SceneState::Play || _sceneState == SceneState::Simulate, "Invalid Scene State.");
 
 		switch (_sceneState)

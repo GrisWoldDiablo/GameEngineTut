@@ -32,6 +32,8 @@ namespace Hazel
 		void RemoveComponent()
 		{
 			HZ_CORE_ASSERT(HasComponent<T>(), "Entity does not have component!");
+			auto& component = GetComponent<T>();
+			_scene->OnComponentRemoved<T>(*this, component);
 			_scene->_registry.remove<T>(_entityHandle);
 		}
 
@@ -53,7 +55,7 @@ namespace Hazel
 			return GetComponent<IDComponent>().ID;
 		}
 
-		operator bool() const { return _entityHandle != entt::null; }
+		operator bool() const { return _scene && _scene->_registry.valid(_entityHandle); }
 		operator entt::entity() const { return _entityHandle; }
 		operator uint32_t() const { return static_cast<uint32_t>(_entityHandle); }
 

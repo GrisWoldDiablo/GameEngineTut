@@ -2,6 +2,7 @@
 #include "Hazel/Core/Timestep.h"
 #include "Hazel/Core/UUID.h"
 #include "Hazel/Renderer/EditorCamera.h"
+#include "Hazel/Renderer/Texture.h"
 
 #include "entt.hpp"
 
@@ -14,7 +15,7 @@ namespace Hazel
 	class Scene
 	{
 	public:
-		Scene() = default;
+		Scene();
 		Scene(const std::string& name);
 		~Scene();
 
@@ -36,6 +37,7 @@ namespace Hazel
 
 		void DrawSpriteRenderComponent(const glm::vec3& cameraPosition);
 		void DrawCircleRenderComponent(const glm::vec3& cameraPosition);
+		void DrawAudioComponent(const glm::vec3& cameraPosition, bool isRuntime = false);
 
 		void OnViewportResize(uint32_t  width, uint32_t height);
 
@@ -53,6 +55,10 @@ namespace Hazel
 	private:
 		template<typename T>
 		void OnComponentAdded(Entity entity, T& component);
+		template<typename T>
+		void OnComponentRemoved(Entity entity, T& component);
+
+		void OnEntityDestroy(Entity entity);
 
 		void OnPhysic2DStart();
 		void OnPhysic2DStop();
@@ -68,6 +74,9 @@ namespace Hazel
 		b2World* _physicsWorld = nullptr;
 
 		std::unordered_map<UUID, entt::entity> _entityMap;
+
+		static Ref<Texture2D> _sAudioSourceIcon;
+		static Ref<Texture2D> _sAudioListenerIcon;
 
 		friend class Entity;
 		friend class SceneSerializer;

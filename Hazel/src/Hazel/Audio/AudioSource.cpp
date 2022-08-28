@@ -19,6 +19,7 @@ namespace Hazel
 
 	AudioSource::~AudioSource()
 	{
+		AudioEngine::DeleteAudioSource(this);
 		alDeleteSources(1, &_alSource);
 		alDeleteBuffers(1, &_alBuffer);
 	}
@@ -59,12 +60,15 @@ namespace Hazel
 
 	void AudioSource::SetOffset(float offset)
 	{
-		alSourcef(_alSource, AL_SEC_OFFSET, offset);
+		if (offset >= 0.0f)
+		{
+			alSourcef(_alSource, AL_SEC_OFFSET, offset);
+		}
 	}
 
 	void AudioSource::SetGain(float gain)
 	{
-		if (_gain != gain)
+		if (gain >= 0.0f && !HMath::IsNearlyEqual(_gain, gain))
 		{
 			_gain = gain;
 			alSourcef(_alSource, AL_GAIN, gain);
@@ -73,19 +77,10 @@ namespace Hazel
 
 	void AudioSource::SetPitch(float pitch)
 	{
-		if (_pitch != pitch)
+		if (pitch >= 0.0f && !HMath::IsNearlyEqual(_pitch, pitch))
 		{
 			_pitch = pitch;
 			alSourcef(_alSource, AL_PITCH, pitch);
-		}
-	}
-
-	void AudioSource::Set3D(bool is3D)
-	{
-		if (_is3D != is3D)
-		{
-			_is3D = is3D;
-			alSourcei(_alSource, AL_SOURCE_SPATIALIZE_SOFT, _is3D ? AL_TRUE : AL_FALSE);
 		}
 	}
 
@@ -98,13 +93,31 @@ namespace Hazel
 		}
 	}
 
+	void AudioSource::Set3D(bool is3D)
+	{
+		if (_is3D != is3D)
+		{
+			_is3D = is3D;
+			alSourcei(_alSource, AL_SOURCE_SPATIALIZE_SOFT, _is3D ? AL_TRUE : AL_FALSE);
+		}
+	}
+
 	void AudioSource::SetPosition(const glm::vec3& position)
 	{
-		if (HMath::IsNearlyEqual(_position, position))
+		if (!HMath::IsNearlyEqual(_position, position))
 		{
 			_position = position;
 
 			alSourcefv(_alSource, AL_POSITION, &_position.x);
 		}
+	}
+
+	void AudioSource::ResetFields()
+	{
+		_gain = 1.0f;
+		_pitch = 1.0f;
+		_is3D = false;
+		_isLoop = false;
+		_position = { 0.0f, 0.0f, 0.0f };
 	}
 }

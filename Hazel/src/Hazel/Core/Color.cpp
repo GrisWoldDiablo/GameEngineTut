@@ -18,6 +18,7 @@ namespace Hazel
 	const Color Color::Turquoise = Color(0.251f, 0.878f, 0.816f, 1.0f);
 	const Color Color::Yellow = Color(1.0f, 0.92f, 0.016f, 1.0f);
 	const Color Color::Orange = Color(1.0f, 0.5f, 0.0f, 1.0f);
+	const Color Color::Pink = Color(1.0f, 0.0f, 1.0f, 1.0f);;
 
 	Color Color::HSVtoRGB(float h, float s, float v, float a)
 	{

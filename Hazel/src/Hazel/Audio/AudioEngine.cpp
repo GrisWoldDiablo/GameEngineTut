@@ -61,13 +61,11 @@ namespace Hazel
 		uint8_t* AudioScratchBuffer = nullptr;
 		uint32_t AudioScratchBufferSize = 10 * 1024 * 1024;
 
-		std::unordered_map<std::filesystem::path, Ref<AudioSource>> UnassignedAudioSources;
+		std::unordered_map<std::string, Ref<AudioSource>> UnassignedAudioSources;
+		std::vector<AudioSource*> AssignedAudioSources;
 	};
 
 	static AudioEngineData* sAudioData = nullptr;
-
-	static Ref<AudioSource> test1;
-	static Ref<AudioSource> test2;
 
 	void AudioEngine::Init()
 	{
@@ -88,9 +86,8 @@ namespace Hazel
 
 	void AudioEngine::Shutdown()
 	{
-		sAudioData->UnassignedAudioSources.clear();
-		CloseAL();
 		delete sAudioData;
+		CloseAL();
 	}
 
 	Ref<AudioSource> AudioEngine::LoadAudioSource(const std::filesystem::path& filePath)
@@ -101,33 +98,69 @@ namespace Hazel
 			return nullptr;
 		}
 
+		Ref<AudioSource> newAudioSource = nullptr;
+
 		switch (Utils::GetAudioFileFormat(filePath))
 		{
 		case AudioFileFormat::MP3:
-			return LoadMP3(filePath);
+			newAudioSource = LoadMP3(filePath);
+			break;
 		case AudioFileFormat::OGG:
-			return LoadOgg(filePath);
+			newAudioSource = LoadOgg(filePath);
+			break;
 		case AudioFileFormat::NONE:
 		default:
 			HZ_CORE_LERROR("No supported format for [{0}]", filePath.string());
 			return nullptr;
 		}
+
+		sAudioData->AssignedAudioSources.push_back(newAudioSource.get());
+
+		return newAudioSource;
 	}
 
 	void AudioEngine::ReleaseAudioSource(Ref<AudioSource> audioSource)
 	{
+		// Don't like much this release, need to revisit.
+		// TODO setup a pool, Max size of map, might be the time for an asset manager.
 		audioSource->Stop();
-		// TODO setup a pool, Max size of map.
-		sAudioData->UnassignedAudioSources.emplace(audioSource->GetPath(), audioSource);
+		audioSource->ResetFields();
+		auto& sources = sAudioData->AssignedAudioSources;
+		sources.erase(std::remove(sources.begin(), sources.end(), audioSource.get()), sources.end());
+		
+		sAudioData->UnassignedAudioSources.emplace(audioSource->GetPath().string(), audioSource);
+	}
+
+	void AudioEngine::DeleteAudioSource(AudioSource* audioSource)
+	{
+		// TODO delete or release?
+		auto& sources = sAudioData->AssignedAudioSources;
+		sources.erase(std::remove(sources.begin(), sources.end(), audioSource), sources.end());
+	}
+
+	void AudioEngine::StopAllAudioSources()
+	{
+		for (const auto& audioSource : sAudioData->AssignedAudioSources)
+		{
+			if (audioSource != nullptr)
+			{
+				audioSource->Stop();
+			}
+		}
+	}
+
+	void AudioEngine::SetListenerPosition(const glm::vec3& position)
+	{
+		alListenerfv(AL_POSITION, &position.x);
 	}
 
 	bool AudioEngine::TryFindAudioSource(Ref<AudioSource>& audioSource, const std::filesystem::path& filePath)
 	{
-		auto foundPair = sAudioData->UnassignedAudioSources.find(filePath);
+		auto foundPair = sAudioData->UnassignedAudioSources.find(filePath.string());
 		if (foundPair != sAudioData->UnassignedAudioSources.end())
 		{
 			audioSource = foundPair->second;
-			sAudioData->UnassignedAudioSources.erase(filePath);
+			sAudioData->UnassignedAudioSources.erase(filePath.string());
 			return true;
 		}
 

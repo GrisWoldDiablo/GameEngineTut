@@ -396,27 +396,27 @@ namespace Hazel
 #pragma endregion
 
 #pragma region Texture
-	void Renderer2D::DrawQuad(const glm::vec2& position, const glm::vec2& size, const Ref<Texture2D>& texture, const glm::vec2& tilingFactor, const Color& tintColor)
+	void Renderer2D::DrawQuad(const glm::vec2& position, const glm::vec2& size, const Ref<Texture2D>& texture, const glm::vec2& tilingFactor, const Color& tintColor, int entityID)
 	{
-		DrawQuad({ position.x, position.y, 0.0f }, size, texture, tilingFactor, tintColor);
+		DrawQuad({ position.x, position.y, 0.0f }, size, texture, tilingFactor, tintColor, entityID);
 	}
 
-	void Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec2& size, const Ref<Texture2D>& texture, const glm::vec2& tilingFactor, const Color& tintColor)
+	void Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec2& size, const Ref<Texture2D>& texture, const glm::vec2& tilingFactor, const Color& tintColor, int entityID)
 	{
 		HZ_PROFILE_FUNCTION();
 
 		glm::mat4 transform = glm::translate(_sIdentityMatrix, position)
 			* glm::scale(_sIdentityMatrix, { size.x,size.y,1.0f });
 
-		DrawQuad(transform, texture, tilingFactor, tintColor);
+		DrawQuad(transform, texture, tilingFactor, tintColor, entityID);
 	}
 
-	void Renderer2D::DrawRotatedQuad(const glm::vec2& position, const glm::vec2& size, float rotation, const Ref<Texture2D>& texture, const glm::vec2& tilingFactor, const Color& tintColor)
+	void Renderer2D::DrawRotatedQuad(const glm::vec2& position, const glm::vec2& size, float rotation, const Ref<Texture2D>& texture, const glm::vec2& tilingFactor, const Color& tintColor, int entityID)
 	{
-		DrawRotatedQuad({ position.x, position.y, 0.0f }, size, rotation, texture, tilingFactor, tintColor);
+		DrawRotatedQuad({ position.x, position.y, 0.0f }, size, rotation, texture, tilingFactor, tintColor, entityID);
 	}
 
-	void Renderer2D::DrawRotatedQuad(const glm::vec3& position, const glm::vec2& size, float rotation, const Ref<Texture2D>& texture, const glm::vec2& tilingFactor, const Color& tintColor)
+	void Renderer2D::DrawRotatedQuad(const glm::vec3& position, const glm::vec2& size, float rotation, const Ref<Texture2D>& texture, const glm::vec2& tilingFactor, const Color& tintColor, int entityID)
 	{
 		HZ_PROFILE_FUNCTION();
 
@@ -424,12 +424,18 @@ namespace Hazel
 			* glm::rotate(_sIdentityMatrix, glm::radians(rotation), { 0.0f,0.0f,1.0f })
 			* glm::scale(_sIdentityMatrix, { size.x,size.y,1.0f });
 
-		DrawQuad(transform, texture, tilingFactor, tintColor);
+		DrawQuad(transform, texture, tilingFactor, tintColor, entityID);
 	}
 
 	void Renderer2D::DrawQuad(const glm::mat4& transform, const Ref<Texture2D>& texture, const glm::vec2& tilingFactor, const Color& tintColor, int entityID)
 	{
 		HZ_PROFILE_FUNCTION();
+
+		if (texture == nullptr)
+		{
+			DrawInvalidTexture(transform);
+			return;
+		}
 
 		int textureIndex = 0;
 
@@ -500,6 +506,12 @@ namespace Hazel
 	void Renderer2D::DrawQuad(const glm::mat4& transform, const Ref<SubTexture2D>& subTexture, const glm::vec2& tilingFactor, const Color& tintColor)
 	{
 		HZ_PROFILE_FUNCTION();
+
+		if (subTexture == nullptr)
+		{
+			DrawInvalidTexture(transform);
+			return;
+		}
 
 		auto coords = subTexture->GetTexCoords();
 		auto newCoords = new glm::vec2[4];
@@ -733,5 +745,10 @@ namespace Hazel
 
 		sData.CircleIndexCount += 6;
 		sData.Stats.QuadCount++;
+	}
+	
+	void Renderer2D::DrawInvalidTexture(const glm::mat4& transform)
+	{
+		DrawQuad(transform, Color::Pink);
 	}
 }

@@ -20,14 +20,14 @@ namespace Hazel
 
 		void SetGain(float gain);
 		void SetPitch(float pitch);
-		void Set3D(bool is3D);
 		void SetLoop(bool isLoop);
+		void Set3D(bool is3D);
 		void SetPosition(const glm::vec3& position);
 
 		float GetGain() const { return _gain; }
 		float GetPitch() const { return _pitch; }
-		bool Get3D() const { return _is3D; }
 		bool GetLoop() const { return _isLoop; }
+		bool Get3D() const { return _is3D; }
 		const glm::vec3& GetPosition() const { return _position; }
 
 		AudioSourceState GetState();
@@ -48,6 +48,8 @@ namespace Hazel
 		bool _is3D = false;
 		bool _isLoop = false;
 		glm::vec3 _position{ 0.0f, 0.0f, 0.0f };
+
+		void ResetFields();
 
 		friend class AudioEngine;
 	};

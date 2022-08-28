@@ -234,9 +234,29 @@ namespace Hazel
 			if (component.AudioSource != nullptr)
 			{
 				out << YAML::Key << "AudioClipPath" << YAML::Value << component.AudioSource->GetPath(); // TODO not use path but actual texture asset.
+				out << YAML::Key << "Gain" << YAML::Value << component.AudioSource->GetGain();
+				out << YAML::Key << "Pitch" << YAML::Value << component.AudioSource->GetPitch();
+				out << YAML::Key << "IsLoop" << YAML::Value << component.AudioSource->GetLoop();
+				out << YAML::Key << "Is3D" << YAML::Value << component.AudioSource->Get3D();
 			}
 
+			out << YAML::Key << "IsVisibleInGame" << YAML::Value << component.IsVisibleInGame;
+
 			out << YAML::EndMap; // AudioSourceComponent
+		}
+#pragma endregion
+
+#pragma region AudioListenerComponent
+		if (entity.HasComponent<AudioListenerComponent>())
+		{
+			const auto& component = entity.GetComponent<AudioListenerComponent>();
+
+			out << YAML::Key << "AudioListenerComponent";
+			out << YAML::BeginMap; // AudioListenerComponent
+
+			out << YAML::Key << "IsVisibleInGame" << YAML::Value << component.IsVisibleInGame;
+
+			out << YAML::EndMap; // AudioListenerComponent
 		}
 #pragma endregion
 
@@ -413,7 +433,10 @@ namespace Hazel
 					if (auto texturePath = spriteRendererComponent["TexturePath"])
 					{
 						component.Texture = Texture2D::Create(texturePath.as<std::filesystem::path>()); // TODO not use path use asset.
-						component.Texture->SetMagFilter(GetValue<uint32_t>(spriteRendererComponent, "MagFilter", 0x2601));
+						if (component.Texture != nullptr)
+						{
+							component.Texture->SetMagFilter(GetValue<uint32_t>(spriteRendererComponent, "MagFilter", 0x2601));
+						}
 					}
 
 					component.Tiling = GetValue<glm::vec2>(spriteRendererComponent, "Tiling", { 1.0f,1.0f });
@@ -475,7 +498,25 @@ namespace Hazel
 					if (auto audioClipPath = audioSourceComponent["AudioClipPath"])
 					{
 						component.AudioSource = AudioSource::Create(audioClipPath.as<std::filesystem::path>()); // TODO not use path use asset.
+						if (component.AudioSource != nullptr)
+						{
+							component.AudioSource->SetGain(GetValue<float>(audioSourceComponent, "Gain", 1.0f));
+							component.AudioSource->SetPitch(GetValue<float>(audioSourceComponent, "Pitch", 1.0f));
+							component.AudioSource->SetLoop(GetValue<bool>(audioSourceComponent, "IsLoop", false));
+							component.AudioSource->Set3D(GetValue<bool>(audioSourceComponent, "Is3D", false));
+							component.AudioSource->SetPosition(deserializedEntity.Transform().Position);
+						}
 					}
+					
+					component.IsVisibleInGame = GetValue<bool>(audioSourceComponent, "IsVisibleInGame", false);
+				}
+#pragma endregion
+
+#pragma region AudioListenerComponent
+				if (auto audioListenerComponent = entity["AudioListenerComponent"])
+				{
+					auto& component = deserializedEntity.AddComponent<AudioListenerComponent>();
+					component.IsVisibleInGame = GetValue<bool>(audioListenerComponent, "IsVisibleInGame", false);
 				}
 #pragma endregion
 			}

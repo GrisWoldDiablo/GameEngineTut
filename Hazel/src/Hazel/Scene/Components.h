@@ -175,9 +175,18 @@ namespace Hazel
 	struct AudioSourceComponent
 	{
 		Ref<AudioSource> AudioSource;
+		bool IsVisibleInGame = false;
 
 		AudioSourceComponent() = default;
 		AudioSourceComponent(const AudioSourceComponent&) = default;
+	};
+
+	struct AudioListenerComponent
+	{
+		bool IsVisibleInGame = false;
+
+		AudioListenerComponent() = default;
+		AudioListenerComponent(const AudioListenerComponent&) = default;
 	};
 
 	template<typename... Component>
@@ -188,5 +197,5 @@ namespace Hazel
 		CircleRendererComponent, CameraComponent,
 		ScriptComponent, NativeScriptComponent,
 		Rigidbody2DComponent, BoxCollider2DComponent, CircleCollider2DComponent,
-		AudioSourceComponent>;
+		AudioSourceComponent, AudioListenerComponent>;
 }

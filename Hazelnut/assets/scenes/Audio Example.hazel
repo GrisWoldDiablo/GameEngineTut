@@ -1,0 +1,61 @@
+Scene: Audio Example
+Entities:
+  - Entity: 6087744046803597786
+    BaseComponent:
+      Name: Audio Source Music
+      Tag: 0
+      Layer: 0
+    TransformComponent:
+      Position: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    AudioSourceComponent:
+      AudioClipPath: assets\audio\rocavaco-Bass17w19.mp3
+      Gain: 1
+      Pitch: 1
+      IsLoop: false
+      Is3D: false
+      IsVisibleInGame: false
+  - Entity: 16623845463241627882
+    BaseComponent:
+      Name: Audio Source SFX 3D Left
+      Tag: 0
+      Layer: 0
+    TransformComponent:
+      Position: [1.86535931, -0.0376783013, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    AudioSourceComponent:
+      AudioClipPath: assets\audio\Splash.ogg
+      Gain: 1
+      Pitch: 1
+      IsLoop: false
+      Is3D: true
+      IsVisibleInGame: false
+  - Entity: 6635671744454841129
+    BaseComponent:
+      Name: Audio Source SFX 3D Right
+      Tag: 0
+      Layer: 0
+    TransformComponent:
+      Position: [4.5277338, -0.0777612925, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    AudioSourceComponent:
+      AudioClipPath: assets\audio\Splash.ogg
+      Gain: 1
+      Pitch: 1
+      IsLoop: false
+      Is3D: true
+      IsVisibleInGame: false
+  - Entity: 5103971069439463806
+    BaseComponent:
+      Name: Audio Listener
+      Tag: 0
+      Layer: 0
+    TransformComponent:
+      Position: [3.3693192, 0.01363796, 6.10351562e-05]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    AudioListenerComponent:
+      IsVisibleInGame: false

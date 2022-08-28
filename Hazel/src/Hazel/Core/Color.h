@@ -7,19 +7,20 @@ namespace Hazel
 	class Color final
 	{
 	public:
-		static const Color Black;	  // [0x000000] Color(0.0f, 0.0f, 0.0f, 1.0f);
-		static const Color White;	  // [0xFFFFFF] Color(1.0f, 1.0f, 1.0f, 1.0f);
-		static const Color Clear;	  // [0x000000] Color(0.0f, 0.0f, 0.0f, 0.0f);
-		static const Color Red;		  // [0xFF0000] Color(1.0f, 0.0f, 0.0f, 1.0f);
-		static const Color Green;	  // [0x00FF00] Color(0.0f, 1.0f, 0.0f, 1.0f);
-		static const Color Blue;	  // [0x0000FF] Color(0.0f, 0.0f, 1.0f, 1.0f);
-		static const Color Cyan;	  // [0x00FFFF] Color(0.0f, 1.0f, 1.0f, 1.0f);
-		static const Color Gray;	  // [0x7F7F7F] Color(0.5f, 0.5f, 0.5f, 1.0f);
-		static const Color Grey;	  // [0x7F7F7F] Color(0.5f, 0.5f, 0.5f, 1.0f);
-		static const Color Magenta;	  // [0xFF00FF] Color(1.0f, 0.0f, 1.0f, 1.0f);
-		static const Color Turquoise; // [0x40E0D0] Color(0.251f, 0.878f, 0.816f, 1.0f);
-		static const Color Yellow;    // [0xFFea04] Color(1.0f, 0.92f, 0.016f, 1.0f);
-		static const Color Orange;    // [0xFF7F00] Color(1.0f, 0.5f, 0.0f, 1.0f);
+		static const Color Black;	  // [0x000000] Color(0.0f, 0.0f, 0.0f, 1.0f)
+		static const Color White;	  // [0xFFFFFF] Color(1.0f, 1.0f, 1.0f, 1.0f)
+		static const Color Clear;	  // [0x000000] Color(0.0f, 0.0f, 0.0f, 0.0f)
+		static const Color Red;		  // [0xFF0000] Color(1.0f, 0.0f, 0.0f, 1.0f)
+		static const Color Green;	  // [0x00FF00] Color(0.0f, 1.0f, 0.0f, 1.0f)
+		static const Color Blue;	  // [0x0000FF] Color(0.0f, 0.0f, 1.0f, 1.0f)
+		static const Color Cyan;	  // [0x00FFFF] Color(0.0f, 1.0f, 1.0f, 1.0f)
+		static const Color Gray;	  // [0x7F7F7F] Color(0.5f, 0.5f, 0.5f, 1.0f)
+		static const Color Grey;	  // [0x7F7F7F] Color(0.5f, 0.5f, 0.5f, 1.0f)
+		static const Color Magenta;	  // [0xFF00FF] Color(1.0f, 0.0f, 1.0f, 1.0f)
+		static const Color Turquoise; // [0x40E0D0] Color(0.251f, 0.878f, 0.816f, 1.0f)
+		static const Color Yellow;    // [0xFFea04] Color(1.0f, 0.92f, 0.016f, 1.0f)
+		static const Color Orange;    // [0xFF7F00] Color(1.0f, 0.5f, 0.0f, 1.0f)
+		static const Color Pink;      // [0xFF00FF] Color(1.0f, 0.0f, 1.0f, 1.0f)
 
 		/// <summary>
 		/// Covert from Hue, Saturation, Value/Brightness to Red Green Blue Color with alpha
