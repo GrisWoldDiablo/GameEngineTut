@@ -43,10 +43,10 @@ namespace Hazel
 		internal extern static void TransformComponent_SetRotation(ulong id, ref Vector3 rotation);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern static void TransformComponent_GetScale(ulong id, out Vector2 scale);
+		internal extern static void TransformComponent_GetScale(ulong id, out Vector3 scale);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern static void TransformComponent_SetScale(ulong id, ref Vector2 scale);
+		internal extern static void TransformComponent_SetScale(ulong id, ref Vector3 scale);
 
 		/* Sprite Renderer */
 		[MethodImpl(MethodImplOptions.InternalCall)]

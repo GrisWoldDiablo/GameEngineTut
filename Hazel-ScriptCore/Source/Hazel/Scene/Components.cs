@@ -29,7 +29,7 @@
 			set => InternalCalls.TransformComponent_SetRotation(Entity.Id, ref value);
 		}
 
-		public Vector2 Scale
+		public Vector3 Scale
 		{
 			get
 			{

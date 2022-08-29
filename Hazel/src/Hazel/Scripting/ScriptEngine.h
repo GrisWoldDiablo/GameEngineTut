@@ -9,6 +9,7 @@ extern "C" // Forward declare of class from C
 	typedef struct _MonoMethod MonoMethod;
 	typedef struct _MonoAssembly MonoAssembly;
 	typedef struct _MonoImage MonoImage;
+	typedef struct _MonoAssemblyName MonoAssemblyName;
 }
 
 namespace Hazel
@@ -37,8 +38,12 @@ namespace Hazel
 		static void InitMono();
 		static void ShutdownMono();
 
+		static void LoadAppDomain();
+		static void UnloadAppDomain();
+		static void ClearAssemblies();
+
 		static bool TrySetupEngine();
-		static bool TryLoadAssembly(const std::filesystem::path& filePath);
+		static bool TryLoadCoreAssembly(const std::filesystem::path& filePath);
 		static bool TryLoadAppAssembly(const std::filesystem::path& filePath);
 		static void LoadAssemblyClasses();
 

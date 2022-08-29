@@ -73,11 +73,15 @@ namespace Hazel
 
 		static void PrintAssemblyType(MonoAssembly* assembly)
 		{
+#if HZ_DEBUG
+			auto monoAssemblyName = mono_assembly_get_name(assembly);
+			auto assemblyName = mono_assembly_name_get_name(monoAssemblyName);
+			HZ_CORE_LINFO("Mono Assembly: {0}", assemblyName);
+
 			MonoImage* image = mono_assembly_get_image(assembly);
 			const MonoTableInfo* typeDefinitionsTable = mono_image_get_table_info(image, MONO_TABLE_TYPEDEF);
 			int32_t numTypes = mono_table_info_get_rows(typeDefinitionsTable);
 
-			HZ_CORE_LINFO("Mono Assembly:");
 			for (int32_t i = 0; i < numTypes; i++)
 			{
 				uint32_t cols[MONO_TYPEDEF_SIZE];
@@ -89,6 +93,7 @@ namespace Hazel
 				HZ_CORE_LTRACE("{0}.{1}", nameSpace, name);
 			}
 		}
+#endif // HZ_DEBUG
 	}
 
 	struct StriptEngineData
@@ -156,14 +161,11 @@ namespace Hazel
 			HZ_CORE_LINFO("Reloading ScriptEngine");
 		}
 
-		mono_domain_set(sScriptData->RootDomain, false);
+		ClearAssemblies();
 
-		MonoObject* exc = nullptr;
-		mono_domain_try_unload(sScriptData->AppDomain, &exc);
-		if (exc)
-		{
-			return false;
-		}
+		UnloadAppDomain();
+
+		LoadAppDomain();
 
 		if (!TrySetupEngine())
 		{
@@ -222,32 +224,54 @@ namespace Hazel
 		mono_set_assemblies_path("mono/lib");
 
 		MonoDomain* rootDomain = mono_jit_init("HazelJITRuntime");
-		HZ_CORE_ASSERT(rootDomain, "MonoDomain could not be initialized!");
+		HZ_CORE_ASSERT(rootDomain, "Root Domain could not be initialized!");
 
 		// Store the root Domain
 		sScriptData->RootDomain = rootDomain;
+
+		LoadAppDomain();
 	}
 
 	void ScriptEngine::ShutdownMono()
+	{
+		UnloadAppDomain();
+
+		mono_jit_cleanup(sScriptData->RootDomain);
+		sScriptData->RootDomain = nullptr;
+	}
+
+	void ScriptEngine::LoadAppDomain()
+	{
+		constexpr char* domainName = "HazelScriptRuntime";
+		MonoDomain* appDomain = mono_domain_create_appdomain(domainName, nullptr);
+		HZ_ASSERT(mono_domain_set(appDomain, false), "Fail to load mono AppDomain");
+		sScriptData->AppDomain = appDomain;
+	}
+
+	void ScriptEngine::UnloadAppDomain()
 	{
 		// Since we are unloading the current domain we need to set one before.
 		mono_domain_set(sScriptData->RootDomain, false);
 
 		mono_domain_unload(sScriptData->AppDomain);
 		sScriptData->AppDomain = nullptr;
+	}
 
-		mono_jit_cleanup(sScriptData->RootDomain);
-		sScriptData->RootDomain = nullptr;
+	void ScriptEngine::ClearAssemblies()
+	{
+		sScriptData->AppAssembly = nullptr;
+		sScriptData->AppAssemblyImage = nullptr;
+		sScriptData->CoreAssembly = nullptr;
+		sScriptData->CoreAssemblyImage = nullptr;
+
+		sScriptData->EntityBaseClass.reset();
+		sScriptData->EntityClasses.clear();
+		sScriptData->EntityBaseClass.reset();
 	}
 
 	bool ScriptEngine::TrySetupEngine()
 	{
-		sScriptData->EntityBaseClass.reset();
-		sScriptData->EntityClasses.clear();
-		sScriptData->CoreAssembly = nullptr;
-		sScriptData->AppAssembly = nullptr;
-
-		if (!TryLoadAssembly("Resources/Scripts/Hazel-ScriptCore.dll"))
+		if (!TryLoadCoreAssembly("Resources/Scripts/Hazel-ScriptCore.dll"))
 		{
 			return false;
 		}
@@ -267,17 +291,8 @@ namespace Hazel
 		return true;
 	}
 
-	bool ScriptEngine::TryLoadAssembly(const std::filesystem::path& filePath)
+	bool ScriptEngine::TryLoadCoreAssembly(const std::filesystem::path& filePath)
 	{
-		constexpr char* domainName = "HazelScriptRuntime";
-		MonoDomain* appDomain = mono_domain_create_appdomain(domainName, nullptr);
-		if (!mono_domain_set(appDomain, false))
-		{
-
-			return false;
-		}
-
-		sScriptData->AppDomain = appDomain;
 		MonoAssembly* coreAssembly = Utils::LoadMonoAssembly(filePath);
 
 		if (!coreAssembly)
@@ -314,7 +329,7 @@ namespace Hazel
 
 		const MonoTableInfo* typeDefinitionsTable = mono_image_get_table_info(sScriptData->AppAssemblyImage, MONO_TABLE_TYPEDEF);
 		int32_t numTypes = mono_table_info_get_rows(typeDefinitionsTable);
-		//MonoClass* entityClass = mono_class_from_name(image, "Hazel", "Entity");
+
 		MonoClass* entityClass = mono_class_from_name(sScriptData->CoreAssemblyImage, "Hazel", "Entity");
 
 		for (int32_t i = 0; i < numTypes; i++)
@@ -353,7 +368,7 @@ namespace Hazel
 	{
 		MonoObject* monoObject = mono_object_new(sScriptData->AppDomain, monoClass);
 		mono_runtime_object_init(monoObject);
-		
+
 		if (constructor)
 		{
 			mono_runtime_invoke(constructor, monoObject, params, nullptr);
