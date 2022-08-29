@@ -359,7 +359,7 @@ namespace Hazel
 
 	bool EditorLayer::OnMouseButtonReleased(const MouseButtonReleasedEvent& mouseButtonReleasedEvent)
 	{
-		// Mouse picking
+		// Mouse picking, TODO allow runtime and simulation?
 		if (mouseButtonReleasedEvent.GetMouseButton() == Mouse::ButtonLeft && _sceneState == SceneState::Edit)
 		{
 			if (_isSceneViewportHovered && (!_sceneHierarchyPanel.GetSelectedEntity() || !ImGuizmo::IsOver()) && !Input::IsKeyPressed(Key::LeftAlt))
@@ -982,6 +982,8 @@ namespace Hazel
 						auto rotationDelta = rotation - transformComponent.Rotation;
 						transformComponent.Rotation += rotationDelta;
 						transformComponent.Scale = scale;
+
+						_sceneHierarchyPanel.EditRuntimeRigidbody(selectedEntity, true);
 					}
 				}
 			}

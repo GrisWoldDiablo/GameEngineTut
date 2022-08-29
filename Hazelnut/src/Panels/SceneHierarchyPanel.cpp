@@ -13,6 +13,8 @@
 #include <fstream>
 #include <filesystem>
 
+#include <Box2D/include/box2d/b2_body.h>
+
 namespace Hazel
 {
 	template<typename T>
@@ -214,6 +216,32 @@ namespace Hazel
 		}
 
 		ImGui::End();
+	}
+
+	void SceneHierarchyPanel::EditRuntimeRigidbody(Entity entity, bool shouldClearVelocity)
+	{
+		if (entity.HasComponent<Rigidbody2DComponent>())
+		{
+			auto& component = entity.GetComponent<Rigidbody2DComponent>();
+			if (auto* body = static_cast<b2Body*>(component.RuntimeBody))
+			{
+				// TODO recalculate velocity instead of zeroing it.
+				if (shouldClearVelocity)
+				{
+					body->SetLinearVelocity(b2Vec2_zero);
+					body->SetAngularVelocity(0.0f);
+				}
+
+				if (Rigidbody2DComponent::Box2DBodyToType(body->GetType()) != component.Type)
+				{
+					body->SetType(static_cast<b2BodyType>(Rigidbody2DComponent::TypeToBox2DBody(component.Type)));
+				}
+
+				body->SetFixedRotation(component.IsFixedRotation);
+				auto position = entity.Transform().Position;
+				body->SetTransform(b2Vec2(position.x, position.y), entity.Transform().Rotation.z);
+			}
+		}
 	}
 
 	void SceneHierarchyPanel::DrawSceneName()
@@ -576,7 +604,7 @@ namespace Hazel
 #pragma endregion
 
 #pragma region Rigidbody2DComponent
-		DrawComponent<Rigidbody2DComponent>(entity, "Rigidbody 2D", [](Rigidbody2DComponent& component)
+		DrawComponent<Rigidbody2DComponent>(entity, "Rigidbody 2D", [&](Rigidbody2DComponent& component)
 		{
 			const char* bodyType[] = { "Static","Dynamic","Kinematic" };
 			const char* currentBodyType = bodyType[(int)component.Type];
@@ -600,6 +628,8 @@ namespace Hazel
 			}
 
 			ImGui::Checkbox("Fixed Rotation", &component.IsFixedRotation);
+
+			EditRuntimeRigidbody(entity);
 		});
 #pragma endregion
 

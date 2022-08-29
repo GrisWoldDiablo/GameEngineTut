@@ -15,6 +15,7 @@ namespace Hazel
 
 		void OnImGuiRender();
 
+		void EditRuntimeRigidbody(Entity entity, bool shouldZeroedVelocity = false);
 		Entity GetSelectedEntity() const { return _selectedEntity; }
 		void SetSelectedEntity(Entity entity) { CleanUpComponents(_selectedEntity); _selectedEntity = entity; }
 		void SetShouldKeepPlaying(bool value);

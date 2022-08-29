@@ -18,19 +18,6 @@ namespace Hazel
 	Ref<Texture2D> Scene::_sAudioSourceIcon;
 	Ref<Texture2D> Scene::_sAudioListenerIcon;
 
-	static b2BodyType Rigidbody2DTypeToBox2DBody(Rigidbody2DComponent::BodyType bodyType)
-	{
-		switch (bodyType)
-		{
-		case Hazel::Rigidbody2DComponent::BodyType::Static: return b2_staticBody;
-		case Hazel::Rigidbody2DComponent::BodyType::Dynamic: return b2_dynamicBody;
-		case Hazel::Rigidbody2DComponent::BodyType::Kinematic: return b2_kinematicBody;
-		}
-
-		HZ_CORE_ASSERT(false, "Unknown body Type!");
-		return b2_staticBody;
-	}
-
 	Scene::Scene()
 	{
 		// TODO create an Icon Manager.
@@ -449,7 +436,7 @@ namespace Hazel
 			auto& transform = entity.Transform();
 
 			b2BodyDef bodyDef;
-			bodyDef.type = Rigidbody2DTypeToBox2DBody(rb2d.Type);
+			bodyDef.type = static_cast<b2BodyType>(Rigidbody2DComponent::TypeToBox2DBody(rb2d.Type));
 			bodyDef.position.Set(transform.Position.x, transform.Position.y);
 			bodyDef.angle = transform.Rotation.z;
 
