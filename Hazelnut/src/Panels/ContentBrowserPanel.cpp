@@ -28,16 +28,17 @@ namespace Hazel
 			ImGui::EndChild();
 		}
 
+		ImGui::SameLine();
 		const auto uv0 = ImVec2(0.0f, 1.0f);
 		const auto uv1 = ImVec2(1.0f, 0.0f);
+		static constexpr float THUMBNAIL_SIZE_MIN = 56.0f;
 		static float padding = 16.0f;
 		static float thumbnailSize = 128.0f;
 		float cellSize = thumbnailSize + padding;
-		float panelWidth = panelSize.x * 0.75f;
+		float panelWidth = ImGui::GetContentRegionAvail().x;
 		auto columnCount = (int)(panelWidth / cellSize);
 		columnCount = columnCount < 1 ? 1 : columnCount;
 
-		ImGui::SameLine();
 		if (ImGui::BeginChild(ImGui::GetID("FolderContent"), ImVec2(panelWidth, panelSize.y - footer), false, ImGuiWindowFlags_NoMove))
 		{
 			if (!std::filesystem::exists(_currentDirectory))
@@ -45,7 +46,7 @@ namespace Hazel
 				_currentDirectory = gAssetsPath;
 			}
 
-			if (ImGui::BeginTable("FolderContent", columnCount, ImGuiTableFlags_SizingFixedSame))
+			const auto drawnElements = [&](bool isThumbnails)
 			{
 				for (auto& directoryEntry : std::filesystem::directory_iterator(_currentDirectory))
 				{
@@ -56,48 +57,108 @@ namespace Hazel
 
 					Ref<Texture2D> icon = directoryEntry.is_directory() ? _folderIconTexture : _fileIconTexture;
 
-					ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
-					ImGui::ImageButton((ImTextureID)(intptr_t)icon->GetRendererID(), { thumbnailSize, thumbnailSize }, uv0, uv1);
-					ImGui::PopStyleColor();
-
-					if (ImGui::BeginDragDropSource())
+					const auto elementActions = [&]
 					{
-						const wchar_t* itemPath = path.c_str();
-						ImGui::SetDragDropPayload("CONTENT_BROWSER_ITEM", itemPath, (wcslen(itemPath) + 1) * sizeof(wchar_t));
-						ImGui::Text(filenameString.c_str());
-						ImGui::EndDragDropSource();
-					}
+						if (ImGui::BeginDragDropSource())
+						{
+							const wchar_t* itemPath = path.c_str();
+							ImGui::SetDragDropPayload("CONTENT_BROWSER_ITEM", itemPath, (wcslen(itemPath) + 1) * sizeof(wchar_t));
+							ImGui::Text(filenameString.c_str());
+							ImGui::EndDragDropSource();
+						}
 
-					if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
+						if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
+						{
+							if (directoryEntry.is_directory())
+							{
+								_currentDirectory /= path.filename();
+							}
+							else if (FileDialogs::QuestionPopup("Do you want to open folderElement in external program?", "Open File"))
+							{
+								FileDialogs::ExecuteFile(path.string().c_str());
+								// TODO Logic based on file extension.
+							}
+						}
+
+						if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right))
+						{
+							ImGui::OpenPopup("Popup");
+						}
+
+						if (ImGui::BeginPopup("Popup"))
+						{
+							if (ImGui::MenuItem("Open Containing Folder"))
+							{
+								FileDialogs::ExecuteFile(_currentDirectory.string().c_str());
+								ImGui::CloseCurrentPopup();
+							}
+
+
+							if (!directoryEntry.is_directory())
+							{
+								ImGui::Separator();
+								if (ImGui::MenuItem("Open Externaly"))
+								{
+									FileDialogs::ExecuteFile(path.string().c_str());
+									ImGui::CloseCurrentPopup();
+								}
+							}
+
+							ImGui::EndPopup();
+						}
+					};
+
+					if (isThumbnails)
 					{
-						if (directoryEntry.is_directory())
-						{
-							_currentDirectory /= path.filename();
-						}
-						else if (FileDialogs::QuestionPopup("Do you want to open folderElement in external program?", "Open File"))
-						{
-							FileDialogs::ExecuteFile(path.string().c_str());
-							// TODO Logic based on file extension.
-						}
-					}
+						ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
+						ImGui::ImageButton((ImTextureID)(intptr_t)icon->GetRendererID(), { thumbnailSize, thumbnailSize }, uv0, uv1);
+						ImGui::PopStyleColor();
 
-					float tw = ImGui::CalcTextSize(filenameString.c_str()).x;
-					float offSet = (cellSize - tw - padding) / 2.0f;
-					offSet = offSet < 0.0f ? 0.0f : offSet;
-					ImGui::SetCursorPosX(ImGui::GetCursorPosX() + offSet);
-					ImGui::TextWrapped(filenameString.c_str());
+						elementActions();
+
+						ImGui::PushTextWrapPos(ImGui::GetCursorPos().x + cellSize);
+						ImGui::TextWrapped(filenameString.c_str());
+						ImGui::PopTextWrapPos();
+					}
+					else
+					{
+						auto maxHeight = ImGui::GetTextLineHeight();
+						ImGui::Image((ImTextureID)(intptr_t)icon->GetRendererID(), { maxHeight ,maxHeight }, uv0, uv1);
+						ImGui::SameLine();
+						ImGui::Selectable(filenameString.c_str());
+
+						elementActions();
+
+						if (!directoryEntry.is_directory()/* && std::filesystem::exists(path)*/)
+						{
+							ImGui::SameLine();
+							ImGui::Text("Size %.2f KB", std::filesystem::file_size(path) / 1000.0f);
+						}
+
+					}
 
 					ImGui::PopID();
 				}
+			};
 
-				ImGui::EndTable();
+			const bool isThumbnails = THUMBNAIL_SIZE_MIN < thumbnailSize;
+			if (isThumbnails)
+			{
+				if (ImGui::BeginTable("FolderContent", columnCount, ImGuiTableFlags_SizingFixedSame))
+				{
+					drawnElements(isThumbnails);
+					ImGui::EndTable();
+				}
 			}
-
+			else
+			{
+				drawnElements(isThumbnails);
+			}
 			ImGui::EndChild();
 		}
 
-		ImGui::PushItemWidth(-80);
-		ImGui::SliderFloat("Thumbnail", &thumbnailSize, 56.0f, 512.0f, "%.0f");
+		ImGui::PushItemWidth(-1.0f);
+		ImGui::SliderFloat("##Thumbnail", &thumbnailSize, THUMBNAIL_SIZE_MIN - 1.0f, 512.0f, "Icon Size");
 		ImGui::PopItemWidth();
 
 		if (ImGui::BeginMenuBar())
@@ -117,12 +178,12 @@ namespace Hazel
 				ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyleColorVec4(ImGuiCol_TextDisabled));
 
 				ImGui::Button("^");
-				
+
 				ImGui::PopStyleColor();
 				ImGui::PopStyleColor();
 				ImGui::PopStyleColor();
 			}
-			
+
 			ImGui::Text(_currentDirectory.string().c_str());
 			ImGui::EndMenuBar();
 		}
