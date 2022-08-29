@@ -129,7 +129,7 @@ namespace Hazel
 
 						elementActions();
 
-						if (!directoryEntry.is_directory()/* && std::filesystem::exists(path)*/)
+						if (!directoryEntry.is_directory())
 						{
 							ImGui::SameLine();
 							ImGui::Text("Size %.2f KB", std::filesystem::file_size(path) / 1000.0f);
