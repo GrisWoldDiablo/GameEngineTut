@@ -14,6 +14,19 @@ extern "C" // Forward declare of class from C
 
 namespace Hazel
 {
+	// https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/types#836-integral-types
+	enum class ScriptFieldType
+	{
+		None = 0,
+		Float, Double, Char, Bool,
+		SByte, Short, Int, Long,
+		Byte, UShort, UInt, ULong,
+		
+		Vector2, Vector3, Vector4,
+		Color,
+		Entity
+	};
+
 	class Scene;
 	class ScriptClass;
 

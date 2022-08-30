@@ -8,6 +8,7 @@
 #include "mono/jit/jit.h"
 #include "mono/metadata/assembly.h"
 #include "mono/metadata/object.h"
+#include "mono/metadata/tabledefs.h"
 
 #include <string>
 
@@ -15,6 +16,30 @@ namespace Hazel
 {
 	namespace Utils
 	{
+		static std::unordered_map<std::string, ScriptFieldType> sScriptFieldTypeMap =
+		{
+			{ "System.Single"	,	ScriptFieldType::Float	 },
+			{ "System.Double"	,	ScriptFieldType::Double	 },
+			{ "System.Char"		,	ScriptFieldType::Char	 },
+			{ "System.Boolean"	,	ScriptFieldType::Bool	 },
+
+			{ "System.SByte"	,	ScriptFieldType::SByte	 },
+			{ "System.Int16"	,	ScriptFieldType::Short	 },
+			{ "System.Int32"	,	ScriptFieldType::Int	 },
+			{ "System.Int64"	,	ScriptFieldType::Long	 },
+
+			{ "System.Byte"		,	ScriptFieldType::Byte	 },
+			{ "System.UInt16"	,	ScriptFieldType::UShort	 },
+			{ "System.UInt32"	,	ScriptFieldType::UInt	 },
+			{ "System.UInt64"	,	ScriptFieldType::ULong	 },
+
+			{ "Hazel.Vector2"	,	ScriptFieldType::Vector2 },
+			{ "Hazel.Vector3"	,	ScriptFieldType::Vector3 },
+			{ "Hazel.Vector4"	,	ScriptFieldType::Vector4 },
+			{ "Hazel.Color"		,	ScriptFieldType::Color	 },
+			{ "Hazel.Entity"	,	ScriptFieldType::Entity	 },
+		};
+
 		// TODO: Move to FileSystem Class
 		static char* ReadBytes(const std::filesystem::path& filePath, uint32_t* outSize)
 		{
@@ -92,8 +117,48 @@ namespace Hazel
 
 				HZ_CORE_LTRACE("{0}.{1}", nameSpace, name);
 			}
-		}
 #endif // HZ_DEBUG
+		}
+
+		ScriptFieldType MonoTypeToScriptFieldType(MonoType* monoType)
+		{
+			std::string typeName = mono_type_get_name(monoType);
+			if (sScriptFieldTypeMap.find(typeName) == sScriptFieldTypeMap.end())
+			{
+				return ScriptFieldType::None;
+			}
+
+			return sScriptFieldTypeMap.at(typeName);
+		}
+
+		std::string ScriptFieldTypeToString(ScriptFieldType scriptFieldType)
+		{
+			switch (scriptFieldType)
+			{
+			case ScriptFieldType::Float:  return "Float";
+			case ScriptFieldType::Double: return "Double";
+			case ScriptFieldType::Char:	  return "Char";
+			case ScriptFieldType::Bool:	  return "Bool";
+
+			case ScriptFieldType::SByte:  return "SByte";
+			case ScriptFieldType::Short:  return "Short";
+			case ScriptFieldType::Int:	  return "Int";
+			case ScriptFieldType::Long:	  return "Long";
+
+			case ScriptFieldType::Byte:	  return "Byte";
+			case ScriptFieldType::UShort: return "UShort";
+			case ScriptFieldType::UInt:	  return "UInt";
+			case ScriptFieldType::ULong:  return "ULong";
+
+			case ScriptFieldType::Vector2:return "Vector2";
+			case ScriptFieldType::Vector3:return "Vector3";
+			case ScriptFieldType::Vector4:return "Vector4";
+			case ScriptFieldType::Color:  return "Color";
+			case ScriptFieldType::Entity: return "Entity";
+			}
+
+			return "<Invalid>";
+		}
 	}
 
 	struct StriptEngineData
@@ -338,29 +403,87 @@ namespace Hazel
 			mono_metadata_decode_row(typeDefinitionsTable, i, cols, MONO_TYPEDEF_SIZE);
 
 			const char* nameSpace = mono_metadata_string_heap(sScriptData->AppAssemblyImage, cols[MONO_TYPEDEF_NAMESPACE]);
-			const char* name = mono_metadata_string_heap(sScriptData->AppAssemblyImage, cols[MONO_TYPEDEF_NAME]);
+			const char* className = mono_metadata_string_heap(sScriptData->AppAssemblyImage, cols[MONO_TYPEDEF_NAME]);
 
 			std::string fullName;
 			if (strlen(nameSpace) != 0)
 			{
-				fullName = fmt::format("{}.{}", nameSpace, name);
+				fullName = fmt::format("{}.{}", nameSpace, className);
 			}
 			else
 			{
-				fullName = name;
+				fullName = className;
 			}
 
-			MonoClass* monoClass = mono_class_from_name(sScriptData->AppAssemblyImage, nameSpace, name);
+			MonoClass* monoClass = mono_class_from_name(sScriptData->AppAssemblyImage, nameSpace, className);
 			if (!monoClass || monoClass == entityClass)
 			{
 				continue;
 			}
 
 			bool isEntity = mono_class_is_subclass_of(monoClass, entityClass, false);
-			if (isEntity)
+			if (!isEntity)
 			{
-				sScriptData->EntityClasses[fullName] = CreateRef<ScriptClass>(nameSpace, name);
+				continue;
 			}
+
+			int fieldCounts = mono_class_num_fields(monoClass);
+			HZ_CORE_LINFO("Class {0}", className);
+			HZ_CORE_LDEBUG("  {1} fields: ", className, fieldCounts);
+			void* iterator = nullptr;
+			while (MonoClassField* field = mono_class_get_fields(monoClass, &iterator))
+			{
+				const auto type = mono_field_get_type(field);
+				const auto scriptFieldType = Utils::MonoTypeToScriptFieldType(type);
+				const auto typeName = Utils::ScriptFieldTypeToString(scriptFieldType);
+				const auto fieldName = mono_field_get_name(field);
+				const auto flags = mono_field_get_flags(field);
+				const auto accessibility = flags & FIELD_ATTRIBUTE_FIELD_ACCESS_MASK;
+
+				std::string extraAttribute = "";
+				switch (flags & ~FIELD_ATTRIBUTE_FIELD_ACCESS_MASK)
+				{
+				case FIELD_ATTRIBUTE_STATIC:
+					extraAttribute = "static";
+					break;
+				case FIELD_ATTRIBUTE_INIT_ONLY:
+					extraAttribute = "readonly";
+					break;
+				default:
+					break;
+				}
+
+				std::string access;
+				switch (accessibility)
+				{
+				case FIELD_ATTRIBUTE_PUBLIC:
+					access = "public";
+					break;
+				case FIELD_ATTRIBUTE_FAMILY:
+					access = "protected";
+					break;
+				case FIELD_ATTRIBUTE_ASSEMBLY:
+					access = "internal";
+					break;
+				case FIELD_ATTRIBUTE_PRIVATE:
+					access = "private";
+					break;
+				default:
+					access = "UNKNOWN";
+					break;
+				}
+				HZ_CORE_LTRACE("    {0} {1} {2} ({3})", extraAttribute, access, fieldName, typeName);
+			}
+
+			int propertyCounts = mono_class_num_properties(monoClass);
+			HZ_CORE_LDEBUG("  {0} properties: ", propertyCounts);
+			iterator = nullptr;
+			while (MonoProperty* prop = mono_class_get_properties(monoClass, &iterator))
+			{
+				HZ_CORE_LTRACE("    {0}", mono_property_get_name(prop));
+			}
+
+			sScriptData->EntityClasses[fullName] = CreateRef<ScriptClass>(nameSpace, className);
 		}
 	}
 
