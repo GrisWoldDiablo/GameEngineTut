@@ -2,6 +2,7 @@
 #include "ScriptInstance.h"
 #include "ScriptClass.h"
 #include "ScriptEngine.h"
+#include "mono/metadata/object.h"
 
 namespace Hazel
 {
@@ -35,5 +36,33 @@ namespace Hazel
 			void* param = &timestep;
 			_scriptClass->InvokeMethod(_instance, _onUpdateMethod, &param);
 		}
+	}
+
+	bool ScriptInstance::TryGetFieldValueInternal(const std::string& name, void* buffer)
+	{
+		const auto& fields = _scriptClass->GetFields();
+		auto it = fields.find(name);
+		if (it == fields.end())
+		{
+			return false;
+		}
+
+		const ScriptField& field = it->second;
+		mono_field_get_value(_instance, field.MonoClassField, buffer);
+		return true;
+	}
+
+	bool ScriptInstance::TrySetFieldValueInternal(const std::string& name, const void* data)
+	{
+		const auto& fields = _scriptClass->GetFields();
+		auto it = fields.find(name);
+		if (it == fields.end())
+		{
+			return false;
+		}
+
+		const ScriptField& field = it->second;
+		mono_field_set_value(_instance, field.MonoClassField, const_cast<void*>(data));
+		return true;
 	}
 }

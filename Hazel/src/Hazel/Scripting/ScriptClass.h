@@ -5,10 +5,21 @@ extern "C" // Forward declare of class from C
 	typedef struct _MonoClass MonoClass;
 	typedef struct _MonoObject MonoObject;
 	typedef struct _MonoMethod MonoMethod;
+	typedef struct _MonoClassField MonoClassField;
 }
 
 namespace Hazel
 {
+	enum class ScriptFieldType;
+
+	struct ScriptField
+	{
+		ScriptFieldType Type;
+		std::string Name;
+
+		MonoClassField* MonoClassField;
+	};
+
 	class ScriptClass
 	{
 	public:
@@ -19,9 +30,16 @@ namespace Hazel
 		MonoMethod* GetMethod(const std::string& name, int paramsCount = 0);
 		MonoObject* InvokeMethod(MonoObject* instance, MonoMethod* monoMethod, void** params = nullptr);
 
+		const std::unordered_map<std::string, ScriptField>& GetFields() const { return _fields; }
+
 	private:
 		std::string _classNamespace;
 		std::string _className;
+
+		std::unordered_map<std::string, ScriptField> _fields;
+
 		MonoClass* _monoClass = nullptr;
+
+		friend class ScriptEngine;
 	};
 }

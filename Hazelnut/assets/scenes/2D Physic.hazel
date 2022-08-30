@@ -71,7 +71,7 @@ Entities:
         OrthographicSize: 10
         OrthographicNearClip: -1
         OrthographicFarClip: 1
-        AspectRatio: 2.19274378
+        AspectRatio: 1.8591224
       IsPrimary: true
       IsFixedAspectRatio: false
     ScriptComponent:
@@ -229,3 +229,14 @@ Entities:
       Color: [1, 1, 1, 1]
       Thickness: 1
       Fade: 0.00499999989
+  - Entity: 14339827444151018024
+    BaseComponent:
+      Name: FieldTester
+      Tag: 0
+      Layer: 0
+    TransformComponent:
+      Position: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    ScriptComponent:
+      ClassName: Sandbox.FieldTester

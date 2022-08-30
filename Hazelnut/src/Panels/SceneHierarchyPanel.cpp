@@ -3,6 +3,8 @@
 #include "Hazel/Scene/ScriptableEntity.h"
 #include "Hazel/Utils/PlatformUtils.h"
 #include "Hazel/Scripting/ScriptEngine.h"
+#include "Hazel/Scripting/ScriptClass.h"
+#include "Hazel/Scripting/ScriptInstance.h"
 #include "Hazel/Audio/AudioEngine.h"
 
 #include <imgui/imgui.h>
@@ -252,10 +254,10 @@ namespace Hazel
 			strcpy_s(buffer, sizeof(buffer), _scene->_name.c_str());
 			if (ImGui::InputText(" : Scene", buffer, sizeof(buffer), ImGuiInputTextFlags_EnterReturnsTrue))
 			{
-				auto newName = std::string(buffer);
+				const auto newName = std::string(buffer);
 				if (!newName.empty())
 				{
-					_scene->SetName(std::string(buffer));
+					_scene->SetName(newName);
 				}
 			}
 			ImGui::Checkbox("Debug", &_isDebug);
@@ -365,7 +367,7 @@ namespace Hazel
 #pragma endregion
 
 #pragma region ScriptComponent
-		DrawComponent<ScriptComponent>(entity, "Script", [](ScriptComponent& component)
+		DrawComponent<ScriptComponent>(entity, "Script", [&](ScriptComponent& component)
 		{
 			bool scriptClassExists = ScriptEngine::EntityClassExist(component.ClassName);
 
@@ -418,6 +420,91 @@ namespace Hazel
 
 				ImGui::EndPopup();
 			}
+
+			if (auto scriptInstance = ScriptEngine::GetEntityScriptInstance(entity.GetUUID()))
+			{
+				const auto& fields = scriptInstance->GetScriptClass()->GetFields();
+				for (const auto& [name, field] : fields)
+				{
+					switch (field.Type)
+					{
+					case ScriptFieldType::Float:
+					{
+						float data = scriptInstance->GetFieldValue<float>(name);
+						if (ImGui::DragFloat(name.c_str(), &data, 0.1f))
+						{
+							scriptInstance->SetFieldValue(name, data);
+						}
+						break;
+					}
+					case ScriptFieldType::Double:
+					{
+						break;
+					}
+					case ScriptFieldType::Char:
+					{
+						break;
+					}
+					case ScriptFieldType::Bool:
+					{
+						break;
+					}
+					case ScriptFieldType::SByte:
+					{
+						break;
+					}
+					case ScriptFieldType::Short:
+					{
+						break;
+					}
+					case ScriptFieldType::Int:
+					{
+						break;
+					}
+					case ScriptFieldType::Long:
+					{
+						break;
+					}
+					case ScriptFieldType::Byte:
+					{
+						break;
+					}
+					case ScriptFieldType::UShort:
+					{
+						break;
+					}
+					case ScriptFieldType::UInt:
+					{
+						break;
+					}
+					case ScriptFieldType::ULong:
+					{
+						break;
+					}
+					case ScriptFieldType::Vector2:
+					{
+						break;
+					}
+					case ScriptFieldType::Vector3:
+					{
+						break;
+					}
+					case ScriptFieldType::Vector4:
+					{
+						break;
+					}
+					case ScriptFieldType::Color:
+					{
+						break;
+					}
+					case ScriptFieldType::Entity:
+					{
+						break;
+					}
+					}
+				}
+			}
+
 		});
 #pragma endregion
 
@@ -768,8 +855,7 @@ namespace Hazel
 			auto floatValueField = [&](const char* label, float min, float max, auto getValue, auto setValue)
 			{
 				float value = getValue();
-				ImGui::DragFloat(label, &value, 0.01f, min, max, "%.3f");
-				if (value != getValue())
+				if (ImGui::DragFloat(label, &value, 0.01f, min, max, "%.3f"))
 				{
 					setValue(value);
 				}
@@ -785,8 +871,7 @@ namespace Hazel
 			auto boolValueField = [&](const char* label, auto getValue, auto setValue)
 			{
 				bool value = getValue();
-				ImGui::Checkbox(label, &value);
-				if (value != getValue())
+				if (ImGui::Checkbox(label, &value))
 				{
 					setValue(value);
 				}
@@ -845,7 +930,6 @@ namespace Hazel
 			}
 
 			float offset = audioSource->GetOffset();
-			const float savedOffset = offset;
 			float lenght = audioSource->GetLength();
 			int min = static_cast<int>(offset / 60);
 			float secs = (offset - (min * 60));
@@ -853,16 +937,16 @@ namespace Hazel
 			int ms = static_cast<int>((secs - sec) * 1000);
 
 			auto trackValue = fmt::format("{}m:{:02d}s:{:02d}ms", min, sec, ms);
-			ImGui::SliderFloat("Track", &offset, 0.0f, lenght, trackValue.c_str(), ImGuiSliderFlags_NoInput);
-
-			if ((state == AudioSourceState::PAUSED || state == AudioSourceState::PLAYING)
-				&& savedOffset != offset)
+			if (ImGui::SliderFloat("Track", &offset, 0.0f, lenght, trackValue.c_str(), ImGuiSliderFlags_NoInput))
 			{
-				audioSource->SetOffset(offset);
+				if (state == AudioSourceState::PAUSED || state == AudioSourceState::PLAYING)
+				{
+					audioSource->SetOffset(offset);
+				}
 			}
 
 			ImGui::Checkbox("Visible In Game##AudioSource", &component.IsVisibleInGame);
-		});
+			});
 #pragma endregion
 
 #pragma region  AudioListenerComponent

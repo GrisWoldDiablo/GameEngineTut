@@ -123,12 +123,13 @@ namespace Hazel
 		ScriptFieldType MonoTypeToScriptFieldType(MonoType* monoType)
 		{
 			std::string typeName = mono_type_get_name(monoType);
-			if (sScriptFieldTypeMap.find(typeName) == sScriptFieldTypeMap.end())
+			auto it = sScriptFieldTypeMap.find(typeName);
+			if (it == sScriptFieldTypeMap.end())
 			{
 				return ScriptFieldType::None;
 			}
 
-			return sScriptFieldTypeMap.at(typeName);
+			return it->second;
 		}
 
 		std::string ScriptFieldTypeToString(ScriptFieldType scriptFieldType)
@@ -284,6 +285,17 @@ namespace Hazel
 		return sScriptData->EntityClasses;
 	}
 
+	Ref<ScriptInstance> ScriptEngine::GetEntityScriptInstance(UUID entityID)
+	{
+		auto it = sScriptData->EntityInstances.find(entityID);
+		if (it == sScriptData->EntityInstances.end())
+		{
+			return nullptr;
+		}
+
+		return it->second;
+	}
+
 	void ScriptEngine::InitMono()
 	{
 		mono_set_assemblies_path("mono/lib");
@@ -427,6 +439,11 @@ namespace Hazel
 				continue;
 			}
 
+			Ref<ScriptClass> scriptClass = CreateRef<ScriptClass>(nameSpace, className);
+
+			sScriptData->EntityClasses[fullName] = scriptClass;
+
+
 			int fieldCounts = mono_class_num_fields(monoClass);
 			HZ_CORE_LINFO("Class {0}", className);
 			HZ_CORE_LDEBUG("  {1} fields: ", className, fieldCounts);
@@ -472,18 +489,23 @@ namespace Hazel
 					access = "UNKNOWN";
 					break;
 				}
+
 				HZ_CORE_LTRACE("    {0} {1} {2} ({3})", extraAttribute, access, fieldName, typeName);
+
+				if (extraAttribute.empty() && access == "public")
+				{
+					scriptClass->_fields[fieldName] = { scriptFieldType, fieldName, field };
+				}
 			}
 
-			int propertyCounts = mono_class_num_properties(monoClass);
-			HZ_CORE_LDEBUG("  {0} properties: ", propertyCounts);
-			iterator = nullptr;
-			while (MonoProperty* prop = mono_class_get_properties(monoClass, &iterator))
-			{
-				HZ_CORE_LTRACE("    {0}", mono_property_get_name(prop));
-			}
-
-			sScriptData->EntityClasses[fullName] = CreateRef<ScriptClass>(nameSpace, className);
+			// TODO Revisit property
+			//int propertyCounts = mono_class_num_properties(monoClass);
+			//HZ_CORE_LDEBUG("  {0} properties: ", propertyCounts);
+			//iterator = nullptr;
+			//while (MonoProperty* prop = mono_class_get_properties(monoClass, &iterator))
+			//{
+			//	HZ_CORE_LTRACE("    {0}", mono_property_get_name(prop));
+			//}
 		}
 	}
 

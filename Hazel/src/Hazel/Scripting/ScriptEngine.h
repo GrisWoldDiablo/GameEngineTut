@@ -10,11 +10,13 @@ extern "C" // Forward declare of class from C
 	typedef struct _MonoAssembly MonoAssembly;
 	typedef struct _MonoImage MonoImage;
 	typedef struct _MonoAssemblyName MonoAssemblyName;
+	typedef struct _MonoClassField MonoClassField;
 }
 
 namespace Hazel
 {
 	// https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/types#836-integral-types
+	// TODO move to different header.
 	enum class ScriptFieldType
 	{
 		None = 0,
@@ -29,6 +31,7 @@ namespace Hazel
 
 	class Scene;
 	class ScriptClass;
+	class ScriptInstance;
 
 	class ScriptEngine
 	{
@@ -46,6 +49,7 @@ namespace Hazel
 
 		static Scene* GetSceneContext();
 		static std::unordered_map<std::string, Ref<ScriptClass>> GetEntityClasses();
+		static Ref<ScriptInstance> GetEntityScriptInstance(UUID entityID);
 
 	private:
 		static void InitMono();
