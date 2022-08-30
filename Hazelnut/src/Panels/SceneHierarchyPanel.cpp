@@ -374,7 +374,7 @@ namespace Hazel
 				ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(Color::Red.r, Color::Red.g, Color::Red.b, Color::Red.a));
 			}
 
-			const auto* className = component.ClassName.c_str();
+			const auto* className = component.ClassName.empty() ? "No Script" : component.ClassName.c_str();
 			if (ImGui::Button(className))
 			{
 				ImGui::OpenPopup(className);
@@ -387,12 +387,11 @@ namespace Hazel
 
 			if (ImGui::BeginPopup(className))
 			{
-				const std::string noScript = "No Script";
-				if (component.ClassName != noScript)
+				if (!component.ClassName.empty())
 				{
 					if (ImGui::Selectable(fmt::format("{0} [X]", component.ClassName).c_str()))
 					{
-						component.ClassName = noScript;
+						component.ClassName.clear();
 					}
 					ImGui::Separator();
 				}
