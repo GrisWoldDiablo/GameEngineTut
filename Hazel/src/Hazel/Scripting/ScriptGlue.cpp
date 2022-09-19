@@ -281,6 +281,60 @@ namespace Hazel
 	}
 #pragma endregion
 
+#pragma region AudioListener
+	static void AudioListenerComponent_GetPosition(UUID entityId, glm::vec3* outPosition)
+	{
+		auto* scene = ScriptEngine::GetSceneContext();
+		HZ_CORE_ASSERT(scene, "Scene is null!");
+		auto entity = scene->GetEntityByUUID(entityId);
+		HZ_CORE_ASSERT(entity, "Entity is null!");
+
+		// Will crash if entity does not have component.
+		auto& component = entity.GetComponent<AudioListenerComponent>();
+		
+		*outPosition = entity.Transform().Position;
+	}
+
+	static void AudioListenerComponent_SetPosition(UUID entityId, glm::vec3* position)
+	{
+		auto* scene = ScriptEngine::GetSceneContext();
+		HZ_CORE_ASSERT(scene, "Scene is null!");
+		auto entity = scene->GetEntityByUUID(entityId);
+		HZ_CORE_ASSERT(entity, "Entity is null!");
+
+		auto& component = entity.GetComponent<AudioListenerComponent>();
+
+		entity.Transform().Position = *position;
+		component.SetPosition(*position);
+	}
+
+	static void AudioListenerComponent_GetIsVisibleInGame(UUID entityId, bool* outIsVisibleInGame)
+	{
+		auto* scene = ScriptEngine::GetSceneContext();
+		HZ_CORE_ASSERT(scene, "Scene is null!");
+		auto entity = scene->GetEntityByUUID(entityId);
+		HZ_CORE_ASSERT(entity, "Entity is null!");
+
+		// Will crash if entity does not have component.
+		auto& component = entity.GetComponent<AudioListenerComponent>();
+
+		*outIsVisibleInGame = component.IsVisibleInGame;
+	}
+
+	static void AudioListenerComponent_SetIsVisibleInGame(UUID entityId, bool* isVisibleInGame)
+	{
+		auto* scene = ScriptEngine::GetSceneContext();
+		HZ_CORE_ASSERT(scene, "Scene is null!");
+		auto entity = scene->GetEntityByUUID(entityId);
+		HZ_CORE_ASSERT(entity, "Entity is null!");
+
+		// Will crash if entity does not have component.
+		auto& component = entity.GetComponent<AudioListenerComponent>();
+		component.IsVisibleInGame = *isVisibleInGame;
+	}
+#pragma endregion
+
+
 	/////////////////
 	/// Registers
 	/////////////////
@@ -353,5 +407,11 @@ namespace Hazel
 		// Rigidbody 2D
 		HZ_ADD_INTERNAL_CALL(Rigidbody2DComponent_ApplyLinearImpulse);
 		HZ_ADD_INTERNAL_CALL(Rigidbody2DComponent_ApplyLinearImpulseToCenter);
+
+		// Audio Listener
+		HZ_ADD_INTERNAL_CALL(AudioListenerComponent_GetPosition);
+		HZ_ADD_INTERNAL_CALL(AudioListenerComponent_SetPosition);
+		HZ_ADD_INTERNAL_CALL(AudioListenerComponent_GetIsVisibleInGame);
+		HZ_ADD_INTERNAL_CALL(AudioListenerComponent_SetIsVisibleInGame);
 	}
 }

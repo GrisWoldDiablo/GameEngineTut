@@ -5,6 +5,7 @@
 #include "Hazel/Core/UUID.h"
 #include "Hazel/Renderer/Texture.h"
 #include "Hazel/Audio/AudioSource.h"
+#include "Hazel/Audio/AudioEngine.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -190,6 +191,12 @@ namespace Hazel
 
 		AudioListenerComponent() = default;
 		AudioListenerComponent(const AudioListenerComponent&) = default;
+
+		// TODO? Maybe move this.
+		void SetPosition(const glm::vec3& position)
+		{
+			AudioEngine::SetListenerPosition(position);
+		}
 	};
 
 	template<typename... Component>

@@ -583,7 +583,7 @@ namespace Hazel
 			}
 		}
 
-		AudioEngine::SetListenerPosition(entity.Transform().Position);
+		component.SetPosition(entity.Transform().Position);
 	}
 #pragma endregion
 

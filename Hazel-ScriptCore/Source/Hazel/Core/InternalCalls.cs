@@ -86,5 +86,18 @@ namespace Hazel
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern static void Rigidbody2DComponent_ApplyLinearImpulseToCenter(ulong entityId, ref Vector2 impulse, bool wake);
+
+		/* AudioListener */
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern static void AudioListenerComponent_GetPosition(ulong entityId, out Vector3 position);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern static void AudioListenerComponent_SetPosition(ulong entityId, ref Vector3 position);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern static void AudioListenerComponent_GetIsVisibleInGame(ulong entityId, out bool isVisibleInGame);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern static void AudioListenerComponent_SetIsVisibleInGame(ulong entityId, ref bool isVisibleInGame);
 	}
 }

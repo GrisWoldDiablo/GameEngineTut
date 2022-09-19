@@ -114,4 +114,30 @@
 			InternalCalls.Rigidbody2DComponent_ApplyLinearImpulseToCenter(Entity.Id, ref impulse, wake);
 		}
 	}
+
+	public class AudioListenerComponent : Component
+	{
+		public Vector3 Position
+		{
+			get
+			{
+				InternalCalls.AudioListenerComponent_GetPosition(Entity.Id, out var position);
+				return position;
+			}
+
+			set => InternalCalls.AudioListenerComponent_SetPosition(Entity.Id, ref value);
+		}
+
+		public bool IsVisibleInGame
+		{
+
+			get
+			{
+				InternalCalls.AudioListenerComponent_GetIsVisibleInGame(Entity.Id, out var isVisibleInGame);
+				return isVisibleInGame;
+			}
+
+			set => InternalCalls.AudioListenerComponent_SetIsVisibleInGame(Entity.Id, ref value);
+		}
+	}
 }
