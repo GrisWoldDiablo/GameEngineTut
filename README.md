@@ -2,7 +2,7 @@
 
 Following Game Engine Series by The Cherno and adding/changing stuff.
 ### Channels:
-https://www.youtube.com/channel/UCQ-W1KE9EYfdxhL6S4twUNw
+https://www.youtube.com/c/TheChernoProject
 
 https://www.youtube.com/c/ChernoUnplugged
 
