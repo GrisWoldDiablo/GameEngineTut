@@ -1,6 +1,11 @@
+[![License](https://img.shields.io/github/license/GrisWoldDiablo/GameEngineTut.svg)](https://github.com/GrisWoldDiablo/GameEngineTut/blob/master/LICENSE.md)
+
 Following Game Engine Series by The Cherno and adding/changing stuff.
-### Channel:
+### Channels:
 https://www.youtube.com/channel/UCQ-W1KE9EYfdxhL6S4twUNw
+
+https://www.youtube.com/c/ChernoUnplugged
+
 ### Serie's playlist:
 https://www.youtube.com/watch?v=JxIZbV_XjAs&list=PLlrATfBNZ98dC-V-N3m0Go4deliWHPFwT
 
