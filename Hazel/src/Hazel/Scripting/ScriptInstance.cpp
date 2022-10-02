@@ -38,7 +38,7 @@ namespace Hazel
 		}
 	}
 
-	bool ScriptInstance::TryGetFieldValueInternal(const std::string& name, void* buffer)
+	bool ScriptInstance::TryGetFieldValueInternal(const std::string& name, void* data)
 	{
 		const auto& fields = _scriptClass->GetFields();
 		auto it = fields.find(name);
@@ -48,7 +48,7 @@ namespace Hazel
 		}
 
 		const ScriptField& field = it->second;
-		mono_field_get_value(_instance, field.MonoClassField, buffer);
+		mono_field_get_value(_instance, field.MonoClassField, data);
 		return true;
 	}
 

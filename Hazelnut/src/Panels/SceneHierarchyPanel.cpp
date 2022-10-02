@@ -430,7 +430,7 @@ namespace Hazel
 					{
 					case ScriptFieldType::Float:
 					{
-						float data = scriptInstance->GetFieldValue<float>(name);
+						auto data = scriptInstance->GetFieldValue<float>(name);
 						if (ImGui::DragFloat(name.c_str(), &data, 0.1f))
 						{
 							scriptInstance->SetFieldValue(name, data);
@@ -439,14 +439,31 @@ namespace Hazel
 					}
 					case ScriptFieldType::Double:
 					{
+						auto data = scriptInstance->GetFieldValue<double>(name);
+						if (ImGui::InputDouble(name.c_str(), &data))
+						{
+							scriptInstance->SetFieldValue(name, data);
+						}
 						break;
 					}
 					case ScriptFieldType::Char:
 					{
+						auto data = scriptInstance->GetFieldValue<uint16_t>(name);
+						char buffer[2] = { data };
+						if (ImGui::InputText(name.c_str(), buffer, sizeof(buffer)))
+						{
+							data = *buffer;
+							scriptInstance->SetFieldValue(name, data);
+						}
 						break;
 					}
 					case ScriptFieldType::Bool:
 					{
+						auto data = scriptInstance->GetFieldValue<bool>(name);
+						if (ImGui::Checkbox(name.c_str(), &data))
+						{
+							scriptInstance->SetFieldValue(name, data);
+						}
 						break;
 					}
 					case ScriptFieldType::SByte:

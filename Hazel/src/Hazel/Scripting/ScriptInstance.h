@@ -39,8 +39,8 @@ namespace Hazel
 		}
 
 	private:
-		bool TryGetFieldValueInternal(const std::string& name, void* buffer);
-		bool TrySetFieldValueInternal(const std::string& name, const void* buffer);
+		bool TryGetFieldValueInternal(const std::string& name, void* data);
+		bool TrySetFieldValueInternal(const std::string& name, const void* data);
 
 	private:
 		Ref<ScriptClass> _scriptClass;

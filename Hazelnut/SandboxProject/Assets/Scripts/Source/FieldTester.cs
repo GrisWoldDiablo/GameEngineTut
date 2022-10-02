@@ -7,7 +7,7 @@ namespace Sandbox
 	{
 		public float flt = 69.0f;
 		public double dbl;
-		public char chr;
+		public char chr = 'k';
 		public bool bol;
 		public sbyte sbyt;
 		public short sht;
@@ -43,9 +43,25 @@ namespace Sandbox
 
 		public int[] IntArray { get; }
 
+		private readonly float _refreshRate = 2.0f;
+		private float _timeleft = 0;
+
 		void OnUpdate(float timeStep)
 		{
-			Console.WriteLine($"{nameof(flt)} : {flt}");
+			if (_timeleft <= 0.0f)
+			{
+				Console.WriteLine("--------------");
+				foreach (var field in GetType().GetFields())
+				{
+					Console.WriteLine($"{field.Name} : {field.GetValue(this)}");
+				}
+				Console.WriteLine("--------------");
+				Console.WriteLine($"CHAR {chr}");
+
+				_timeleft = _refreshRate;
+			}
+
+			_timeleft -= timeStep;
 		}
 	}
 }
