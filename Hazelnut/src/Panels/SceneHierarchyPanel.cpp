@@ -449,7 +449,7 @@ namespace Hazel
 					case ScriptFieldType::Char:
 					{
 						auto data = scriptInstance->GetFieldValue<uint16_t>(name);
-						char buffer[2] = { data };
+						char buffer[2] = { static_cast<char>(data) };
 						if (ImGui::InputText(name.c_str(), buffer, sizeof(buffer)))
 						{
 							data = *buffer;

@@ -7,7 +7,7 @@ namespace Sandbox
 	{
 		public float flt = 69.0f;
 		public double dbl;
-		public char chr = 'k';
+		public char chr;
 		public bool bol;
 		public sbyte sbyt;
 		public short sht;
@@ -56,7 +56,6 @@ namespace Sandbox
 					Console.WriteLine($"{field.Name} : {field.GetValue(this)}");
 				}
 				Console.WriteLine("--------------");
-				Console.WriteLine($"CHAR {chr}");
 
 				_timeleft = _refreshRate;
 			}
