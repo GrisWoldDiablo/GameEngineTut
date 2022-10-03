@@ -149,6 +149,8 @@ namespace Hazel
 
 	void Scene::OnRuntimeStart()
 	{
+		_isRunning = true;
+
 		OnPhysic2DStart();
 
 		// Scripting
@@ -171,6 +173,8 @@ namespace Hazel
 		OnPhysic2DStop();
 
 		ScriptEngine::OnRuntimeStop();
+
+		_isRunning = false;
 	}
 
 	void Scene::OnSimulationStart()

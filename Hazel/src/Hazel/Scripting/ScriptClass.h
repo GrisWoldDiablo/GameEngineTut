@@ -1,5 +1,7 @@
 #pragma once
 
+#include "ScriptField.h"
+
 extern "C" // Forward declare of class from C
 {
 	typedef struct _MonoClass MonoClass;
@@ -10,16 +12,6 @@ extern "C" // Forward declare of class from C
 
 namespace Hazel
 {
-	enum class ScriptFieldType;
-
-	struct ScriptField
-	{
-		ScriptFieldType Type;
-		std::string Name;
-
-		MonoClassField* MonoClassField;
-	};
-
 	class ScriptClass
 	{
 	public:

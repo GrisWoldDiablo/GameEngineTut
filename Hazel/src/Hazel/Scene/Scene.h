@@ -52,6 +52,8 @@ namespace Hazel
 		template<typename... Components>
 		auto GetAllEntitiesWith() { return _registry.view<Components...>(); }
 
+		bool IsRunning() const { return _isRunning; }
+
 	private:
 		template<typename T>
 		void OnComponentAdded(Entity entity, T& component);
@@ -72,6 +74,7 @@ namespace Hazel
 		std::string _name;
 
 		b2World* _physicsWorld = nullptr;
+		bool _isRunning = false;
 
 		std::unordered_map<UUID, entt::entity> _entityMap;
 

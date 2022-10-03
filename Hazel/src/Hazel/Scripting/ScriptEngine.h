@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Hazel/Scene/Entity.h"
+#include "ScriptField.h"
 
 extern "C" // Forward declare of class from C
 {
@@ -15,20 +16,6 @@ extern "C" // Forward declare of class from C
 
 namespace Hazel
 {
-	// https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/types#836-integral-types
-	// TODO move to different header.
-	enum class ScriptFieldType
-	{
-		None = 0,
-		Float, Double, Char, Bool,
-		SByte, Short, Int, Long,
-		Byte, UShort, UInt, ULong,
-		
-		Vector2, Vector3, Vector4,
-		Color,
-		Entity
-	};
-
 	class Scene;
 	class ScriptClass;
 	class ScriptInstance;
@@ -48,7 +35,10 @@ namespace Hazel
 		static void OnUpdateEntity(Entity entity, Timestep timestep);
 
 		static Scene* GetSceneContext();
+		static Ref<ScriptClass> GetEntityClass(const std::string& fullClassName);
 		static std::unordered_map<std::string, Ref<ScriptClass>> GetEntityClasses();
+		static ScriptFieldMap& GetScriptFieldMap(Entity entity);
+
 		static Ref<ScriptInstance> GetEntityScriptInstance(UUID entityID);
 
 	private:

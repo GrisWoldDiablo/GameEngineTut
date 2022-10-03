@@ -38,7 +38,7 @@ namespace Hazel
 		}
 	}
 
-	bool ScriptInstance::TryGetFieldValueInternal(const std::string& name, void* data)
+	bool ScriptInstance::TryGetFieldValueInternal(const std::string& name, void* data) const
 	{
 		const auto& fields = _scriptClass->GetFields();
 		auto it = fields.find(name);
