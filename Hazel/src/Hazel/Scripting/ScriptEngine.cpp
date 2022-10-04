@@ -131,35 +131,6 @@ namespace Hazel
 
 			return it->second;
 		}
-
-		std::string ScriptFieldTypeToString(ScriptFieldType scriptFieldType)
-		{
-			switch (scriptFieldType)
-			{
-			case ScriptFieldType::Float:  return "Float";
-			case ScriptFieldType::Double: return "Double";
-			case ScriptFieldType::Char:	  return "Char";
-			case ScriptFieldType::Bool:	  return "Bool";
-
-			case ScriptFieldType::SByte:  return "SByte";
-			case ScriptFieldType::Short:  return "Short";
-			case ScriptFieldType::Int:	  return "Int";
-			case ScriptFieldType::Long:	  return "Long";
-
-			case ScriptFieldType::Byte:	  return "Byte";
-			case ScriptFieldType::UShort: return "UShort";
-			case ScriptFieldType::UInt:	  return "UInt";
-			case ScriptFieldType::ULong:  return "ULong";
-
-			case ScriptFieldType::Vector2:return "Vector2";
-			case ScriptFieldType::Vector3:return "Vector3";
-			case ScriptFieldType::Vector4:return "Vector4";
-			case ScriptFieldType::Color:  return "Color";
-			case ScriptFieldType::Entity: return "Entity";
-			}
-
-			return "<Invalid>";
-		}
 	}
 
 	struct StriptEngineData
@@ -434,6 +405,9 @@ namespace Hazel
 
 	void ScriptEngine::LoadAssemblyClasses()
 	{
+
+		MonoDomain* loadingDomain = mono_domain_create_appdomain("loadingDomain", nullptr);
+
 		sScriptData->EntityClasses.clear();
 
 		const MonoTableInfo* typeDefinitionsTable = mono_image_get_table_info(sScriptData->AppAssemblyImage, MONO_TABLE_TYPEDEF);
@@ -480,6 +454,7 @@ namespace Hazel
 			HZ_CORE_LINFO("Class {0}", className);
 			HZ_CORE_LDEBUG("  {1} fields: ", className, fieldCounts);
 			void* iterator = nullptr;
+
 			while (MonoClassField* field = mono_class_get_fields(monoClass, &iterator))
 			{
 				const auto type = mono_field_get_type(field);
@@ -487,6 +462,7 @@ namespace Hazel
 				const auto typeName = Utils::ScriptFieldTypeToString(scriptFieldType);
 				const auto fieldName = mono_field_get_name(field);
 				const auto flags = mono_field_get_flags(field);
+
 				const auto accessibility = flags & FIELD_ATTRIBUTE_FIELD_ACCESS_MASK;
 
 				std::string extraAttribute = "";
@@ -502,31 +478,45 @@ namespace Hazel
 					break;
 				}
 
-				std::string access;
+				std::string accessModifier;
 				switch (accessibility)
 				{
 				case FIELD_ATTRIBUTE_PUBLIC:
-					access = "public";
+					accessModifier = "public";
 					break;
 				case FIELD_ATTRIBUTE_FAMILY:
-					access = "protected";
+					accessModifier = "protected";
 					break;
 				case FIELD_ATTRIBUTE_ASSEMBLY:
-					access = "internal";
+					accessModifier = "internal";
 					break;
 				case FIELD_ATTRIBUTE_PRIVATE:
-					access = "private";
+					accessModifier = "private";
 					break;
 				default:
-					access = "UNKNOWN";
+					accessModifier = "UNKNOWN";
 					break;
 				}
 
-				HZ_CORE_LTRACE("    {0} {1} {2} ({3})", extraAttribute, access, fieldName, typeName);
+				HZ_CORE_LTRACE("    {0} {1} {2} ({3})", extraAttribute, accessModifier, fieldName, typeName);
 
-				if (extraAttribute.empty() && access == "public")
+				if (extraAttribute.empty() && accessibility == FIELD_ATTRIBUTE_PUBLIC)
 				{
-					scriptClass->_fields[fieldName] = { scriptFieldType, fieldName, field };
+					// TODO Revisit defaultFieldValue
+					// should we keep a copy of the default value in ScriptField?
+					// Since ScriptFieldInstance has a copy of ScriptField.
+
+					static uint8_t defaultFieldDataBuffer[8];
+					memset(defaultFieldDataBuffer, 0, sizeof(defaultFieldDataBuffer));
+
+					MonoObject* monoObject = mono_object_new(loadingDomain, monoClass);
+					mono_runtime_object_init(monoObject);
+					mono_field_get_value(monoObject, field, defaultFieldDataBuffer);
+
+					ScriptField scriptField = { scriptFieldType, fieldName, field };
+					memcpy(scriptField.DefaultData, defaultFieldDataBuffer, sizeof(defaultFieldDataBuffer));
+
+					scriptClass->_fields[fieldName] = scriptField;
 				}
 			}
 
@@ -539,6 +529,8 @@ namespace Hazel
 			//	HZ_CORE_LTRACE("    {0}", mono_property_get_name(prop));
 			//}
 		}
+
+		mono_domain_unload(loadingDomain);
 	}
 
 	MonoObject* ScriptEngine::InstanciateClass(MonoClass* monoClass, MonoMethod* constructor, void** params)

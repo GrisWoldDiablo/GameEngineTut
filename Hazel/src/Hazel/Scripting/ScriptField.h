@@ -24,8 +24,16 @@ namespace Hazel
 	{
 		ScriptFieldType Type;
 		std::string Name;
-
 		MonoClassField* MonoClassField;
+		uint8_t DefaultData[8];
+
+		template<typename T>
+		T GetDefaultValue() const
+		{
+			static_assert(sizeof(T) <= 8, "Type too large!");
+
+			return *reinterpret_cast<const T*>(DefaultData);
+		}
 	};
 
 	// ScriptField + data storage
@@ -61,4 +69,70 @@ namespace Hazel
 	};
 
 	using ScriptFieldMap = std::unordered_map<std::string, ScriptFieldInstance>;
+
+	namespace Utils
+	{
+		inline const char* ScriptFieldTypeToString(ScriptFieldType scriptFieldType)
+		{
+			switch (scriptFieldType)
+			{
+			case ScriptFieldType::None:   return "None";
+
+			case ScriptFieldType::Float:  return "Float";
+			case ScriptFieldType::Double: return "Double";
+			case ScriptFieldType::Char:	  return "Char";
+			case ScriptFieldType::Bool:	  return "Bool";
+
+			case ScriptFieldType::SByte:  return "SByte";
+			case ScriptFieldType::Short:  return "Short";
+			case ScriptFieldType::Int:	  return "Int";
+			case ScriptFieldType::Long:	  return "Long";
+
+			case ScriptFieldType::Byte:	  return "Byte";
+			case ScriptFieldType::UShort: return "UShort";
+			case ScriptFieldType::UInt:	  return "UInt";
+			case ScriptFieldType::ULong:  return "ULong";
+
+			case ScriptFieldType::Vector2:return "Vector2";
+			case ScriptFieldType::Vector3:return "Vector3";
+			case ScriptFieldType::Vector4:return "Vector4";
+
+			case ScriptFieldType::Color:  return "Color";
+			case ScriptFieldType::Entity: return "Entity";
+			}
+
+			HZ_CORE_ASSERT(false, "Unknown ScriptFieldType!");
+			return "None";
+		}
+
+		inline ScriptFieldType ScriptFieldTypeFromString(std::string_view fieldType)
+		{
+			if (fieldType == "None")	return ScriptFieldType::None;
+
+			if (fieldType == "Float")	return ScriptFieldType::Float;
+			if (fieldType == "Double")	return ScriptFieldType::Double;
+			if (fieldType == "Char")	return ScriptFieldType::Char;
+			if (fieldType == "Bool")	return ScriptFieldType::Bool;
+
+			if (fieldType == "SByte")	return ScriptFieldType::SByte;
+			if (fieldType == "Short")	return ScriptFieldType::Short;
+			if (fieldType == "Int")		return ScriptFieldType::Int;
+			if (fieldType == "Long")	return ScriptFieldType::Long;
+
+			if (fieldType == "Byte")	return ScriptFieldType::Byte;
+			if (fieldType == "UShort")	return ScriptFieldType::UShort;
+			if (fieldType == "UInt")	return ScriptFieldType::UInt;
+			if (fieldType == "ULong")	return ScriptFieldType::ULong;
+
+			if (fieldType == "Vector2") return ScriptFieldType::Vector2;
+			if (fieldType == "Vector3") return ScriptFieldType::Vector3;
+			if (fieldType == "Vector4") return ScriptFieldType::Vector4;
+
+			if (fieldType == "Color")	return ScriptFieldType::Color;
+			if (fieldType == "Entity")	return ScriptFieldType::Entity;
+
+			HZ_CORE_ASSERT(false, "Unknown ScriptFieldType!");
+			return ScriptFieldType::None;
+		}
+	}
 }

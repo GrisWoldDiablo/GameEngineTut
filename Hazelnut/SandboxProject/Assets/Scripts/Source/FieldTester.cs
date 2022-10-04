@@ -5,18 +5,18 @@ namespace Sandbox
 {
 	public class FieldTester : Entity
 	{
-		public float flt = 69.0f;
-		public double dbl;
-		public char chr;
-		public bool bol;
-		public sbyte sbyt;
-		public short sht;
-		public int it;
-		public long lng;
-		public byte byt;
-		public ushort usht;
-		public uint uit;
-		public ulong ulng;
+		public float flt = 69.0f;   // In Inpsector
+		public double dbl = 4.269d; // In Inpsector
+		public char chr = 'k';      // In Inpsector
+		public bool bol = true;     // In Inpsector
+		public sbyte sbyt = 127;    // In Inpsector
+		public short sht = 2565;    // In Inpsector
+		public int it = 1234;       // In Inpsector
+		public long lng = 223456L;  // In Inpsector
+		public byte byt = 255;      // In Inpsector
+		public ushort usht = 25643; // In Inpsector
+		public uint uit = 4321u;    // In Inpsector
+		public ulong ulng = 3421ul; // In Inpsector
 		public Vector2 vc2;
 		public Vector3 vc3;
 		public Vector4 vc4;
@@ -26,10 +26,12 @@ namespace Sandbox
 		static public int StaticInt;
 		const int ConstInt = 2;
 		readonly public int ReadonlyInt;
-		public int PublicInt;
+
+		public int PublicInt = 231; // In Inpsector
 		private int PrivateInt;
 		protected int ProtectedInt;
 		internal int InternalInt;
+
 		Vector3 vector;
 		TransformComponent transformComponent;
 		Entity entity;

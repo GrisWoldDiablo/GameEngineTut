@@ -241,7 +241,7 @@ namespace Hazel
 
 	void EditorLayer::OnEvent(Event& event)
 	{
-		if (_isSceneViewportFocused && _sceneState == SceneState::Edit)
+		if (_sceneState != SceneState::Play)
 		{
 			_editorCamera.OnEvent(event);
 		}
@@ -874,8 +874,8 @@ namespace Hazel
 		{
 			ImGui::SetWindowFocus();
 		}
-		// TODO revisit
-		//Application::Get().GetImGuiLayer()->BlockEvents(!_isSceneViewportFocused && !_isSceneViewportHovered);
+
+		Application::Get().GetImGuiLayer()->BlockEvents(!_isSceneViewportHovered);
 
 		auto sceneViewportPanelSize = ImGui::GetContentRegionAvail();
 		_sceneViewportSize = { sceneViewportPanelSize.x, sceneViewportPanelSize.y };

@@ -583,163 +583,306 @@ namespace Hazel
 
 				for (const auto& [name, field] : fields)
 				{
-					switch (field.Type)
-					{
-					case ScriptFieldType::Float:
+					if (entityFields.find(name) != entityFields.end())
 					{
 						auto& scriptField = entityFields[name];
-						scriptField.Field = field;
-						auto data = scriptField.GetValue<float>();
-						if (ImGui::DragFloat(name.c_str(), &data, 0.1f))
-						{
-							scriptField.SetValue(data);
-						}
-						break;
-					}
-					case ScriptFieldType::Double:
-					{
-						auto& scriptField = entityFields[name];
-						scriptField.Field = field;
-						auto data = scriptField.GetValue<double>();
-						if (ImGui::DragScalar(name.c_str(), ImGuiDataType_Double, &data, 0.1f))
-						{
-							scriptField.SetValue(data);
-						}
-						break;
-					}
-					case ScriptFieldType::Char:
-					{
-						auto& scriptField = entityFields[name];
-						scriptField.Field = field;
-						auto data = scriptField.GetValue<uint16_t>();
-						char buffer[2] = { static_cast<char>(data) };
-						if (ImGui::InputText(name.c_str(), buffer, sizeof(buffer)))
-						{
-							data = *buffer;
-							scriptField.SetValue(data);
-						}
-						break;
-					}
-					case ScriptFieldType::Bool:
-					{
-						auto& scriptField = entityFields[name];
-						scriptField.Field = field;
-						auto data = scriptField.GetValue<bool>();
-						if (ImGui::Checkbox(name.c_str(), &data))
-						{
-							scriptField.SetValue(data);
-						}
-						break;
-					}
 
-					case ScriptFieldType::SByte:
-					{
-						auto& scriptField = entityFields[name];
-						scriptField.Field = field;
-						auto data = scriptField.GetValue<int8_t>();
-						if (ImGui::DragScalar(name.c_str(), ImGuiDataType_S8, &data))
+						switch (field.Type)
 						{
-							scriptField.SetValue(data);
-						}
-						break;
-					}
-					case ScriptFieldType::Short:
-					{
-						auto& scriptField = entityFields[name];
-						scriptField.Field = field;
-						auto data = scriptField.GetValue<int16_t>();
-						if (ImGui::DragScalar(name.c_str(), ImGuiDataType_S16, &data))
+						case ScriptFieldType::Float:
 						{
-							scriptField.SetValue(data);
+							auto data = scriptField.GetValue<float>();
+							if (ImGui::DragFloat(name.c_str(), &data, 0.1f))
+							{
+								scriptField.SetValue(data);
+							}
+							break;
 						}
-						break;
-					}
-					case ScriptFieldType::Int:
-					{
-						auto& scriptField = entityFields[name];
-						scriptField.Field = field;
-						auto data = scriptField.GetValue<int32_t>();
-						if (ImGui::DragInt(name.c_str(), &data, 0.1f))
+						case ScriptFieldType::Double:
 						{
-							scriptField.SetValue(data);
+							auto data = scriptField.GetValue<double>();
+							if (ImGui::DragScalar(name.c_str(), ImGuiDataType_Double, &data, 0.1f))
+							{
+								scriptField.SetValue(data);
+							}
+							break;
 						}
-						break;
-					}
-					case ScriptFieldType::Long:
-					{
-						auto& scriptField = entityFields[name];
-						scriptField.Field = field;
-						auto data = scriptField.GetValue<int64_t>();
-						if (ImGui::DragScalar(name.c_str(), ImGuiDataType_S64, &data))
+						case ScriptFieldType::Char:
 						{
-							scriptField.SetValue(data);
+							auto data = scriptField.GetValue<uint16_t>();
+							char buffer[2] = { static_cast<char>(data) };
+							if (ImGui::InputText(name.c_str(), buffer, sizeof(buffer)))
+							{
+								data = *buffer;
+								scriptField.SetValue(data);
+							}
+							break;
 						}
-						break;
-					}
-					case ScriptFieldType::Byte:
-					{
-						auto& scriptField = entityFields[name];
-						scriptField.Field = field;
-						auto data = scriptField.GetValue<uint8_t>();
-						if (ImGui::DragScalar(name.c_str(), ImGuiDataType_U8, &data))
+						case ScriptFieldType::Bool:
 						{
-							scriptField.SetValue(data);
+							auto data = scriptField.GetValue<bool>();
+							if (ImGui::Checkbox(name.c_str(), &data))
+							{
+								scriptField.SetValue(data);
+							}
+							break;
 						}
-						break;
-					}
-					case ScriptFieldType::UShort:
-					{
-						auto& scriptField = entityFields[name];
-						scriptField.Field = field;
-						auto data = scriptField.GetValue<uint16_t>();
-						if (ImGui::DragScalar(name.c_str(), ImGuiDataType_U16, &data))
+
+						case ScriptFieldType::SByte:
 						{
-							scriptField.SetValue(data);
+							auto data = scriptField.GetValue<int8_t>();
+							if (ImGui::DragScalar(name.c_str(), ImGuiDataType_S8, &data))
+							{
+								scriptField.SetValue(data);
+							}
+							break;
 						}
-						break;
-					}
-					case ScriptFieldType::UInt:
-					{
-						auto& scriptField = entityFields[name];
-						scriptField.Field = field;
-						auto data = scriptField.GetValue<uint32_t>();
-						if (ImGui::DragScalar(name.c_str(), ImGuiDataType_U32, &data))
+						case ScriptFieldType::Short:
 						{
-							scriptField.SetValue(data);
+							auto data = scriptField.GetValue<int16_t>();
+							if (ImGui::DragScalar(name.c_str(), ImGuiDataType_S16, &data))
+							{
+								scriptField.SetValue(data);
+							}
+							break;
 						}
-						break;
-					}
-					case ScriptFieldType::ULong:
-					{
-						auto& scriptField = entityFields[name];
-						scriptField.Field = field;
-						auto data = scriptField.GetValue<uint64_t>();
-						if (ImGui::DragScalar(name.c_str(), ImGuiDataType_U64, &data))
+						case ScriptFieldType::Int:
 						{
-							scriptField.SetValue(data);
+							auto data = scriptField.GetValue<int32_t>();
+							if (ImGui::DragInt(name.c_str(), &data, 0.1f))
+							{
+								scriptField.SetValue(data);
+							}
+							break;
 						}
-						break;
+						case ScriptFieldType::Long:
+						{
+							auto data = scriptField.GetValue<int64_t>();
+							if (ImGui::DragScalar(name.c_str(), ImGuiDataType_S64, &data))
+							{
+								scriptField.SetValue(data);
+							}
+							break;
+						}
+						case ScriptFieldType::Byte:
+						{
+							auto data = scriptField.GetValue<uint8_t>();
+							if (ImGui::DragScalar(name.c_str(), ImGuiDataType_U8, &data))
+							{
+								scriptField.SetValue(data);
+							}
+							break;
+						}
+						case ScriptFieldType::UShort:
+						{
+							auto data = scriptField.GetValue<uint16_t>();
+							if (ImGui::DragScalar(name.c_str(), ImGuiDataType_U16, &data))
+							{
+								scriptField.SetValue(data);
+							}
+							break;
+						}
+						case ScriptFieldType::UInt:
+						{
+							auto data = scriptField.GetValue<uint32_t>();
+							if (ImGui::DragScalar(name.c_str(), ImGuiDataType_U32, &data))
+							{
+								scriptField.SetValue(data);
+							}
+							break;
+						}
+						case ScriptFieldType::ULong:
+						{
+							auto data = scriptField.GetValue<uint64_t>();
+							if (ImGui::DragScalar(name.c_str(), ImGuiDataType_U64, &data))
+							{
+								scriptField.SetValue(data);
+							}
+							break;
+						}
+						case ScriptFieldType::Vector2:
+						{
+							break;
+						}
+						case ScriptFieldType::Vector3:
+						{
+							break;
+						}
+						case ScriptFieldType::Vector4:
+						{
+							break;
+						}
+						case ScriptFieldType::Color:
+						{
+							break;
+						}
+						case ScriptFieldType::Entity:
+						{
+							break;
+						}
+						}
 					}
-					case ScriptFieldType::Vector2:
+					else
 					{
-						break;
-					}
-					case ScriptFieldType::Vector3:
-					{
-						break;
-					}
-					case ScriptFieldType::Vector4:
-					{
-						break;
-					}
-					case ScriptFieldType::Color:
-					{
-						break;
-					}
-					case ScriptFieldType::Entity:
-					{
-						break;
-					}
+						switch (field.Type)
+						{
+						case ScriptFieldType::Float:
+						{
+							auto data = field.GetDefaultValue<float>();
+							if (ImGui::DragFloat(name.c_str(), &data, 0.1f))
+							{
+								auto& scriptField = entityFields[name];
+								scriptField.Field = field;
+								scriptField.SetValue(data);
+							}
+							break;
+						}
+						case ScriptFieldType::Double:
+						{
+							auto data = field.GetDefaultValue<double>();
+							if (ImGui::DragScalar(name.c_str(), ImGuiDataType_Double, &data, 0.1f))
+							{
+								auto& scriptField = entityFields[name];
+								scriptField.Field = field;
+								scriptField.SetValue(data);
+							}
+							break;
+						}
+						case ScriptFieldType::Char:
+						{
+							auto data = field.GetDefaultValue<uint16_t>();
+							char buffer[2] = { static_cast<char>(data) };
+							if (ImGui::InputText(name.c_str(), buffer, sizeof(buffer)))
+							{
+								auto& scriptField = entityFields[name];
+								scriptField.Field = field;
+								data = *buffer;
+								scriptField.SetValue(data);
+							}
+							break;
+						}
+						case ScriptFieldType::Bool:
+						{
+							auto data = field.GetDefaultValue<bool>();
+							if (ImGui::Checkbox(name.c_str(), &data))
+							{
+								auto& scriptField = entityFields[name];
+								scriptField.Field = field;
+								scriptField.SetValue(data);
+							}
+							break;
+						}
+
+						case ScriptFieldType::SByte:
+						{
+							auto data = field.GetDefaultValue<int8_t>();
+							if (ImGui::DragScalar(name.c_str(), ImGuiDataType_S8, &data))
+							{
+								auto& scriptField = entityFields[name];
+								scriptField.Field = field;
+								scriptField.SetValue(data);
+							}
+							break;
+						}
+						case ScriptFieldType::Short:
+						{
+							auto data = field.GetDefaultValue<int16_t>();
+							if (ImGui::DragScalar(name.c_str(), ImGuiDataType_S16, &data))
+							{
+								auto& scriptField = entityFields[name];
+								scriptField.Field = field;
+								scriptField.SetValue(data);
+							}
+							break;
+						}
+						case ScriptFieldType::Int:
+						{
+							auto data = field.GetDefaultValue<int32_t>();
+							if (ImGui::DragInt(name.c_str(), &data, 0.1f))
+							{
+								auto& scriptField = entityFields[name];
+								scriptField.Field = field;
+								scriptField.SetValue(data);
+							}
+							break;
+						}
+						case ScriptFieldType::Long:
+						{
+							auto data = field.GetDefaultValue<int64_t>();
+							if (ImGui::DragScalar(name.c_str(), ImGuiDataType_S64, &data))
+							{
+								auto& scriptField = entityFields[name];
+								scriptField.Field = field;
+								scriptField.SetValue(data);
+							}
+							break;
+						}
+						case ScriptFieldType::Byte:
+						{
+							auto data = field.GetDefaultValue<uint8_t>();
+							if (ImGui::DragScalar(name.c_str(), ImGuiDataType_U8, &data))
+							{
+								auto& scriptField = entityFields[name];
+								scriptField.Field = field;
+								scriptField.SetValue(data);
+							}
+							break;
+						}
+						case ScriptFieldType::UShort:
+						{
+							auto data = field.GetDefaultValue<uint16_t>();
+							if (ImGui::DragScalar(name.c_str(), ImGuiDataType_U16, &data))
+							{
+								auto& scriptField = entityFields[name];
+								scriptField.Field = field;
+								scriptField.SetValue(data);
+							}
+							break;
+						}
+						case ScriptFieldType::UInt:
+						{
+							auto data = field.GetDefaultValue<uint32_t>();
+							if (ImGui::DragScalar(name.c_str(), ImGuiDataType_U32, &data))
+							{
+								auto& scriptField = entityFields[name];
+								scriptField.Field = field;
+								scriptField.SetValue(data);
+							}
+							break;
+						}
+						case ScriptFieldType::ULong:
+						{
+							auto data = field.GetDefaultValue<uint64_t>();
+							if (ImGui::DragScalar(name.c_str(), ImGuiDataType_U64, &data))
+							{
+								auto& scriptField = entityFields[name];
+								scriptField.Field = field;
+								scriptField.SetValue(data);
+							}
+							break;
+						}
+						case ScriptFieldType::Vector2:
+						{
+							break;
+						}
+						case ScriptFieldType::Vector3:
+						{
+							break;
+						}
+						case ScriptFieldType::Vector4:
+						{
+							break;
+						}
+						case ScriptFieldType::Color:
+						{
+							break;
+						}
+						case ScriptFieldType::Entity:
+						{
+							break;
+						}
+						}
+
 					}
 				}
 			}
