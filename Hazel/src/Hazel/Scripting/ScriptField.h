@@ -25,12 +25,12 @@ namespace Hazel
 		ScriptFieldType Type;
 		std::string Name;
 		MonoClassField* MonoClassField;
-		uint8_t DefaultData[8];
+		uint8_t DefaultData[16];
 
 		template<typename T>
 		T GetDefaultValue() const
 		{
-			static_assert(sizeof(T) <= 8, "Type too large!");
+			static_assert(sizeof(T) <= 16, "Type too large!");
 
 			return *reinterpret_cast<const T*>(DefaultData);
 		}
@@ -49,7 +49,7 @@ namespace Hazel
 		template<typename T>
 		T GetValue() const
 		{
-			static_assert(sizeof(T) <= 8, "Type too large!");
+			static_assert(sizeof(T) <= 16, "Type too large!");
 
 			return *reinterpret_cast<const T*>(_dataBuffer);
 		}
@@ -57,13 +57,13 @@ namespace Hazel
 		template<typename T>
 		void SetValue(T value)
 		{
-			static_assert(sizeof(T) <= 8, "Type too large!");
+			static_assert(sizeof(T) <= 16, "Type too large!");
 
-			memcpy(_dataBuffer, &value, sizeof(T));
+			memcpy_s(_dataBuffer, sizeof(_dataBuffer), &value, sizeof(T));
 		}
 
 	private:
-		uint8_t _dataBuffer[8];
+		uint8_t _dataBuffer[16];
 
 		friend class ScriptEngine;
 	};
@@ -72,7 +72,7 @@ namespace Hazel
 
 	namespace Utils
 	{
-		inline const char* ScriptFieldTypeToString(ScriptFieldType scriptFieldType)
+		inline const std::string ScriptFieldTypeToString(ScriptFieldType scriptFieldType)
 		{
 			switch (scriptFieldType)
 			{

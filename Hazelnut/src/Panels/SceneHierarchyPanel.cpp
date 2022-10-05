@@ -627,7 +627,6 @@ namespace Hazel
 							}
 							break;
 						}
-
 						case ScriptFieldType::SByte:
 						{
 							auto data = scriptField.GetValue<int8_t>();
@@ -731,9 +730,9 @@ namespace Hazel
 							auto data = field.GetDefaultValue<float>();
 							if (ImGui::DragFloat(name.c_str(), &data, 0.1f))
 							{
-								auto& scriptField = entityFields[name];
-								scriptField.Field = field;
-								scriptField.SetValue(data);
+								auto& scriptFieldInstance = entityFields[name];
+								scriptFieldInstance.Field = field;
+								scriptFieldInstance.SetValue(data);
 							}
 							break;
 						}
@@ -742,9 +741,9 @@ namespace Hazel
 							auto data = field.GetDefaultValue<double>();
 							if (ImGui::DragScalar(name.c_str(), ImGuiDataType_Double, &data, 0.1f))
 							{
-								auto& scriptField = entityFields[name];
-								scriptField.Field = field;
-								scriptField.SetValue(data);
+								auto& scriptFieldInstance = entityFields[name];
+								scriptFieldInstance.Field = field;
+								scriptFieldInstance.SetValue(data);
 							}
 							break;
 						}
@@ -754,10 +753,10 @@ namespace Hazel
 							char buffer[2] = { static_cast<char>(data) };
 							if (ImGui::InputText(name.c_str(), buffer, sizeof(buffer)))
 							{
-								auto& scriptField = entityFields[name];
-								scriptField.Field = field;
+								auto& scriptFieldInstance = entityFields[name];
+								scriptFieldInstance.Field = field;
 								data = *buffer;
-								scriptField.SetValue(data);
+								scriptFieldInstance.SetValue(data);
 							}
 							break;
 						}
@@ -766,9 +765,9 @@ namespace Hazel
 							auto data = field.GetDefaultValue<bool>();
 							if (ImGui::Checkbox(name.c_str(), &data))
 							{
-								auto& scriptField = entityFields[name];
-								scriptField.Field = field;
-								scriptField.SetValue(data);
+								auto& scriptFieldInstance = entityFields[name];
+								scriptFieldInstance.Field = field;
+								scriptFieldInstance.SetValue(data);
 							}
 							break;
 						}
@@ -778,9 +777,9 @@ namespace Hazel
 							auto data = field.GetDefaultValue<int8_t>();
 							if (ImGui::DragScalar(name.c_str(), ImGuiDataType_S8, &data))
 							{
-								auto& scriptField = entityFields[name];
-								scriptField.Field = field;
-								scriptField.SetValue(data);
+								auto& scriptFieldInstance = entityFields[name];
+								scriptFieldInstance.Field = field;
+								scriptFieldInstance.SetValue(data);
 							}
 							break;
 						}
@@ -789,9 +788,9 @@ namespace Hazel
 							auto data = field.GetDefaultValue<int16_t>();
 							if (ImGui::DragScalar(name.c_str(), ImGuiDataType_S16, &data))
 							{
-								auto& scriptField = entityFields[name];
-								scriptField.Field = field;
-								scriptField.SetValue(data);
+								auto& scriptFieldInstance = entityFields[name];
+								scriptFieldInstance.Field = field;
+								scriptFieldInstance.SetValue(data);
 							}
 							break;
 						}
@@ -800,9 +799,9 @@ namespace Hazel
 							auto data = field.GetDefaultValue<int32_t>();
 							if (ImGui::DragInt(name.c_str(), &data, 0.1f))
 							{
-								auto& scriptField = entityFields[name];
-								scriptField.Field = field;
-								scriptField.SetValue(data);
+								auto& scriptFieldInstance = entityFields[name];
+								scriptFieldInstance.Field = field;
+								scriptFieldInstance.SetValue(data);
 							}
 							break;
 						}
@@ -811,9 +810,9 @@ namespace Hazel
 							auto data = field.GetDefaultValue<int64_t>();
 							if (ImGui::DragScalar(name.c_str(), ImGuiDataType_S64, &data))
 							{
-								auto& scriptField = entityFields[name];
-								scriptField.Field = field;
-								scriptField.SetValue(data);
+								auto& scriptFieldInstance = entityFields[name];
+								scriptFieldInstance.Field = field;
+								scriptFieldInstance.SetValue(data);
 							}
 							break;
 						}
@@ -822,9 +821,9 @@ namespace Hazel
 							auto data = field.GetDefaultValue<uint8_t>();
 							if (ImGui::DragScalar(name.c_str(), ImGuiDataType_U8, &data))
 							{
-								auto& scriptField = entityFields[name];
-								scriptField.Field = field;
-								scriptField.SetValue(data);
+								auto& scriptFieldInstance = entityFields[name];
+								scriptFieldInstance.Field = field;
+								scriptFieldInstance.SetValue(data);
 							}
 							break;
 						}
@@ -833,9 +832,9 @@ namespace Hazel
 							auto data = field.GetDefaultValue<uint16_t>();
 							if (ImGui::DragScalar(name.c_str(), ImGuiDataType_U16, &data))
 							{
-								auto& scriptField = entityFields[name];
-								scriptField.Field = field;
-								scriptField.SetValue(data);
+								auto& scriptFieldInstance = entityFields[name];
+								scriptFieldInstance.Field = field;
+								scriptFieldInstance.SetValue(data);
 							}
 							break;
 						}
@@ -844,9 +843,9 @@ namespace Hazel
 							auto data = field.GetDefaultValue<uint32_t>();
 							if (ImGui::DragScalar(name.c_str(), ImGuiDataType_U32, &data))
 							{
-								auto& scriptField = entityFields[name];
-								scriptField.Field = field;
-								scriptField.SetValue(data);
+								auto& scriptFieldInstance = entityFields[name];
+								scriptFieldInstance.Field = field;
+								scriptFieldInstance.SetValue(data);
 							}
 							break;
 						}
@@ -855,9 +854,9 @@ namespace Hazel
 							auto data = field.GetDefaultValue<uint64_t>();
 							if (ImGui::DragScalar(name.c_str(), ImGuiDataType_U64, &data))
 							{
-								auto& scriptField = entityFields[name];
-								scriptField.Field = field;
-								scriptField.SetValue(data);
+								auto& scriptFieldInstance = entityFields[name];
+								scriptFieldInstance.Field = field;
+								scriptFieldInstance.SetValue(data);
 							}
 							break;
 						}
@@ -886,7 +885,6 @@ namespace Hazel
 					}
 				}
 			}
-
 		});
 #pragma endregion
 

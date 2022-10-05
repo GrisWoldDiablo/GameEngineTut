@@ -506,7 +506,7 @@ namespace Hazel
 					// should we keep a copy of the default value in ScriptField?
 					// Since ScriptFieldInstance has a copy of ScriptField.
 
-					static uint8_t defaultFieldDataBuffer[8];
+					static uint8_t defaultFieldDataBuffer[16];
 					memset(defaultFieldDataBuffer, 0, sizeof(defaultFieldDataBuffer));
 
 					MonoObject* monoObject = mono_object_new(loadingDomain, monoClass);
@@ -514,7 +514,7 @@ namespace Hazel
 					mono_field_get_value(monoObject, field, defaultFieldDataBuffer);
 
 					ScriptField scriptField = { scriptFieldType, fieldName, field };
-					memcpy(scriptField.DefaultData, defaultFieldDataBuffer, sizeof(defaultFieldDataBuffer));
+					memcpy_s(scriptField.DefaultData, sizeof(scriptField.DefaultData), defaultFieldDataBuffer, sizeof(defaultFieldDataBuffer));
 
 					scriptClass->_fields[fieldName] = scriptField;
 				}

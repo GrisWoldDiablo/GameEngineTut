@@ -1,4 +1,7 @@
 #pragma once
+
+#include "Hazel/Scripting/ScriptField.h"
+
 #include <yaml-cpp/yaml.h>
 #include <glm/glm.hpp>
 
@@ -101,6 +104,26 @@ namespace YAML
 			return true;
 		}
 	};
+
+	template<>
+	struct convert<Hazel::ScriptFieldType>
+	{
+		static Node encode(const Hazel::ScriptFieldType& rhs)
+		{
+			return Node(Hazel::Utils::ScriptFieldTypeToString(rhs));
+		}
+
+		static bool decode(const Node& node, Hazel::ScriptFieldType& rhs)
+		{
+			if (!node.IsScalar())
+			{
+				return false;
+			}
+
+			rhs = Hazel::Utils::ScriptFieldTypeFromString(node.Scalar());
+			return true;
+		}
+	};
 }
 
 namespace Hazel
@@ -129,6 +152,11 @@ namespace Hazel
 	inline YAML::Emitter& operator<<(YAML::Emitter& out, const std::filesystem::path& path)
 	{
 		return  out.Write(path.string());
+	}
+
+	inline YAML::Emitter& operator<<(YAML::Emitter& out, const ScriptFieldType& type)
+	{
+		return  out.Write(Utils::ScriptFieldTypeToString(type));
 	}
 
 	class Serializer

@@ -23,7 +23,7 @@ namespace Hazel
 		template<typename T>
 		T GetFieldValue(const std::string& name) const
 		{
-			static_assert(sizeof(T) <= 8, "Type too large!");
+			static_assert(sizeof(T) <= 16, "Type too large!");
 
 			if (TryGetFieldValueInternal(name, _sFieldValueBuffer))
 			{
@@ -36,7 +36,7 @@ namespace Hazel
 		template<typename T>
 		void SetFieldValue(const std::string& name, const T& data)
 		{
-			static_assert(sizeof(T) <= 8, "Type too large!");
+			static_assert(sizeof(T) <= 16, "Type too large!");
 
 			TrySetFieldValueInternal(name, &data);
 			//TODO error handling
@@ -54,7 +54,7 @@ namespace Hazel
 		MonoMethod* _onCreateMethod = nullptr;
 		MonoMethod* _onUpdateMethod = nullptr;
 
-		inline static uint8_t _sFieldValueBuffer[8];
+		inline static uint8_t _sFieldValueBuffer[16];
 
 		friend class ScriptEngine;
 	};

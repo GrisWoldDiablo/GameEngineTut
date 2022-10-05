@@ -4,6 +4,9 @@
 #include "Entity.h"
 #include "Components.h"
 
+#include "Hazel/Scripting/ScriptEngine.h"
+#include "Hazel/Scripting/ScriptClass.h"
+
 namespace Hazel
 {
 	static std::string _runtimeSceneData;
@@ -127,6 +130,135 @@ namespace Hazel
 			out << YAML::BeginMap; // ScriptComponent
 
 			out << YAML::Key << "ClassName" << YAML::Value << component.ClassName;
+
+			// Fields
+			auto entityClass = ScriptEngine::GetEntityClass(component.ClassName);
+			const auto& fields = entityClass->GetFields();
+
+			if (fields.size() > 0)
+			{
+				out << YAML::Key << "ScriptFields" << YAML::Value;
+
+				auto& entityFields = ScriptEngine::GetScriptFieldMap(entity);
+
+				out << YAML::BeginSeq; // ScriptFields Sequence
+
+				for (const auto& [name, field] : fields)
+				{
+					if (entityFields.find(name) == entityFields.end())
+					{
+						continue;
+					}
+
+					out << YAML::BeginMap; // Field Map
+
+					out << YAML::Key << "Name" << YAML::Value << name;
+					out << YAML::Key << "Type" << YAML::Value << field.Type;
+
+					const auto& scriptField = entityFields.at(name);
+
+					out << YAML::Key << "Data" << YAML::Value;
+
+					switch (field.Type)
+					{
+					case ScriptFieldType::Float:
+					{
+						out << scriptField.GetValue<float>();
+						break;
+					}
+					case ScriptFieldType::Double:
+					{
+						out << scriptField.GetValue<double>();
+						break;
+					}
+					case ScriptFieldType::Char:
+					{
+						out << scriptField.GetValue<uint8_t>();
+						break;
+					}
+					case ScriptFieldType::Bool:
+					{
+						out << scriptField.GetValue<bool>();
+						break;
+					}
+					case ScriptFieldType::SByte:
+					{
+						out << scriptField.GetValue<int8_t>();
+						break;
+					}
+					case ScriptFieldType::Short:
+					{
+						out << scriptField.GetValue<int16_t>();
+						break;
+					}
+					case ScriptFieldType::Int:
+					{
+						out << scriptField.GetValue<int32_t>();
+						break;
+					}
+					case ScriptFieldType::Long:
+					{
+						out << scriptField.GetValue<int64_t>();
+						break;
+					}
+					case ScriptFieldType::Byte:
+					{
+						out << scriptField.GetValue<uint16_t>();
+						break;
+					}
+					case ScriptFieldType::UShort:
+					{
+						out << scriptField.GetValue<uint16_t>();
+						break;
+					}
+					case ScriptFieldType::UInt:
+					{
+						out << scriptField.GetValue<uint32_t>();
+						break;
+					}
+					case ScriptFieldType::ULong:
+					{
+						out << scriptField.GetValue<uint64_t>();
+						break;
+					}
+					case ScriptFieldType::Vector2:
+					{
+						out << scriptField.GetValue<glm::vec2>();
+						break;
+					}
+					case ScriptFieldType::Vector3:
+					{
+						out << scriptField.GetValue<glm::vec3>();
+						break;
+					}
+					case ScriptFieldType::Vector4:
+					{
+						out << scriptField.GetValue<glm::vec4>();
+						break;
+					}
+					case ScriptFieldType::Color:
+					{
+						out << scriptField.GetValue<Color>();
+						break;
+					}
+					case ScriptFieldType::Entity:
+					{
+						out << scriptField.GetValue<UUID>();
+						break;
+					}
+					case ScriptFieldType::None:
+					default:
+					{
+						out << "None";
+						break;
+					}
+					}
+
+					out << YAML::EndMap; // Field Map
+				}
+
+				out << YAML::EndSeq; // ScriptFields Sequence 
+			}
 
 			out << YAML::EndMap; // ScriptComponent  
 		}
@@ -422,6 +554,143 @@ namespace Hazel
 				{
 					auto& component = deserializedEntity.AddComponent<ScriptComponent>();
 					component.ClassName = GetValue<std::string>(scriptComponent, "ClassName");
+
+					if (auto scriptFields = scriptComponent["ScriptFields"])
+					{
+						if (const auto& entityClass = ScriptEngine::GetEntityClass(component.ClassName))
+						{
+							auto& entityFields = ScriptEngine::GetScriptFieldMap(deserializedEntity);
+							const auto& fields = entityClass->GetFields();
+
+							for (auto scriptField : scriptFields)
+							{
+								auto name = GetValue<std::string>(scriptField, "Name");
+
+								if (fields.find(name) == fields.end())
+								{
+									HZ_CORE_LWARN("Deserialization: Field [{0}] doesn't not exist on class [{1}]", name, component.ClassName);
+									continue;
+								}
+
+								auto type = GetValue<ScriptFieldType>(scriptField, "Type");
+								auto& scriptFieldInstance = entityFields[name];
+								scriptFieldInstance.Field = fields.at(name);
+
+								switch (type)
+								{
+								case ScriptFieldType::Float:
+								{
+									auto data = GetValue<float>(scriptField, "Data");
+									scriptFieldInstance.SetValue(data);
+									break;
+								}
+								case ScriptFieldType::Double:
+								{
+									auto data = GetValue<double>(scriptField, "Data");
+									scriptFieldInstance.SetValue(data);
+									break;
+								}
+								case ScriptFieldType::Char:
+								{
+									auto data = static_cast<uint16_t>(GetValue<char>(scriptField, "Data"));
+									scriptFieldInstance.SetValue(data);
+									break;
+								}
+								case ScriptFieldType::Bool:
+								{
+									auto data = GetValue<bool>(scriptField, "Data");
+									scriptFieldInstance.SetValue(data);
+									break;
+								}
+								case ScriptFieldType::SByte:
+								{
+									auto data = GetValue<int8_t>(scriptField, "Data");
+									scriptFieldInstance.SetValue(data);
+									break;
+								}
+								case ScriptFieldType::Short:
+								{
+									auto data = GetValue<int16_t>(scriptField, "Data");
+									scriptFieldInstance.SetValue(data);
+									break;
+								}
+								case ScriptFieldType::Int:
+								{
+									auto data = GetValue<int32_t>(scriptField, "Data");
+									scriptFieldInstance.SetValue(data);
+									break;
+								}
+								case ScriptFieldType::Long:
+								{
+									auto data = GetValue<int64_t>(scriptField, "Data");
+									scriptFieldInstance.SetValue(data);
+									break;
+								}
+								case ScriptFieldType::Byte:
+								{
+									auto data = GetValue<uint8_t>(scriptField, "Data");
+									scriptFieldInstance.SetValue(data);
+									break;
+								}
+								case ScriptFieldType::UShort:
+								{
+									auto data = GetValue<uint16_t>(scriptField, "Data");
+									scriptFieldInstance.SetValue(data);
+									break;
+								}
+								case ScriptFieldType::UInt:
+								{
+									auto data = GetValue<uint32_t>(scriptField, "Data");
+									scriptFieldInstance.SetValue(data);
+									break;
+								}
+								case ScriptFieldType::ULong:
+								{
+									auto data = GetValue<uint64_t>(scriptField, "Data");
+									scriptFieldInstance.SetValue(data);
+									break;
+								}
+								case ScriptFieldType::Vector2:
+								{
+									auto data = GetValue<glm::vec2>(scriptField, "Data");
+									scriptFieldInstance.SetValue(data);
+									break;
+								}
+								case ScriptFieldType::Vector3:
+								{
+									auto data = GetValue<glm::vec3>(scriptField, "Data");
+									scriptFieldInstance.SetValue(data);
+									break;
+								}
+								case ScriptFieldType::Vector4:
+								{
+									auto data = GetValue<glm::vec4>(scriptField, "Data");
+									scriptFieldInstance.SetValue(data);
+									break;
+								}
+								case ScriptFieldType::Color:
+								{
+									auto data = GetValue<glm::vec4>(scriptField, "Data");
+									scriptFieldInstance.SetValue(data);
+									break;
+								}
+								case ScriptFieldType::Entity:
+								{
+									auto data = GetValue<uint64_t>(scriptField, "Data");
+									scriptFieldInstance.SetValue(data);
+									break;
+								}
+								case ScriptFieldType::None:
+								default:
+								{
+									auto data = "";
+									scriptFieldInstance.SetValue(data);
+									break;
+								}
+								}
+							}
+						}
+					}
 				}
 #pragma endregion
 
@@ -507,7 +776,7 @@ namespace Hazel
 							component.AudioSource->SetPosition(deserializedEntity.Transform().Position);
 						}
 					}
-					
+
 					component.IsVisibleInGame = GetValue<bool>(audioSourceComponent, "IsVisibleInGame", false);
 				}
 #pragma endregion
