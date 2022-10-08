@@ -19,6 +19,29 @@
 
 namespace Hazel
 {
+	template<typename PopupFunction>
+	static void DrawYesNoPopup(const std::string& question, PopupFunction popupFunction)
+	{
+		if (ImGui::BeginPopupContextItem())
+		{
+			ImGui::Text(question.c_str());
+			ImGui::Separator();
+			if (ImGui::Button("Yes"))
+			{
+				popupFunction();
+				ImGui::CloseCurrentPopup();
+			}
+			ImGui::SameLine();
+			ImGui::Text(" ");
+			ImGui::SameLine();
+			if (ImGui::Button("No"))
+			{
+				ImGui::CloseCurrentPopup();
+			}
+			ImGui::EndPopup();
+		}
+	}
+
 	template<typename T>
 	static bool ResetButton(const std::string& label, T& values, T resetValue, ImVec2 size)
 	{
@@ -198,6 +221,11 @@ namespace Hazel
 		ImGui::Begin("Scene Hierarchy", nullptr, ImGuiWindowFlags_MenuBar);
 
 		DrawSceneName();
+		if (ImGui::Button("Create New Entity"))
+		{
+			_scene->CreateEntity();
+		}
+		ImGui::Separator();
 
 		_scene->_registry.each([&](auto entityID)
 		{
@@ -610,24 +638,10 @@ namespace Hazel
 			}
 			else
 			{
-				if (ImGui::BeginPopupContextItem())
+				DrawYesNoPopup("Reset Class Fields?", [&]
 				{
-					ImGui::Text("Reset Class Fields");
-					ImGui::Separator();
-					if (ImGui::Button("Yes"))
-					{
-						ScriptEngine::EraseFromScriptFieldMap(entity);
-						ImGui::CloseCurrentPopup();
-					}
-					ImGui::SameLine();
-					ImGui::Text(" ");
-					ImGui::SameLine();
-					if (ImGui::Button("No"))
-					{
-						ImGui::CloseCurrentPopup();
-					}
-					ImGui::EndPopup();
-				}
+					ScriptEngine::EraseFromScriptFieldMap(entity);
+				});
 
 				auto entityClass = ScriptEngine::GetEntityClass(component.ClassName);
 				const auto& fields = entityClass->GetFields();
@@ -939,7 +953,7 @@ namespace Hazel
 						case ScriptFieldType::Vector2:
 						{
 							auto data = field.GetDefaultValue<glm::vec2>();
-							if (DrawVecControls(name, data))
+							if (DrawVecControls(name, data, data))
 							{
 								auto& scriptFieldInstance = entityFields[name];
 								scriptFieldInstance.Field = field;
@@ -950,7 +964,7 @@ namespace Hazel
 						case ScriptFieldType::Vector3:
 						{
 							auto data = field.GetDefaultValue<glm::vec3>();
-							if (DrawVecControls(name, data))
+							if (DrawVecControls(name, data, data))
 							{
 								auto& scriptFieldInstance = entityFields[name];
 								scriptFieldInstance.Field = field;
@@ -961,7 +975,7 @@ namespace Hazel
 						case ScriptFieldType::Vector4:
 						{
 							auto data = field.GetDefaultValue<glm::vec4>();
-							if (DrawVecControls(name, data))
+							if (DrawVecControls(name, data, data))
 							{
 								auto& scriptFieldInstance = entityFields[name];
 								scriptFieldInstance.Field = field;
@@ -1108,23 +1122,12 @@ namespace Hazel
 				textureFilePath = std::filesystem::relative(textureFilePath);
 			}
 
-			if (component.Texture != nullptr && ImGui::BeginPopupContextItem())
+			if (component.Texture != nullptr)
 			{
-				ImGui::Text("Clear Texture?");
-				ImGui::Separator();
-				if (ImGui::Button("Yes"))
+				DrawYesNoPopup("Clear Texture?", [&]
 				{
 					component.Texture = nullptr;
-					ImGui::CloseCurrentPopup();
-				}
-				ImGui::SameLine();
-				ImGui::Text(" ");
-				ImGui::SameLine();
-				if (ImGui::Button("No"))
-				{
-					ImGui::CloseCurrentPopup();
-				}
-				ImGui::EndPopup();
+				});
 			}
 
 			if (!textureFilePath.empty())
@@ -1268,24 +1271,13 @@ namespace Hazel
 				isButtonPressed = ImGui::Button("Select Clip");
 			}
 
-			if (audioSource != nullptr && ImGui::BeginPopupContextItem())
+			if (audioSource != nullptr)
 			{
-				ImGui::Text("Clear Audio Clip?");
-				ImGui::Separator();
-				if (ImGui::Button("Yes"))
+				DrawYesNoPopup("Clear Audio Clip?", [&]
 				{
 					AudioEngine::ReleaseAudioSource(audioSource);
 					audioSource.reset();
-					ImGui::CloseCurrentPopup();
-				}
-				ImGui::SameLine();
-				ImGui::Text(" ");
-				ImGui::SameLine();
-				if (ImGui::Button("No"))
-				{
-					ImGui::CloseCurrentPopup();
-				}
-				ImGui::EndPopup();
+				});
 			}
 
 			std::filesystem::path audioClipFilePath;
