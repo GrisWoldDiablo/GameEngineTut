@@ -71,7 +71,7 @@ Entities:
         OrthographicSize: 10
         OrthographicNearClip: -1
         OrthographicFarClip: 1
-        AspectRatio: 1.8591224
+        AspectRatio: 2.30645156
       IsPrimary: true
       IsFixedAspectRatio: false
     ScriptComponent:
@@ -235,8 +235,13 @@ Entities:
       Tag: 0
       Layer: 0
     TransformComponent:
-      Position: [0, 0, 0]
+      Position: [0.763527155, 1.1367836, -3.9653969e-10]
       Rotation: [0, 0, 0]
       Scale: [1, 1, 1]
     ScriptComponent:
       ClassName: Sandbox.FieldTester
+      ScriptFields:
+        []
+    SpriteRendererComponent:
+      Tiling: [1, 1]
+      Color: [1, 1, 1, 1]

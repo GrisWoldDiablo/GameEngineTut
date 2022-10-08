@@ -9,7 +9,7 @@ namespace Hazel
 		public float B; // Blue
 		public float A; // Alpha
 
-		Color(float red, float green, float blue, float alpha = 1.0f)
+		public Color(float red, float green, float blue, float alpha = 1.0f)
 		{
 			R = red;
 			G = green;
@@ -25,7 +25,7 @@ namespace Hazel
 		/// Return the Grayscale value of the color. (ITU-R BT.601 conversion)
 		/// (0.299 * r) + (0.587 * g) + (0.114 * b)
 		/// </summary>
-		float GetGrayscaleValue()
+		public float GetGrayscaleValue()
 		{
 			return (0.299f * R) + (0.587f * G) + (0.114f * B);
 		}
@@ -33,7 +33,7 @@ namespace Hazel
 		/// <summary>
 		/// Return hexadecimal version of the RGB
 		/// </summary>
-		string GetHexValue()
+		public string GetHexValue()
 		{
 			return $"{(int)(R * 255.0f):x}{(int)(G * 255.0f):x}{(int)(B * 255.0f):x}".ToUpper();
 		}

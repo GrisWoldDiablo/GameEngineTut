@@ -164,10 +164,10 @@ namespace Hazel
 	public:
 		virtual ~Serializer() = default;
 
-		virtual void Serialize(const std::string& filepath) = 0;
+		virtual void Serialize(const std::filesystem::path& filepath) = 0;
 		virtual void SerializeRuntime() = 0;
 
-		virtual bool Deserialize(const std::string& filepath, bool isWithLog = true) = 0;
+		virtual bool Deserialize(const std::filesystem::path& filepath, bool isWithLog = true) = 0;
 		virtual bool DeserializeRuntime() = 0;
 	};
 }

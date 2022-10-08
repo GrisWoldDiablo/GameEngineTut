@@ -288,6 +288,13 @@ namespace Hazel
 		return sScriptData->EntityScriptFields[entity.GetUUID()];
 	}
 
+	void ScriptEngine::EraseFromScriptFieldMap(Entity entity)
+	{
+		HZ_CORE_ASSERT(entity, "Entity is invalid");
+
+		sScriptData->EntityScriptFields.erase(entity.GetUUID());
+	}
+
 	Ref<ScriptInstance> ScriptEngine::GetEntityScriptInstance(UUID entityID)
 	{
 		auto it = sScriptData->EntityInstances.find(entityID);

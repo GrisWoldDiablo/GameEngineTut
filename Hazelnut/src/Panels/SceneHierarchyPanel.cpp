@@ -20,8 +20,9 @@
 namespace Hazel
 {
 	template<typename T>
-	static void ResetButton(const std::string& label, T& values, float resetValue, ImVec2 size)
+	static bool ResetButton(const std::string& label, T& values, T resetValue, ImVec2 size)
 	{
+		bool hasValueChanged = false;
 		if (ImGui::Button(label.c_str(), size))
 		{
 			ImGui::OpenPopup("reset");
@@ -33,7 +34,8 @@ namespace Hazel
 			ImGui::Separator();
 			if (ImGui::Button("Yes"))
 			{
-				values = T(resetValue);
+				values = resetValue;
+				hasValueChanged = true;
 				ImGui::CloseCurrentPopup();
 			}
 			ImGui::SameLine();
@@ -45,6 +47,8 @@ namespace Hazel
 			}
 			ImGui::EndPopup();
 		}
+
+		return hasValueChanged;
 	}
 
 	template<typename T, typename UIFunction>
@@ -99,8 +103,9 @@ namespace Hazel
 	}
 
 	template<typename T>
-	static void DrawFloatField(const char* label, T& value, float resetValue, const Color& color, int precision = 2)
+	static bool DrawFloatField(const char* label, T& value, float resetValue, const Color& color, int precision = 2)
 	{
+		bool hasValueChanged = false;
 		auto boldFont = ImGui::GetIO().Fonts->Fonts[0];
 		float lineHeight = boldFont->FontSize + GImGui->Style.FramePadding.y * 2.0f;
 
@@ -119,6 +124,7 @@ namespace Hazel
 		if (ImGui::Button(label, buttonSize))
 		{
 			value = resetValue;
+			hasValueChanged = true;
 		}
 		ImGui::PopFont();
 		ImGui::PopStyleColor(3);
@@ -127,14 +133,14 @@ namespace Hazel
 		auto floatLabel = std::string("##") + label;
 		std::stringstream ss;
 		ss << "%." << precision << "f";
-		ImGui::DragFloat(floatLabel.c_str(), &value, 0.1f, 0.0f, 0.0f, ss.str().c_str());
+		return hasValueChanged | ImGui::DragFloat(floatLabel.c_str(), &value, 0.1f, 0.0f, 0.0f, ss.str().c_str());
 	}
 
 	template<typename T>
-	static void DrawVecControls(const std::string& label, T& values, float resetValue = 0.0f, float columnWidth = 100.0f)
+	static bool DrawVecControls(const std::string& label, T& values, T resetValue = T(0.0f), float columnWidth = 100.0f)
 	{
 		int valuesSize = sizeof(values) / sizeof(values[0]);
-
+		bool hasValueChanged = false;
 		ImGui::PushID(label.c_str());
 
 		ImGui::Columns(2, label.c_str(), false);
@@ -143,7 +149,7 @@ namespace Hazel
 		float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
 
 #pragma region ResetButton
-		ResetButton(label, values, resetValue, ImVec2{ columnWidth, lineHeight });
+		hasValueChanged = ResetButton(label, values, resetValue, ImVec2{ columnWidth, lineHeight });
 #pragma endregion
 
 		ImGui::NextColumn();
@@ -164,7 +170,10 @@ namespace Hazel
 		for (int i = 0; i < valuesSize; i++)
 		{
 			ImGui::SameLine();
-			DrawFloatField(vecLabels[i], values[i], resetValue, vecColors[i]);
+			if (DrawFloatField(vecLabels[i], values[i], resetValue[i], vecColors[i]))
+			{
+				hasValueChanged = true;
+			}
 			ImGui::PopItemWidth();
 		}
 
@@ -174,6 +183,8 @@ namespace Hazel
 
 		ImGui::Columns(1);
 		ImGui::PopID();
+
+		return hasValueChanged;
 	}
 
 	void SceneHierarchyPanel::SetScene(const Ref<Scene>& scene)
@@ -362,7 +373,7 @@ namespace Hazel
 			DrawVecControls("Rotation", rotation);
 			component.Rotation = glm::radians(rotation);
 
-			DrawVecControls("Scale", component.Scale, 1.0f);
+			DrawVecControls("Scale", component.Scale, glm::vec3(1.0f));
 		});
 #pragma endregion
 
@@ -552,18 +563,41 @@ namespace Hazel
 						}
 						case ScriptFieldType::Vector2:
 						{
+							const auto defaultValue = field.GetDefaultValue<glm::vec2>();
+							auto data = scriptInstance->GetFieldValue<glm::vec2>(name);
+							if (DrawVecControls(name, data, defaultValue))
+							{
+								scriptInstance->SetFieldValue(name, data);
+							}
 							break;
 						}
 						case ScriptFieldType::Vector3:
 						{
+							const auto defaultValue = field.GetDefaultValue<glm::vec3>();
+							auto data = scriptInstance->GetFieldValue<glm::vec3>(name);
+							if (DrawVecControls(name, data, defaultValue))
+							{
+								scriptInstance->SetFieldValue(name, data);
+							}
 							break;
 						}
 						case ScriptFieldType::Vector4:
 						{
+							const auto defaultValue = field.GetDefaultValue<glm::vec4>();
+							auto data = scriptInstance->GetFieldValue<glm::vec4>(name);
+							if (DrawVecControls(name, data, defaultValue))
+							{
+								scriptInstance->SetFieldValue(name, data);
+							}
 							break;
 						}
 						case ScriptFieldType::Color:
 						{
+							auto data = scriptInstance->GetFieldValue<Color>(name);
+							if (ImGui::ColorEdit4(name.c_str(), data.GetValuePtr()))
+							{
+								scriptInstance->SetFieldValue(name, data);
+							}
 							break;
 						}
 						case ScriptFieldType::Entity:
@@ -576,6 +610,25 @@ namespace Hazel
 			}
 			else
 			{
+				if (ImGui::BeginPopupContextItem())
+				{
+					ImGui::Text("Reset Class Fields");
+					ImGui::Separator();
+					if (ImGui::Button("Yes"))
+					{
+						ScriptEngine::EraseFromScriptFieldMap(entity);
+						ImGui::CloseCurrentPopup();
+					}
+					ImGui::SameLine();
+					ImGui::Text(" ");
+					ImGui::SameLine();
+					if (ImGui::Button("No"))
+					{
+						ImGui::CloseCurrentPopup();
+					}
+					ImGui::EndPopup();
+				}
+
 				auto entityClass = ScriptEngine::GetEntityClass(component.ClassName);
 				const auto& fields = entityClass->GetFields();
 
@@ -701,18 +754,41 @@ namespace Hazel
 						}
 						case ScriptFieldType::Vector2:
 						{
+							const auto defaultValue = scriptField.Field.GetDefaultValue<glm::vec2>();
+							auto data = scriptField.GetValue<glm::vec2>();
+							if (DrawVecControls(name, data, defaultValue))
+							{
+								scriptField.SetValue(data);
+							}
 							break;
 						}
 						case ScriptFieldType::Vector3:
 						{
+							const auto defaultValue = scriptField.Field.GetDefaultValue<glm::vec3>();
+							auto data = scriptField.GetValue<glm::vec3>();
+							if (DrawVecControls(name, data, defaultValue))
+							{
+								scriptField.SetValue(data);
+							}
 							break;
 						}
 						case ScriptFieldType::Vector4:
 						{
+							const auto defaultValue = scriptField.Field.GetDefaultValue<glm::vec4>();
+							auto data = scriptField.GetValue<glm::vec4>();
+							if (DrawVecControls(name, data, defaultValue))
+							{
+								scriptField.SetValue(data);
+							}
 							break;
 						}
 						case ScriptFieldType::Color:
 						{
+							auto data = scriptField.GetValue<Color>();
+							if (ImGui::ColorEdit4(name.c_str(), data.GetValuePtr()))
+							{
+								scriptField.SetValue(data);
+							}
 							break;
 						}
 						case ScriptFieldType::Entity:
@@ -862,18 +938,46 @@ namespace Hazel
 						}
 						case ScriptFieldType::Vector2:
 						{
+							auto data = field.GetDefaultValue<glm::vec2>();
+							if (DrawVecControls(name, data))
+							{
+								auto& scriptFieldInstance = entityFields[name];
+								scriptFieldInstance.Field = field;
+								scriptFieldInstance.SetValue(data);
+							}
 							break;
 						}
 						case ScriptFieldType::Vector3:
 						{
+							auto data = field.GetDefaultValue<glm::vec3>();
+							if (DrawVecControls(name, data))
+							{
+								auto& scriptFieldInstance = entityFields[name];
+								scriptFieldInstance.Field = field;
+								scriptFieldInstance.SetValue(data);
+							}
 							break;
 						}
 						case ScriptFieldType::Vector4:
 						{
+							auto data = field.GetDefaultValue<glm::vec4>();
+							if (DrawVecControls(name, data))
+							{
+								auto& scriptFieldInstance = entityFields[name];
+								scriptFieldInstance.Field = field;
+								scriptFieldInstance.SetValue(data);
+							}
 							break;
 						}
 						case ScriptFieldType::Color:
 						{
+							auto data = field.GetDefaultValue<Color>();
+							if (ImGui::ColorEdit4(name.c_str(), data.GetValuePtr()))
+							{
+								auto& scriptFieldInstance = entityFields[name];
+								scriptFieldInstance.Field = field;
+								scriptFieldInstance.SetValue(data);
+							}
 							break;
 						}
 						case ScriptFieldType::Entity:
@@ -1048,7 +1152,7 @@ namespace Hazel
 				}
 				ImGui::SameLine();
 				ImGui::Text("%s", component.Texture->IsMagFilterLinear() ? "Linear" : "Nearest");
-				DrawVecControls("Tiling", component.Tiling, 1.0f);
+				DrawVecControls("Tiling", component.Tiling, glm::vec2(1.0f));
 			}
 
 			auto& color = component.Color;
@@ -1102,8 +1206,8 @@ namespace Hazel
 #pragma region BoxCollider2DComponent
 		DrawComponent<BoxCollider2DComponent>(entity, "Box Collider 2D", [](BoxCollider2DComponent& component)
 		{
-			DrawVecControls("Offset", component.Offset, 0.0f);
-			DrawVecControls("Size", component.Size, 0.5f);
+			DrawVecControls("Offset", component.Offset);
+			DrawVecControls("Size", component.Size, glm::vec2(0.5f));
 			ImGui::DragFloat("Rotation", &component.Rotation, 0.01f, 0.0f, 360.0f);
 			ImGui::DragFloat("Density", &component.Density, 0.01f, 0.0f, 1.0f);
 			ImGui::DragFloat("Friction", &component.Friction, 0.01f, 0.0f, 1.0f);
@@ -1115,7 +1219,7 @@ namespace Hazel
 #pragma region CircleCollider2DComponent
 		DrawComponent<CircleCollider2DComponent>(entity, "Circle Collider 2D", [](CircleCollider2DComponent& component)
 		{
-			DrawVecControls("Offset", component.Offset, 0.0f);
+			DrawVecControls("Offset", component.Offset);
 			ImGui::DragFloat("Radius", &component.Radius, 0.01f, 0.0f, 0.0f);
 			ImGui::DragFloat("Density", &component.Density, 0.01f, 0.0f, 1.0f);
 			ImGui::DragFloat("Friction", &component.Friction, 0.01f, 0.0f, 1.0f);
@@ -1326,7 +1430,7 @@ namespace Hazel
 			}
 
 			ImGui::Checkbox("Visible In Game##AudioSource", &component.IsVisibleInGame);
-			});
+		});
 #pragma endregion
 
 #pragma region  AudioListenerComponent

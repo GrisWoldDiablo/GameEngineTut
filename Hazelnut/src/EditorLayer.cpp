@@ -359,8 +359,8 @@ namespace Hazel
 
 	bool EditorLayer::OnMouseButtonReleased(const MouseButtonReleasedEvent& mouseButtonReleasedEvent)
 	{
-		// Mouse picking, TODO allow runtime and simulation?
-		if (mouseButtonReleasedEvent.GetMouseButton() == Mouse::ButtonLeft && _sceneState == SceneState::Edit)
+		// TODO Mouse picking, allow simulation, find bug where simulation stops?
+		if (mouseButtonReleasedEvent.GetMouseButton() == Mouse::ButtonLeft && _sceneState != SceneState::Simulate)
 		{
 			if (_isSceneViewportHovered && (!_sceneHierarchyPanel.GetSelectedEntity() || !ImGuizmo::IsOver()) && !Input::IsKeyPressed(Key::LeftAlt))
 			{
@@ -741,17 +741,27 @@ namespace Hazel
 			{
 				switch (_sceneState)
 				{
-				case SceneState::Edit:
-					OnScenePlay();
-					break;
 				case SceneState::Play:
 					OnSceneStop();
 					break;
 				case SceneState::Simulate:
 					OnSceneStop();
+					[[fallthrough]];
+				case SceneState::Edit:
 					OnScenePlay();
 					break;
 				}
+			}
+
+			switch (_sceneState)
+			{
+			case SceneState::Play:
+				AddTooltip("Stop");
+				break;
+			case SceneState::Simulate:
+			case SceneState::Edit:
+				AddTooltip("Play");
+				break;
 			}
 
 			ImGui::SameLine();
@@ -766,6 +776,19 @@ namespace Hazel
 					OnSceneStop();
 					break;
 				}
+			}
+
+			switch (_sceneState)
+			{
+			case SceneState::Play:
+				AddTooltip("Disabled");
+				break;
+			case SceneState::Simulate:
+				AddTooltip("Stop");
+				break;
+			case SceneState::Edit:
+				AddTooltip("Simulate");
+				break;
 			}
 
 			ImGui::EndTable();

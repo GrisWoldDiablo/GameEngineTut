@@ -406,12 +406,9 @@ namespace Hazel
 		return fallbackValue;
 	}
 
-	void SceneSerializer::Serialize(const std::string& filepath)
+	void SceneSerializer::Serialize(const std::filesystem::path& filepath)
 	{
-		auto fileName = std::string(filepath);
-		fileName = fileName.erase(0, fileName.find_last_of('\\') + 1);
-		fileName = fileName.erase(fileName.find(".hazel"), fileName.length());
-		_scene->SetName(fileName);
+		_scene->SetName(filepath.filename().replace_extension().string());
 
 		YAML::Emitter out;
 		SerializeData(out);
@@ -456,12 +453,12 @@ namespace Hazel
 		out << YAML::EndMap;
 	}
 
-	bool SceneSerializer::Deserialize(const std::string& filepath, bool isWithLog)
+	bool SceneSerializer::Deserialize(const std::filesystem::path& filepath, bool isWithLog)
 	{
 		YAML::Node data;
 		try
 		{
-			data = YAML::LoadFile(filepath);
+			data = YAML::LoadFile(filepath.string());
 		}
 		catch (YAML::ParserException& e)
 		{

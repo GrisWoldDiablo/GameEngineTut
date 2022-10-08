@@ -234,7 +234,7 @@ namespace Hazel
 				if (entity.HasComponent<BoxCollider2DComponent>()
 				  || entity.HasComponent<CircleCollider2DComponent>())
 				{
-					auto* body = (b2Body*)rb2d.RuntimeBody;
+					auto* body = static_cast<b2Body*>(rb2d.RuntimeBody);
 					const auto& position = body->GetPosition();
 					transform.Position.x = position.x;
 					transform.Position.y = position.y;
@@ -292,7 +292,7 @@ namespace Hazel
 				if (entity.HasComponent<BoxCollider2DComponent>()
 				  || entity.HasComponent<CircleCollider2DComponent>())
 				{
-					auto* body = (b2Body*)rb2d.RuntimeBody;
+					auto* body = static_cast<b2Body*>(rb2d.RuntimeBody);
 					const auto& position = body->GetPosition();
 					transform.Position.x = position.x;
 					transform.Position.y = position.y;

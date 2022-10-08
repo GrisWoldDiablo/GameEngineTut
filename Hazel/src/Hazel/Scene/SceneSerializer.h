@@ -10,9 +10,9 @@ namespace Hazel
 	public:
 		SceneSerializer(const Ref<Scene>& scene);
 
-		void Serialize(const std::string& filepath) override;
+		void Serialize(const std::filesystem::path& filepath) override;
 		void SerializeRuntime() override;
-		bool Deserialize(const std::string& filepath, bool isWithLog = true) override;
+		bool Deserialize(const std::filesystem::path& filepath, bool isWithLog = true) override;
 		bool DeserializeRuntime() override;
 
 	private:

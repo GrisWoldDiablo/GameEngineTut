@@ -28,7 +28,7 @@ namespace Hazel
 
 		public override string ToString()
 		{
-			return $"({X:f},{Y:f},{Z:f})";
+			return $"({X:f}, {Y:f}, {Z:f})";
 		}
 
 		public override int GetHashCode()

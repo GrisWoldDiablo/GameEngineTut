@@ -25,7 +25,7 @@
 
 		public override string ToString()
 		{
-			return $"({X:f},{Y:f})";
+			return $"({X:f}, {Y:f})";
 		}
 
 		public override int GetHashCode()

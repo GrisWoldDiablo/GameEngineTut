@@ -38,6 +38,7 @@ namespace Hazel
 		static Ref<ScriptClass> GetEntityClass(const std::string& fullClassName);
 		static std::unordered_map<std::string, Ref<ScriptClass>> GetEntityClasses();
 		static ScriptFieldMap& GetScriptFieldMap(Entity entity);
+		static void EraseFromScriptFieldMap(Entity entity);
 
 		static Ref<ScriptInstance> GetEntityScriptInstance(UUID entityID);
 
