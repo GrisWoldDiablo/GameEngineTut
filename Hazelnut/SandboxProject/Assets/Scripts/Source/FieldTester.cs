@@ -5,6 +5,7 @@ namespace Sandbox
 {
 	public class FieldTester : Entity
 	{
+		public string @String = "Hello World";                                  // In Inpsector
 		public float @float = 69.0f;                                            // In Inpsector
 		public double @double = 4.269d;                                         // In Inpsector
 		public char @char = 'k';                                                // In Inpsector

@@ -33,6 +33,8 @@ namespace Hazel
 			{ "System.UInt32"	,	ScriptFieldType::UInt	 },
 			{ "System.UInt64"	,	ScriptFieldType::ULong	 },
 
+			{ "System.String"	,	ScriptFieldType::String	 },
+
 			{ "Hazel.Vector2"	,	ScriptFieldType::Vector2 },
 			{ "Hazel.Vector3"	,	ScriptFieldType::Vector3 },
 			{ "Hazel.Vector4"	,	ScriptFieldType::Vector4 },
@@ -242,9 +244,15 @@ namespace Hazel
 			{
 				const auto& fieldMap = sScriptData->EntityScriptFields.at(entityUUID);
 
-				for (const auto& [name, fieldIntance] : fieldMap)
+				for (const auto& [name, fieldInstance] : fieldMap)
 				{
-					instance->TrySetFieldValueInternal(name, fieldIntance._dataBuffer);
+					if (fieldInstance.Field.Type == ScriptFieldType::String)
+					{
+						instance->TrySetFieldStringValueInternal(name, fieldInstance._stringData);
+						continue;
+					}
+
+					instance->TrySetFieldValueInternal(name, fieldInstance._dataBuffer);
 				}
 			}
 
@@ -518,10 +526,19 @@ namespace Hazel
 
 					MonoObject* monoObject = mono_object_new(loadingDomain, monoClass);
 					mono_runtime_object_init(monoObject);
-					mono_field_get_value(monoObject, field, defaultFieldDataBuffer);
 
 					ScriptField scriptField = { scriptFieldType, fieldName, field };
-					memcpy_s(scriptField.DefaultData, sizeof(scriptField.DefaultData), defaultFieldDataBuffer, sizeof(defaultFieldDataBuffer));
+
+					if (scriptFieldType == ScriptFieldType::String)
+					{
+						MonoString* monoString = reinterpret_cast<MonoString*>(mono_field_get_value_object(loadingDomain, field, monoObject));
+						scriptField.DefaultStringData = mono_string_to_utf8(monoString);
+					}
+					else
+					{
+						mono_field_get_value(monoObject, field, defaultFieldDataBuffer);
+						memcpy_s(scriptField.DefaultData, sizeof(scriptField.DefaultData), defaultFieldDataBuffer, sizeof(defaultFieldDataBuffer));
+					}
 
 					scriptClass->_fields[fieldName] = scriptField;
 				}

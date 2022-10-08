@@ -42,9 +42,28 @@ namespace Hazel
 			//TODO error handling
 		}
 
+		std::string GetFieldStringValue(const std::string& name) const
+		{
+			if (TryGetFieldStringValueInternal(name, _sFieldStringValueBuffer))
+			{
+				return _sFieldStringValueBuffer;
+			}
+			//TODO error handling
+			return {};
+		}
+
+		void SetFieldStringValue(const std::string& name, const std::string& data)
+		{
+			TrySetFieldStringValueInternal(name, data);
+			//TODO error handling
+		}
+
 	private:
 		bool TryGetFieldValueInternal(const std::string& name, void* data) const;
 		bool TrySetFieldValueInternal(const std::string& name, const void* data);
+
+		bool TryGetFieldStringValueInternal(const std::string& name, std::string& data) const;
+		bool TrySetFieldStringValueInternal(const std::string& name, const std::string& data);
 
 	private:
 		Ref<ScriptClass> _scriptClass;
@@ -55,6 +74,7 @@ namespace Hazel
 		MonoMethod* _onUpdateMethod = nullptr;
 
 		inline static uint8_t _sFieldValueBuffer[16];
+		inline static std::string _sFieldStringValueBuffer;
 
 		friend class ScriptEngine;
 	};

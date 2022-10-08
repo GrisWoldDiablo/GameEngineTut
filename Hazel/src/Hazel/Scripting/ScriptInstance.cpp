@@ -49,6 +49,7 @@ namespace Hazel
 
 		const ScriptField& field = it->second;
 		mono_field_get_value(_instance, field.MonoClassField, data);
+
 		return true;
 	}
 
@@ -63,6 +64,39 @@ namespace Hazel
 
 		const ScriptField& field = it->second;
 		mono_field_set_value(_instance, field.MonoClassField, const_cast<void*>(data));
+
+		return true;
+	}
+
+	bool ScriptInstance::TryGetFieldStringValueInternal(const std::string& name, std::string& data) const
+	{
+		const auto& fields = _scriptClass->GetFields();
+		auto it = fields.find(name);
+		if (it == fields.end())
+		{
+			return false;
+		}
+
+		const ScriptField& field = it->second;
+		auto* monoString = reinterpret_cast<MonoString*>(mono_field_get_value_object(mono_object_get_domain(_instance), field.MonoClassField, _instance));
+		data = mono_string_to_utf8(monoString);
+
+		return true;
+	}
+
+	bool ScriptInstance::TrySetFieldStringValueInternal(const std::string& name, const std::string& data)
+	{
+		const auto& fields = _scriptClass->GetFields();
+		auto it = fields.find(name);
+		if (it == fields.end())
+		{
+			return false;
+		}
+
+		const ScriptField& field = it->second;
+		auto* monoString = mono_string_new(mono_object_get_domain(_instance), data.c_str());
+		mono_field_set_value(_instance, field.MonoClassField, monoString);
+
 		return true;
 	}
 }

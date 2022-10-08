@@ -126,7 +126,7 @@ namespace Hazel
 	}
 
 	template<typename T>
-	static bool DrawFloatField(const char* label, T& value, float resetValue, const Color& color, int precision = 2)
+	static bool DrawFloatField(const char* label, T& value, T resetValue, const Color& color, int precision = 2)
 	{
 		bool hasValueChanged = false;
 		auto boldFont = ImGui::GetIO().Fonts->Fonts[0];
@@ -632,6 +632,17 @@ namespace Hazel
 						{
 							break;
 						}
+						case ScriptFieldType::String:
+						{
+							char buffer[256] = {};
+							auto data = scriptInstance->GetFieldStringValue(name);
+							strcpy_s(buffer, sizeof(buffer), data.c_str());
+							if (ImGui::InputText(name.c_str(), buffer, sizeof(buffer)))
+							{
+								scriptInstance->SetFieldStringValue(name, buffer);
+							}
+							break;
+						}
 						}
 					}
 				}
@@ -807,6 +818,17 @@ namespace Hazel
 						}
 						case ScriptFieldType::Entity:
 						{
+							break;
+						}
+						case ScriptFieldType::String:
+						{
+							char buffer[256] = {};
+							auto data = scriptField.GetStringValue();
+							strcpy_s(buffer, sizeof(buffer), data.c_str());
+							if (ImGui::InputText(name.c_str(), buffer, sizeof(buffer)))
+							{
+								scriptField.SetStringValue(buffer);
+							}
 							break;
 						}
 						}
@@ -998,8 +1020,20 @@ namespace Hazel
 						{
 							break;
 						}
+						case ScriptFieldType::String:
+						{
+							char buffer[256] = {};
+							auto data = field.GetDefaultStringValue();
+							strcpy_s(buffer, sizeof(buffer), data.c_str());
+							if (ImGui::InputText(name.c_str(), buffer, sizeof(buffer)))
+							{
+								auto& scriptFieldInstance = entityFields[name];
+								scriptFieldInstance.Field = field;
+								scriptFieldInstance.SetStringValue(buffer);
+							}
+							break;
 						}
-
+						}
 					}
 				}
 			}

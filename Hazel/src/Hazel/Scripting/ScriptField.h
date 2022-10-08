@@ -3,6 +3,7 @@
 extern "C" // Forward declare of class from C
 {
 	typedef struct _MonoClassField MonoClassField;
+	typedef struct _MonoString MonoString;
 }
 
 namespace Hazel
@@ -15,6 +16,8 @@ namespace Hazel
 		SByte, Short, Int, Long,
 		Byte, UShort, UInt, ULong,
 
+		String,
+
 		Vector2, Vector3, Vector4,
 		Color,
 		Entity
@@ -26,6 +29,7 @@ namespace Hazel
 		std::string Name;
 		MonoClassField* MonoClassField;
 		uint8_t DefaultData[16];
+		std::string DefaultStringData;
 
 		template<typename T>
 		T GetDefaultValue() const
@@ -33,6 +37,11 @@ namespace Hazel
 			static_assert(sizeof(T) <= 16, "Type too large!");
 
 			return *reinterpret_cast<const T*>(DefaultData);
+		}
+
+		std::string GetDefaultStringValue() const
+		{
+			return DefaultStringData;
 		}
 	};
 
@@ -62,8 +71,19 @@ namespace Hazel
 			memcpy_s(_dataBuffer, sizeof(_dataBuffer), &value, sizeof(T));
 		}
 
+		std::string GetStringValue() const
+		{
+			return _stringData;
+		}
+
+		void SetStringValue(const std::string& value)
+		{
+			_stringData = value;
+		}
+
 	private:
 		uint8_t _dataBuffer[16];
+		std::string _stringData;
 
 		friend class ScriptEngine;
 	};
@@ -92,6 +112,8 @@ namespace Hazel
 			case ScriptFieldType::UShort: return "UShort";
 			case ScriptFieldType::UInt:	  return "UInt";
 			case ScriptFieldType::ULong:  return "ULong";
+
+			case ScriptFieldType::String: return "String";
 
 			case ScriptFieldType::Vector2:return "Vector2";
 			case ScriptFieldType::Vector3:return "Vector3";
@@ -123,6 +145,8 @@ namespace Hazel
 			if (fieldType == "UShort")	return ScriptFieldType::UShort;
 			if (fieldType == "UInt")	return ScriptFieldType::UInt;
 			if (fieldType == "ULong")	return ScriptFieldType::ULong;
+
+			if (fieldType == "String")	return ScriptFieldType::String;
 
 			if (fieldType == "Vector2") return ScriptFieldType::Vector2;
 			if (fieldType == "Vector3") return ScriptFieldType::Vector3;
