@@ -420,7 +420,6 @@ namespace Hazel
 
 	void ScriptEngine::LoadAssemblyClasses()
 	{
-
 		MonoDomain* loadingDomain = mono_domain_create_appdomain("loadingDomain", nullptr);
 
 		sScriptData->EntityClasses.clear();

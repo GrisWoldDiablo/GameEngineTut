@@ -17,6 +17,15 @@ namespace Hazel
 		//////////////
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern static void Entity_CreateNew(ref string name, out ulong outId);
+		
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern static void Entity_FindByName(ref string name, out ulong outId);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern static void Entity_AddComponent(ulong id, Type type);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern static bool Entity_HasComponent(ulong entityId, Type componentType);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -86,6 +95,9 @@ namespace Hazel
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern static void Rigidbody2DComponent_ApplyLinearImpulseToCenter(ulong entityId, ref Vector2 impulse, bool wake);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern static void Rigidbody2DComponent_ApplyAngularImpulse(ulong entityId, ref float impulse, bool wake);
 
 		/* AudioListener */
 		[MethodImpl(MethodImplOptions.InternalCall)]

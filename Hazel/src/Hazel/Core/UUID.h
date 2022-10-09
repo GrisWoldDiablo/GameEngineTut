@@ -11,6 +11,8 @@ namespace Hazel
 
 		operator uint64_t() const { return _uuid; }
 
+		static UUID Invalid() { return UUID(0); }
+
 	private:
 		uint64_t _uuid;
 	};

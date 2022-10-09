@@ -13,19 +13,61 @@ namespace Hazel
 #define HZ_ADD_INTERNAL_CALL(Name) mono_add_internal_call("Hazel.InternalCalls::" #Name, Name)
 
 	static std::unordered_map<MonoType*, std::function<bool(Entity)>> sEntityHasComponentFuncs;
+	static std::unordered_map<MonoType*, std::function<void(Entity)>> sEntityAddComponentFuncs;
 
 	/////////////////
 	/// Inputs
 	/////////////////
 
+#pragma region Inputs
 	static bool Input_IsKeyDown(KeyCode keyCode)
 	{
 		return Input::IsKeyPressed(keyCode);
 	}
+#pragma endregion
 
 	/////////////////
 	/// Entity
 	/////////////////
+
+#pragma region Entity
+	static void Entity_CreateNew(MonoString** name, UUID* outId)
+	{
+		auto* scene = ScriptEngine::GetSceneContext();
+		HZ_CORE_ASSERT(scene, "Scene is null!");
+
+		auto newEntity = scene->CreateEntity(mono_string_to_utf8(*name));
+
+		*outId = newEntity.GetUUID();
+	}
+
+	static void Entity_FindByName(MonoString** name, UUID* outId)
+	{
+		auto* scene = ScriptEngine::GetSceneContext();
+		HZ_CORE_ASSERT(scene, "Scene is null!");
+		std::string entityName = mono_string_to_utf8(*name);
+		auto foundEntity = scene->GetEntityByName(entityName);
+		if (foundEntity)
+		{
+			*outId = foundEntity.GetUUID();
+			return;
+		}
+
+		*outId = UUID::Invalid();
+	}
+
+	static void Entity_AddComponent(UUID entityId, MonoReflectionType* componentType)
+	{
+		auto* scene = ScriptEngine::GetSceneContext();
+		HZ_CORE_ASSERT(scene, "Scene is null!");
+		auto entity = scene->GetEntityByUUID(entityId);
+		HZ_CORE_ASSERT(entity, "Entity is null!");
+
+		auto* managedType = mono_reflection_type_get_type(componentType);
+		HZ_CORE_ASSERT(sEntityAddComponentFuncs.find(managedType) != sEntityAddComponentFuncs.end(), "");
+
+		sEntityAddComponentFuncs.at(managedType)(entity);
+	}
 
 	static bool Entity_HasComponent(UUID entityId, MonoReflectionType* componentType)
 	{
@@ -36,6 +78,7 @@ namespace Hazel
 
 		auto* managedType = mono_reflection_type_get_type(componentType);
 		HZ_CORE_ASSERT(sEntityHasComponentFuncs.find(managedType) != sEntityHasComponentFuncs.end(), "");
+
 		return sEntityHasComponentFuncs.at(managedType)(entity);
 	}
 
@@ -58,6 +101,7 @@ namespace Hazel
 
 		entity.Name() = mono_string_to_utf8(*name);
 	}
+#pragma endregion
 
 	/////////////////
 	/// Components
@@ -279,6 +323,19 @@ namespace Hazel
 
 		body->ApplyLinearImpulseToCenter(b2Vec2(impulse->x, impulse->y), wake);
 	}
+
+	static void Rigidbody2DComponent_ApplyAngularImpulse(UUID entityId, float* impulse, bool wake)
+	{
+		auto* scene = ScriptEngine::GetSceneContext();
+		HZ_CORE_ASSERT(scene, "Scene is null!");
+		auto entity = scene->GetEntityByUUID(entityId);
+		HZ_CORE_ASSERT(entity, "Entity is null!");
+
+		auto& component = entity.GetComponent<Rigidbody2DComponent>();
+		auto* body = static_cast<b2Body*>(component.RuntimeBody);
+
+		body->ApplyAngularImpulse(*impulse, wake);
+	}
 #pragma endregion
 
 #pragma region AudioListener
@@ -291,7 +348,7 @@ namespace Hazel
 
 		// Will crash if entity does not have component.
 		auto& component = entity.GetComponent<AudioListenerComponent>();
-		
+
 		*outPosition = entity.Transform().Position;
 	}
 
@@ -334,7 +391,6 @@ namespace Hazel
 	}
 #pragma endregion
 
-
 	/////////////////
 	/// Registers
 	/////////////////
@@ -357,6 +413,7 @@ namespace Hazel
 			}
 
 			sEntityHasComponentFuncs[managedType] = [](Entity entity) { return entity.HasComponent<TComponent>(); };
+			sEntityAddComponentFuncs[managedType] = [](Entity entity) { entity.AddComponent<TComponent>(); };
 		}(), ...);
 	}
 
@@ -369,6 +426,7 @@ namespace Hazel
 	void ScriptGlue::RegisterComponents()
 	{
 		sEntityHasComponentFuncs.clear();
+		sEntityAddComponentFuncs.clear();
 		RegisterComponents(AllComponents{});
 	}
 
@@ -378,6 +436,9 @@ namespace Hazel
 		HZ_ADD_INTERNAL_CALL(Input_IsKeyDown);
 
 		// Entity
+		HZ_ADD_INTERNAL_CALL(Entity_CreateNew);
+		HZ_ADD_INTERNAL_CALL(Entity_FindByName);
+		HZ_ADD_INTERNAL_CALL(Entity_AddComponent);
 		HZ_ADD_INTERNAL_CALL(Entity_HasComponent);
 		HZ_ADD_INTERNAL_CALL(Entity_GetName);
 		HZ_ADD_INTERNAL_CALL(Entity_SetName);
@@ -407,6 +468,7 @@ namespace Hazel
 		// Rigidbody 2D
 		HZ_ADD_INTERNAL_CALL(Rigidbody2DComponent_ApplyLinearImpulse);
 		HZ_ADD_INTERNAL_CALL(Rigidbody2DComponent_ApplyLinearImpulseToCenter);
+		HZ_ADD_INTERNAL_CALL(Rigidbody2DComponent_ApplyAngularImpulse);
 
 		// Audio Listener
 		HZ_ADD_INTERNAL_CALL(AudioListenerComponent_GetPosition);

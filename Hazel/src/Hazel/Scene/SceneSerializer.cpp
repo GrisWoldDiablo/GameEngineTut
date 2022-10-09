@@ -132,139 +132,140 @@ namespace Hazel
 			out << YAML::Key << "ClassName" << YAML::Value << component.ClassName;
 
 			// Fields
-			auto entityClass = ScriptEngine::GetEntityClass(component.ClassName);
-			const auto& fields = entityClass->GetFields();
-
-			if (fields.size() > 0)
+			if (auto entityClass = ScriptEngine::GetEntityClass(component.ClassName))
 			{
-				out << YAML::Key << "ScriptFields" << YAML::Value;
+				const auto& fields = entityClass->GetFields();
 
-				auto& entityFields = ScriptEngine::GetScriptFieldMap(entity);
-
-				out << YAML::BeginSeq; // ScriptFields Sequence
-
-				for (const auto& [name, field] : fields)
+				if (fields.size() > 0)
 				{
-					if (entityFields.find(name) == entityFields.end())
+					out << YAML::Key << "ScriptFields" << YAML::Value;
+
+					auto& entityFields = ScriptEngine::GetScriptFieldMap(entity);
+
+					out << YAML::BeginSeq; // ScriptFields Sequence
+
+					for (const auto& [name, field] : fields)
 					{
-						continue;
+						if (entityFields.find(name) == entityFields.end())
+						{
+							continue;
+						}
+
+						out << YAML::BeginMap; // Field Map
+
+						out << YAML::Key << "Name" << YAML::Value << name;
+						out << YAML::Key << "Type" << YAML::Value << field.Type;
+
+						const auto& scriptField = entityFields.at(name);
+
+						out << YAML::Key << "Data" << YAML::Value;
+
+						switch (field.Type)
+						{
+						case ScriptFieldType::Float:
+						{
+							out << scriptField.GetValue<float>();
+							break;
+						}
+						case ScriptFieldType::Double:
+						{
+							out << scriptField.GetValue<double>();
+							break;
+						}
+						case ScriptFieldType::Char:
+						{
+							out << scriptField.GetValue<uint8_t>();
+							break;
+						}
+						case ScriptFieldType::Bool:
+						{
+							out << scriptField.GetValue<bool>();
+							break;
+						}
+						case ScriptFieldType::SByte:
+						{
+							out << scriptField.GetValue<int8_t>();
+							break;
+						}
+						case ScriptFieldType::Short:
+						{
+							out << scriptField.GetValue<int16_t>();
+							break;
+						}
+						case ScriptFieldType::Int:
+						{
+							out << scriptField.GetValue<int32_t>();
+							break;
+						}
+						case ScriptFieldType::Long:
+						{
+							out << scriptField.GetValue<int64_t>();
+							break;
+						}
+						case ScriptFieldType::Byte:
+						{
+							out << scriptField.GetValue<uint16_t>();
+							break;
+						}
+						case ScriptFieldType::UShort:
+						{
+							out << scriptField.GetValue<uint16_t>();
+							break;
+						}
+						case ScriptFieldType::UInt:
+						{
+							out << scriptField.GetValue<uint32_t>();
+							break;
+						}
+						case ScriptFieldType::ULong:
+						{
+							out << scriptField.GetValue<uint64_t>();
+							break;
+						}
+						case ScriptFieldType::Vector2:
+						{
+							out << scriptField.GetValue<glm::vec2>();
+							break;
+						}
+						case ScriptFieldType::Vector3:
+						{
+							out << scriptField.GetValue<glm::vec3>();
+							break;
+						}
+						case ScriptFieldType::Vector4:
+						{
+							out << scriptField.GetValue<glm::vec4>();
+							break;
+						}
+						case ScriptFieldType::Color:
+						{
+							out << scriptField.GetValue<Color>();
+							break;
+						}
+						case ScriptFieldType::Entity:
+						{
+							out << scriptField.GetValue<UUID>();
+							break;
+						}
+						case ScriptFieldType::String:
+						{
+							out << scriptField.GetStringValue();
+							break;
+						}
+						case ScriptFieldType::None:
+						default:
+						{
+							out << "None";
+							break;
+						}
+						}
+
+						out << YAML::EndMap; // Field Map
 					}
 
-					out << YAML::BeginMap; // Field Map
-
-					out << YAML::Key << "Name" << YAML::Value << name;
-					out << YAML::Key << "Type" << YAML::Value << field.Type;
-
-					const auto& scriptField = entityFields.at(name);
-
-					out << YAML::Key << "Data" << YAML::Value;
-
-					switch (field.Type)
-					{
-					case ScriptFieldType::Float:
-					{
-						out << scriptField.GetValue<float>();
-						break;
-					}
-					case ScriptFieldType::Double:
-					{
-						out << scriptField.GetValue<double>();
-						break;
-					}
-					case ScriptFieldType::Char:
-					{
-						out << scriptField.GetValue<uint8_t>();
-						break;
-					}
-					case ScriptFieldType::Bool:
-					{
-						out << scriptField.GetValue<bool>();
-						break;
-					}
-					case ScriptFieldType::SByte:
-					{
-						out << scriptField.GetValue<int8_t>();
-						break;
-					}
-					case ScriptFieldType::Short:
-					{
-						out << scriptField.GetValue<int16_t>();
-						break;
-					}
-					case ScriptFieldType::Int:
-					{
-						out << scriptField.GetValue<int32_t>();
-						break;
-					}
-					case ScriptFieldType::Long:
-					{
-						out << scriptField.GetValue<int64_t>();
-						break;
-					}
-					case ScriptFieldType::Byte:
-					{
-						out << scriptField.GetValue<uint16_t>();
-						break;
-					}
-					case ScriptFieldType::UShort:
-					{
-						out << scriptField.GetValue<uint16_t>();
-						break;
-					}
-					case ScriptFieldType::UInt:
-					{
-						out << scriptField.GetValue<uint32_t>();
-						break;
-					}
-					case ScriptFieldType::ULong:
-					{
-						out << scriptField.GetValue<uint64_t>();
-						break;
-					}
-					case ScriptFieldType::Vector2:
-					{
-						out << scriptField.GetValue<glm::vec2>();
-						break;
-					}
-					case ScriptFieldType::Vector3:
-					{
-						out << scriptField.GetValue<glm::vec3>();
-						break;
-					}
-					case ScriptFieldType::Vector4:
-					{
-						out << scriptField.GetValue<glm::vec4>();
-						break;
-					}
-					case ScriptFieldType::Color:
-					{
-						out << scriptField.GetValue<Color>();
-						break;
-					}
-					case ScriptFieldType::Entity:
-					{
-						out << scriptField.GetValue<UUID>();
-						break;
-					}
-					case ScriptFieldType::String:
-					{
-						out << scriptField.GetStringValue();
-						break;
-					}
-					case ScriptFieldType::None:
-					default:
-					{
-						out << "None";
-						break;
-					}
-					}
-
-					out << YAML::EndMap; // Field Map
+					out << YAML::EndSeq; // ScriptFields Sequence 
 				}
-
-				out << YAML::EndSeq; // ScriptFields Sequence 
 			}
-
 			out << YAML::EndMap; // ScriptComponent  
 		}
 #pragma endregion

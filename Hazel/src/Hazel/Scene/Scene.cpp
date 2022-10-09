@@ -416,6 +416,20 @@ namespace Hazel
 		return {};
 	}
 
+	Entity Scene::GetEntityByName(const std::string& name)
+	{
+		for (const auto& [uuid, entity] : _entityMap)
+		{
+			Entity foundEntity{ entity,this };
+			if (foundEntity.Name() == name)
+			{
+				return foundEntity;
+			}
+		}
+
+		return {};
+	}
+
 	Entity Scene::GetPrimaryCameraEntity()
 	{
 		auto view = _registry.view<CameraComponent>();

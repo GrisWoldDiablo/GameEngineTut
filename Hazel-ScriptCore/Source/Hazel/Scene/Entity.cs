@@ -2,7 +2,7 @@ namespace Hazel
 {
 	public class Entity
 	{
-		public readonly ulong Id;
+		public readonly UUID Id;
 
 		public string Name
 		{
@@ -34,12 +34,17 @@ namespace Hazel
 
 		protected Entity()
 		{
-			Id = 0;
+			Id = new UUID(0);
 		}
 
 		internal Entity(ulong id)
 		{
-			Id = id;
+			Id = new UUID(id);
+		}
+
+		public override string ToString()
+		{
+			return $"{Name}<{Id}>";
 		}
 
 		public bool HasComponent<T>() where T : Component, new()
@@ -55,6 +60,35 @@ namespace Hazel
 			}
 
 			return new T() { Entity = this };
+		}
+
+		public T AddComponent<T>() where T : Component, new()
+		{
+			if (HasComponent<T>())
+			{
+				return null;
+			}
+
+			InternalCalls.Entity_AddComponent(Id, typeof(T));
+
+			return new T() { Entity = this };
+		}
+
+		public static Entity CreateNew(string name = "Entity")
+		{
+			InternalCalls.Entity_CreateNew(ref name, out var newId);
+
+			return new Entity(newId);
+		}
+
+		/// <summary>
+		/// This is slow as it will look through all entities and return the first one with matching name.
+		/// </summary>
+		public static Entity FindByName(string name)
+		{
+			InternalCalls.Entity_FindByName(ref name, out var newId);
+
+			return newId != 0 ? new Entity(newId) : null;
 		}
 	}
 }

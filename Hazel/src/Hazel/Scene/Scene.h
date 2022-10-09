@@ -43,6 +43,7 @@ namespace Hazel
 
 		Entity DuplicateEntity(Entity entity);
 		Entity GetEntityByUUID(UUID uuid);
+		Entity GetEntityByName(const std::string& name);
 
 		std::string GetName() const { return _name; }
 		void SetName(const std::string& name) { _name = name; }

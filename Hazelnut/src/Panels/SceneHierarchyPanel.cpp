@@ -253,6 +253,7 @@ namespace Hazel
 		ImGui::End();
 	}
 
+	// TODO Move to separate class method.
 	void SceneHierarchyPanel::EditRuntimeRigidbody(Entity entity, bool shouldClearVelocity)
 	{
 		if (entity.HasComponent<Rigidbody2DComponent>())

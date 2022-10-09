@@ -203,14 +203,8 @@ namespace Hazel
 	{
 		HZ_PROFILE_FUNCTION();
 
-		if (enable)
-		{
-			glfwSwapInterval(1);
-		}
-		else
-		{
-			glfwSwapInterval(0);
-		}
+		glfwSwapInterval(enable ? 1 : 0);
+
 		_data.VSync = enable;
 	}
 }

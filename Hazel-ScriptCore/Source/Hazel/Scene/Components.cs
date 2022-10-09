@@ -113,6 +113,11 @@
 		{
 			InternalCalls.Rigidbody2DComponent_ApplyLinearImpulseToCenter(Entity.Id, ref impulse, wake);
 		}
+
+		public void ApplyAngularImpulse(float impulse, bool wake = true)
+		{
+			InternalCalls.Rigidbody2DComponent_ApplyAngularImpulse(Entity.Id, ref impulse, wake);
+		}
 	}
 
 	public class AudioListenerComponent : Component
