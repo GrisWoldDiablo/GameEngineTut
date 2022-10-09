@@ -246,6 +246,11 @@ namespace Hazel
 						out << scriptField.GetValue<UUID>();
 						break;
 					}
+					case ScriptFieldType::String:
+					{
+						out << scriptField.GetStringValue();
+						break;
+					}
 					case ScriptFieldType::None:
 					default:
 					{
@@ -675,6 +680,12 @@ namespace Hazel
 								{
 									auto data = GetValue<uint64_t>(scriptField, "Data");
 									scriptFieldInstance.SetValue(data);
+									break;
+								}
+								case ScriptFieldType::String:
+								{
+									auto data = GetValue<std::string>(scriptField, "Data");
+									scriptFieldInstance.SetStringValue(data);
 									break;
 								}
 								case ScriptFieldType::None:
