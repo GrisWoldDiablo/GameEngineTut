@@ -59,19 +59,15 @@ namespace Hazel
 			return nullptr;
 		}
 
-		static const char* GetCacheDirectory()
+		static std::filesystem::path GetCacheDirectory()
 		{
-			// TODO make sure the assets directory is valid
-			return "assets/cache/shader/opengl";
-		}
-
-		static void CreateCacheDirectoryIfNeeded()
-		{
-			std::string cacheDirectory = GetCacheDirectory();
+			std::filesystem::path cacheDirectory = "assets/cache/shader/opengl";
 			if (!std::filesystem::exists(cacheDirectory))
 			{
 				std::filesystem::create_directories(cacheDirectory);
 			}
+
+			return cacheDirectory;
 		}
 
 		static const char* GLShaderStageCachedOpenGLFileExtension(uint32_t stage)
@@ -106,7 +102,6 @@ namespace Hazel
 
 		_shouldRecompile = shouldRecompile;
 
-		Utils::CreateCacheDirectoryIfNeeded();
 		auto source = ReadFile(filePath);
 		auto shaderSources = PreProcess(source);
 

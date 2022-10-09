@@ -10,6 +10,26 @@ namespace Hazel
 	// TODO change once we have projects.
 	extern const std::filesystem::path gAssetsPath = "assets";
 
+	static bool Button(const std::string& label, bool isEnabled = true)
+	{
+		if (isEnabled)
+		{
+			return ImGui::Button(label.c_str());
+		}
+
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImGui::GetStyleColorVec4(ImGuiCol_Button));
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImGui::GetStyleColorVec4(ImGuiCol_Button));
+		ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyleColorVec4(ImGuiCol_TextDisabled));
+
+		ImGui::Button(label.c_str());
+
+		ImGui::PopStyleColor();
+		ImGui::PopStyleColor();
+		ImGui::PopStyleColor();
+
+		return false;
+	}
+
 	ContentBrowserPanel::ContentBrowserPanel()
 		:_currentDirectory(gAssetsPath)
 	{
@@ -163,25 +183,9 @@ namespace Hazel
 
 		if (ImGui::BeginMenuBar())
 		{
-			if (_currentDirectory != gAssetsPath)
+			if (Button("^", _currentDirectory != gAssetsPath))
 			{
-				if (ImGui::Button("^"))
-				{
-					_currentDirectory = _currentDirectory.parent_path();
-				}
-			}
-			else
-			{
-				// TODO add disable button function.
-				ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImGui::GetStyleColorVec4(ImGuiCol_Button));
-				ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImGui::GetStyleColorVec4(ImGuiCol_Button));
-				ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyleColorVec4(ImGuiCol_TextDisabled));
-
-				ImGui::Button("^");
-
-				ImGui::PopStyleColor();
-				ImGui::PopStyleColor();
-				ImGui::PopStyleColor();
+				_currentDirectory = _currentDirectory.parent_path();
 			}
 
 			ImGui::Text(_currentDirectory.string().c_str());

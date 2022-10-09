@@ -1181,7 +1181,6 @@ namespace Hazel
 			{
 				if (ImGui::Button("Mag Filter Toggle"))
 				{
-					// TODO serialize Mag Filter
 					auto currentMagFilter = component.Texture->GetMagFilter();
 					component.Texture->ToggleMagFilter(currentMagFilter);
 				}

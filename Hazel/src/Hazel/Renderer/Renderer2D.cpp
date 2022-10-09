@@ -216,20 +216,6 @@ namespace Hazel
 		return BeginScene(camera.GetProjection() * glm::inverse(transform));
 	}
 
-	bool Renderer2D::BeginScene(const OrthographicCamera& camera)
-	{
-		HZ_PROFILE_FUNCTION();
-
-		return BeginScene(camera.GetViewProjectionMatrix());
-	}
-
-	bool Renderer2D::BeginScene(const EditorCamera& camera)
-	{
-		HZ_PROFILE_FUNCTION();
-
-		return BeginScene(camera.GetViewProjection());
-	}
-
 	bool Renderer2D::BeginScene(glm::mat4 viewProjection)
 	{
 		HZ_PROFILE_FUNCTION();

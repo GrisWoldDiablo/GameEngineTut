@@ -422,7 +422,7 @@ namespace Hazel
 		else
 		{
 			cameraPositionZ = _editorCamera.GetPosition().z;
-			hasSceneBegun = Renderer2D::BeginScene(_editorCamera);
+			hasSceneBegun = Renderer2D::BeginScene(_editorCamera.GetViewProjection());
 		}
 
 		if (!hasSceneBegun)
@@ -1009,8 +1009,6 @@ namespace Hazel
 #pragma endregion
 
 #pragma region CameraDriving
-		// TODO Draw Magnifying and Hand cursor when zooming and panning
-		// Draw Eye cursor and move speed when driving the camera
 		if (_editorCamera.IsAdjusting() && ImGui::IsItemHovered())
 		{
 			// Cursor
@@ -1115,6 +1113,7 @@ namespace Hazel
 		ImGui::Separator();
 
 		// TODO Since we can remove and add component need to disable this for now, to revamp later.
+		// Add small secondary viewport for selected camera.
 		/*auto& mainCamera = _mainCamera.GetComponent<CameraComponent>();
 		auto& secondaryCamera = _secondaryCamera.GetComponent<CameraComponent>();
 

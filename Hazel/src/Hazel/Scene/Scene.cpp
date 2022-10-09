@@ -496,7 +496,7 @@ namespace Hazel
 
 	void Scene::RenderScene(const EditorCamera& camera)
 	{
-		if (Renderer2D::BeginScene(camera))
+		if (Renderer2D::BeginScene(camera.GetViewProjection()))
 		{
 			DrawSpriteRenderComponent(camera.GetPosition());
 			DrawCircleRenderComponent(camera.GetPosition());
