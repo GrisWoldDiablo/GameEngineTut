@@ -221,11 +221,6 @@ namespace Hazel
 		ImGui::Begin("Scene Hierarchy", nullptr, ImGuiWindowFlags_MenuBar);
 
 		DrawSceneName();
-		if (ImGui::Button("Create New Entity"))
-		{
-			_scene->CreateEntity();
-		}
-		ImGui::Separator();
 
 		_scene->_registry.each([&](auto entityID)
 		{
@@ -328,7 +323,13 @@ namespace Hazel
 		bool shouldDeleteEntity = false;
 		if (ImGui::BeginPopupContextItem())
 		{
-			if (ImGui::MenuItem("Delete Entity"))
+			if (ImGui::MenuItem("Create New Entity"))
+			{
+				_scene->CreateEntity();
+			}
+			ImGui::Separator();
+
+			if (ImGui::MenuItem(fmt::format("Delete Entity : [{0}]", entity.Name()).c_str()))
 			{
 				shouldDeleteEntity = true;
 			}
