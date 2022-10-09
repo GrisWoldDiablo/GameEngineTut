@@ -531,8 +531,11 @@ namespace Hazel
 
 					if (scriptFieldType == ScriptFieldType::String)
 					{
-						MonoString* monoString = reinterpret_cast<MonoString*>(mono_field_get_value_object(loadingDomain, field, monoObject));
-						scriptField.DefaultStringData = mono_string_to_utf8(monoString);
+						if (MonoObject* monoStringObject = mono_field_get_value_object(loadingDomain, field, monoObject))
+						{
+							MonoString* monoString = reinterpret_cast<MonoString*>(monoStringObject);
+							scriptField.DefaultStringData = mono_string_to_utf8(monoString);
+						}
 					}
 					else
 					{
