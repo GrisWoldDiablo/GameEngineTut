@@ -600,9 +600,7 @@ namespace Hazel
 	{
 		auto& window = Application::Get().GetWindow();
 		auto fileName = scenePath.empty() ? "Unsaved" : scenePath.stem();
-		std::stringstream ss;
-		ss << window.GetTitle() << " " << fileName;
-		window.SetTitle(ss.str());
+		window.SetTitle(fmt::format("{0} {1}", window.GetTitle(), fileName));
 	}
 
 	void EditorLayer::DrawToolbar()
@@ -840,11 +838,8 @@ namespace Hazel
 				{
 					for (int i = 0; i < std::size(sRendererShaderName); i++)
 					{
-						std::stringstream ss;
 						const auto rendererShaderType = static_cast<RendererShader>(i);
-						ss << "Reload " << sRendererShaderName[rendererShaderType];
-
-						if (ImGui::MenuItem(ss.str().c_str()))
+						if (ImGui::MenuItem(fmt::format("Reload {0}", sRendererShaderName[rendererShaderType]).c_str()))
 						{
 							Renderer2D::ReloadShader(rendererShaderType);
 						}

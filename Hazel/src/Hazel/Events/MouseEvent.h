@@ -25,10 +25,7 @@ namespace Hazel
 
 		std::string ToString() const override
 		{
-			std::stringstream ss;
-			ss << "MouseMovedEvent : (" << _mouseX << "," << _mouseY << ")";
-			ss << ", Delta(" << _deltaX << "," << _deltaY << ")";
-			return ss.str();
+			return fmt::format("MouseMovedEvent : ({0}, {1}), Delta({2}, {3})", _mouseX, _mouseY, _deltaX, _deltaY);
 		}
 
 		EVENT_CLASS_TYPE(MouseMoved)
@@ -56,9 +53,7 @@ namespace Hazel
 
 		std::string ToString() const override
 		{
-			std::stringstream ss;
-			ss << "MouseScrolledEvent : (" << _xOffset << "," << _yOffset << ")";
-			return ss.str();
+			return fmt::format("MouseScrolledEvent : ({0}, {1})", _xOffset, _yOffset);
 		}
 
 		EVENT_CLASS_TYPE(MouseScrolled)
@@ -93,9 +88,7 @@ namespace Hazel
 
 		std::string ToString() const override
 		{
-			std::stringstream ss;
-			ss << "MouseButtonPressedEvent : " << _button;
-			return ss.str();
+			return fmt::format("MouseButtonPressedEvent : {0}", _button);
 		}
 
 		EVENT_CLASS_TYPE(MouseButtonPressed)
@@ -110,9 +103,7 @@ namespace Hazel
 
 		std::string ToString() const override
 		{
-			std::stringstream ss;
-			ss << "MouseButtonReleasedEvent : " << _button;
-			return ss.str();
+			return fmt::format("MouseButtonReleasedEvent : {0}", _button);
 		}
 
 		EVENT_CLASS_TYPE(MouseButtonReleased)

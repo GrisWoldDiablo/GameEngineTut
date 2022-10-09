@@ -30,9 +30,7 @@ namespace Hazel
 
 		std::string ToString() const override
 		{
-			std::stringstream ss;
-			ss << "KeyPressedEvent : " << _keyCode << " (repeat=" << _isRepeat << ")";
-			return ss.str();
+			return fmt::format("KeyPressedEvent : {0} (repeat={1})", _keyCode, _isRepeat);
 		}
 
 		EVENT_CLASS_TYPE(KeyPressed)
@@ -50,9 +48,7 @@ namespace Hazel
 
 		std::string ToString() const override
 		{
-			std::stringstream ss;
-			ss << "KeyReleasedEvent : " << _keyCode;
-			return ss.str();
+			return fmt::format("KeyReleasedEvent : {0}", _keyCode);
 		}
 
 		EVENT_CLASS_TYPE(KeyReleased)
@@ -67,9 +63,7 @@ namespace Hazel
 
 		std::string ToString() const override
 		{
-			std::stringstream ss;
-			ss << "KeyTypedEvent : " << _keyCode;
-			return ss.str();
+			return fmt::format("KeyTypedEvent : {0}", _keyCode);
 		}
 
 		EVENT_CLASS_TYPE(KeyTyped)

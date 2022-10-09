@@ -15,9 +15,7 @@ namespace Hazel
 
 		std::string ToString() const override
 		{
-			std::stringstream ss;
-			ss << "WindowResizeEvent : " << _width << " x " << _height;
-			return ss.str();
+			return fmt::format("WindowResizeEvent : {0} x {1}", _width, _height);
 		}
 
 		EVENT_CLASS_TYPE(WindowResize)
@@ -49,9 +47,7 @@ namespace Hazel
 
 		std::string ToString() const override
 		{
-			std::stringstream ss;
-			ss << "WindowMovedEvent : (" << _windowX << "," << _windowY << ")";
-			return ss.str();
+			return fmt::format("WindowMovedEvent : ({0}, {1})", _windowX, _windowY);
 		}
 
 		EVENT_CLASS_TYPE(WindowMoved)

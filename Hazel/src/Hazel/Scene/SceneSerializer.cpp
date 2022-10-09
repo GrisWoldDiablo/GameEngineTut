@@ -427,9 +427,7 @@ namespace Hazel
 		YAML::Emitter out;
 		SerializeData(out);
 
-		std::stringstream stream;
-		stream << out.c_str();
-		_runtimeSceneData = stream.str();
+		_runtimeSceneData = out.c_str();
 	}
 
 	void SceneSerializer::SerializeData(YAML::Emitter& out)

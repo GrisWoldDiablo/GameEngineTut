@@ -154,9 +154,8 @@ namespace Hazel
 
 		ImGui::SameLine();
 		auto floatLabel = std::string("##") + label;
-		std::stringstream ss;
-		ss << "%." << precision << "f";
-		return hasValueChanged | ImGui::DragFloat(floatLabel.c_str(), &value, 0.1f, 0.0f, 0.0f, ss.str().c_str());
+		std::string precisionString = fmt::format("%.{0}f", precision);
+		return hasValueChanged | ImGui::DragFloat(floatLabel.c_str(), &value, 0.1f, 0.0f, 0.0f, precisionString.c_str());
 	}
 
 	template<typename T>
@@ -308,9 +307,7 @@ namespace Hazel
 		std::string displayName = entity.Name();
 		if (_isDebug)
 		{
-			std::stringstream ss;
-			ss << displayName << "<" << entity.GetUUID() << ">";
-			displayName = ss.str();
+			displayName = fmt::format("{0}<{1}>", displayName, entity.GetUUID());
 		}
 
 		bool expanded = ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)entity, flags, displayName.c_str());
