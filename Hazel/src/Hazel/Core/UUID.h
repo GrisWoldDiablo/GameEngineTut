@@ -9,6 +9,8 @@ namespace Hazel
 		UUID(uint64_t uuid);
 		UUID(const UUID&) = default;
 
+		bool operator ==(const UUID& other) { return _uuid == other._uuid; }
+
 		operator uint64_t() const { return _uuid; }
 
 		static UUID Invalid() { return UUID(0); }

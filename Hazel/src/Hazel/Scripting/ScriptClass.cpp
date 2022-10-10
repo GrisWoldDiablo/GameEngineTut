@@ -57,5 +57,4 @@ namespace Hazel
 	{
 		return mono_runtime_invoke(monoMethod, instance, params, nullptr);
 	}
-
 }

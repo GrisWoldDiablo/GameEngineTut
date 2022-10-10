@@ -47,6 +47,16 @@ namespace Hazel
 			return $"{Name}<{Id}>";
 		}
 
+		public override int GetHashCode()
+		{
+			return Id.GetHashCode();
+		}
+
+		public override bool Equals(object other)
+		{
+			return other is Entity otherEntity && CompareEntity(this, otherEntity);
+		}
+
 		public bool HasComponent<T>() where T : Component, new()
 		{
 			return InternalCalls.Entity_HasComponent(Id, typeof(T));
@@ -74,11 +84,31 @@ namespace Hazel
 			return new T() { Entity = this };
 		}
 
-		public static Entity CreateNew(string name = "Entity")
+		public bool Destroy()
 		{
-			InternalCalls.Entity_CreateNew(ref name, out var newId);
+			return InternalCalls.Entity_Destroy(Id);
+		}
+
+		public bool IsValid()
+		{
+			return IsValid(this);
+		}
+
+		public static Entity Create(string name = "Entity")
+		{
+			InternalCalls.Entity_Create(ref name, out var newId);
 
 			return new Entity(newId);
+		}
+
+		public static bool Destroy(Entity entity)
+		{
+			return InternalCalls.Entity_Destroy(entity.Id);
+		}
+
+		public static bool Destroy(ulong entityId)
+		{
+			return InternalCalls.Entity_Destroy(entityId);
 		}
 
 		/// <summary>
@@ -86,9 +116,55 @@ namespace Hazel
 		/// </summary>
 		public static Entity FindByName(string name)
 		{
-			InternalCalls.Entity_FindByName(ref name, out var newId);
+			if (InternalCalls.Entity_FindByName(ref name, out var newId))
+			{
+				return new Entity(newId);
+			}
 
-			return newId != 0 ? new Entity(newId) : null;
+			return null;
+		}
+
+		public static implicit operator bool(Entity entity)
+		{
+			return !CompareEntity(entity, null);
+		}
+
+		public static bool operator ==(Entity lhs, Entity rhs)
+		{
+			return CompareEntity(lhs, rhs);
+		}
+
+		public static bool operator !=(Entity lhs, Entity rhs)
+		{
+			return !CompareEntity(lhs, rhs);
+		}
+
+		private static bool CompareEntity(Entity lhs, Entity rhs)
+		{
+			var lhsIsNull = lhs is null;
+			var rhsIsNull = rhs is null;
+
+			if (lhsIsNull && rhsIsNull)
+			{
+				return true;
+			}
+
+			if (rhsIsNull)
+			{
+				return !IsValid(lhs);
+			}
+
+			if (lhsIsNull)
+			{
+				return !IsValid(rhs);
+			}
+
+			return lhs.Id == rhs.Id;
+		}
+
+		private static bool IsValid(Entity entity)
+		{
+			return InternalCalls.Entity_IsValid(entity.Id);
 		}
 	}
 }

@@ -15,7 +15,9 @@ namespace Hazel
 	{
 	public:
 		ScriptInstance(Ref<ScriptClass> scriptClass, Entity entity);
+
 		void InvokeOnCreate();
+		void InvokeOnDestroy();
 		void InvokeOnUpdate(float ts);
 
 		Ref<ScriptClass> GetScriptClass() { return _scriptClass; }
@@ -71,6 +73,7 @@ namespace Hazel
 		MonoObject* _instance = nullptr;
 		MonoMethod* _constructor = nullptr;
 		MonoMethod* _onCreateMethod = nullptr;
+		MonoMethod* _onDestroyMethod = nullptr;
 		MonoMethod* _onUpdateMethod = nullptr;
 
 		inline static uint8_t _sFieldValueBuffer[16];

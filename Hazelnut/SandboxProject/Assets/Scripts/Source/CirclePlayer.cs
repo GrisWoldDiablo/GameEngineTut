@@ -15,6 +15,11 @@ namespace Sandbox
 			_circleRenderer = GetComponent<CircleRendererComponent>();
 		}
 
+		public void OnDestroy()
+		{
+			Console.WriteLine($"Destroy [{Name}<{Id}>]");
+		}
+
 		private void OnUpdate(float timestep)
 		{
 			// Sprite Renderer

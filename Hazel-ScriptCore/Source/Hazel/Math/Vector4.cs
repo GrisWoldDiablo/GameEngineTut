@@ -40,12 +40,7 @@ namespace Hazel
 
 		public override bool Equals(object other)
 		{
-			if (!(other is Vector4))
-			{
-				return false;
-			}
-
-			return Equals((Vector4)other);
+			return other is Vector4 otherVector && Equals(otherVector);
 		}
 
 		public bool Equals(Vector4 other)
@@ -224,20 +219,14 @@ namespace Hazel
 			return Zero - value;
 		}
 
-		public static bool operator !=(Vector4 lhs, Vector4 rhs)
-		{
-			return (lhs.X != rhs.X ||
-					lhs.Y != rhs.Y ||
-					lhs.Z != rhs.Z ||
-					lhs.W != rhs.W);
-		}
-
 		public static bool operator ==(Vector4 lhs, Vector4 rhs)
 		{
-			return (lhs.X == rhs.X &&
-					lhs.Y == rhs.Y &&
-					lhs.Z == rhs.Z &&
-					lhs.W == rhs.W);
+			return lhs.Equals(rhs);
+		}
+
+		public static bool operator !=(Vector4 lhs, Vector4 rhs)
+		{
+			return !lhs.Equals(rhs);
 		}
 
 		public static implicit operator Vector4(Vector2 value)

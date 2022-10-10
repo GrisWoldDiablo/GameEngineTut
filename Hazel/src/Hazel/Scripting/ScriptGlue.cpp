@@ -31,7 +31,15 @@ namespace Hazel
 	/////////////////
 
 #pragma region Entity
-	static void Entity_CreateNew(MonoString** name, UUID* outId)
+	static bool Entity_IsValid(UUID entityId)
+	{
+		auto* scene = ScriptEngine::GetSceneContext();
+		HZ_CORE_ASSERT(scene, "Scene is null!");
+
+		return scene->GetEntityByUUID(entityId);
+	}
+
+	static void Entity_Create(MonoString** name, UUID* outId)
 	{
 		auto* scene = ScriptEngine::GetSceneContext();
 		HZ_CORE_ASSERT(scene, "Scene is null!");
@@ -41,19 +49,34 @@ namespace Hazel
 		*outId = newEntity.GetUUID();
 	}
 
-	static void Entity_FindByName(MonoString** name, UUID* outId)
+	static bool Entity_Destroy(UUID entityId)
 	{
 		auto* scene = ScriptEngine::GetSceneContext();
 		HZ_CORE_ASSERT(scene, "Scene is null!");
-		std::string entityName = mono_string_to_utf8(*name);
-		auto foundEntity = scene->GetEntityByName(entityName);
-		if (foundEntity)
+		
+		if (auto entity = scene->GetEntityByUUID(entityId))
 		{
-			*outId = foundEntity.GetUUID();
-			return;
+			scene->DestroyEntity(entity);
+			return true;
 		}
 
+		return false;
+	}
+
+	static bool Entity_FindByName(MonoString** name, UUID* outId)
+	{
+		auto* scene = ScriptEngine::GetSceneContext();
+		HZ_CORE_ASSERT(scene, "Scene is null!");
+
 		*outId = UUID::Invalid();
+
+		if (auto foundEntity = scene->GetEntityByName(mono_string_to_utf8(*name)))
+		{
+			*outId = foundEntity.GetUUID();
+			return true;
+		}
+
+		return false;
 	}
 
 	static void Entity_AddComponent(UUID entityId, MonoReflectionType* componentType)
@@ -436,7 +459,9 @@ namespace Hazel
 		HZ_ADD_INTERNAL_CALL(Input_IsKeyDown);
 
 		// Entity
-		HZ_ADD_INTERNAL_CALL(Entity_CreateNew);
+		HZ_ADD_INTERNAL_CALL(Entity_IsValid);
+		HZ_ADD_INTERNAL_CALL(Entity_Create);
+		HZ_ADD_INTERNAL_CALL(Entity_Destroy);
 		HZ_ADD_INTERNAL_CALL(Entity_FindByName);
 		HZ_ADD_INTERNAL_CALL(Entity_AddComponent);
 		HZ_ADD_INTERNAL_CALL(Entity_HasComponent);

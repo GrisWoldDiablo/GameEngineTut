@@ -702,5 +702,16 @@ namespace Hazel
 		{
 			OnComponentRemoved(entity, component);
 		});
+
+		if (_isRunning)
+		{
+			CleanUpComponent<ScriptComponent>(entity, [&](ScriptComponent& component)
+			{
+				if (ScriptEngine::EntityClassExist(component.ClassName))
+				{
+					ScriptEngine::OnDestroyEntity(entity);
+				}
+			});
+		}
 	}
 }

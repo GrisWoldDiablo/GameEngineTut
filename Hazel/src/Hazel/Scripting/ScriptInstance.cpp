@@ -13,6 +13,7 @@ namespace Hazel
 		_constructor = ScriptEngine::GetEntityClass()->GetMethod(".ctor", 1);
 
 		_onCreateMethod = scriptClass->GetMethod("OnCreate");
+		_onDestroyMethod = scriptClass->GetMethod("OnDestroy");
 		_onUpdateMethod = scriptClass->GetMethod("OnUpdate", 1);
 
 		// Call Entity Constructor
@@ -26,6 +27,14 @@ namespace Hazel
 		if (_onCreateMethod)
 		{
 			_scriptClass->InvokeMethod(_instance, _onCreateMethod);
+		}
+	}
+
+	void ScriptInstance::InvokeOnDestroy()
+	{
+		if (_onDestroyMethod)
+		{
+			_scriptClass->InvokeMethod(_instance, _onDestroyMethod);
 		}
 	}
 

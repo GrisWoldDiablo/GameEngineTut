@@ -17,13 +17,19 @@ namespace Hazel
 		//////////////
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern static void Entity_CreateNew(ref string name, out ulong outId);
-		
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern static void Entity_FindByName(ref string name, out ulong outId);
+		internal extern static bool Entity_IsValid(ulong entityId);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern static void Entity_AddComponent(ulong id, Type type);
+		internal extern static void Entity_Create(ref string name, out ulong entityId);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern static bool Entity_Destroy(ulong entityId);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern static bool Entity_FindByName(ref string name, out ulong entityId);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern static void Entity_AddComponent(ulong entityId, Type type);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern static bool Entity_HasComponent(ulong entityId, Type componentType);
@@ -46,16 +52,16 @@ namespace Hazel
 		internal extern static void TransformComponent_SetPosition(ulong entityId, ref Vector3 position);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern static void TransformComponent_GetRotation(ulong id, out Vector3 rotation);
+		internal extern static void TransformComponent_GetRotation(ulong entityId, out Vector3 rotation);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern static void TransformComponent_SetRotation(ulong id, ref Vector3 rotation);
+		internal extern static void TransformComponent_SetRotation(ulong entityId, ref Vector3 rotation);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern static void TransformComponent_GetScale(ulong id, out Vector3 scale);
+		internal extern static void TransformComponent_GetScale(ulong entityId, out Vector3 scale);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern static void TransformComponent_SetScale(ulong id, ref Vector3 scale);
+		internal extern static void TransformComponent_SetScale(ulong entityId, ref Vector3 scale);
 
 		/* Sprite Renderer */
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -65,29 +71,29 @@ namespace Hazel
 		internal extern static void SpriteRendererComponent_SetTiling(ulong entityId, ref Vector2 tiling);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern static void SpriteRendererComponent_GetColor(ulong id, out Color color);
+		internal extern static void SpriteRendererComponent_GetColor(ulong entityId, out Color color);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern static void SpriteRendererComponent_SetColor(ulong id, ref Color color);
+		internal extern static void SpriteRendererComponent_SetColor(ulong entityId, ref Color color);
 
 		/* Circle Renderer*/
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern static void CircleRendererComponent_GetColor(ulong id, out Color color);
+		internal extern static void CircleRendererComponent_GetColor(ulong entityId, out Color color);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern static void CircleRendererComponent_SetColor(ulong id, ref Color color);
+		internal extern static void CircleRendererComponent_SetColor(ulong entityId, ref Color color);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern static void CircleRendererComponent_GetThickness(ulong id, out float thickness);
+		internal extern static void CircleRendererComponent_GetThickness(ulong entityId, out float thickness);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern static void CircleRendererComponent_SetThickness(ulong id, ref float thickness);
+		internal extern static void CircleRendererComponent_SetThickness(ulong entityId, ref float thickness);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern static void CircleRendererComponent_GetFade(ulong id, out float fade);
+		internal extern static void CircleRendererComponent_GetFade(ulong entityId, out float fade);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern static void CircleRendererComponent_SetFade(ulong id, ref float fade);
+		internal extern static void CircleRendererComponent_SetFade(ulong entityId, ref float fade);
 
 		/* Rigibody 2D */
 		[MethodImpl(MethodImplOptions.InternalCall)]

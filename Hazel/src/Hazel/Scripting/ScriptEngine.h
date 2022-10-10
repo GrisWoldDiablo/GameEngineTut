@@ -32,6 +32,7 @@ namespace Hazel
 
 		static bool EntityClassExist(const std::string& fullClassName);
 		static void OnCreateEntity(Entity entity);
+		static void OnDestroyEntity(Entity entity);
 		static void OnUpdateEntity(Entity entity, Timestep timestep);
 
 		static Scene* GetSceneContext();

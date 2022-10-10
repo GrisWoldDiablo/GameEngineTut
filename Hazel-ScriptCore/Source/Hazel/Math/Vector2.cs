@@ -35,12 +35,7 @@
 
 		public override bool Equals(object other)
 		{
-			if (!(other is Vector2))
-			{
-				return false;
-			}
-
-			return Equals((Vector2)other);
+			return other is Vector2 otherVector && Equals(otherVector);
 		}
 
 		public bool Equals(Vector2 other)
@@ -203,16 +198,14 @@
 			return Zero - value;
 		}
 
-		public static bool operator !=(Vector2 lhs, Vector2 rhs)
-		{
-			return (lhs.X != rhs.X ||
-					lhs.Y != rhs.Y);
-		}
-
 		public static bool operator ==(Vector2 lhs, Vector2 rhs)
 		{
-			return (lhs.X == rhs.X &&
-					lhs.Y == rhs.Y);
+			return lhs.Equals(rhs);
+		}
+
+		public static bool operator !=(Vector2 lhs, Vector2 rhs)
+		{
+			return !lhs.Equals(rhs);
 		}
 
 		public static implicit operator Vector2(Vector3 value)

@@ -188,6 +188,11 @@ namespace Hazel
 
 	void ScriptEngine::OnRuntimeStop()
 	{
+		for (auto& [uuid, instance] : sScriptData->EntityInstances)
+		{
+			instance->InvokeOnDestroy();
+		}
+
 		sScriptData->SceneContext = nullptr;
 
 		sScriptData->EntityInstances.clear();
@@ -260,12 +265,22 @@ namespace Hazel
 		}
 	}
 
+	void ScriptEngine::OnDestroyEntity(Entity entity)
+	{
+		const auto& entityUUID = entity.GetUUID();
+		HZ_CORE_ASSERT(sScriptData->EntityInstances.find(entityUUID) != sScriptData->EntityInstances.end(), "entity UUID [{0}] missing", entityUUID);
+
+		auto& instance = sScriptData->EntityInstances.at(entityUUID);
+		instance->InvokeOnDestroy();
+		sScriptData->EntityInstances.erase(entityUUID);
+	}
+
 	void ScriptEngine::OnUpdateEntity(Entity entity, Timestep timestep)
 	{
 		const auto& entityUUID = entity.GetUUID();
 		HZ_CORE_ASSERT(sScriptData->EntityInstances.find(entityUUID) != sScriptData->EntityInstances.end(), "entity UUID [{0}] missing", entityUUID);
 
-		auto instance = sScriptData->EntityInstances[entityUUID];
+		auto& instance = sScriptData->EntityInstances.at(entityUUID);
 		instance->InvokeOnUpdate(static_cast<float>(timestep));
 	}
 
