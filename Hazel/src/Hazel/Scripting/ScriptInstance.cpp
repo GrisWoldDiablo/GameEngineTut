@@ -49,51 +49,103 @@ namespace Hazel
 
 	bool ScriptInstance::TryGetFieldValueInternal(const std::string& name, void* data) const
 	{
-		const auto& fields = _scriptClass->GetFields();
-		auto it = fields.find(name);
-		if (it == fields.end())
+		ScriptField field;
+		if (TryGetField(name, field))
 		{
-			return false;
+			mono_field_get_value(_instance, field.MonoClassField, data);
+			return true;
 		}
 
-		const ScriptField& field = it->second;
-		mono_field_get_value(_instance, field.MonoClassField, data);
-
-		return true;
+		return false;
 	}
 
 	bool ScriptInstance::TrySetFieldValueInternal(const std::string& name, const void* data)
 	{
-		const auto& fields = _scriptClass->GetFields();
-		auto it = fields.find(name);
-		if (it == fields.end())
+		ScriptField field;
+		if (TryGetField(name, field))
 		{
-			return false;
+			mono_field_set_value(_instance, field.MonoClassField, const_cast<void*>(data));
+			return true;
 		}
 
-		const ScriptField& field = it->second;
-		mono_field_set_value(_instance, field.MonoClassField, const_cast<void*>(data));
-
-		return true;
+		return false;
 	}
 
 	bool ScriptInstance::TryGetFieldStringValueInternal(const std::string& name, std::string& data) const
 	{
-		const auto& fields = _scriptClass->GetFields();
-		auto it = fields.find(name);
-		if (it == fields.end())
+		ScriptField field;
+		if (TryGetField(name, field))
 		{
-			return false;
+			auto* monoString = reinterpret_cast<MonoString*>(mono_field_get_value_object(mono_object_get_domain(_instance), field.MonoClassField, _instance));
+			data = mono_string_to_utf8(monoString);
+			return true;
 		}
 
-		const ScriptField& field = it->second;
-		auto* monoString = reinterpret_cast<MonoString*>(mono_field_get_value_object(mono_object_get_domain(_instance), field.MonoClassField, _instance));
-		data = mono_string_to_utf8(monoString);
-
-		return true;
+		return false;
 	}
 
 	bool ScriptInstance::TrySetFieldStringValueInternal(const std::string& name, const std::string& data)
+	{
+		ScriptField field;
+		if (TryGetField(name, field))
+		{
+			auto* monoString = mono_string_new(mono_object_get_domain(_instance), data.c_str());
+			mono_field_set_value(_instance, field.MonoClassField, monoString);
+			return true;
+		}
+
+		return false;
+	}
+
+	bool ScriptInstance::TryGetFieldEntityValueInternal(const std::string& name, Entity& data) const
+	{
+		ScriptField field;
+		if (TryGetField(name, field))
+		{
+			if (auto* monoInstance = mono_field_get_value_object(mono_object_get_domain(_instance), field.MonoClassField, _instance))
+			{
+				const auto& scriptField = ScriptEngine::GetEntityClass()->GetFields().at("Id");
+				uint64_t uuid;
+				mono_field_get_value(monoInstance, scriptField.MonoClassField, &uuid);
+				data = ScriptEngine::GetSceneContext()->GetEntityByUUID(uuid);
+
+				return true;
+			}
+		}
+		return false;
+	}
+
+	bool ScriptInstance::TrySetFieldEntityValueInternal(const std::string& name, const Entity& data)
+	{
+		ScriptField field;
+		if (TryGetField(name, field))
+		{
+			// Clear the field.
+			if (!data)
+			{
+				mono_field_set_value(_instance, field.MonoClassField, nullptr);
+				return true;
+			}
+
+			// Assign the field to a entity that has an assigned ScriptInstance
+			if (const auto& entityScriptInstance = ScriptEngine::GetEntityScriptInstance(data.GetUUID()))
+			{
+				mono_field_set_value(_instance, field.MonoClassField, entityScriptInstance->_instance);
+				return true;
+			}
+
+			// Create a ScriptInstance and assign it to the entity.
+			if (const auto& entityScriptInstance = ScriptEngine::OnCreateEntity(data))
+			{
+				mono_field_set_value(_instance, field.MonoClassField, entityScriptInstance->_instance);
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	bool ScriptInstance::TryGetField(const std::string& name, ScriptField& scriptField) const
 	{
 		const auto& fields = _scriptClass->GetFields();
 		auto it = fields.find(name);
@@ -102,10 +154,7 @@ namespace Hazel
 			return false;
 		}
 
-		const ScriptField& field = it->second;
-		auto* monoString = mono_string_new(mono_object_get_domain(_instance), data.c_str());
-		mono_field_set_value(_instance, field.MonoClassField, monoString);
-
+		scriptField = it->second;
 		return true;
 	}
 }

@@ -1,5 +1,6 @@
 namespace Hazel
 {
+	// TODO Create HObject class to parent Component and Entity classes and move Id to it.
 	public class Entity
 	{
 		public readonly UUID Id;
@@ -44,7 +45,7 @@ namespace Hazel
 
 		public override string ToString()
 		{
-			return $"{Name}<{Id}>";
+			return this ? $"{Name}<{Id}>" : "Null";
 		}
 
 		public override int GetHashCode()
@@ -116,9 +117,9 @@ namespace Hazel
 		/// </summary>
 		public static Entity FindByName(string name)
 		{
-			if (InternalCalls.Entity_FindByName(ref name, out var newId))
+			if (InternalCalls.Entity_FindByName(ref name, out Entity entity))
 			{
-				return new Entity(newId);
+				return entity;
 			}
 
 			return null;

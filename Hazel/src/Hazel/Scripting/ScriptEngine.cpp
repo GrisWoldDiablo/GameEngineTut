@@ -234,14 +234,29 @@ namespace Hazel
 		return sScriptData->EntityClasses.find(fullClassName) != sScriptData->EntityClasses.end();
 	}
 
-	void ScriptEngine::OnCreateEntity(Entity entity)
+	Ref<ScriptInstance> ScriptEngine::OnCreateEntity(Entity entity)
 	{
+		Ref<ScriptInstance> instance = nullptr;
+
+		UUID entityUUID = entity.GetUUID();
+
+		if (instance = GetEntityScriptInstance(entityUUID))
+		{
+			return instance;
+		}
+
+		if (!entity.HasComponent<ScriptComponent>())
+		{
+			instance = CreateRef<ScriptInstance>(sScriptData->EntityBaseClass, entity);
+			sScriptData->EntityInstances[entityUUID] = instance;
+			instance->InvokeOnCreate();
+			return instance;
+		}
+
 		const auto& scriptComponent = entity.GetComponent<ScriptComponent>();
 		if (EntityClassExist(scriptComponent.ClassName))
 		{
-			UUID entityUUID = entity.GetUUID();
-
-			auto instance = CreateRef<ScriptInstance>(sScriptData->EntityClasses[scriptComponent.ClassName], entity);
+			instance = CreateRef<ScriptInstance>(sScriptData->EntityClasses[scriptComponent.ClassName], entity);
 			sScriptData->EntityInstances[entityUUID] = instance;
 
 			// Copy field values
@@ -251,18 +266,36 @@ namespace Hazel
 
 				for (const auto& [name, fieldInstance] : fieldMap)
 				{
-					if (fieldInstance.Field.Type == ScriptFieldType::String)
+					switch (fieldInstance.Field.Type)
+					{
+					case  ScriptFieldType::String:
 					{
 						instance->TrySetFieldStringValueInternal(name, fieldInstance._stringData);
-						continue;
+						break;
 					}
+					case  ScriptFieldType::Entity:
+					{
+						const auto fieldEntityUUID = fieldInstance.GetValue<uint64_t>();
+						if (auto& foundEntity = sScriptData->SceneContext->GetEntityByUUID(fieldEntityUUID))
+						{
+							const auto& foundEntityInstance = OnCreateEntity(foundEntity);
+							HZ_ASSERT(foundEntityInstance, "Failed at Creating {0} Instance", foundEntity.Name());
+							instance->TrySetFieldValueInternal(name, foundEntityInstance->_instance);
+						}
+						break;
+					}
+					default:
+						instance->TrySetFieldValueInternal(name, fieldInstance._dataBuffer);
 
-					instance->TrySetFieldValueInternal(name, fieldInstance._dataBuffer);
+						break;
+					}
 				}
 			}
 
 			instance->InvokeOnCreate();
 		}
+
+		return instance;
 	}
 
 	void ScriptEngine::OnDestroyEntity(Entity entity)
@@ -376,7 +409,6 @@ namespace Hazel
 
 		sScriptData->EntityBaseClass.reset();
 		sScriptData->EntityClasses.clear();
-		sScriptData->EntityBaseClass.reset();
 	}
 
 	bool ScriptEngine::TrySetupEngine()
@@ -396,7 +428,16 @@ namespace Hazel
 		ScriptGlue::RegisterComponents();
 		ScriptGlue::RegisterFunctions();
 
-		sScriptData->EntityBaseClass = CreateRef<ScriptClass>("Hazel", "Entity", true);
+		// TODO ? Move somewhere else.
+		{
+			auto baseClass = CreateRef<ScriptClass>("Hazel", "Entity", true);
+
+			const std::string fieldName = "Id";
+			auto field = mono_class_get_field_from_name(baseClass->_monoClass, fieldName.c_str());
+			baseClass->_fields[fieldName] = ScriptField{ ScriptFieldType::ULong, fieldName, field };
+
+			sScriptData->EntityBaseClass = baseClass;
+		}
 
 		return true;
 	}
@@ -478,7 +519,6 @@ namespace Hazel
 
 			sScriptData->EntityClasses[fullName] = scriptClass;
 
-
 			int fieldCounts = mono_class_num_fields(monoClass);
 			HZ_CORE_LINFO("Class {0}", className);
 			HZ_CORE_LDEBUG("  {1} fields: ", className, fieldCounts);
@@ -543,18 +583,28 @@ namespace Hazel
 
 					ScriptField scriptField = { scriptFieldType, fieldName, field };
 
-					if (scriptFieldType == ScriptFieldType::String)
+					switch (scriptFieldType)
+					{
+					case ScriptFieldType::String:
 					{
 						if (MonoObject* monoStringObject = mono_field_get_value_object(loadingDomain, field, monoObject))
 						{
 							MonoString* monoString = reinterpret_cast<MonoString*>(monoStringObject);
 							scriptField.DefaultStringData = mono_string_to_utf8(monoString);
 						}
+						break;
 					}
-					else
+					case ScriptFieldType::Entity:
+					{
+						// Do nothing leave data buffer at 0
+						break;
+					}
+					default: // All other types.
 					{
 						mono_field_get_value(monoObject, field, defaultFieldDataBuffer);
 						memcpy_s(scriptField.DefaultData, sizeof(scriptField.DefaultData), defaultFieldDataBuffer, sizeof(defaultFieldDataBuffer));
+						break;
+					}
 					}
 
 					scriptClass->_fields[fieldName] = scriptField;

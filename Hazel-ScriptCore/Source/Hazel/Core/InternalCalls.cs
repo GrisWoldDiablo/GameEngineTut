@@ -26,7 +26,7 @@ namespace Hazel
 		internal extern static bool Entity_Destroy(ulong entityId);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern static bool Entity_FindByName(ref string name, out ulong entityId);
+		internal extern static bool Entity_FindByName(ref string name, out Entity entityId);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern static void Entity_AddComponent(ulong entityId, Type type);

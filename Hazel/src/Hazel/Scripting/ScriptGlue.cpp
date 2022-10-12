@@ -2,6 +2,7 @@
 #include "Hazel.h"
 #include "ScriptGlue.h"
 #include "ScriptEngine.h"
+#include "ScriptInstance.h"
 
 #include "mono/metadata/object.h"
 #include "mono/metadata/reflection.h"
@@ -53,7 +54,7 @@ namespace Hazel
 	{
 		auto* scene = ScriptEngine::GetSceneContext();
 		HZ_CORE_ASSERT(scene, "Scene is null!");
-		
+
 		if (auto entity = scene->GetEntityByUUID(entityId))
 		{
 			scene->DestroyEntity(entity);
@@ -63,17 +64,26 @@ namespace Hazel
 		return false;
 	}
 
-	static bool Entity_FindByName(MonoString** name, UUID* outId)
+	static bool Entity_FindByName(MonoString** name, MonoObject** outEntity)
 	{
 		auto* scene = ScriptEngine::GetSceneContext();
 		HZ_CORE_ASSERT(scene, "Scene is null!");
 
-		*outId = UUID::Invalid();
+		*outEntity = nullptr;
 
 		if (auto foundEntity = scene->GetEntityByName(mono_string_to_utf8(*name)))
 		{
-			*outId = foundEntity.GetUUID();
-			return true;
+			if (const auto& entityScriptInstance = ScriptEngine::GetEntityScriptInstance(foundEntity.GetUUID()))
+			{
+				*outEntity = entityScriptInstance->GetInstance();
+				return true;
+			}
+
+			if (const auto& entityScriptInstance = ScriptEngine::OnCreateEntity(foundEntity))
+			{
+				*outEntity = entityScriptInstance->GetInstance();
+				return true;
+			}
 		}
 
 		return false;

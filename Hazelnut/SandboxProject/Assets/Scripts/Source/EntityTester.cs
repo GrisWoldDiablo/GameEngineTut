@@ -9,9 +9,11 @@ namespace Sandbox
 		public Color NewEntityColor;
 		public string EntityToFind;
 		public Color EntityToFindColor;
+		public Entity EntityToTest;
 
 		public float lifeTime = 5.0f;
 		private Entity _foundEntity;
+		private CircleRendererComponent _cr;
 
 		public void OnCreate()
 		{
@@ -23,13 +25,13 @@ namespace Sandbox
 			spriteComponent.Color = NewEntityColor;
 
 			_foundEntity = FindByName(EntityToFind);
-			if (_foundEntity != null)
+			Console.WriteLine($"Find By Name : {_foundEntity}");
+			if (_foundEntity is CirclePlayer player)
 			{
-				var cr = _foundEntity.GetComponent<CircleRendererComponent>();
-				if (cr != null)
-				{
-					cr.Color = EntityToFindColor;
-				}
+				Console.WriteLine($"Find By Name  Player: {player}");
+				EntityToTest = player;
+				player.Color = NewEntityColor;
+				_cr = player.GetComponent<CircleRendererComponent>();
 			}
 		}
 
@@ -40,13 +42,25 @@ namespace Sandbox
 
 		public void OnUpdate(float timestep)
 		{
-			if (!_foundEntity)
+			if (EntityToTest)
 			{
-				return;
+				var position = EntityToTest.Transform.Position;
+				position.X += 0.5f * timestep;
+				EntityToTest.Transform.Position = position;
+			}
+
+			if (lifeTime < 2.5f && _cr)
+			{
+				_cr.Color = EntityToFindColor;
 			}
 
 			lifeTime -= timestep;
 
+			if (!_foundEntity)
+			{
+				return;
+			}
+			
 			if (lifeTime < 0.0f)
 			{
 				Destroy(_foundEntity.Id);

@@ -38,19 +38,19 @@ namespace Hazel
 		}
 
 		template<typename T>
-		T& GetComponent()
+		T& GetComponent() const
 		{
 			HZ_CORE_ASSERT(HasComponent<T>(), "Entity does not have component!");
 			return _scene->_registry.get<T>(_entityHandle);
 		}
 
 		template<typename... T>
-		bool HasComponent()
+		bool HasComponent() const
 		{
 			return _scene->_registry.any_of<T...>(_entityHandle);
 		}
 
-		UUID GetUUID()
+		UUID GetUUID() const
 		{
 			return GetComponent<IDComponent>().ID;
 		}

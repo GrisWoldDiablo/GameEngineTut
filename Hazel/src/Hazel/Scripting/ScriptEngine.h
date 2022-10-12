@@ -31,7 +31,7 @@ namespace Hazel
 		static bool TryReload(bool shouldLog = true);
 
 		static bool EntityClassExist(const std::string& fullClassName);
-		static void OnCreateEntity(Entity entity);
+		static Ref<ScriptInstance> OnCreateEntity(Entity entity);
 		static void OnDestroyEntity(Entity entity);
 		static void OnUpdateEntity(Entity entity, Timestep timestep);
 

@@ -1,4 +1,4 @@
-﻿#include "hzpch.h"
+#include "hzpch.h"
 #include "ContentBrowserPanel.h"
 #include "Hazel/Core/Color.h"
 #include "Hazel/Utils/PlatformUtils.h"
@@ -10,6 +10,7 @@ namespace Hazel
 	// TODO change once we have projects.
 	extern const std::filesystem::path gAssetsPath = "assets";
 
+	// TODO move to ImGui Utils
 	static bool Button(const std::string& label, bool isEnabled = true)
 	{
 		if (isEnabled)
@@ -42,7 +43,8 @@ namespace Hazel
 		const float footer = ImGui::GetFrameHeightWithSpacing();
 		ImGui::Begin("Content Browser", nullptr, ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoScrollbar);
 		auto panelSize = ImGui::GetContentRegionAvail();
-		if (ImGui::BeginChild(ImGui::GetID("Folders"), ImVec2(panelSize.x * 0.25f, panelSize.y - footer), true, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_HorizontalScrollbar))
+		const float panelHeight = panelSize.y - footer;
+		if (panelHeight > 0.0f &&ImGui::BeginChild(ImGui::GetID("Folders"), ImVec2(panelSize.x * 0.25f, panelHeight), true, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_HorizontalScrollbar))
 		{
 			LoopDirectory(gAssetsPath);
 			ImGui::EndChild();
@@ -59,7 +61,7 @@ namespace Hazel
 		auto columnCount = (int)(panelWidth / cellSize);
 		columnCount = columnCount < 1 ? 1 : columnCount;
 
-		if (ImGui::BeginChild(ImGui::GetID("FolderContent"), ImVec2(panelWidth, panelSize.y - footer), false, ImGuiWindowFlags_NoMove))
+		if (panelHeight > 0.0f && ImGui::BeginChild(ImGui::GetID("FolderContent"), ImVec2(panelWidth, panelHeight), false, ImGuiWindowFlags_NoMove))
 		{
 			if (!std::filesystem::exists(_currentDirectory))
 			{

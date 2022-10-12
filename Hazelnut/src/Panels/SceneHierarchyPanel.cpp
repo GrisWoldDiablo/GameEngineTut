@@ -20,9 +20,9 @@
 namespace Hazel
 {
 	template<typename PopupFunction>
-	static void DrawYesNoPopup(const std::string& question, PopupFunction popupFunction)
+	static void DrawYesNoPopup(const std::string& question, PopupFunction popupFunction, const char* id = nullptr)
 	{
-		if (ImGui::BeginPopupContextItem())
+		if (ImGui::BeginPopupContextItem(id))
 		{
 			ImGui::Text(question.c_str());
 			ImGui::Separator();
@@ -244,10 +244,28 @@ namespace Hazel
 
 		ImGui::End();
 
-		ImGui::Begin("Properties");
-		if (_selectedEntity)
+		ImGui::Begin("Properties", nullptr, ImGuiWindowFlags_MenuBar);
+
+		if (_selectedEntity || _lockedEntity)
 		{
-			DrawComponents(_selectedEntity);
+			if (ImGui::BeginMenuBar())
+			{
+				if (!_lockedEntity && ImGui::MenuItem("Lock"))
+				{
+					_lockedEntity = _selectedEntity;
+				}
+				else if (_lockedEntity && ImGui::MenuItem("Unlock"))
+				{
+					_lockedEntity = Entity();
+				}
+
+				ImGui::EndMenuBar();
+			}
+		}
+
+		if (_selectedEntity || _lockedEntity)
+		{
+			DrawComponents(_lockedEntity ? _lockedEntity : _selectedEntity);
 		}
 
 		ImGui::End();
@@ -312,6 +330,13 @@ namespace Hazel
 		}
 
 		bool expanded = ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)entity, flags, displayName.c_str());
+
+		if (ImGui::BeginDragDropSource())
+		{
+			ImGui::SetDragDropPayload("ENTITY_NODE_ITEM", &entity, sizeof(Entity));
+			ImGui::Text(entity.Name().c_str());
+			ImGui::EndDragDropSource();
+		}
 
 		if (ImGui::IsItemClicked())
 		{
@@ -629,6 +654,65 @@ namespace Hazel
 						}
 						case ScriptFieldType::Entity:
 						{
+							auto data = scriptInstance->GetFieldEntityValue(name);
+							if (data)
+							{
+								ImGui::LabelText(name.c_str(), data.Name().c_str());
+								if (ImGui::IsItemClicked())
+								{
+									_selectedEntity = data;
+								}
+							}
+							else
+							{
+								ImGui::LabelText(name.c_str(), "None");
+							}
+
+							if (ImGui::BeginDragDropTarget())
+							{
+								if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ENTITY_NODE_ITEM"))
+								{
+									auto payloadEntity = *(Entity*)payload->Data;
+									scriptInstance->SetFieldEntityValue(name, payloadEntity);
+								}
+								ImGui::EndDragDropTarget();
+							}
+
+							if (ImGui::BeginPopupContextItem("ScriptFieldType::Entity"))
+							{
+								if (data)
+								{
+									if (ImGui::Selectable(fmt::format("{0} [X]", data.Name()).c_str()))
+									{
+										scriptInstance->SetFieldEntityValue(name, Entity());
+									}
+									ImGui::Separator();
+								}
+
+								if (ImGui::BeginListBox("##Entities"))
+								{
+									_scene->_registry.each([&](auto entityID)
+									{
+										Entity entity{ entityID, _scene.get() };
+
+										if (data && data.GetUUID() == entity.GetUUID())
+										{
+											return;
+										}
+
+										if (ImGui::Selectable(fmt::format("{0}##{1}", entity.Name(), entity.GetUUID()).c_str()))
+										{
+											scriptInstance->SetFieldEntityValue(name, entity);
+											ImGui::CloseCurrentPopup();
+										}
+									});
+
+									ImGui::EndListBox();
+								}
+
+								ImGui::EndPopup();
+							}
+
 							break;
 						}
 						case ScriptFieldType::String:
@@ -817,6 +901,67 @@ namespace Hazel
 						}
 						case ScriptFieldType::Entity:
 						{
+							auto data = scriptField.GetValue<uint64_t>();
+							auto& foundEntity = _scene->GetEntityByUUID(data);
+							if (foundEntity)
+							{
+								ImGui::LabelText(name.c_str(), foundEntity.Name().c_str());
+								if (ImGui::IsItemClicked())
+								{
+									_selectedEntity = foundEntity;
+								}
+							}
+							else
+							{
+								ImGui::LabelText(name.c_str(), "None");
+							}
+
+							if (ImGui::BeginDragDropTarget())
+							{
+								if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ENTITY_NODE_ITEM"))
+								{
+									auto payloadEntity = *(Entity*)payload->Data;
+
+									scriptField.SetValue(payloadEntity.GetUUID());
+								}
+								ImGui::EndDragDropTarget();
+							}
+
+							if (ImGui::BeginPopupContextItem("ScriptFieldType::Entity"))
+							{
+								if (foundEntity)
+								{
+									if (ImGui::Selectable(fmt::format("{0} [X]", foundEntity.Name()).c_str()))
+									{
+										scriptField.SetValue<UUID>(0);
+									}
+									ImGui::Separator();
+								}
+
+								if (ImGui::BeginListBox("##Entities"))
+								{
+									_scene->_registry.each([&](auto entityID)
+									{
+										Entity entity{ entityID, _scene.get() };
+
+
+										if (foundEntity && foundEntity.GetUUID() == entity.GetUUID())
+										{
+											return;
+										}
+
+										if (ImGui::Selectable(fmt::format("{0}##{1}", entity.Name(), entity.GetUUID()).c_str()))
+										{
+											scriptField.SetValue<UUID>(entity.GetUUID());
+											ImGui::CloseCurrentPopup();
+										}
+									});
+
+									ImGui::EndListBox();
+								}
+
+								ImGui::EndPopup();
+							}
 							break;
 						}
 						case ScriptFieldType::String:
@@ -1017,6 +1162,44 @@ namespace Hazel
 						}
 						case ScriptFieldType::Entity:
 						{
+							ImGui::LabelText(name.c_str(), "None");
+
+							if (ImGui::BeginDragDropTarget())
+							{
+								if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ENTITY_NODE_ITEM"))
+								{
+									auto payloadEntity = *(Entity*)payload->Data;
+
+									auto& scriptFieldInstance = entityFields[name];
+									scriptFieldInstance.Field = field;
+									scriptFieldInstance.SetValue(payloadEntity.GetUUID());
+								}
+								ImGui::EndDragDropTarget();
+							}
+
+							if (ImGui::BeginPopupContextItem("ScriptFieldType::Entity"))
+							{
+								if (ImGui::BeginListBox("##Entities"))
+								{
+									_scene->_registry.each([&](auto entityID)
+									{
+										Entity entity{ entityID, _scene.get() };
+
+										if (ImGui::Selectable(fmt::format("{0}##{1}", entity.Name(), entity.GetUUID()).c_str()))
+										{
+											auto& scriptFieldInstance = entityFields[name];
+											scriptFieldInstance.Field = field;
+											scriptFieldInstance.SetValue(entity.GetUUID());
+
+											ImGui::CloseCurrentPopup();
+										}
+									});
+
+									ImGui::EndListBox();
+								}
+
+								ImGui::EndPopup();
+							}
 							break;
 						}
 						case ScriptFieldType::String:

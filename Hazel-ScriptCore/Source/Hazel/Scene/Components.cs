@@ -1,8 +1,57 @@
 ﻿namespace Hazel
 {
+	// TODO Create HObject class to parent Component and Entity classes
 	public class Component
 	{
 		public Entity Entity { get; internal set; }
+
+		public override int GetHashCode()
+		{
+			return (Entity.GetHashCode() << 2) ^ (Entity.GetHashCode() >> 1);
+		}
+
+		public override bool Equals(object obj)
+		{
+			return obj is Component component && Entity.Equals(component.Entity);
+		}
+
+		public static implicit operator bool(Component component)
+		{
+			return component.Entity;
+		}
+
+		public static bool operator ==(Component lhs, Component rhs)
+		{
+			return CompareComponent(lhs, rhs);
+		}
+
+		public static bool operator !=(Component lhs, Component rhs)
+		{
+			return !CompareComponent(lhs, rhs);
+		}
+
+		private static bool CompareComponent(Component lhs, Component rhs)
+		{
+			var lhsIsNull = lhs is null;
+			var rhsIsNull = rhs is null;
+
+			if (lhsIsNull && rhsIsNull)
+			{
+				return true;
+			}
+
+			if (rhsIsNull && !lhsIsNull)
+			{
+				return !lhs.Entity;
+			}
+
+			if (lhsIsNull && !rhsIsNull)
+			{
+				return !rhs.Entity;
+			}
+
+			return lhs.Entity == rhs.Entity;
+		}
 	}
 
 	public class TransformComponent : Component

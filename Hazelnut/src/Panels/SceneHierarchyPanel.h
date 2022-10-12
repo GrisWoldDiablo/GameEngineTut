@@ -32,6 +32,7 @@ namespace Hazel
 	private:
 		Ref<Scene> _scene;
 		Entity _selectedEntity;
+		Entity _lockedEntity;
 		bool _isDebug = false;
 		Weak<AudioSource> _previousAudioSource;
 		bool _shouldKeepPlaying = false;

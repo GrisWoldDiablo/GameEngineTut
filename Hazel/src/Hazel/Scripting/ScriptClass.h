@@ -33,5 +33,6 @@ namespace Hazel
 		MonoClass* _monoClass = nullptr;
 
 		friend class ScriptEngine;
+		friend class ScriptInstance;
 	};
 }

@@ -6,6 +6,8 @@ namespace Sandbox
 {
 	public class CirclePlayer : Entity
 	{
+		public Color Color;
+
 		private CircleRendererComponent _circleRenderer;
 
 		private void OnCreate()

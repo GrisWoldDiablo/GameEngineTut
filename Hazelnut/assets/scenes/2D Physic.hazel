@@ -71,7 +71,7 @@ Entities:
         OrthographicSize: 10
         OrthographicNearClip: -1
         OrthographicFarClip: 1
-        AspectRatio: 1.21671391
+        AspectRatio: 1.63450837
       IsPrimary: true
       IsFixedAspectRatio: false
     ScriptComponent:
@@ -243,7 +243,9 @@ Entities:
     ScriptComponent:
       ClassName: Sandbox.FieldTester
       ScriptFields:
-        []
+        - Name: Entity
+          Type: Entity
+          Data: 5051573955425461706
     SpriteRendererComponent:
       Tiling: [1, 1]
       Color: [1, 1, 1, 1]

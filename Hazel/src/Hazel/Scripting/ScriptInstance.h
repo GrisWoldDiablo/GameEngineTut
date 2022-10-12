@@ -10,6 +10,7 @@ extern "C" // Forward declare of class from C
 namespace Hazel
 {
 	class ScriptClass;
+	struct ScriptField;
 
 	class ScriptInstance
 	{
@@ -20,7 +21,8 @@ namespace Hazel
 		void InvokeOnDestroy();
 		void InvokeOnUpdate(float ts);
 
-		Ref<ScriptClass> GetScriptClass() { return _scriptClass; }
+		Ref<ScriptClass> GetScriptClass() const { return _scriptClass; }
+		MonoObject* GetInstance() const { return _instance; }
 
 		template<typename T>
 		T GetFieldValue(const std::string& name) const
@@ -60,12 +62,33 @@ namespace Hazel
 			//TODO error handling
 		}
 
+		Entity GetFieldEntityValue(const std::string& name) const
+		{
+			if (TryGetFieldEntityValueInternal(name, _sFieldEntityValueBuffer))
+			{
+				return _sFieldEntityValueBuffer;
+			}
+			//TODO error handling
+			return Entity();
+		}
+
+		void SetFieldEntityValue(const std::string& name, const Entity& data)
+		{
+			TrySetFieldEntityValueInternal(name, data);
+			//TODO error handling
+		}
+
 	private:
 		bool TryGetFieldValueInternal(const std::string& name, void* data) const;
 		bool TrySetFieldValueInternal(const std::string& name, const void* data);
 
 		bool TryGetFieldStringValueInternal(const std::string& name, std::string& data) const;
 		bool TrySetFieldStringValueInternal(const std::string& name, const std::string& data);
+
+		bool TryGetFieldEntityValueInternal(const std::string& name, Entity& data) const;
+		bool TrySetFieldEntityValueInternal(const std::string& name, const Entity& data);
+
+		bool TryGetField(const std::string& name, ScriptField& scriptField) const;
 
 	private:
 		Ref<ScriptClass> _scriptClass;
@@ -78,6 +101,7 @@ namespace Hazel
 
 		inline static uint8_t _sFieldValueBuffer[16];
 		inline static std::string _sFieldStringValueBuffer;
+		inline static Entity _sFieldEntityValueBuffer;
 
 		friend class ScriptEngine;
 	};
