@@ -933,7 +933,7 @@ namespace Hazel
 								{
 									if (ImGui::Selectable(fmt::format("{0} [X]", foundEntity.Name()).c_str()))
 									{
-										scriptField.SetValue<UUID>(0);
+										entityFields.erase(name);
 									}
 									ImGui::Separator();
 								}
