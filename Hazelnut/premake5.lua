@@ -16,6 +16,7 @@ project "Hazelnut"
 
 	includedirs
 	{
+		"src",
 		"%{wks.location}/Hazel/vendor/spdlog/include",
 		"%{wks.location}/Hazel/src",
 		"%{wks.location}/Hazel/vendor",

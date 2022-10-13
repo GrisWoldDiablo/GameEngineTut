@@ -11,6 +11,7 @@ namespace Hazel
 		virtual uint32_t GetWidth() const = 0;
 		virtual uint32_t GetHeight() const = 0;
 		virtual uint32_t GetRendererID() const = 0;
+		virtual void* GetRawID() const = 0;
 		virtual const std::filesystem::path& GetPath() const = 0;
 		virtual uint32_t GetMagFilter() const = 0;
 

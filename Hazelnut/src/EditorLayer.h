@@ -111,32 +111,11 @@ namespace Hazel
 		// Hover Timer
 		float _timeSpentHovering = 0;
 
-		// Toolbar Icons
-		enum class Icons
-		{
-			Pan,
-			Magnifier,
-			Eye,
-			Nothing,
-			Position,
-			Rotation,
-			Scale,
-			Local,
-			Global,
-			Play,
-			Stop,
-			Simulate
-		};
-
-		std::map<Icons, Ref<Texture2D>> _iconTextures;
-		Ref<Texture2D> _shaderLoadingTexture;
-
 		enum class SceneState
 		{
 			Edit = 0,
 			Play = 1,
 			Simulate = 2
 		} _sceneState = SceneState::Edit;
-
 	};
 }

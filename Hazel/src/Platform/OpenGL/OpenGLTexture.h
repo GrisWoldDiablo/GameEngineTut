@@ -15,6 +15,7 @@ namespace Hazel
 		uint32_t GetWidth() const override { return _width; }
 		uint32_t GetHeight() const override { return _height; }
 		uint32_t GetRendererID() const override { return _rendererID; }
+		void* GetRawID() const override { return reinterpret_cast<void*>(static_cast<intptr_t>(_rendererID)); }
 		const std::filesystem::path& GetPath() const override { return _path; }
 		uint32_t GetMagFilter() const override { return _magFilter; }
 		bool IsMagFilterLinear() const override { return _magFilter == GL_LINEAR; }

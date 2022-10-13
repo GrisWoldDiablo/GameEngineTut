@@ -1,4 +1,6 @@
 #include "SceneHierarchyPanel.h"
+#include "Utils/EditorResourceManager.h"
+
 #include "Hazel/Scene/Components.h"
 #include "Hazel/Scene/ScriptableEntity.h"
 #include "Hazel/Utils/PlatformUtils.h"
@@ -250,6 +252,13 @@ namespace Hazel
 		{
 			if (ImGui::BeginMenuBar())
 			{
+				const auto barHeight = ImGui::GetCurrentWindow()->MenuBarHeight();
+				const auto imageSize = ImVec2(barHeight, barHeight);
+				const auto uv0 = ImVec2(0.0f, 1.0f);
+				const auto uv1 = ImVec2(1.0f, 0.0f);
+				Ref<Texture2D> lockImage = _lockedEntity ? Utils::ERM::GetTexture(Utils::Icon_Lock) : Utils::ERM::GetTexture(Utils::Icon_Unlock);
+				ImGui::Image(lockImage->GetRawID(), imageSize, uv0, uv1);
+				
 				if (!_lockedEntity && ImGui::MenuItem("Lock"))
 				{
 					_lockedEntity = _selectedEntity;

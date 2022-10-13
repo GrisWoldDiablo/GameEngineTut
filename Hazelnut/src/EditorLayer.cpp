@@ -1,4 +1,5 @@
 #include "EditorLayer.h"
+#include "Utils/EditorResourceManager.h"
 #include "NativeScripts.h"
 
 #include "Hazel/Scene/SceneSerializer.h"
@@ -13,32 +14,13 @@
 
 namespace Hazel
 {
-	EditorLayer::EditorLayer()
-		: Layer("Hazel Editor")
-	{
-		// Create Gizmo Icons texture.
-		_iconTextures =
-		{
-			{ Icons::Pan,		Texture2D::Create("Resources/Icons/Gizmo/PanIcon256White.png")			},
-			{ Icons::Magnifier, Texture2D::Create("Resources/Icons/Gizmo/MagnifierIcon256White.png")	},
-			{ Icons::Eye,		Texture2D::Create("Resources/Icons/Gizmo/EyeIcon256White.png")			},
-			{ Icons::Nothing,	Texture2D::Create("Resources/Icons/Gizmo/NothingGizmo256White.png")		},
-			{ Icons::Position,	Texture2D::Create("Resources/Icons/Gizmo/PositionGizmo256White.png")	},
-			{ Icons::Rotation,	Texture2D::Create("Resources/Icons/Gizmo/RotationGizmo256White.png")	},
-			{ Icons::Scale,		Texture2D::Create("Resources/Icons/Gizmo/ScaleGizmo256White.png")		},
-			{ Icons::Local,		Texture2D::Create("Resources/Icons/Gizmo/LocalGizmo256White.png")		},
-			{ Icons::Global,	Texture2D::Create("Resources/Icons/Gizmo/GlobalGizmo256White.png")		},
-			{ Icons::Play,		Texture2D::Create("Resources/Icons/General/PlayButton256.png")			},
-			{ Icons::Stop,		Texture2D::Create("Resources/Icons/General/StopButton256.png")			},
-			{ Icons::Simulate,	Texture2D::Create("Resources/Icons/General/SimulateButton256.png")		},
-		};
-
-		_shaderLoadingTexture = Texture2D::Create("Resources/ShadersLoading.png");
-	}
+	EditorLayer::EditorLayer() : Layer("Hazel Editor") {}
 
 	void EditorLayer::OnAttach()
 	{
 		HZ_PROFILE_FUNCTION();
+
+		Utils::EditorResourceManager::Init();
 
 		// Set Fonts
 		auto imGuiLayer = Application::Get().GetImGuiLayer();
@@ -82,6 +64,7 @@ namespace Hazel
 	void EditorLayer::OnDetach()
 	{
 		HZ_PROFILE_FUNCTION();
+		Utils::EditorResourceManager::Shutdown();
 	}
 
 	void EditorLayer::OnUpdate(Timestep timestep)
@@ -631,15 +614,15 @@ namespace Hazel
 			{
 				if (_editorCamera.IsPanning())
 				{
-					gizmoButtonTexture = _iconTextures[Icons::Pan];
+					gizmoButtonTexture = Utils::ERM::GetTexture(Utils::Icon_Pan);
 				}
 				else if (_editorCamera.IsZooming())
 				{
-					gizmoButtonTexture = _iconTextures[Icons::Magnifier];
+					gizmoButtonTexture = Utils::ERM::GetTexture(Utils::Icon_Magnifier);
 				}
 				else
 				{
-					gizmoButtonTexture = _iconTextures[Icons::Eye];
+					gizmoButtonTexture = Utils::ERM::GetTexture(Utils::Icon_Eye);
 				}
 
 				if (!_hasStoredPreviousGizmoType)
@@ -651,7 +634,7 @@ namespace Hazel
 			}
 			else
 			{
-				gizmoButtonTexture = _iconTextures[Icons::Nothing];
+				gizmoButtonTexture = Utils::ERM::GetTexture(Utils::Icon_Nothing);
 				if (_hasStoredPreviousGizmoType)
 				{
 					_gizmoType = _previousGizmoType;
@@ -661,7 +644,7 @@ namespace Hazel
 			}
 
 			bool isNothing = _gizmoType == -1;
-			if (ImGui::ImageButton((ImTextureID)(intptr_t)gizmoButtonTexture->GetRendererID(), size, uv0, uv1, 3, isNothing ? selectedColor : normalColor, isNothing ? tintColor : whiteColor))
+			if (ImGui::ImageButton(gizmoButtonTexture->GetRawID(), size, uv0, uv1, 3, isNothing ? selectedColor : normalColor, isNothing ? tintColor : whiteColor))
 			{
 				_gizmoType = -1;
 			}
@@ -670,7 +653,7 @@ namespace Hazel
 			ImGui::SameLine();
 
 			bool isTranslate = _gizmoType == ImGuizmo::TRANSLATE;
-			if (ImGui::ImageButton((ImTextureID)(intptr_t)_iconTextures[Icons::Position]->GetRendererID(), size, uv0, uv1, 3, isTranslate ? selectedColor : normalColor, isTranslate ? tintColor : whiteColor))
+			if (ImGui::ImageButton(Utils::ERM::GetTexture(Utils::Icon_Position)->GetRawID(), size, uv0, uv1, 3, isTranslate ? selectedColor : normalColor, isTranslate ? tintColor : whiteColor))
 			{
 				_gizmoType = ImGuizmo::TRANSLATE;
 			}
@@ -678,7 +661,7 @@ namespace Hazel
 
 			ImGui::SameLine();
 			bool isRotate = _gizmoType == ImGuizmo::ROTATE;
-			if (ImGui::ImageButton((ImTextureID)(intptr_t)_iconTextures[Icons::Rotation]->GetRendererID(), size, uv0, uv1, 3, isRotate ? selectedColor : normalColor, isRotate ? tintColor : whiteColor))
+			if (ImGui::ImageButton(Utils::ERM::GetTexture(Utils::Icon_Rotation)->GetRawID(), size, uv0, uv1, 3, isRotate ? selectedColor : normalColor, isRotate ? tintColor : whiteColor))
 			{
 				_gizmoType = ImGuizmo::ROTATE;
 			}
@@ -686,7 +669,7 @@ namespace Hazel
 
 			ImGui::SameLine();
 			bool isScale = _gizmoType == ImGuizmo::SCALE;
-			if (ImGui::ImageButton((ImTextureID)(intptr_t)_iconTextures[Icons::Scale]->GetRendererID(), size, uv0, uv1, 3, isScale ? selectedColor : normalColor, isScale ? tintColor : whiteColor))
+			if (ImGui::ImageButton(Utils::ERM::GetTexture(Utils::Icon_Scale)->GetRawID(), size, uv0, uv1, 3, isScale ? selectedColor : normalColor, isScale ? tintColor : whiteColor))
 			{
 				_gizmoType = ImGuizmo::SCALE;
 				_gizmoSpace = ImGuizmo::LOCAL;
@@ -696,7 +679,7 @@ namespace Hazel
 			ImGui::TableNextColumn();
 			if (_gizmoSpace == ImGuizmo::LOCAL)
 			{
-				if (ImGui::ImageButton((ImTextureID)(intptr_t)_iconTextures[Icons::Local]->GetRendererID(), size, uv0, uv1, 3, selectedColor, tintColor))
+				if (ImGui::ImageButton(Utils::ERM::GetTexture(Utils::Icon_Local)->GetRawID(), size, uv0, uv1, 3, selectedColor, tintColor))
 				{
 					if (!isScale)
 					{
@@ -712,7 +695,7 @@ namespace Hazel
 			}
 			else
 			{
-				if (ImGui::ImageButton((ImTextureID)(intptr_t)_iconTextures[Icons::Global]->GetRendererID(), size, uv0, uv1, 3, selectedColor, tintColor))
+				if (ImGui::ImageButton(Utils::ERM::GetTexture(Utils::Icon_Global)->GetRawID(), size, uv0, uv1, 3, selectedColor, tintColor))
 				{
 					_gizmoSpace = ImGuizmo::LOCAL;
 				}
@@ -733,9 +716,9 @@ namespace Hazel
 			}
 
 			bool isEditing = _sceneState == SceneState::Edit || _sceneState == SceneState::Simulate;
-			auto& sceneStateButton = isEditing ? _iconTextures[Icons::Play] : _iconTextures[Icons::Stop];
+			auto& sceneStateButton = isEditing ? Utils::ERM::GetTexture(Utils::Icon_Play) : Utils::ERM::GetTexture(Utils::Icon_Stop);
 
-			if (ImGui::ImageButton((ImTextureID)(intptr_t)sceneStateButton->GetRendererID(), size, uv0, uv1, 3, isEditing ? normalColor : selectedColor, isEditing ? whiteColor : tintColor))
+			if (ImGui::ImageButton(sceneStateButton->GetRawID(), size, uv0, uv1, 3, isEditing ? normalColor : selectedColor, isEditing ? whiteColor : tintColor))
 			{
 				switch (_sceneState)
 				{
@@ -763,7 +746,7 @@ namespace Hazel
 			}
 
 			ImGui::SameLine();
-			if (ImGui::ImageButton((ImTextureID)(intptr_t)_iconTextures[Icons::Simulate]->GetRendererID(), size, uv0, uv1, 3, isEditing ? normalColor : selectedColor, _sceneState != SceneState::Simulate ? whiteColor : tintColor))
+			if (ImGui::ImageButton(Utils::ERM::GetTexture(Utils::Icon_Simulate)->GetRawID(), size, uv0, uv1, 3, isEditing ? normalColor : selectedColor, _sceneState != SceneState::Simulate ? whiteColor : tintColor))
 			{
 				switch (_sceneState)
 				{
@@ -900,12 +883,12 @@ namespace Hazel
 
 		if (Renderer2D::IsReady())
 		{
-			auto textureID = _framebuffer->GetColorAttachmentRenderID();
-			ImGui::Image((void*)(uint64_t)textureID, { _sceneViewportSize.x, _sceneViewportSize.y }, ImVec2{ 0.0f, 1.0f }, ImVec2{ 1.0f, 0.0f });
+			auto textureID = reinterpret_cast<void*>(static_cast<intptr_t>(_framebuffer->GetColorAttachmentRenderID()));
+			ImGui::Image(textureID, { _sceneViewportSize.x, _sceneViewportSize.y }, ImVec2{ 0.0f, 1.0f }, ImVec2{ 1.0f, 0.0f });
 		}
 		else
 		{
-			ImGui::Image((void*)(uint64_t)_shaderLoadingTexture->GetRendererID(), { _sceneViewportSize.x, _sceneViewportSize.y }, ImVec2{ 0.0f, 1.0f }, ImVec2{ 1.0f, 0.0f });
+			ImGui::Image(Utils::ERM::GetTexture(Utils::Image_ShaderLoading)->GetRawID(), { _sceneViewportSize.x, _sceneViewportSize.y }, ImVec2{ 0.0f, 1.0f }, ImVec2{ 1.0f, 0.0f });
 		}
 
 		if (ImGui::BeginDragDropTarget())
@@ -1022,7 +1005,21 @@ namespace Hazel
 			lowerRightPos.y += 25.0f;
 			lowerRightPos.x += 25.0f;
 
-			Ref<Texture2D> cursorTexture = _editorCamera.IsPanning() ? _iconTextures[Icons::Pan] : _editorCamera.IsZooming() ? _iconTextures[Icons::Magnifier] : _iconTextures[Icons::Eye];
+			Ref<Texture2D> cursorTexture;
+			if (_editorCamera.IsPanning())
+			{
+				
+				cursorTexture = Utils::ERM::GetTexture(Utils::Icon_Pan);
+			}
+			else if (_editorCamera.IsZooming())
+			{
+				cursorTexture = Utils::ERM::GetTexture(Utils::Icon_Magnifier);
+			}
+			else
+			{
+				cursorTexture = Utils::ERM::GetTexture(Utils::Icon_Eye);
+			}
+
 
 			if (_editorCamera.IsDriving())
 			{
@@ -1038,7 +1035,7 @@ namespace Hazel
 				ImGui::GetForegroundDrawList()->AddText(mousePos, IM_COL32_WHITE, ss.str().c_str());
 			}
 
-			ImGui::GetForegroundDrawList()->AddImage((ImTextureID)(intptr_t)cursorTexture->GetRendererID(), upperLeftPos, lowerRightPos, { 0.0f, 1.0f }, { 1.0f, 0.0f }, IM_COL32_WHITE);
+			ImGui::GetForegroundDrawList()->AddImage(cursorTexture->GetRawID(), upperLeftPos, lowerRightPos, { 0.0f, 1.0f }, { 1.0f, 0.0f }, IM_COL32_WHITE);
 		}
 
 #pragma endregion
