@@ -276,7 +276,7 @@ namespace Hazel
 					case  ScriptFieldType::Entity:
 					{
 						const auto fieldEntityUUID = fieldInstance.GetValue<uint64_t>();
-						if (auto& foundEntity = sScriptData->SceneContext->GetEntityByUUID(fieldEntityUUID))
+						if (auto foundEntity = sScriptData->SceneContext->GetEntityByUUID(fieldEntityUUID))
 						{
 							const auto& foundEntityInstance = OnCreateEntity(foundEntity);
 							HZ_ASSERT(foundEntityInstance, "Failed at Creating {0} Instance", foundEntity.Name());
@@ -385,7 +385,7 @@ namespace Hazel
 
 	void ScriptEngine::LoadAppDomain()
 	{
-		constexpr char* domainName = "HazelScriptRuntime";
+		constexpr char* domainName = const_cast<char*>("HazelScriptRuntime");
 		MonoDomain* appDomain = mono_domain_create_appdomain(domainName, nullptr);
 		HZ_ASSERT(mono_domain_set(appDomain, false), "Fail to load mono AppDomain");
 		sScriptData->AppDomain = appDomain;
@@ -476,7 +476,7 @@ namespace Hazel
 
 	void ScriptEngine::LoadAssemblyClasses()
 	{
-		MonoDomain* loadingDomain = mono_domain_create_appdomain("loadingDomain", nullptr);
+		MonoDomain* loadingDomain = mono_domain_create_appdomain(const_cast<char*>("loadingDomain"), nullptr);
 
 		sScriptData->EntityClasses.clear();
 

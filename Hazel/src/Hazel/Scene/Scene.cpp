@@ -399,6 +399,8 @@ namespace Hazel
 
 	Entity Scene::DuplicateEntity(Entity entity)
 	{
+		HZ_ASSERT(!_isRunning, "Cannot duplicate while scene is running.");
+
 		Entity newEntity = CreateEntity(entity.Name());
 		CopyComponentsIfExist(AllComponents{}, newEntity, entity);
 
@@ -528,7 +530,7 @@ namespace Hazel
 	template<typename T>
 	void Scene::OnComponentAdded(Entity entity, T& component)
 	{
-		static_assert(false);
+		//static_assert(false);
 	}
 
 	template<>
@@ -609,7 +611,7 @@ namespace Hazel
 	template<typename T>
 	void Scene::OnComponentRemoved(Entity entity, T& component)
 	{
-		static_assert(false);
+		//static_assert(false);
 	}
 
 	template<>

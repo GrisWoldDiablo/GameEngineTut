@@ -45,7 +45,7 @@ namespace Hazel
 
 		public override string ToString()
 		{
-			return this ? $"{Name}<{Id}>" : "Null";
+			return IsValid() ? $"{Name}<{Id}>" : "Null";
 		}
 
 		public override int GetHashCode()
@@ -104,12 +104,7 @@ namespace Hazel
 
 		public static bool Destroy(Entity entity)
 		{
-			return InternalCalls.Entity_Destroy(entity.Id);
-		}
-
-		public static bool Destroy(ulong entityId)
-		{
-			return InternalCalls.Entity_Destroy(entityId);
+			return !entity || InternalCalls.Entity_Destroy(entity.Id);
 		}
 
 		/// <summary>

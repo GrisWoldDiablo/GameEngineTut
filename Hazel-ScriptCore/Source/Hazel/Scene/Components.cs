@@ -17,7 +17,7 @@
 
 		public static implicit operator bool(Component component)
 		{
-			return component.Entity;
+			return !(component is null) && component.Entity;
 		}
 
 		public static bool operator ==(Component lhs, Component rhs)

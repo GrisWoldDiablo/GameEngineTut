@@ -716,7 +716,7 @@ namespace Hazel
 			}
 
 			bool isEditing = _sceneState == SceneState::Edit || _sceneState == SceneState::Simulate;
-			auto& sceneStateButton = isEditing ? Utils::ERM::GetTexture(Utils::Icon_Play) : Utils::ERM::GetTexture(Utils::Icon_Stop);
+			auto sceneStateButton = isEditing ? Utils::ERM::GetTexture(Utils::Icon_Play) : Utils::ERM::GetTexture(Utils::Icon_Stop);
 
 			if (ImGui::ImageButton(sceneStateButton->GetRawID(), size, uv0, uv1, 3, isEditing ? normalColor : selectedColor, isEditing ? whiteColor : tintColor))
 			{
@@ -1248,6 +1248,11 @@ namespace Hazel
 
 	void EditorLayer::DuplicateEntity()
 	{
+		if (_sceneState != SceneState::Edit)
+		{
+			return;
+		}
+
 		if (auto selectedEntity = _sceneHierarchyPanel.GetSelectedEntity())
 		{
 			auto newEntity = _activeScene->DuplicateEntity(selectedEntity);

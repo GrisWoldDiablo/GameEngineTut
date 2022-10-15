@@ -44,6 +44,7 @@ namespace Hazel
 	{
 		auto* scene = ScriptEngine::GetSceneContext();
 		HZ_CORE_ASSERT(scene, "Scene is null!");
+		HZ_CORE_ASSERT(*name, "Name is null!");
 
 		auto newEntity = scene->CreateEntity(mono_string_to_utf8(*name));
 
@@ -68,6 +69,7 @@ namespace Hazel
 	{
 		auto* scene = ScriptEngine::GetSceneContext();
 		HZ_CORE_ASSERT(scene, "Scene is null!");
+		HZ_CORE_ASSERT(*name, "Name is null!");
 
 		*outEntity = nullptr;
 

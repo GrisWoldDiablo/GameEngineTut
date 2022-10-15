@@ -762,7 +762,7 @@ namespace Hazel
 						case ScriptFieldType::Float:
 						{
 							auto data = scriptField.GetValue<float>();
-							if (ImGui::DragFloat(name.c_str(), &data, 0.1f))
+							if (ImGui::DragScalar(name.c_str(), ImGuiDataType_Float, &data, 0.1f))
 							{
 								scriptField.SetValue(data);
 							}
@@ -911,7 +911,7 @@ namespace Hazel
 						case ScriptFieldType::Entity:
 						{
 							auto data = scriptField.GetValue<uint64_t>();
-							auto& foundEntity = _scene->GetEntityByUUID(data);
+							auto foundEntity = _scene->GetEntityByUUID(data);
 							if (foundEntity)
 							{
 								ImGui::LabelText(name.c_str(), foundEntity.Name().c_str());
@@ -993,7 +993,7 @@ namespace Hazel
 						case ScriptFieldType::Float:
 						{
 							auto data = field.GetDefaultValue<float>();
-							if (ImGui::DragFloat(name.c_str(), &data, 0.1f))
+							if (ImGui::DragScalar(name.c_str(), ImGuiDataType_Float, &data, 0.1f))
 							{
 								auto& scriptFieldInstance = entityFields[name];
 								scriptFieldInstance.Field = field;
