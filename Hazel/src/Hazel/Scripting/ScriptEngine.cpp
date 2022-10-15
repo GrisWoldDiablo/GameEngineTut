@@ -301,7 +301,7 @@ namespace Hazel
 	void ScriptEngine::OnDestroyEntity(Entity entity)
 	{
 		const auto& entityUUID = entity.GetUUID();
-		HZ_CORE_ASSERT(sScriptData->EntityInstances.find(entityUUID) != sScriptData->EntityInstances.end(), "entity UUID [{0}] missing", entityUUID);
+		HZ_CORE_ASSERT(sScriptData->EntityInstances.find(entityUUID) != sScriptData->EntityInstances.end(), "Entity UUID [{0}] missing", entityUUID);
 
 		auto& instance = sScriptData->EntityInstances.at(entityUUID);
 		instance->InvokeOnDestroy();
@@ -311,7 +311,7 @@ namespace Hazel
 	void ScriptEngine::OnUpdateEntity(Entity entity, Timestep timestep)
 	{
 		const auto& entityUUID = entity.GetUUID();
-		HZ_CORE_ASSERT(sScriptData->EntityInstances.find(entityUUID) != sScriptData->EntityInstances.end(), "entity UUID [{0}] missing", entityUUID);
+		HZ_CORE_ASSERT(sScriptData->EntityInstances.find(entityUUID) != sScriptData->EntityInstances.end(), "Entity UUID [{0}] missing", entityUUID);
 
 		auto& instance = sScriptData->EntityInstances.at(entityUUID);
 		instance->InvokeOnUpdate(static_cast<float>(timestep));

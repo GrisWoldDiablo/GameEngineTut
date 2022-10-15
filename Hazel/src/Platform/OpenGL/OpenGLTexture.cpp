@@ -27,6 +27,8 @@ namespace Hazel
 	{
 		HZ_PROFILE_FUNCTION();
 
+		HZ_CORE_ASSERT(std::filesystem::exists(path), fmt::format("File path {0} not found!", path.string()));
+
 		int width, height, channels;
 		stbi_set_flip_vertically_on_load(1);
 
@@ -35,7 +37,18 @@ namespace Hazel
 			HZ_PROFILE_SCOPE("stbi_load");
 			data = stbi_load(_path.string().c_str(), &width, &height, &channels, 0);
 		}
-		HZ_CORE_ASSERT(data, "Failed to load image!");
+
+		bool hasLoadingFailed = !data;
+		if (hasLoadingFailed)
+		{
+			stbi_image_free(data);
+			HZ_CORE_ASSERT(false, "Failed to load image!");
+			uint8_t dataError[4] = { 255,128,255,255 };
+			data = dataError;
+			width = 1;
+			height = 1;
+			channels = 4;
+		}
 
 		_width = width;
 		_height = height;
@@ -71,7 +84,10 @@ namespace Hazel
 
 		glTextureSubImage2D(_rendererID, 0, 0, 0, _width, _height, _dataFormat, GL_UNSIGNED_BYTE, data);
 
-		stbi_image_free(data);
+		if (!hasLoadingFailed)
+		{
+			stbi_image_free(data);
+		}
 	}
 
 	OpenGLTexture2D::~OpenGLTexture2D()

@@ -39,8 +39,14 @@ namespace Hazel::Utils
 		delete sEditorResourceData;
 	}
 
-	Ref<Texture2D> EditorResourceManager::GetTexture(EditorImage_ icon)
+	Ref<Texture2D> EditorResourceManager::GetTexture(EditorImage_ editorImage)
 	{
-		return sEditorResourceData->Textures[icon];
+		if (sEditorResourceData->Textures.find(editorImage) == sEditorResourceData->Textures.end())
+		{
+			HZ_ASSERT_ONCE(false, "Editor Image not found!");
+			return Texture2D::ErrorTexture;
+		}
+
+		return sEditorResourceData->Textures.at(editorImage);
 	}
 }

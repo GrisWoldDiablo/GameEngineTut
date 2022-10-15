@@ -29,7 +29,7 @@ namespace Hazel::Utils
 		static void Init();
 		static void Shutdown();
 
-		static Ref<Texture2D> GetTexture(EditorImage_ icon);
+		static Ref<Texture2D> GetTexture(EditorImage_ editorImage);
 	};
 
 	using ERM = EditorResourceManager;

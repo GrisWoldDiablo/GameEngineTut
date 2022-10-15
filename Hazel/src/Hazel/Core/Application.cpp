@@ -39,6 +39,15 @@ namespace Hazel
 		ScriptEngine::Init();
 		Renderer::Init();
 
+		// TODO move somewhere else?
+		Texture2D::ErrorTexture = []
+		{
+			auto errorTexture = Texture2D::Create(1, 1);
+			const uint8_t data[4] = { 255,128,255,255 };
+			errorTexture->SetData((void*)data, 4);
+			return errorTexture;
+		}();
+
 		// Create ImGui and push it to the layer stack as an overlay.
 		_imGuiLayer = new ImGuiLayer();
 		PushOverlay(_imGuiLayer);

@@ -6,6 +6,9 @@
 
 namespace Hazel
 {
+	// Assignement in Hazel::Application constructor, since the renderer need to be initialized.
+	Ref<Texture2D> Texture2D::ErrorTexture = nullptr;
+
 	Ref<Texture2D> Texture2D::Create(uint32_t width, uint32_t height)
 	{
 		switch (Renderer::GetAPI())
