@@ -29,7 +29,7 @@ void ParticleSystem::OnUpdate(Hazel::Timestep ts)
 
 void ParticleSystem::OnRender(Hazel::OrthographicCamera& camera)
 {
-	Hazel::Renderer2D::BeginScene(camera);
+	Hazel::Renderer2D::BeginScene(camera.GetViewProjectionMatrix());
 	for (auto& particle : _particlePool)
 	{
 		if (!particle.Active)

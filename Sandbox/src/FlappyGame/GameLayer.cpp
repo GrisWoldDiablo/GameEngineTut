@@ -30,7 +30,7 @@ void GameLayer::OnUpdate(Hazel::Timestep timestep)
 	Hazel::RenderCommand::SetClearColor({ 0.4f, 0.4f, 0.4f, 1.0f });
 	Hazel::RenderCommand::Clear();
 
-	Hazel::Renderer2D::BeginScene(_cameraController.GetCamera());
+	Hazel::Renderer2D::BeginScene(_cameraController.GetCamera().GetViewProjectionMatrix());
 
 	Hazel::RenderCommand::SetDepthMaskReadOnly();
 

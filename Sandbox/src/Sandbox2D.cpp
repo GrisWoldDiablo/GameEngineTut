@@ -131,7 +131,7 @@ void Sandbox2D::OnUpdate(Hazel::Timestep timestep)
 		}
 	}
 
-	Hazel::Renderer2D::BeginScene(_cameraController.GetCamera());
+	Hazel::Renderer2D::BeginScene(_cameraController.GetCamera().GetViewProjectionMatrix());
 
 	for (uint32_t y = 0; y < _mapHeight; y++)
 	{
