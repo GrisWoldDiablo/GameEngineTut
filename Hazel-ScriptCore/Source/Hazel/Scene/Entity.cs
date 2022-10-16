@@ -97,9 +97,9 @@ namespace Hazel
 
 		public static Entity Create(string name = "Entity")
 		{
-			InternalCalls.Entity_Create(ref name, out var newId);
+			InternalCalls.Entity_Create(ref name, out var newEntity);
 
-			return new Entity(newId);
+			return newEntity;
 		}
 
 		public static bool Destroy(Entity entity)

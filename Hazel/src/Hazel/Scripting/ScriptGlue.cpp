@@ -40,15 +40,19 @@ namespace Hazel
 		return scene->GetEntityByUUID(entityId);
 	}
 
-	static void Entity_Create(MonoString** name, UUID* outId)
+	static void Entity_Create(MonoString** name, MonoObject** outEntity)
 	{
 		auto* scene = ScriptEngine::GetSceneContext();
 		HZ_CORE_ASSERT(scene, "Scene is null!");
 		HZ_CORE_ASSERT(*name, "Name is null!");
 
-		auto newEntity = scene->CreateEntity(mono_string_to_utf8(*name));
+		*outEntity = nullptr;
 
-		*outId = newEntity.GetUUID();
+		const auto newEntity = scene->CreateEntity(mono_string_to_utf8(*name));
+		if (const auto& entityScriptInstance = ScriptEngine::OnCreateEntity(newEntity))
+		{
+			*outEntity = entityScriptInstance->GetInstance();
+		}
 	}
 
 	static bool Entity_Destroy(UUID entityId)
