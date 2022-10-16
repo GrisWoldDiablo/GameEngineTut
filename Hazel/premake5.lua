@@ -1,7 +1,7 @@
 project "Hazel"
 	kind "StaticLib"
 	language "C++"
-	cppdialect "C++17"
+	cppdialect "C++20"
 	staticruntime "off"
 
 	targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
@@ -51,7 +51,8 @@ project "Hazel"
 		"_CRT_SECURE_NO_WARNINGS",
 		"GLFW_INCLUDE_NONE",
 		"AL_LIBTYPE_STATIC",
-		"RESTRICT=__restrict"
+		"RESTRICT=__restrict",
+		"_SILENCE_ALL_CXX23_DEPRECATION_WARNINGS"
 	}
 	
 	links

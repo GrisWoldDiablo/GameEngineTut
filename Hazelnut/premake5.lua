@@ -1,7 +1,7 @@
 project "Hazelnut"
 	kind "ConsoleApp"
 	language "C++"
-	cppdialect "C++17"
+	cppdialect "C++20"
 	staticruntime "off"
 
 	targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
@@ -24,6 +24,11 @@ project "Hazelnut"
 		"%{IncludeDir.entt}",
 		"%{IncludeDir.ImGuizmo}",
 		"%{IncludeDir.yaml_cpp}"
+	}
+
+	defines
+	{
+		"_SILENCE_ALL_CXX23_DEPRECATION_WARNINGS"
 	}
 
 	links

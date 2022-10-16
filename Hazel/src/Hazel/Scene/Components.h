@@ -20,6 +20,7 @@ namespace Hazel
 		UUID ID;
 
 		IDComponent() = default;
+		IDComponent(const UUID& uuid) { ID = uuid; }
 		IDComponent(const IDComponent&) = default;
 	};
 

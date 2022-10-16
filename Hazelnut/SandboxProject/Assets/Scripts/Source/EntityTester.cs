@@ -5,9 +5,9 @@ namespace Sandbox
 {
 	public class EntityTester : Entity
 	{
-		public string NewEntityName;
+		public string NewEntityName = string.Empty;
 		public Color NewEntityColor;
-		public string EntityToFind;
+		public string EntityToFind = string.Empty;
 		public Color EntityToFindColor;
 		public Entity EntityToTest;
 
@@ -18,13 +18,13 @@ namespace Sandbox
 		public void OnCreate()
 		{
 			Console.WriteLine($"New Entity : [{NewEntityName}]");
-			var newEnityID = Create(NewEntityName);
+			var newEnityID = Create(NewEntityName ?? "Missing name");
 			Console.WriteLine($"New Entity ID : [{newEnityID}]");
 
 			var spriteComponent = newEnityID.AddComponent<SpriteRendererComponent>();
 			spriteComponent.Color = NewEntityColor;
 
-			_foundEntity = FindByName(EntityToFind);
+			_foundEntity = FindByName(EntityToFind ?? "");
 			Console.WriteLine($"Find By Name : {_foundEntity}");
 			if (_foundEntity is CirclePlayer player)
 			{
@@ -60,10 +60,11 @@ namespace Sandbox
 			{
 				return;
 			}
-			
+
 			if (lifeTime < 0.0f)
 			{
-				Destroy(_foundEntity.Id);
+				Console.WriteLine($"DESTROY {_foundEntity}!");
+				Destroy(_foundEntity);
 			}
 		}
 	}

@@ -21,6 +21,54 @@
 
 namespace Hazel
 {
+#define DrawScalarFieldInstance(Type, ImGuiType)						\
+			auto data = scriptInstance->GetFieldValue<Type>(name);		\
+			if (ImGui::DragScalar(name.c_str(), ImGuiType, &data, 0.1f))\
+			{															\
+				scriptInstance->SetFieldValue(name, data);				\
+			}															\
+
+#define DrawScalarField(Type, ImGuiType)								\
+			auto data = scriptField.GetValue<Type>();					\
+			if (ImGui::DragScalar(name.c_str(), ImGuiType, &data, 0.1f))\
+			{															\
+				scriptField.SetValue(data);								\
+			}
+
+#define DrawScalarFieldInit(Type, ImGuiType)							\
+			auto data = field.GetDefaultValue<Type>();					\
+			if (ImGui::DragScalar(name.c_str(), ImGuiType, &data, 0.1f))\
+			{															\
+				auto& scriptFieldInstance = entityFields[name];			\
+				scriptFieldInstance.Field = field;						\
+				scriptFieldInstance.SetValue(data);						\
+			}
+
+#define DrawVectorFieldInstance(Type)								\
+			const auto defaultValue = field.GetDefaultValue<Type>();\
+			auto data = scriptInstance->GetFieldValue<Type>(name);	\
+			if (DrawVecControls(name, data, defaultValue))			\
+			{														\
+				scriptInstance->SetFieldValue(name, data);			\
+			}
+
+#define DrawVectorField(Type)													\
+			const auto defaultValue = scriptField.Field.GetDefaultValue<Type>();\
+			auto data = scriptField.GetValue<Type>();							\
+			if (DrawVecControls(name, data, defaultValue))						\
+			{																	\
+				scriptField.SetValue(data);										\
+			}
+
+#define DrawVectorFieldInit(Type)								\
+			auto data = field.GetDefaultValue<Type>();			\
+			if (DrawVecControls(name, data, data))				\
+			{													\
+				auto& scriptFieldInstance = entityFields[name];	\
+				scriptFieldInstance.Field = field;				\
+				scriptFieldInstance.SetValue(data);				\
+			}
+
 	template<typename PopupFunction>
 	static void DrawYesNoPopup(const std::string& question, PopupFunction popupFunction, const char* id = nullptr)
 	{
@@ -258,15 +306,17 @@ namespace Hazel
 				const auto uv1 = ImVec2(1.0f, 0.0f);
 				Ref<Texture2D> lockImage = _lockedEntity ? Utils::ERM::GetTexture(Utils::Icon_Lock) : Utils::ERM::GetTexture(Utils::Icon_Unlock);
 				ImGui::Image(lockImage->GetRawID(), imageSize, uv0, uv1);
-				
-				if (!_lockedEntity && ImGui::MenuItem("Lock"))
+				bool isImageClicked = ImGui::IsItemClicked();
+
+				if (!_lockedEntity && (ImGui::MenuItem("Lock") || isImageClicked))
 				{
 					_lockedEntity = _selectedEntity;
 				}
-				else if (_lockedEntity && ImGui::MenuItem("Unlock"))
+				else if (_lockedEntity && (ImGui::MenuItem("Unlock") || isImageClicked))
 				{
 					_lockedEntity = Entity();
 				}
+
 
 				ImGui::EndMenuBar();
 			}
@@ -502,6 +552,18 @@ namespace Hazel
 				return;
 			}
 
+			auto entityDropTarget = []<typename SetFunction>(SetFunction setFunction)
+			{
+				if (ImGui::BeginDragDropTarget())
+				{
+					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ENTITY_NODE_ITEM"))
+					{
+						setFunction(*static_cast<Entity*>(payload->Data));
+					}
+					ImGui::EndDragDropTarget();
+				}
+			};
+
 			// If scene Running
 			if (_scene->IsRunning())
 			{
@@ -514,20 +576,12 @@ namespace Hazel
 						{
 						case ScriptFieldType::Float:
 						{
-							auto data = scriptInstance->GetFieldValue<float>(name);
-							if (ImGui::DragScalar(name.c_str(), ImGuiDataType_Float, &data, 0.1f))
-							{
-								scriptInstance->SetFieldValue(name, data);
-							}
+							DrawScalarFieldInstance(float, ImGuiDataType_Float);
 							break;
 						}
 						case ScriptFieldType::Double:
 						{
-							auto data = scriptInstance->GetFieldValue<double>(name);
-							if (ImGui::DragScalar(name.c_str(), ImGuiDataType_Double, &data, 0.1f))
-							{
-								scriptInstance->SetFieldValue(name, data);
-							}
+							DrawScalarFieldInstance(double, ImGuiDataType_Double);
 							break;
 						}
 						case ScriptFieldType::Char:
@@ -552,104 +606,57 @@ namespace Hazel
 						}
 						case ScriptFieldType::SByte:
 						{
-							auto data = scriptInstance->GetFieldValue<int8_t>(name);
-							if (ImGui::DragScalar(name.c_str(), ImGuiDataType_S8, &data))
-							{
-								scriptInstance->SetFieldValue(name, data);
-							}
+							DrawScalarFieldInstance(int8_t, ImGuiDataType_S8);
 							break;
 						}
 						case ScriptFieldType::Short:
 						{
-							auto data = scriptInstance->GetFieldValue<int16_t>(name);
-							if (ImGui::DragScalar(name.c_str(), ImGuiDataType_S16, &data))
-							{
-								scriptInstance->SetFieldValue(name, data);
-							}
+							DrawScalarFieldInstance(int16_t, ImGuiDataType_S16);
 							break;
 						}
 						case ScriptFieldType::Int:
 						{
-							auto data = scriptInstance->GetFieldValue<int32_t>(name);
-							if (ImGui::DragInt(name.c_str(), &data, 0.1f))
-							{
-								scriptInstance->SetFieldValue(name, data);
-							}
+							DrawScalarFieldInstance(int32_t, ImGuiDataType_S32);
 							break;
 						}
 						case ScriptFieldType::Long:
 						{
-							auto data = scriptInstance->GetFieldValue<int64_t>(name);
-							if (ImGui::DragScalar(name.c_str(), ImGuiDataType_S64, &data))
-							{
-								scriptInstance->SetFieldValue(name, data);
-							}
+							DrawScalarFieldInstance(int64_t, ImGuiDataType_S64);
 							break;
 						}
 						case ScriptFieldType::Byte:
 						{
-							auto data = scriptInstance->GetFieldValue<uint8_t>(name);
-							if (ImGui::DragScalar(name.c_str(), ImGuiDataType_U8, &data))
-							{
-								scriptInstance->SetFieldValue(name, data);
-							}
+							DrawScalarFieldInstance(uint8_t, ImGuiDataType_U8);
 							break;
 						}
 						case ScriptFieldType::UShort:
 						{
-							auto data = scriptInstance->GetFieldValue<uint16_t>(name);
-							if (ImGui::DragScalar(name.c_str(), ImGuiDataType_U16, &data))
-							{
-								scriptInstance->SetFieldValue(name, data);
-							}
+							DrawScalarFieldInstance(uint16_t, ImGuiDataType_U16);
 							break;
 						}
 						case ScriptFieldType::UInt:
 						{
-							auto data = scriptInstance->GetFieldValue<uint32_t>(name);
-							if (ImGui::DragScalar(name.c_str(), ImGuiDataType_U32, &data))
-							{
-								scriptInstance->SetFieldValue(name, data);
-							}
+							DrawScalarFieldInstance(uint32_t, ImGuiDataType_U32);
 							break;
 						}
 						case ScriptFieldType::ULong:
 						{
-							auto data = scriptInstance->GetFieldValue<uint64_t>(name);
-							if (ImGui::DragScalar(name.c_str(), ImGuiDataType_U64, &data))
-							{
-								scriptInstance->SetFieldValue(name, data);
-							}
+							DrawScalarFieldInstance(uint64_t, ImGuiDataType_U64);
 							break;
 						}
 						case ScriptFieldType::Vector2:
 						{
-							const auto defaultValue = field.GetDefaultValue<glm::vec2>();
-							auto data = scriptInstance->GetFieldValue<glm::vec2>(name);
-							if (DrawVecControls(name, data, defaultValue))
-							{
-								scriptInstance->SetFieldValue(name, data);
-							}
+							DrawVectorFieldInstance(glm::vec2);
 							break;
 						}
 						case ScriptFieldType::Vector3:
 						{
-							const auto defaultValue = field.GetDefaultValue<glm::vec3>();
-							auto data = scriptInstance->GetFieldValue<glm::vec3>(name);
-							if (DrawVecControls(name, data, defaultValue))
-							{
-								scriptInstance->SetFieldValue(name, data);
-							}
+							DrawVectorFieldInstance(glm::vec3);
 							break;
 						}
 						case ScriptFieldType::Vector4:
 						{
-							const auto defaultValue = field.GetDefaultValue<glm::vec4>();
-							auto data = scriptInstance->GetFieldValue<glm::vec4>(name);
-							if (DrawVecControls(name, data, defaultValue))
-							{
-								scriptInstance->SetFieldValue(name, data);
-							}
+							DrawVectorFieldInstance(glm::vec4);
 							break;
 						}
 						case ScriptFieldType::Color:
@@ -664,64 +671,42 @@ namespace Hazel
 						case ScriptFieldType::Entity:
 						{
 							auto data = scriptInstance->GetFieldEntityValue(name);
-							if (data)
-							{
-								ImGui::LabelText(name.c_str(), data.Name().c_str());
-								if (ImGui::IsItemClicked())
-								{
-									_selectedEntity = data;
-								}
-							}
-							else
-							{
-								ImGui::LabelText(name.c_str(), "None");
-							}
 
-							if (ImGui::BeginDragDropTarget())
+							const char* comboName = data ? data.Name().c_str() : "(Null)";
+							if (ImGui::BeginCombo(name.c_str(), comboName))
 							{
-								if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ENTITY_NODE_ITEM"))
+								if (ImGui::Selectable("(Null)"))
 								{
-									auto payloadEntity = *(Entity*)payload->Data;
-									scriptInstance->SetFieldEntityValue(name, payloadEntity);
+									scriptInstance->SetFieldEntityValue(name, Entity());
 								}
-								ImGui::EndDragDropTarget();
-							}
 
-							if (ImGui::BeginPopupContextItem("ScriptFieldType::Entity"))
-							{
-								if (data)
+								_scene->_registry.each([&](auto entityID)
 								{
-									if (ImGui::Selectable(fmt::format("{0} [X]", data.Name()).c_str()))
+									Entity entity{ entityID, _scene.get() };
+
+									if (ImGui::Selectable(fmt::format("{0}##{1}", entity.Name(), entity.GetUUID()).c_str()))
 									{
-										scriptInstance->SetFieldEntityValue(name, Entity());
+										scriptInstance->SetFieldEntityValue(name, entity);
 									}
-									ImGui::Separator();
-								}
 
-								if (ImGui::BeginListBox("##Entities"))
-								{
-									_scene->_registry.each([&](auto entityID)
+									if (data && data.GetUUID() == entity.GetUUID())
 									{
-										Entity entity{ entityID, _scene.get() };
+										ImGui::SetItemDefaultFocus();
+									}
+								});
 
-										if (data && data.GetUUID() == entity.GetUUID())
-										{
-											return;
-										}
-
-										if (ImGui::Selectable(fmt::format("{0}##{1}", entity.Name(), entity.GetUUID()).c_str()))
-										{
-											scriptInstance->SetFieldEntityValue(name, entity);
-											ImGui::CloseCurrentPopup();
-										}
-									});
-
-									ImGui::EndListBox();
-								}
-
-								ImGui::EndPopup();
+								ImGui::EndCombo();
 							}
 
+							if (ImGui::IsItemClicked(ImGuiMouseButton_Right))
+							{
+								_selectedEntity = data;
+							}
+
+							entityDropTarget([&](Entity entity)
+							{
+								scriptInstance->SetFieldEntityValue(name, entity);
+							});
 							break;
 						}
 						case ScriptFieldType::String:
@@ -755,26 +740,19 @@ namespace Hazel
 				{
 					if (entityFields.find(name) != entityFields.end())
 					{
+						// That field was edited at least once.
 						auto& scriptField = entityFields[name];
 
 						switch (field.Type)
 						{
 						case ScriptFieldType::Float:
 						{
-							auto data = scriptField.GetValue<float>();
-							if (ImGui::DragScalar(name.c_str(), ImGuiDataType_Float, &data, 0.1f))
-							{
-								scriptField.SetValue(data);
-							}
+							DrawScalarField(float, ImGuiDataType_Float);
 							break;
 						}
 						case ScriptFieldType::Double:
 						{
-							auto data = scriptField.GetValue<double>();
-							if (ImGui::DragScalar(name.c_str(), ImGuiDataType_Double, &data, 0.1f))
-							{
-								scriptField.SetValue(data);
-							}
+							DrawScalarField(double, ImGuiDataType_Double);
 							break;
 						}
 						case ScriptFieldType::Char:
@@ -799,104 +777,58 @@ namespace Hazel
 						}
 						case ScriptFieldType::SByte:
 						{
-							auto data = scriptField.GetValue<int8_t>();
-							if (ImGui::DragScalar(name.c_str(), ImGuiDataType_S8, &data))
-							{
-								scriptField.SetValue(data);
-							}
+							DrawScalarField(double, ImGuiDataType_S8);
+
 							break;
 						}
 						case ScriptFieldType::Short:
 						{
-							auto data = scriptField.GetValue<int16_t>();
-							if (ImGui::DragScalar(name.c_str(), ImGuiDataType_S16, &data))
-							{
-								scriptField.SetValue(data);
-							}
+							DrawScalarField(int16_t, ImGuiDataType_S16);
 							break;
 						}
 						case ScriptFieldType::Int:
 						{
-							auto data = scriptField.GetValue<int32_t>();
-							if (ImGui::DragInt(name.c_str(), &data, 0.1f))
-							{
-								scriptField.SetValue(data);
-							}
+							DrawScalarField(int32_t, ImGuiDataType_S32);
 							break;
 						}
 						case ScriptFieldType::Long:
 						{
-							auto data = scriptField.GetValue<int64_t>();
-							if (ImGui::DragScalar(name.c_str(), ImGuiDataType_S64, &data))
-							{
-								scriptField.SetValue(data);
-							}
+							DrawScalarField(int64_t, ImGuiDataType_S64);
 							break;
 						}
 						case ScriptFieldType::Byte:
 						{
-							auto data = scriptField.GetValue<uint8_t>();
-							if (ImGui::DragScalar(name.c_str(), ImGuiDataType_U8, &data))
-							{
-								scriptField.SetValue(data);
-							}
+							DrawScalarField(uint8_t, ImGuiDataType_U8);
 							break;
 						}
 						case ScriptFieldType::UShort:
 						{
-							auto data = scriptField.GetValue<uint16_t>();
-							if (ImGui::DragScalar(name.c_str(), ImGuiDataType_U16, &data))
-							{
-								scriptField.SetValue(data);
-							}
+							DrawScalarField(uint16_t, ImGuiDataType_U16);
 							break;
 						}
 						case ScriptFieldType::UInt:
 						{
-							auto data = scriptField.GetValue<uint32_t>();
-							if (ImGui::DragScalar(name.c_str(), ImGuiDataType_U32, &data))
-							{
-								scriptField.SetValue(data);
-							}
+							DrawScalarField(uint32_t, ImGuiDataType_U32);
 							break;
 						}
 						case ScriptFieldType::ULong:
 						{
-							auto data = scriptField.GetValue<uint64_t>();
-							if (ImGui::DragScalar(name.c_str(), ImGuiDataType_U64, &data))
-							{
-								scriptField.SetValue(data);
-							}
+							DrawScalarField(uint64_t, ImGuiDataType_U64);
 							break;
 						}
 						case ScriptFieldType::Vector2:
 						{
-							const auto defaultValue = scriptField.Field.GetDefaultValue<glm::vec2>();
-							auto data = scriptField.GetValue<glm::vec2>();
-							if (DrawVecControls(name, data, defaultValue))
-							{
-								scriptField.SetValue(data);
-							}
+							DrawVectorField(glm::vec2);
 							break;
 						}
 						case ScriptFieldType::Vector3:
 						{
-							const auto defaultValue = scriptField.Field.GetDefaultValue<glm::vec3>();
-							auto data = scriptField.GetValue<glm::vec3>();
-							if (DrawVecControls(name, data, defaultValue))
-							{
-								scriptField.SetValue(data);
-							}
+							DrawVectorField(glm::vec3);
 							break;
 						}
 						case ScriptFieldType::Vector4:
 						{
-							const auto defaultValue = scriptField.Field.GetDefaultValue<glm::vec4>();
-							auto data = scriptField.GetValue<glm::vec4>();
-							if (DrawVecControls(name, data, defaultValue))
-							{
-								scriptField.SetValue(data);
-							}
+							DrawVectorField(glm::vec4);
 							break;
 						}
 						case ScriptFieldType::Color:
@@ -912,65 +844,42 @@ namespace Hazel
 						{
 							auto data = scriptField.GetValue<uint64_t>();
 							auto foundEntity = _scene->GetEntityByUUID(data);
-							if (foundEntity)
+
+							const char* comboName = foundEntity ? foundEntity.Name().c_str() : "(Null)";
+							if (ImGui::BeginCombo(name.c_str(), comboName))
 							{
-								ImGui::LabelText(name.c_str(), foundEntity.Name().c_str());
-								if (ImGui::IsItemClicked())
+								if (ImGui::Selectable("(Null)"))
 								{
-									_selectedEntity = foundEntity;
+									entityFields.erase(name);
 								}
-							}
-							else
-							{
-								ImGui::LabelText(name.c_str(), "None");
-							}
 
-							if (ImGui::BeginDragDropTarget())
-							{
-								if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ENTITY_NODE_ITEM"))
+								_scene->_registry.each([&](auto entityID)
 								{
-									auto payloadEntity = *(Entity*)payload->Data;
+									Entity entity{ entityID, _scene.get() };
 
-									scriptField.SetValue(payloadEntity.GetUUID());
-								}
-								ImGui::EndDragDropTarget();
-							}
-
-							if (ImGui::BeginPopupContextItem("ScriptFieldType::Entity"))
-							{
-								if (foundEntity)
-								{
-									if (ImGui::Selectable(fmt::format("{0} [X]", foundEntity.Name()).c_str()))
+									if (ImGui::Selectable(fmt::format("{0}##{1}", entity.Name(), entity.GetUUID()).c_str()))
 									{
-										entityFields.erase(name);
+										scriptField.SetValue<UUID>(entity.GetUUID());
 									}
-									ImGui::Separator();
-								}
 
-								if (ImGui::BeginListBox("##Entities"))
-								{
-									_scene->_registry.each([&](auto entityID)
+									if (foundEntity && foundEntity.GetUUID() == entity.GetUUID())
 									{
-										Entity entity{ entityID, _scene.get() };
+										ImGui::SetItemDefaultFocus();
+									}
+								});
 
-
-										if (foundEntity && foundEntity.GetUUID() == entity.GetUUID())
-										{
-											return;
-										}
-
-										if (ImGui::Selectable(fmt::format("{0}##{1}", entity.Name(), entity.GetUUID()).c_str()))
-										{
-											scriptField.SetValue<UUID>(entity.GetUUID());
-											ImGui::CloseCurrentPopup();
-										}
-									});
-
-									ImGui::EndListBox();
-								}
-
-								ImGui::EndPopup();
+								ImGui::EndCombo();
 							}
+							
+							if (ImGui::IsItemClicked(ImGuiMouseButton_Right))
+							{
+								_selectedEntity = foundEntity;
+							}
+
+							entityDropTarget([&](Entity entity)
+							{
+								scriptField.SetValue(entity.GetUUID());
+							});
 							break;
 						}
 						case ScriptFieldType::String:
@@ -992,24 +901,12 @@ namespace Hazel
 						{
 						case ScriptFieldType::Float:
 						{
-							auto data = field.GetDefaultValue<float>();
-							if (ImGui::DragScalar(name.c_str(), ImGuiDataType_Float, &data, 0.1f))
-							{
-								auto& scriptFieldInstance = entityFields[name];
-								scriptFieldInstance.Field = field;
-								scriptFieldInstance.SetValue(data);
-							}
+							DrawScalarFieldInit(float, ImGuiDataType_Float);
 							break;
 						}
 						case ScriptFieldType::Double:
 						{
-							auto data = field.GetDefaultValue<double>();
-							if (ImGui::DragScalar(name.c_str(), ImGuiDataType_Double, &data, 0.1f))
-							{
-								auto& scriptFieldInstance = entityFields[name];
-								scriptFieldInstance.Field = field;
-								scriptFieldInstance.SetValue(data);
-							}
+							DrawScalarFieldInit(double, ImGuiDataType_Double);
 							break;
 						}
 						case ScriptFieldType::Char:
@@ -1039,123 +936,57 @@ namespace Hazel
 
 						case ScriptFieldType::SByte:
 						{
-							auto data = field.GetDefaultValue<int8_t>();
-							if (ImGui::DragScalar(name.c_str(), ImGuiDataType_S8, &data))
-							{
-								auto& scriptFieldInstance = entityFields[name];
-								scriptFieldInstance.Field = field;
-								scriptFieldInstance.SetValue(data);
-							}
+							DrawScalarFieldInit(int8_t, ImGuiDataType_S8);
 							break;
 						}
 						case ScriptFieldType::Short:
 						{
-							auto data = field.GetDefaultValue<int16_t>();
-							if (ImGui::DragScalar(name.c_str(), ImGuiDataType_S16, &data))
-							{
-								auto& scriptFieldInstance = entityFields[name];
-								scriptFieldInstance.Field = field;
-								scriptFieldInstance.SetValue(data);
-							}
+							DrawScalarFieldInit(int16_t, ImGuiDataType_S16);
 							break;
 						}
 						case ScriptFieldType::Int:
 						{
-							auto data = field.GetDefaultValue<int32_t>();
-							if (ImGui::DragInt(name.c_str(), &data, 0.1f))
-							{
-								auto& scriptFieldInstance = entityFields[name];
-								scriptFieldInstance.Field = field;
-								scriptFieldInstance.SetValue(data);
-							}
+							DrawScalarFieldInit(int32_t, ImGuiDataType_S32);
 							break;
 						}
 						case ScriptFieldType::Long:
 						{
-							auto data = field.GetDefaultValue<int64_t>();
-							if (ImGui::DragScalar(name.c_str(), ImGuiDataType_S64, &data))
-							{
-								auto& scriptFieldInstance = entityFields[name];
-								scriptFieldInstance.Field = field;
-								scriptFieldInstance.SetValue(data);
-							}
+							DrawScalarFieldInit(int64_t, ImGuiDataType_S64);
 							break;
 						}
 						case ScriptFieldType::Byte:
 						{
-							auto data = field.GetDefaultValue<uint8_t>();
-							if (ImGui::DragScalar(name.c_str(), ImGuiDataType_U8, &data))
-							{
-								auto& scriptFieldInstance = entityFields[name];
-								scriptFieldInstance.Field = field;
-								scriptFieldInstance.SetValue(data);
-							}
+							DrawScalarFieldInit(uint8_t, ImGuiDataType_U8);
 							break;
 						}
 						case ScriptFieldType::UShort:
 						{
-							auto data = field.GetDefaultValue<uint16_t>();
-							if (ImGui::DragScalar(name.c_str(), ImGuiDataType_U16, &data))
-							{
-								auto& scriptFieldInstance = entityFields[name];
-								scriptFieldInstance.Field = field;
-								scriptFieldInstance.SetValue(data);
-							}
+							DrawScalarFieldInit(uint16_t, ImGuiDataType_U16);
 							break;
 						}
 						case ScriptFieldType::UInt:
 						{
-							auto data = field.GetDefaultValue<uint32_t>();
-							if (ImGui::DragScalar(name.c_str(), ImGuiDataType_U32, &data))
-							{
-								auto& scriptFieldInstance = entityFields[name];
-								scriptFieldInstance.Field = field;
-								scriptFieldInstance.SetValue(data);
-							}
+							DrawScalarFieldInit(uint32_t, ImGuiDataType_U32);
 							break;
 						}
 						case ScriptFieldType::ULong:
 						{
-							auto data = field.GetDefaultValue<uint64_t>();
-							if (ImGui::DragScalar(name.c_str(), ImGuiDataType_U64, &data))
-							{
-								auto& scriptFieldInstance = entityFields[name];
-								scriptFieldInstance.Field = field;
-								scriptFieldInstance.SetValue(data);
-							}
+							DrawScalarFieldInit(uint64_t, ImGuiDataType_U64);
 							break;
 						}
 						case ScriptFieldType::Vector2:
 						{
-							auto data = field.GetDefaultValue<glm::vec2>();
-							if (DrawVecControls(name, data, data))
-							{
-								auto& scriptFieldInstance = entityFields[name];
-								scriptFieldInstance.Field = field;
-								scriptFieldInstance.SetValue(data);
-							}
+							DrawVectorFieldInit(glm::vec2);
 							break;
 						}
 						case ScriptFieldType::Vector3:
 						{
-							auto data = field.GetDefaultValue<glm::vec3>();
-							if (DrawVecControls(name, data, data))
-							{
-								auto& scriptFieldInstance = entityFields[name];
-								scriptFieldInstance.Field = field;
-								scriptFieldInstance.SetValue(data);
-							}
+							DrawVectorFieldInit(glm::vec3);
 							break;
 						}
 						case ScriptFieldType::Vector4:
 						{
-							auto data = field.GetDefaultValue<glm::vec4>();
-							if (DrawVecControls(name, data, data))
-							{
-								auto& scriptFieldInstance = entityFields[name];
-								scriptFieldInstance.Field = field;
-								scriptFieldInstance.SetValue(data);
-							}
+							DrawVectorFieldInit(glm::vec4);
 							break;
 						}
 						case ScriptFieldType::Color:
@@ -1171,44 +1002,31 @@ namespace Hazel
 						}
 						case ScriptFieldType::Entity:
 						{
-							ImGui::LabelText(name.c_str(), "None");
-
-							if (ImGui::BeginDragDropTarget())
+							if (ImGui::BeginCombo(name.c_str(), "(Null)"))
 							{
-								if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ENTITY_NODE_ITEM"))
-								{
-									auto payloadEntity = *(Entity*)payload->Data;
+								ImGui::Selectable("(Null)");
 
-									auto& scriptFieldInstance = entityFields[name];
-									scriptFieldInstance.Field = field;
-									scriptFieldInstance.SetValue(payloadEntity.GetUUID());
-								}
-								ImGui::EndDragDropTarget();
-							}
-
-							if (ImGui::BeginPopupContextItem("ScriptFieldType::Entity"))
-							{
-								if (ImGui::BeginListBox("##Entities"))
+								_scene->_registry.each([&](auto entityID)
 								{
-									_scene->_registry.each([&](auto entityID)
+									Entity entity{ entityID, _scene.get() };
+
+									if (ImGui::Selectable(fmt::format("{0}##{1}", entity.Name(), entity.GetUUID()).c_str()))
 									{
-										Entity entity{ entityID, _scene.get() };
+										auto& scriptFieldInstance = entityFields[name];
+										scriptFieldInstance.Field = field;
+										scriptFieldInstance.SetValue(entity.GetUUID());
+									}
+								});
 
-										if (ImGui::Selectable(fmt::format("{0}##{1}", entity.Name(), entity.GetUUID()).c_str()))
-										{
-											auto& scriptFieldInstance = entityFields[name];
-											scriptFieldInstance.Field = field;
-											scriptFieldInstance.SetValue(entity.GetUUID());
-
-											ImGui::CloseCurrentPopup();
-										}
-									});
-
-									ImGui::EndListBox();
-								}
-
-								ImGui::EndPopup();
+								ImGui::EndCombo();
 							}
+
+							entityDropTarget([&](Entity entity)
+							{
+								auto& scriptFieldInstance = entityFields[name];
+								scriptFieldInstance.Field = field;
+								scriptFieldInstance.SetValue(entity.GetUUID());
+							});
 							break;
 						}
 						case ScriptFieldType::String:

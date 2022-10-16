@@ -26,9 +26,9 @@ def main(argv):
     if platform.system() == "Windows":
         print("\nRunning premakes...") 
         print("")
-        subprocess.call(os.path.relpath("./scripts/GenerateSandboxProject.bat"), stdin=subprocess.DEVNULL)   
-        print("")
         subprocess.call(os.path.abspath("./scripts/GenerateHazelProject.bat"), stdin=subprocess.DEVNULL)
+        print("")
+        subprocess.call(os.path.relpath("./scripts/GenerateSandboxProject.bat"), stdin=subprocess.DEVNULL)   
 
     print("\nSetup completed!")
 
