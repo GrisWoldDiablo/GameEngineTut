@@ -192,12 +192,6 @@ namespace Hazel
 
 		AudioListenerComponent() = default;
 		AudioListenerComponent(const AudioListenerComponent&) = default;
-
-		// TODO? Maybe move this.
-		void SetPosition(const glm::vec3& position)
-		{
-			AudioEngine::SetListenerPosition(position);
-		}
 	};
 
 	template<typename... Component>

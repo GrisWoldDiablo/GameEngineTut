@@ -1,4 +1,4 @@
-﻿namespace Hazel
+namespace Hazel
 {
 	// TODO Create HObject class to parent Component and Entity classes
 	public class Component
@@ -171,17 +171,6 @@
 
 	public class AudioListenerComponent : Component
 	{
-		public Vector3 Position
-		{
-			get
-			{
-				InternalCalls.AudioListenerComponent_GetPosition(Entity.Id, out var position);
-				return position;
-			}
-
-			set => InternalCalls.AudioListenerComponent_SetPosition(Entity.Id, ref value);
-		}
-
 		public bool IsVisibleInGame
 		{
 

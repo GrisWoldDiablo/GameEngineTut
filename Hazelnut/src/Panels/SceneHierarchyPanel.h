@@ -25,6 +25,7 @@ namespace Hazel
 		void DrawSceneName();
 		void DrawEntityNode(Entity entity);
 		void DrawComponents(Entity entity);
+		void UpdateComponents(Entity entity);
 		template<typename T>
 		void AddComponentMenu();
 		void CleanUpComponents(Entity entity);

@@ -175,6 +175,16 @@ namespace Hazel
 		}
 	}
 
+	template<typename T, typename UIFunction>
+	static void UpdateComponent(Entity entity, UIFunction uiFunction)
+	{
+		if (entity.HasComponent<T>())
+		{
+			auto& component = entity.GetComponent<T>();
+			uiFunction(component);
+		}
+	}
+
 	template<typename T>
 	static bool DrawFloatField(const char* label, T& value, T resetValue, const Color& color, int precision = 2)
 	{
@@ -325,6 +335,8 @@ namespace Hazel
 		if (_selectedEntity || _lockedEntity)
 		{
 			DrawComponents(_lockedEntity ? _lockedEntity : _selectedEntity);
+			UpdateComponents(_selectedEntity);
+			UpdateComponents(_lockedEntity);
 		}
 
 		ImGui::End();
@@ -870,7 +882,7 @@ namespace Hazel
 
 								ImGui::EndCombo();
 							}
-							
+
 							if (ImGui::IsItemClicked(ImGuiMouseButton_Right))
 							{
 								_selectedEntity = foundEntity;
@@ -1402,11 +1414,6 @@ namespace Hazel
 				[&]() { return audioSource->Get3D(); },
 				[&](auto valueToSet) { audioSource->Set3D(valueToSet); });
 
-			if (audioSource->Get3D())
-			{
-				audioSource->SetPosition(entity.Transform().Position);
-			}
-
 			ImGui::Text("Lenght: %.3f sec", audioSource->GetLength());
 
 			auto state = audioSource->GetState();
@@ -1485,11 +1492,37 @@ namespace Hazel
 					return;
 				}
 			}
-
-			AudioEngine::SetListenerPosition(entity.Transform().Position);
 		});
 #pragma endregion
 
+	}
+
+	void SceneHierarchyPanel::UpdateComponents(Entity entity)
+	{
+		if (!entity)
+		{
+			return;
+		}
+
+#pragma region  AudioSourceComponent
+		UpdateComponent<AudioSourceComponent>(entity, [&](AudioSourceComponent& component)
+		{
+			if (auto& audioSource = component.AudioSource)
+			{
+				if (audioSource->Get3D())
+				{
+					audioSource->SetPosition(entity.Transform().Position);
+				}
+			}
+		});
+#pragma endregion
+
+#pragma region  AudioListenerComponent
+		UpdateComponent<AudioListenerComponent>(entity, [&](AudioListenerComponent& component)
+		{
+			AudioEngine::SetListenerPosition(entity.Transform().Position);
+		});
+#pragma endregion
 	}
 
 	template<typename T, typename Function>

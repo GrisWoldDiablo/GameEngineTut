@@ -165,6 +165,23 @@ namespace Hazel
 		HZ_CORE_ASSERT(entity, "Entity is null!");
 
 		entity.Transform().Position = *position;
+
+		if (entity.HasComponent<AudioListenerComponent>())
+		{
+			AudioEngine::SetListenerPosition(*position);
+		}
+
+		if (entity.HasComponent<AudioSourceComponent>())
+		{
+			auto& component = entity.GetComponent<AudioSourceComponent>();
+			if (auto& source = component.AudioSource)
+			{
+				if (source->Get3D())
+				{
+					source->SetPosition(*position);
+				}
+			}
+		}
 	}
 
 	static void TransformComponent_GetRotation(UUID entityId, glm::vec3* outRotation)
@@ -378,32 +395,6 @@ namespace Hazel
 #pragma endregion
 
 #pragma region AudioListener
-	static void AudioListenerComponent_GetPosition(UUID entityId, glm::vec3* outPosition)
-	{
-		auto* scene = ScriptEngine::GetSceneContext();
-		HZ_CORE_ASSERT(scene, "Scene is null!");
-		auto entity = scene->GetEntityByUUID(entityId);
-		HZ_CORE_ASSERT(entity, "Entity is null!");
-
-		// Will crash if entity does not have component.
-		auto& component = entity.GetComponent<AudioListenerComponent>();
-
-		*outPosition = entity.Transform().Position;
-	}
-
-	static void AudioListenerComponent_SetPosition(UUID entityId, glm::vec3* position)
-	{
-		auto* scene = ScriptEngine::GetSceneContext();
-		HZ_CORE_ASSERT(scene, "Scene is null!");
-		auto entity = scene->GetEntityByUUID(entityId);
-		HZ_CORE_ASSERT(entity, "Entity is null!");
-
-		auto& component = entity.GetComponent<AudioListenerComponent>();
-
-		entity.Transform().Position = *position;
-		component.SetPosition(*position);
-	}
-
 	static void AudioListenerComponent_GetIsVisibleInGame(UUID entityId, bool* outIsVisibleInGame)
 	{
 		auto* scene = ScriptEngine::GetSceneContext();
@@ -512,8 +503,6 @@ namespace Hazel
 		HZ_ADD_INTERNAL_CALL(Rigidbody2DComponent_ApplyAngularImpulse);
 
 		// Audio Listener
-		HZ_ADD_INTERNAL_CALL(AudioListenerComponent_GetPosition);
-		HZ_ADD_INTERNAL_CALL(AudioListenerComponent_SetPosition);
 		HZ_ADD_INTERNAL_CALL(AudioListenerComponent_GetIsVisibleInGame);
 		HZ_ADD_INTERNAL_CALL(AudioListenerComponent_SetIsVisibleInGame);
 	}

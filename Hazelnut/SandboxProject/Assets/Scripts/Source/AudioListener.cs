@@ -38,10 +38,10 @@ namespace Sandbox
 				velocity.X = 1.0f;
 			}
 
-			var position = _audioListener.Position;
+			var position = Transform.Position;
 			velocity *= speed * timestep;
 			position += velocity;
-			_audioListener.Position = position;
+			Transform.Position = position;
 
 			if (Input.IsKeyDown(KeyCode.SPACE))
 			{
