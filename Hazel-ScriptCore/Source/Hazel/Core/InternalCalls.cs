@@ -44,6 +44,7 @@ namespace Hazel
 		// Components
 		//////////////
 
+		#region Transform
 		/* Transform */
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern static void TransformComponent_GetPosition(ulong entityId, out Vector3 position);
@@ -62,7 +63,9 @@ namespace Hazel
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern static void TransformComponent_SetScale(ulong entityId, ref Vector3 scale);
+		#endregion
 
+		#region Sprite Renderer
 		/* Sprite Renderer */
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern static void SpriteRendererComponent_GetTiling(ulong entityId, out Vector2 tiling);
@@ -75,7 +78,9 @@ namespace Hazel
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern static void SpriteRendererComponent_SetColor(ulong entityId, ref Color color);
+		#endregion
 
+		#region Circle Renderer
 		/* Circle Renderer*/
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern static void CircleRendererComponent_GetColor(ulong entityId, out Color color);
@@ -94,7 +99,9 @@ namespace Hazel
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern static void CircleRendererComponent_SetFade(ulong entityId, ref float fade);
+		#endregion
 
+		#region Rigibody 2D
 		/* Rigibody 2D */
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern static void Rigidbody2DComponent_ApplyLinearImpulse(ulong entityId, ref Vector2 impulse, ref Vector2 point, bool wake);
@@ -103,13 +110,76 @@ namespace Hazel
 		internal extern static void Rigidbody2DComponent_ApplyLinearImpulseToCenter(ulong entityId, ref Vector2 impulse, bool wake);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern static void Rigidbody2DComponent_ApplyAngularImpulse(ulong entityId, ref float impulse, bool wake);
+		internal extern static void Rigidbody2DComponent_ApplyAngularImpulse(ulong entityId, float impulse, bool wake);
+		#endregion
 
-		/* AudioListener */
+		#region Audio Listener
+		/* Audio Listener */
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern static void AudioListenerComponent_GetIsVisibleInGame(ulong entityId, out bool isVisibleInGame);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern static void AudioListenerComponent_SetIsVisibleInGame(ulong entityId, ref bool isVisibleInGame);
+		internal extern static void AudioListenerComponent_SetIsVisibleInGame(ulong entityId, bool isVisibleInGame);
+		#endregion
+
+		#region Audio Source
+		/* Audio Source */
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern static void AudioSourceComponent_GetGain(UUID id, out float gain);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern static void AudioSourceComponent_SetGain(UUID id, float gain);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern static void AudioSourceComponent_GetPitch(UUID id, out float pitch);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern static void AudioSourceComponent_SetPitch(UUID id, float pitch);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern static void AudioSourceComponent_GetLoop(UUID id, out bool isLoop);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern static void AudioSourceComponent_SetLoop(UUID id, bool isLoop);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern static void AudioSourceComponent_Get3D(UUID id, out bool is3D);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern static void AudioSourceComponent_Set3D(UUID id, bool is3D);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern static void AudioSourceComponent_GetState(UUID id, out int state);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern static void AudioSourceComponent_GetOffset(UUID id, out float offset);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern static void AudioSourceComponent_SetOffset(UUID id, float offset);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern static void AudioSourceComponent_GetLength(UUID id, out float lenght);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern static void AudioSourceComponent_GetPath(UUID id, out string path);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern static void AudioSourceComponent_Play(UUID id);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern static void AudioSourceComponent_Stop(UUID id);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern static void AudioSourceComponent_Pause(UUID id);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern static void AudioSourceComponent_Rewind(UUID id);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern static void AudioSourceComponent_GetIsVisibleInGame(UUID id, out bool isVisibleInGame);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern static void AudioSourceComponent_SetIsVisibleInGame(UUID id, bool isVisibleInGame);
+		#endregion
 	}
 }

@@ -151,6 +151,9 @@ namespace Hazel
 	{
 		_isRunning = true;
 
+		// TODO? Should we do this here?
+		AudioEngine::StopAllAudioSources();
+		
 		OnPhysic2DStart();
 
 		// Scripting
@@ -170,6 +173,9 @@ namespace Hazel
 
 	void Scene::OnRuntimeStop()
 	{
+		// TODO? Should we do this here?
+		AudioEngine::StopAllAudioSources();
+		
 		OnPhysic2DStop();
 
 		ScriptEngine::OnRuntimeStop();
@@ -530,6 +536,8 @@ namespace Hazel
 	template<typename T>
 	void Scene::OnComponentAdded(Entity entity, T& component)
 	{
+		// Commented because of C++20.
+		// TODO Find equivalent.
 		//static_assert(false);
 	}
 
@@ -611,6 +619,8 @@ namespace Hazel
 	template<typename T>
 	void Scene::OnComponentRemoved(Entity entity, T& component)
 	{
+		// Commented because of C++20.
+		// TODO Find equivalent.
 		//static_assert(false);
 	}
 
@@ -660,7 +670,12 @@ namespace Hazel
 
 	template<>
 	void Scene::OnComponentRemoved<AudioSourceComponent>(Entity entity, AudioSourceComponent& component)
-	{}
+	{
+		if (component.AudioSource)
+		{
+			component.AudioSource->Stop();
+		}
+	}
 
 	template<>
 	void Scene::OnComponentRemoved<AudioListenerComponent>(Entity entity, AudioListenerComponent& component)
@@ -701,6 +716,11 @@ namespace Hazel
 		}
 
 		CleanUpComponent<AudioListenerComponent>(entity, [&](AudioListenerComponent& component)
+		{
+			OnComponentRemoved(entity, component);
+		});
+
+		CleanUpComponent<AudioSourceComponent>(entity, [&](AudioSourceComponent& component)
 		{
 			OnComponentRemoved(entity, component);
 		});

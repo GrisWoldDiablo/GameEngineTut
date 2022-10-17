@@ -1,4 +1,4 @@
-namespace Hazel
+﻿namespace Hazel
 {
 	// TODO Create HObject class to parent Component and Entity classes
 	public class Component
@@ -12,12 +12,12 @@ namespace Hazel
 
 		public override bool Equals(object obj)
 		{
-			return obj is Component component && Entity.Equals(component.Entity);
+			return obj is Component component && CompareComponent(this, component);
 		}
 
 		public static implicit operator bool(Component component)
 		{
-			return !(component is null) && component.Entity;
+			return !(component is null) && !CompareComponent(component, null);
 		}
 
 		public static bool operator ==(Component lhs, Component rhs)
@@ -42,15 +42,16 @@ namespace Hazel
 
 			if (rhsIsNull && !lhsIsNull)
 			{
-				return !lhs.Entity;
+				return !lhs.Entity || !lhs.Entity.HasComponent(lhs.GetType());
 			}
 
 			if (lhsIsNull && !rhsIsNull)
 			{
-				return !rhs.Entity;
+				return !rhs.Entity || !rhs.Entity.HasComponent(lhs.GetType());
 			}
 
-			return lhs.Entity == rhs.Entity;
+			// Just need to check one side for component since they are equal.
+			return (lhs.Entity == rhs.Entity) && lhs.Entity.HasComponent(lhs.GetType());
 		}
 	}
 
@@ -165,7 +166,7 @@ namespace Hazel
 
 		public void ApplyAngularImpulse(float impulse, bool wake = true)
 		{
-			InternalCalls.Rigidbody2DComponent_ApplyAngularImpulse(Entity.Id, ref impulse, wake);
+			InternalCalls.Rigidbody2DComponent_ApplyAngularImpulse(Entity.Id, impulse, wake);
 		}
 	}
 
@@ -180,7 +181,114 @@ namespace Hazel
 				return isVisibleInGame;
 			}
 
-			set => InternalCalls.AudioListenerComponent_SetIsVisibleInGame(Entity.Id, ref value);
+			set => InternalCalls.AudioListenerComponent_SetIsVisibleInGame(Entity.Id, value);
 		}
+	}
+
+	public enum AudioSourceState
+	{
+		None = 0,
+		Initial,
+		Playing,
+		Pause,
+		Stopped
+	}
+
+	public class AudioSourceComponent : Component
+	{
+		public float Gain
+		{
+			get
+			{
+				InternalCalls.AudioSourceComponent_GetGain(Entity.Id, out var gain);
+				return gain;
+			}
+			set => InternalCalls.AudioSourceComponent_SetGain(Entity.Id, value);
+		}
+
+		public float Pitch
+		{
+			get
+			{
+				InternalCalls.AudioSourceComponent_GetPitch(Entity.Id, out var pitch);
+				return pitch;
+			}
+			set => InternalCalls.AudioSourceComponent_SetPitch(Entity.Id, value);
+		}
+
+		public bool IsLoop
+		{
+			get
+			{
+				InternalCalls.AudioSourceComponent_GetLoop(Entity.Id, out var isLoop);
+				return isLoop;
+			}
+			set => InternalCalls.AudioSourceComponent_SetLoop(Entity.Id, value);
+		}
+
+		public bool Is3D
+		{
+			get
+			{
+				InternalCalls.AudioSourceComponent_Get3D(Entity.Id, out var is3D);
+				return is3D;
+			}
+			set => InternalCalls.AudioSourceComponent_Set3D(Entity.Id, value);
+		}
+
+		public AudioSourceState State
+		{
+			get
+			{
+				InternalCalls.AudioSourceComponent_GetState(Entity.Id, out var state);
+				return (AudioSourceState)state;
+			}
+		}
+
+		public float Offset
+		{
+			get
+			{
+				InternalCalls.AudioSourceComponent_GetOffset(Entity.Id, out var offset);
+				return offset;
+			}
+			set => InternalCalls.AudioSourceComponent_SetOffset(Entity.Id, value);
+		}
+
+		public float Length
+		{
+			get
+			{
+				InternalCalls.AudioSourceComponent_GetLength(Entity.Id, out var lenght);
+				return lenght;
+			}
+		}
+
+		public string Path
+		{
+			get
+			{
+				InternalCalls.AudioSourceComponent_GetPath(Entity.Id, out var path);
+				return path;
+			}
+		}
+
+		public bool IsVisibleInGame
+		{
+
+			get
+			{
+				InternalCalls.AudioSourceComponent_GetIsVisibleInGame(Entity.Id, out var isVisibleInGame);
+				return isVisibleInGame;
+			}
+
+			set => InternalCalls.AudioSourceComponent_SetIsVisibleInGame(Entity.Id, value);
+		}
+
+
+		public void Play() => InternalCalls.AudioSourceComponent_Play(Entity.Id);
+		public void Stop() => InternalCalls.AudioSourceComponent_Stop(Entity.Id);
+		public void Pause() => InternalCalls.AudioSourceComponent_Pause(Entity.Id);
+		public void Rewind() => InternalCalls.AudioSourceComponent_Rewind(Entity.Id);
 	}
 }

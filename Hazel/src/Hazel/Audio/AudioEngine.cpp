@@ -35,7 +35,7 @@ namespace Hazel
 				return AudioFileFormat::OGG;
 			}
 
-			return AudioFileFormat::NONE;
+			return AudioFileFormat::None;
 		}
 
 		static ALenum GetOpenALFormat(uint32_t channels)
@@ -62,7 +62,7 @@ namespace Hazel
 		uint32_t AudioScratchBufferSize = 10 * 1024 * 1024;
 
 		std::unordered_map<std::string, Ref<AudioSource>> UnassignedAudioSources;
-		std::vector<AudioSource*> AssignedAudioSources;
+		std::unordered_set<AudioSource*> AssignedAudioSources;
 	};
 
 	static AudioEngineData* sAudioData = nullptr;
@@ -108,13 +108,13 @@ namespace Hazel
 		case AudioFileFormat::OGG:
 			newAudioSource = LoadOgg(filePath);
 			break;
-		case AudioFileFormat::NONE:
+		case AudioFileFormat::None:
 		default:
 			HZ_CORE_LERROR("No supported format for [{0}]", filePath.string());
 			return nullptr;
 		}
 
-		sAudioData->AssignedAudioSources.push_back(newAudioSource.get());
+		sAudioData->AssignedAudioSources.emplace(newAudioSource.get());
 
 		return newAudioSource;
 	}
@@ -126,8 +126,8 @@ namespace Hazel
 		audioSource->Stop();
 		audioSource->ResetFields();
 		auto& sources = sAudioData->AssignedAudioSources;
-		sources.erase(std::remove(sources.begin(), sources.end(), audioSource.get()), sources.end());
-		
+		sources.erase(audioSource.get());
+
 		sAudioData->UnassignedAudioSources.emplace(audioSource->GetPath().string(), audioSource);
 	}
 
@@ -135,7 +135,10 @@ namespace Hazel
 	{
 		// TODO delete or release?
 		auto& sources = sAudioData->AssignedAudioSources;
-		sources.erase(std::remove(sources.begin(), sources.end(), audioSource), sources.end());
+		if (!sources.empty() && sources.contains(audioSource))
+		{
+			sources.erase(audioSource);
+		}
 	}
 
 	void AudioEngine::StopAllAudioSources()

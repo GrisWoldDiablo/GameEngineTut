@@ -103,7 +103,7 @@ namespace Hazel
 		HZ_CORE_ASSERT(entity, "Entity is null!");
 
 		auto* managedType = mono_reflection_type_get_type(componentType);
-		HZ_CORE_ASSERT(sEntityAddComponentFuncs.find(managedType) != sEntityAddComponentFuncs.end(), "");
+		HZ_CORE_ASSERT(sEntityAddComponentFuncs.find(managedType) != sEntityAddComponentFuncs.end(), "Invalid Type!");
 
 		sEntityAddComponentFuncs.at(managedType)(entity);
 	}
@@ -116,7 +116,7 @@ namespace Hazel
 		HZ_CORE_ASSERT(entity, "Entity is null!");
 
 		auto* managedType = mono_reflection_type_get_type(componentType);
-		HZ_CORE_ASSERT(sEntityHasComponentFuncs.find(managedType) != sEntityHasComponentFuncs.end(), "");
+		HZ_CORE_ASSERT(sEntityHasComponentFuncs.find(managedType) != sEntityHasComponentFuncs.end(), "Invalid Type!");
 
 		return sEntityHasComponentFuncs.at(managedType)(entity);
 	}
@@ -146,6 +146,7 @@ namespace Hazel
 	/// Components
 	/////////////////
 
+#pragma region Components
 #pragma region Transform
 	static void TransformComponent_GetPosition(UUID entityId, glm::vec3* outPosition)
 	{
@@ -380,7 +381,7 @@ namespace Hazel
 		body->ApplyLinearImpulseToCenter(b2Vec2(impulse->x, impulse->y), wake);
 	}
 
-	static void Rigidbody2DComponent_ApplyAngularImpulse(UUID entityId, float* impulse, bool wake)
+	static void Rigidbody2DComponent_ApplyAngularImpulse(UUID entityId, float impulse, bool wake)
 	{
 		auto* scene = ScriptEngine::GetSceneContext();
 		HZ_CORE_ASSERT(scene, "Scene is null!");
@@ -390,7 +391,7 @@ namespace Hazel
 		auto& component = entity.GetComponent<Rigidbody2DComponent>();
 		auto* body = static_cast<b2Body*>(component.RuntimeBody);
 
-		body->ApplyAngularImpulse(*impulse, wake);
+		body->ApplyAngularImpulse(impulse, wake);
 	}
 #pragma endregion
 
@@ -408,7 +409,7 @@ namespace Hazel
 		*outIsVisibleInGame = component.IsVisibleInGame;
 	}
 
-	static void AudioListenerComponent_SetIsVisibleInGame(UUID entityId, bool* isVisibleInGame)
+	static void AudioListenerComponent_SetIsVisibleInGame(UUID entityId, bool isVisibleInGame)
 	{
 		auto* scene = ScriptEngine::GetSceneContext();
 		HZ_CORE_ASSERT(scene, "Scene is null!");
@@ -417,9 +418,276 @@ namespace Hazel
 
 		// Will crash if entity does not have component.
 		auto& component = entity.GetComponent<AudioListenerComponent>();
-		component.IsVisibleInGame = *isVisibleInGame;
+		component.IsVisibleInGame = isVisibleInGame;
 	}
 #pragma endregion
+
+#pragma region AudioSource
+	static void AudioSourceComponent_GetGain(UUID entityId, float* outGain)
+	{
+		auto* scene = ScriptEngine::GetSceneContext();
+		HZ_CORE_ASSERT(scene, "Scene is null!");
+		auto entity = scene->GetEntityByUUID(entityId);
+		HZ_CORE_ASSERT(entity, "Entity is null!");
+
+		// Will crash if entity does not have component.
+		auto& component = entity.GetComponent<AudioSourceComponent>();
+		HZ_CORE_ASSERT(component.AudioSource, "AudioSource is Null!");
+
+		*outGain = component.AudioSource->GetGain();
+	}
+
+	static void AudioSourceComponent_SetGain(UUID entityId, float gain)
+	{
+		auto* scene = ScriptEngine::GetSceneContext();
+		HZ_CORE_ASSERT(scene, "Scene is null!");
+		auto entity = scene->GetEntityByUUID(entityId);
+		HZ_CORE_ASSERT(entity, "Entity is null!");
+
+		// Will crash if entity does not have component.
+		auto& component = entity.GetComponent<AudioSourceComponent>();
+		HZ_CORE_ASSERT(component.AudioSource, "AudioSource is Null!");
+
+		component.AudioSource->SetGain(gain);
+	}
+
+	static void AudioSourceComponent_GetPitch(UUID entityId, float* outPitch)
+	{
+		auto* scene = ScriptEngine::GetSceneContext();
+		HZ_CORE_ASSERT(scene, "Scene is null!");
+		auto entity = scene->GetEntityByUUID(entityId);
+		HZ_CORE_ASSERT(entity, "Entity is null!");
+
+		// Will crash if entity does not have component.
+		auto& component = entity.GetComponent<AudioSourceComponent>();
+		HZ_CORE_ASSERT(component.AudioSource, "AudioSource is Null!");
+
+		*outPitch = component.AudioSource->GetPitch();
+	}
+
+	static void AudioSourceComponent_SetPitch(UUID entityId, float pitch)
+	{
+		auto* scene = ScriptEngine::GetSceneContext();
+		HZ_CORE_ASSERT(scene, "Scene is null!");
+		auto entity = scene->GetEntityByUUID(entityId);
+		HZ_CORE_ASSERT(entity, "Entity is null!");
+
+		// Will crash if entity does not have component.
+		auto& component = entity.GetComponent<AudioSourceComponent>();
+		HZ_CORE_ASSERT(component.AudioSource, "AudioSource is Null!");
+
+		component.AudioSource->SetPitch(pitch);
+	}
+
+	static void AudioSourceComponent_GetLoop(UUID entityId, bool* outIsLoop)
+	{
+		auto* scene = ScriptEngine::GetSceneContext();
+		HZ_CORE_ASSERT(scene, "Scene is null!");
+		auto entity = scene->GetEntityByUUID(entityId);
+		HZ_CORE_ASSERT(entity, "Entity is null!");
+
+		// Will crash if entity does not have component.
+		auto& component = entity.GetComponent<AudioSourceComponent>();
+		HZ_CORE_ASSERT(component.AudioSource, "AudioSource is Null!");
+
+		*outIsLoop = component.AudioSource->GetLoop();
+	}
+
+	static void AudioSourceComponent_SetLoop(UUID entityId, bool loop)
+	{
+		auto* scene = ScriptEngine::GetSceneContext();
+		HZ_CORE_ASSERT(scene, "Scene is null!");
+		auto entity = scene->GetEntityByUUID(entityId);
+		HZ_CORE_ASSERT(entity, "Entity is null!");
+
+		// Will crash if entity does not have component.
+		auto& component = entity.GetComponent<AudioSourceComponent>();
+		HZ_CORE_ASSERT(component.AudioSource, "AudioSource is Null!");
+
+		component.AudioSource->SetLoop(loop);
+	}
+
+	static void AudioSourceComponent_Get3D(UUID entityId, bool* outIs3D)
+	{
+		auto* scene = ScriptEngine::GetSceneContext();
+		HZ_CORE_ASSERT(scene, "Scene is null!");
+		auto entity = scene->GetEntityByUUID(entityId);
+		HZ_CORE_ASSERT(entity, "Entity is null!");
+
+		// Will crash if entity does not have component.
+		auto& component = entity.GetComponent<AudioSourceComponent>();
+		HZ_CORE_ASSERT(component.AudioSource, "AudioSource is Null!");
+
+		*outIs3D = component.AudioSource->Get3D();
+	}
+
+	static void AudioSourceComponent_Set3D(UUID entityId, bool is3D)
+	{
+		auto* scene = ScriptEngine::GetSceneContext();
+		HZ_CORE_ASSERT(scene, "Scene is null!");
+		auto entity = scene->GetEntityByUUID(entityId);
+		HZ_CORE_ASSERT(entity, "Entity is null!");
+
+		// Will crash if entity does not have component.
+		auto& component = entity.GetComponent<AudioSourceComponent>();
+		HZ_CORE_ASSERT(component.AudioSource, "AudioSource is Null!");
+
+		component.AudioSource->Set3D(is3D);
+	}
+
+	static void AudioSourceComponent_GetState(UUID entityId, int* outState)
+	{
+		auto* scene = ScriptEngine::GetSceneContext();
+		HZ_CORE_ASSERT(scene, "Scene is null!");
+		auto entity = scene->GetEntityByUUID(entityId);
+		HZ_CORE_ASSERT(entity, "Entity is null!");
+
+		// Will crash if entity does not have component.
+		auto& component = entity.GetComponent<AudioSourceComponent>();
+		HZ_CORE_ASSERT(component.AudioSource, "AudioSource is Null!");
+
+		*outState = static_cast<int>(component.AudioSource->GetState());
+	}
+
+	static void AudioSourceComponent_GetOffset(UUID entityId, float* outOffset)
+	{
+		auto* scene = ScriptEngine::GetSceneContext();
+		HZ_CORE_ASSERT(scene, "Scene is null!");
+		auto entity = scene->GetEntityByUUID(entityId);
+		HZ_CORE_ASSERT(entity, "Entity is null!");
+
+		// Will crash if entity does not have component.
+		auto& component = entity.GetComponent<AudioSourceComponent>();
+		HZ_CORE_ASSERT(component.AudioSource, "AudioSource is Null!");
+
+		*outOffset = component.AudioSource->GetOffset();
+	}
+
+	static void AudioSourceComponent_SetOffset(UUID entityId, float* offset)
+	{
+		auto* scene = ScriptEngine::GetSceneContext();
+		HZ_CORE_ASSERT(scene, "Scene is null!");
+		auto entity = scene->GetEntityByUUID(entityId);
+		HZ_CORE_ASSERT(entity, "Entity is null!");
+
+		// Will crash if entity does not have component.
+		auto& component = entity.GetComponent<AudioSourceComponent>();
+		HZ_CORE_ASSERT(component.AudioSource, "AudioSource is Null!");
+
+		component.AudioSource->SetOffset(*offset);
+	}
+
+	static void AudioSourceComponent_GetLength(UUID entityId, float* outLenght)
+	{
+		auto* scene = ScriptEngine::GetSceneContext();
+		HZ_CORE_ASSERT(scene, "Scene is null!");
+		auto entity = scene->GetEntityByUUID(entityId);
+		HZ_CORE_ASSERT(entity, "Entity is null!");
+
+		// Will crash if entity does not have component.
+		auto& component = entity.GetComponent<AudioSourceComponent>();
+		HZ_CORE_ASSERT(component.AudioSource, "AudioSource is Null!");
+
+		*outLenght = component.AudioSource->GetLength();
+	}
+
+	static void AudioSourceComponent_GetPath(UUID entityId, MonoString** outPath)
+	{
+		auto* scene = ScriptEngine::GetSceneContext();
+		HZ_CORE_ASSERT(scene, "Scene is null!");
+		auto entity = scene->GetEntityByUUID(entityId);
+		HZ_CORE_ASSERT(entity, "Entity is null!");
+
+		// Will crash if entity does not have component.
+		auto& component = entity.GetComponent<AudioSourceComponent>();
+		HZ_CORE_ASSERT(component.AudioSource, "AudioSource is Null!");
+
+		*outPath = mono_string_new_wrapper(component.AudioSource->GetPath().string().c_str());
+	}
+
+	static void AudioSourceComponent_GetIsVisibleInGame(UUID entityId, bool* outIsVisibleInGame)
+	{
+		auto* scene = ScriptEngine::GetSceneContext();
+		HZ_CORE_ASSERT(scene, "Scene is null!");
+		auto entity = scene->GetEntityByUUID(entityId);
+		HZ_CORE_ASSERT(entity, "Entity is null!");
+
+		// Will crash if entity does not have component.
+		auto& component = entity.GetComponent<AudioSourceComponent>();
+
+		*outIsVisibleInGame = component.IsVisibleInGame;
+	}
+
+	static void AudioSourceComponent_SetIsVisibleInGame(UUID entityId, bool isVisibleInGame)
+	{
+		auto* scene = ScriptEngine::GetSceneContext();
+		HZ_CORE_ASSERT(scene, "Scene is null!");
+		auto entity = scene->GetEntityByUUID(entityId);
+		HZ_CORE_ASSERT(entity, "Entity is null!");
+
+		// Will crash if entity does not have component.
+		auto& component = entity.GetComponent<AudioSourceComponent>();
+		component.IsVisibleInGame = isVisibleInGame;
+	}
+
+	static void AudioSourceComponent_Play(UUID entityId)
+	{
+		auto* scene = ScriptEngine::GetSceneContext();
+		HZ_CORE_ASSERT(scene, "Scene is null!");
+		auto entity = scene->GetEntityByUUID(entityId);
+		HZ_CORE_ASSERT(entity, "Entity is null!");
+
+		// Will crash if entity does not have component.
+		auto& component = entity.GetComponent<AudioSourceComponent>();
+		HZ_CORE_ASSERT(component.AudioSource, "AudioSource is Null!");
+
+		component.AudioSource->Play();
+	}
+
+	static void AudioSourceComponent_Stop(UUID entityId)
+	{
+		auto* scene = ScriptEngine::GetSceneContext();
+		HZ_CORE_ASSERT(scene, "Scene is null!");
+		auto entity = scene->GetEntityByUUID(entityId);
+		HZ_CORE_ASSERT(entity, "Entity is null!");
+
+		// Will crash if entity does not have component.
+		auto& component = entity.GetComponent<AudioSourceComponent>();
+		HZ_CORE_ASSERT(component.AudioSource, "AudioSource is Null!");
+
+		component.AudioSource->Stop();
+	}
+
+	static void AudioSourceComponent_Pause(UUID entityId)
+	{
+		auto* scene = ScriptEngine::GetSceneContext();
+		HZ_CORE_ASSERT(scene, "Scene is null!");
+		auto entity = scene->GetEntityByUUID(entityId);
+		HZ_CORE_ASSERT(entity, "Entity is null!");
+
+		// Will crash if entity does not have component.
+		auto& component = entity.GetComponent<AudioSourceComponent>();
+		HZ_CORE_ASSERT(component.AudioSource, "AudioSource is Null!");
+
+		component.AudioSource->Pause();
+	}
+
+	static void AudioSourceComponent_Rewind(UUID entityId)
+	{
+		auto* scene = ScriptEngine::GetSceneContext();
+		HZ_CORE_ASSERT(scene, "Scene is null!");
+		auto entity = scene->GetEntityByUUID(entityId);
+		HZ_CORE_ASSERT(entity, "Entity is null!");
+
+		// Will crash if entity does not have component.
+		auto& component = entity.GetComponent<AudioSourceComponent>();
+		HZ_CORE_ASSERT(component.AudioSource, "AudioSource is Null!");
+
+		component.AudioSource->Rewind();
+	}
+#pragma endregion  
+#pragma endregion
+
 
 	/////////////////
 	/// Registers
@@ -462,10 +730,11 @@ namespace Hazel
 
 	void ScriptGlue::RegisterFunctions()
 	{
-		// Inputs
+#pragma region Inputs
 		HZ_ADD_INTERNAL_CALL(Input_IsKeyDown);
+#pragma endregion
 
-		// Entity
+#pragma region Entity
 		HZ_ADD_INTERNAL_CALL(Entity_IsValid);
 		HZ_ADD_INTERNAL_CALL(Entity_Create);
 		HZ_ADD_INTERNAL_CALL(Entity_Destroy);
@@ -474,36 +743,66 @@ namespace Hazel
 		HZ_ADD_INTERNAL_CALL(Entity_HasComponent);
 		HZ_ADD_INTERNAL_CALL(Entity_GetName);
 		HZ_ADD_INTERNAL_CALL(Entity_SetName);
+#pragma endregion
 
-		// Transform
+#pragma region Transform
 		HZ_ADD_INTERNAL_CALL(TransformComponent_GetPosition);
 		HZ_ADD_INTERNAL_CALL(TransformComponent_SetPosition);
 		HZ_ADD_INTERNAL_CALL(TransformComponent_GetRotation);
 		HZ_ADD_INTERNAL_CALL(TransformComponent_SetRotation);
 		HZ_ADD_INTERNAL_CALL(TransformComponent_GetScale);
 		HZ_ADD_INTERNAL_CALL(TransformComponent_SetScale);
+#pragma endregion
 
-		// Sprite Renderer
+#pragma region Components
+#pragma region Sprite Renderer
 		HZ_ADD_INTERNAL_CALL(SpriteRendererComponent_GetTiling);
 		HZ_ADD_INTERNAL_CALL(SpriteRendererComponent_SetTiling);
 		HZ_ADD_INTERNAL_CALL(SpriteRendererComponent_GetColor);
 		HZ_ADD_INTERNAL_CALL(SpriteRendererComponent_SetColor);
+#pragma endregion
 
-		// Circle Renderer
+#pragma region Circle Renderer
 		HZ_ADD_INTERNAL_CALL(CircleRendererComponent_GetColor);
 		HZ_ADD_INTERNAL_CALL(CircleRendererComponent_SetColor);
 		HZ_ADD_INTERNAL_CALL(CircleRendererComponent_GetThickness);
 		HZ_ADD_INTERNAL_CALL(CircleRendererComponent_SetThickness);
 		HZ_ADD_INTERNAL_CALL(CircleRendererComponent_GetFade);
 		HZ_ADD_INTERNAL_CALL(CircleRendererComponent_SetFade);
+#pragma endregion
 
-		// Rigidbody 2D
+#pragma region Rigidbody 2D
 		HZ_ADD_INTERNAL_CALL(Rigidbody2DComponent_ApplyLinearImpulse);
 		HZ_ADD_INTERNAL_CALL(Rigidbody2DComponent_ApplyLinearImpulseToCenter);
 		HZ_ADD_INTERNAL_CALL(Rigidbody2DComponent_ApplyAngularImpulse);
+#pragma endregion
 
-		// Audio Listener
+#pragma region Audio Listener
 		HZ_ADD_INTERNAL_CALL(AudioListenerComponent_GetIsVisibleInGame);
 		HZ_ADD_INTERNAL_CALL(AudioListenerComponent_SetIsVisibleInGame);
+#pragma endregion
+
+#pragma region Audio Source
+		HZ_ADD_INTERNAL_CALL(AudioSourceComponent_GetGain);
+		HZ_ADD_INTERNAL_CALL(AudioSourceComponent_SetGain);
+		HZ_ADD_INTERNAL_CALL(AudioSourceComponent_GetPitch);
+		HZ_ADD_INTERNAL_CALL(AudioSourceComponent_SetPitch);
+		HZ_ADD_INTERNAL_CALL(AudioSourceComponent_GetLoop);
+		HZ_ADD_INTERNAL_CALL(AudioSourceComponent_SetLoop);
+		HZ_ADD_INTERNAL_CALL(AudioSourceComponent_Get3D);
+		HZ_ADD_INTERNAL_CALL(AudioSourceComponent_Set3D);
+		HZ_ADD_INTERNAL_CALL(AudioSourceComponent_GetState);
+		HZ_ADD_INTERNAL_CALL(AudioSourceComponent_GetOffset);
+		HZ_ADD_INTERNAL_CALL(AudioSourceComponent_SetOffset);
+		HZ_ADD_INTERNAL_CALL(AudioSourceComponent_GetLength);
+		HZ_ADD_INTERNAL_CALL(AudioSourceComponent_GetPath);
+		HZ_ADD_INTERNAL_CALL(AudioSourceComponent_GetIsVisibleInGame);
+		HZ_ADD_INTERNAL_CALL(AudioSourceComponent_SetIsVisibleInGame);
+		HZ_ADD_INTERNAL_CALL(AudioSourceComponent_Play);
+		HZ_ADD_INTERNAL_CALL(AudioSourceComponent_Stop);
+		HZ_ADD_INTERNAL_CALL(AudioSourceComponent_Pause);
+		HZ_ADD_INTERNAL_CALL(AudioSourceComponent_Rewind);
+#pragma endregion  
+#pragma endregion
 	}
 }

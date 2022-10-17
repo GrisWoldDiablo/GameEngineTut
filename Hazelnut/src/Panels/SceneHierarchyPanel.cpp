@@ -1419,8 +1419,8 @@ namespace Hazel
 			auto state = audioSource->GetState();
 			switch (state)
 			{
-			case AudioSourceState::INITIAL:
-			case AudioSourceState::STOPPED:
+			case AudioSourceState::Initial:
+			case AudioSourceState::Stopped:
 			{
 				if (ImGui::Button("Play"))
 				{
@@ -1428,7 +1428,7 @@ namespace Hazel
 				}
 				break;
 			}
-			case AudioSourceState::PAUSED:
+			case AudioSourceState::Paused:
 			{
 				if (ImGui::Button("Unpause"))
 				{
@@ -1436,7 +1436,7 @@ namespace Hazel
 				}
 				break;
 			}
-			case AudioSourceState::PLAYING:
+			case AudioSourceState::Playing:
 			{
 				if (ImGui::Button("Pause"))
 				{
@@ -1464,7 +1464,7 @@ namespace Hazel
 			auto trackValue = fmt::format("{}m:{:02d}s:{:02d}ms", min, sec, ms);
 			if (ImGui::SliderFloat("Track", &offset, 0.0f, lenght, trackValue.c_str(), ImGuiSliderFlags_NoInput))
 			{
-				if (state == AudioSourceState::PAUSED || state == AudioSourceState::PLAYING)
+				if (state == AudioSourceState::Paused || state == AudioSourceState::Playing)
 				{
 					audioSource->SetOffset(offset);
 				}
@@ -1544,7 +1544,7 @@ namespace Hazel
 
 		CleanUpComponent<AudioSourceComponent>(entity, [&](AudioSourceComponent& component)
 		{
-			if (_shouldKeepPlaying)
+			if (_shouldKeepPlaying || _scene->IsRunning())
 			{
 				return;
 			}
@@ -1589,7 +1589,7 @@ namespace Hazel
 		}
 
 		_shouldKeepPlaying = value;
-		if (!_shouldKeepPlaying)
+		if (!_shouldKeepPlaying && !_scene->IsRunning())
 		{
 			AudioEngine::StopAllAudioSources();
 		}

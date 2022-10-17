@@ -48,7 +48,7 @@ namespace Hazel
 	{
 		ALenum state;
 		alGetSourcei(_alSource, AL_SOURCE_STATE, &state);
-		return static_cast<AudioSourceState>(state);
+		return Utils::AlSourceStateToAudioSourceState(state);
 	}
 
 	float AudioSource::GetOffset()

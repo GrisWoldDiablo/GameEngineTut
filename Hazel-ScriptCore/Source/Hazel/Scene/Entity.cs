@@ -1,3 +1,5 @@
+using System;
+
 namespace Hazel
 {
 	// TODO Create HObject class to parent Component and Entity classes and move Id to it.
@@ -58,9 +60,31 @@ namespace Hazel
 			return other is Entity otherEntity && CompareEntity(this, otherEntity);
 		}
 
+		public bool HasComponent(Type componentType)
+		{
+			if (!componentType.IsSubclassOf(typeof(Component)))
+			{
+				throw new ArgumentException($"Invalid type! {componentType} is not a subtype of {typeof(Component)}");
+			}
+			return InternalCalls.Entity_HasComponent(Id, componentType);
+		}
+
 		public bool HasComponent<T>() where T : Component, new()
 		{
 			return InternalCalls.Entity_HasComponent(Id, typeof(T));
+		}
+
+		public Component GetComponent(Type componentType)
+		{
+			if (!HasComponent(componentType))
+			{
+				return null;
+			}
+
+			var component = Activator.CreateInstance(componentType) as Component;
+			var entityProperty = componentType.GetProperty(nameof(component.Entity));
+			entityProperty.SetValue(component, this);
+			return component;
 		}
 
 		public T GetComponent<T>() where T : Component, new()

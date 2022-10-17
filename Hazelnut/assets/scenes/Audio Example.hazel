@@ -79,6 +79,27 @@ Entities:
         OrthographicSize: 10
         OrthographicNearClip: -1
         OrthographicFarClip: 1
-        AspectRatio: 0
+        AspectRatio: 1.50509465
       IsPrimary: true
       IsFixedAspectRatio: false
+  - Entity: 16142203576667495273
+    BaseComponent:
+      Name: AudioTester
+      Tag: 0
+      Layer: 0
+    TransformComponent:
+      Position: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    ScriptComponent:
+      ClassName: Sandbox.AudioTester
+      ScriptFields:
+        - Name: LeftSource
+          Type: Entity
+          Data: 16623845463241627882
+        - Name: RightSource
+          Type: Entity
+          Data: 6635671744454841129
+        - Name: MusicSource
+          Type: Entity
+          Data: 6087744046803597786

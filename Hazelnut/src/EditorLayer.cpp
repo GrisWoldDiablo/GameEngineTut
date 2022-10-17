@@ -1195,11 +1195,6 @@ namespace Hazel
 
 	void EditorLayer::OnScenePlay()
 	{
-		if (_sceneHierarchyPanel.GetShouldKeepPlaying())
-		{
-			AudioEngine::StopAllAudioSources();
-		}
-
 		_sceneState = SceneState::Play;
 
 		_activeScene = Scene::Copy(_editorScene);
@@ -1212,8 +1207,6 @@ namespace Hazel
 
 	void EditorLayer::OnSceneSimulate()
 	{
-		AudioEngine::StopAllAudioSources();
-
 		_sceneState = SceneState::Simulate;
 
 		_activeScene = Scene::Copy(_editorScene);
@@ -1226,7 +1219,6 @@ namespace Hazel
 
 	void EditorLayer::OnSceneStop()
 	{
-		AudioEngine::StopAllAudioSources();
 
 		HZ_CORE_ASSERT(_sceneState == SceneState::Play || _sceneState == SceneState::Simulate, "Invalid Scene State.");
 
