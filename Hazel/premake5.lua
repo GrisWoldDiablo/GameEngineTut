@@ -26,24 +26,25 @@ project "Hazel"
 	{
 		"src",
 		"vendor/spdlog/include",
+		"%{IncludeDir.stb_image}",
+		"%{IncludeDir.yaml_cpp}",
 		"%{IncludeDir.Box2D}",
 		"%{IncludeDir.GLFW}",
 		"%{IncludeDir.Glad}",
 		"%{IncludeDir.ImGui}",
+		"%{IncludeDir.ImGuizmo}",
 		"%{IncludeDir.glm}",
-		"%{IncludeDir.stb_image}",
 		"%{IncludeDir.entt}",
 		"%{IncludeDir.mono}",
-		"%{IncludeDir.yaml_cpp}",
-		"%{IncludeDir.ImGuizmo}",
+		"%{IncludeDir.filewatch}",
+		"%{IncludeDir.VulkanSDK}",
 		"%{IncludeDir.OpenALSoft}/include",
 		"%{IncludeDir.OpenALSoft}/src",
 		"%{IncludeDir.OpenALSoft}/src/common",
 		"%{IncludeDir.OpenALSoft}/src/core",
 		"%{IncludeDir.libogg}",
 		"%{IncludeDir.Vorbis}",
-		"%{IncludeDir.minimp3}",
-		"%{IncludeDir.VulkanSDK}"
+		"%{IncludeDir.minimp3}"
 	}
 
 	defines

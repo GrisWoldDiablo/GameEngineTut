@@ -53,10 +53,13 @@ namespace Hazel
 
 		const ApplicationSpecification& GetSpecification() const { return _specification; }
 
+		void SubmitToMainThread(const std::function<void()>& function);
+
 	private:
 		void Run();
 		bool OnWindowClose(const WindowCloseEvent& windowCloseEvent);
 		bool OnWindowResize(const WindowResizeEvent& windowResizeEvent);
+		void ExecuteMainThreadQueue();
 
 	private:
 		ApplicationSpecification _specification;
@@ -66,6 +69,9 @@ namespace Hazel
 		bool _running = true;
 		bool _minimized = false;
 		float _lastFrameTime = 0.0f;
+
+		std::vector<std::function<void()>> _mainThreadQueue;
+		std::mutex _mainThreadQueueMutex;
 
 	private:
 		// Singleton related.

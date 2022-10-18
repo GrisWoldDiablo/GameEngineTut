@@ -1,5 +1,7 @@
 #include "hzpch.h"
 #include "Hazel/Scene/Scene.h"
+#include "Hazel/Core/Application.h"
+
 #include "ScriptEngine.h"
 #include "ScriptGlue.h"
 #include "ScriptClass.h"
@@ -10,7 +12,7 @@
 #include "mono/metadata/object.h"
 #include "mono/metadata/tabledefs.h"
 
-#include <string>
+#include "FileWatch.h"
 
 namespace Hazel
 {
@@ -155,9 +157,32 @@ namespace Hazel
 
 		// Runtime
 		Scene* SceneContext = nullptr;
+
+		// FileWatch
+		Scope<filewatch::FileWatch<std::string>> CoreAssemblyFileWatcher;
+		Scope<filewatch::FileWatch<std::string>> AppAssemblyFileWatcher;
+		bool IsAssemblyReloading = false;
 	};
 
 	static StriptEngineData* sScriptData = nullptr;
+
+	static void OnAssemblyFileSystemEvent(const std::string& path, const filewatch::Event eventType)
+	{
+		HZ_CORE_LDEBUG("Path: {0}, Event: {1}", path, (int)eventType);
+
+		if (!sScriptData->IsAssemblyReloading && eventType == filewatch::Event::modified)
+		{
+			sScriptData->IsAssemblyReloading = true;
+
+			using namespace std::chrono_literals;
+			std::this_thread::sleep_for(500ms);
+
+			Application::Get().SubmitToMainThread([]
+			{
+				ScriptEngine::TryReload();
+			});
+		}
+	}
 
 	void ScriptEngine::Init()
 	{
@@ -423,6 +448,8 @@ namespace Hazel
 			return false;
 		}
 
+		sScriptData->IsAssemblyReloading = false;
+
 		LoadAssemblyClasses();
 
 		ScriptGlue::RegisterComponents();
@@ -455,6 +482,9 @@ namespace Hazel
 		sScriptData->CoreAssembly = coreAssembly;
 		sScriptData->CoreAssemblyImage = mono_assembly_get_image(coreAssembly);
 
+		sScriptData->CoreAssemblyFileWatcher = CreateScope<filewatch::FileWatch<std::string>>(
+			filePath.string(), &OnAssemblyFileSystemEvent);
+
 		return true;
 	}
 
@@ -470,6 +500,9 @@ namespace Hazel
 
 		sScriptData->AppAssembly = appAssembly;
 		sScriptData->AppAssemblyImage = mono_assembly_get_image(appAssembly);
+
+		sScriptData->AppAssemblyFileWatcher = CreateScope<filewatch::FileWatch<std::string>>(
+			filePath.string(), &OnAssemblyFileSystemEvent);
 
 		return true;
 	}

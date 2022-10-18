@@ -20,10 +20,11 @@ project "Hazelnut"
 		"%{wks.location}/Hazel/vendor/spdlog/include",
 		"%{wks.location}/Hazel/src",
 		"%{wks.location}/Hazel/vendor",
+		"%{IncludeDir.yaml_cpp}",
+		"%{IncludeDir.ImGuizmo}",
 		"%{IncludeDir.glm}",
 		"%{IncludeDir.entt}",
-		"%{IncludeDir.ImGuizmo}",
-		"%{IncludeDir.yaml_cpp}"
+		"%{IncludeDir.filewatch}"
 	}
 
 	defines

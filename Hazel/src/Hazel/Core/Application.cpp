@@ -78,6 +78,8 @@ namespace Hazel
 			Time::SetTimestep(timestep);
 			Time::SetTimeElapsed(time);
 
+			ExecuteMainThreadQueue();
+
 			// if minimized do not bother updating
 			if (!_minimized)
 			{
@@ -181,5 +183,24 @@ namespace Hazel
 		Renderer::OnWindowResize(windowResizeEvent.GetWidth(), windowResizeEvent.GetHeight());
 
 		return false;
+	}
+
+	void Application::SubmitToMainThread(const std::function<void()>& function)
+	{
+		std::scoped_lock<std::mutex> lock(_mainThreadQueueMutex);
+
+		_mainThreadQueue.emplace_back(function);
+	}
+
+	void Application::ExecuteMainThreadQueue()
+	{
+		std::scoped_lock<std::mutex> lock(_mainThreadQueueMutex);
+
+		for (auto& function : _mainThreadQueue)
+		{
+			function();
+		}
+
+		_mainThreadQueue.clear();
 	}
 }
