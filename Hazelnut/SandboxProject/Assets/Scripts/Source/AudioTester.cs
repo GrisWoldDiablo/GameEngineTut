@@ -30,20 +30,21 @@ namespace Sandbox
 			if (LeftSource)
 			{
 				_leftSourceAudio = LeftSource.GetComponent<AudioSourceComponent>();
-				Console.WriteLine($"Left : {_leftSourceAudio?.Path}");
+				Console.WriteLine($"Left : {(_leftSourceAudio ? _leftSourceAudio.Path : null)}");
 			}
 
 			if (RightSource)
 			{
 				_rightSourceAudio = RightSource.GetComponent<AudioSourceComponent>();
-				Console.WriteLine($"Right : {_rightSourceAudio?.Path}");
+				Console.WriteLine($"Right : {(_rightSourceAudio ? _rightSourceAudio.Path : null)}");
 			}
 
 			if (MusicSource)
 			{
 				_musicSourceAudio = MusicSource.GetComponent(typeof(AudioSourceComponent)) as AudioSourceComponent;
-				Console.WriteLine($"Music : {_musicSourceAudio?.Path}");
-				Path = _musicSourceAudio?.Path;
+
+				Console.WriteLine($"Music : {(_musicSourceAudio ? _musicSourceAudio.Path : null)}");
+				Path = _musicSourceAudio ? _musicSourceAudio.Path : null;
 				Console.WriteLine($" Has Type {typeof(TransformComponent)}: {MusicSource.HasComponent(typeof(TransformComponent))}");
 				Console.WriteLine($" Has Type {typeof(CircleRendererComponent)}: {MusicSource.HasComponent(typeof(CircleRendererComponent))}");
 			}

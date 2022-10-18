@@ -1327,22 +1327,25 @@ namespace Hazel
 
 			if (audioSource != nullptr)
 			{
-				DrawYesNoPopup("Clear Audio Clip?", [&]
+				if (!_scene->IsRunning())
 				{
-					AudioEngine::ReleaseAudioSource(audioSource);
-					audioSource.reset();
-				});
+					DrawYesNoPopup("Clear Audio Clip?", [&]
+					{
+						AudioEngine::ReleaseAudioSource(audioSource);
+						audioSource.reset();
+					});
+				}
 			}
 
 			std::filesystem::path audioClipFilePath;
 
-			if (isButtonPressed)
+			if (isButtonPressed && !_scene->IsRunning())
 			{
 				audioClipFilePath = FileDialogs::OpenFile("Audio Clip (*.ogg,*.mp3)\0*.ogg;*.mp3\0");
 				audioClipFilePath = std::filesystem::relative(audioClipFilePath);
 			}
 
-			if (ImGui::BeginDragDropTarget())
+			if (!_scene->IsRunning() && ImGui::BeginDragDropTarget())
 			{
 				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
 				{

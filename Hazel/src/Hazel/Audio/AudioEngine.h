@@ -17,7 +17,6 @@ namespace Hazel
 		static void SetListenerPosition(const glm::vec3& position);
 
 	private:
-		static void DeleteAudioSource(AudioSource* audioSource);
 		static bool TryFindAudioSource(Ref<AudioSource>& audioSource, const std::filesystem::path& filePath);
 
 		static void PrintDeviceInfo();

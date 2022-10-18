@@ -62,7 +62,7 @@ namespace Hazel
 		uint32_t AudioScratchBufferSize = 10 * 1024 * 1024;
 
 		std::unordered_map<std::string, Ref<AudioSource>> UnassignedAudioSources;
-		std::unordered_set<AudioSource*> AssignedAudioSources;
+		std::vector<Weak<AudioSource>> AssignedAudioSources;
 	};
 
 	static AudioEngineData* sAudioData = nullptr;
@@ -114,7 +114,7 @@ namespace Hazel
 			return nullptr;
 		}
 
-		sAudioData->AssignedAudioSources.emplace(newAudioSource.get());
+		sAudioData->AssignedAudioSources.push_back(newAudioSource);
 
 		return newAudioSource;
 	}
@@ -126,29 +126,26 @@ namespace Hazel
 		audioSource->Stop();
 		audioSource->ResetFields();
 		auto& sources = sAudioData->AssignedAudioSources;
-		sources.erase(audioSource.get());
-
-		sAudioData->UnassignedAudioSources.emplace(audioSource->GetPath().string(), audioSource);
-	}
-
-	void AudioEngine::DeleteAudioSource(AudioSource* audioSource)
-	{
-		// TODO delete or release?
-		auto& sources = sAudioData->AssignedAudioSources;
-		if (!sources.empty() && sources.contains(audioSource))
+		for (std::vector<Weak<AudioSource>>::iterator it = sources.begin(); it != sources.end();it++)
 		{
-			sources.erase(audioSource);
+			if (it->lock() == audioSource)
+			{
+				it = sources.erase(it);
+				break;
+			}
 		}
+		
+		sAudioData->UnassignedAudioSources.emplace(audioSource->GetPath().string(), audioSource);
 	}
 
 	void AudioEngine::StopAllAudioSources()
 	{
 		// Todo keep track of which one is actually playing.
-		for (const auto& audioSource : sAudioData->AssignedAudioSources)
+		for (auto& audioSource : sAudioData->AssignedAudioSources)
 		{
-			if (audioSource != nullptr)
+			if (auto audioSourceRef = audioSource.lock())
 			{
-				audioSource->Stop();
+				audioSourceRef->Stop();
 			}
 		}
 	}
