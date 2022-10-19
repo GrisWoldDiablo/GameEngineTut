@@ -18,8 +18,6 @@ namespace Hazel
 		void EditRuntimeRigidbody(Entity entity, bool shouldZeroedVelocity = false);
 		Entity GetSelectedEntity() const { return _selectedEntity; }
 		void SetSelectedEntity(Entity entity) { CleanUpComponents(_selectedEntity); _selectedEntity = entity; }
-		void SetShouldKeepPlaying(bool value);
-		bool GetShouldKeepPlaying() const { return _shouldKeepPlaying; }
 
 	private:
 		void DrawSceneName();
@@ -36,6 +34,5 @@ namespace Hazel
 		Entity _lockedEntity;
 		bool _isDebug = false;
 		Weak<AudioSource> _previousAudioSource;
-		bool _shouldKeepPlaying = false;
 	};
 }

@@ -54,6 +54,7 @@ namespace Hazel
 		auto GetAllEntitiesWith() { return _registry.view<Components...>(); }
 
 		bool IsRunning() const { return _isRunning; }
+		bool& ShouldCloneAudioSource() { return _shouldCloneAudioSource; }
 
 	private:
 		template<typename T>
@@ -76,6 +77,8 @@ namespace Hazel
 
 		b2World* _physicsWorld = nullptr;
 		bool _isRunning = false;
+
+		bool _shouldCloneAudioSource = false;
 
 		std::unordered_map<UUID, entt::entity> _entityMap;
 

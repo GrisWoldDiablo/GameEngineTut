@@ -71,6 +71,8 @@ namespace Hazel
 	{
 		HZ_PROFILE_FUNCTION();
 		_updateTimer.Reset();
+		
+		_activeScene->OnViewportResize(static_cast<uint32_t>(_sceneViewportSize.x), static_cast<uint32_t>(_sceneViewportSize.y));
 
 		auto& frameBufferSpec = _framebuffer->GetSpecification();
 		if (_sceneViewportSize.x > 0.0f && _sceneViewportSize.y > 0.0f &&
@@ -79,7 +81,6 @@ namespace Hazel
 			_framebuffer->Resize(static_cast<uint32_t>(_sceneViewportSize.x), static_cast<uint32_t>(_sceneViewportSize.y));
 
 			_editorCamera.SetViewportSize(_sceneViewportSize.x, _sceneViewportSize.y);
-			_activeScene->OnViewportResize(static_cast<uint32_t>(_sceneViewportSize.x), static_cast<uint32_t>(_sceneViewportSize.y));
 		}
 
 		CalculateFPS();
@@ -1094,9 +1095,7 @@ namespace Hazel
 		ImGui::Begin("Tools");
 
 		ImGui::Checkbox("Show physics colliders", &_shouldShowPhysicsColliders);
-		bool shouldKeepPlaying = _sceneHierarchyPanel.GetShouldKeepPlaying();
-		ImGui::Checkbox("Play AudioSource without selection", &shouldKeepPlaying);
-		_sceneHierarchyPanel.SetShouldKeepPlaying(shouldKeepPlaying);
+		ImGui::Checkbox("Clone AudioSource on Play", &_activeScene->ShouldCloneAudioSource());
 
 		if (ImGui::Button("Show Demo Window"))
 		{
@@ -1196,10 +1195,10 @@ namespace Hazel
 	void EditorLayer::OnScenePlay()
 	{
 		_sceneState = SceneState::Play;
+		_sceneHierarchyPanel.SetSelectedEntity(Entity());
 
 		_activeScene = Scene::Copy(_editorScene);
 
-		_activeScene->OnViewportResize((uint32_t)_sceneViewportSize.x, (uint32_t)_sceneViewportSize.y);
 		_activeScene->OnRuntimeStart();
 
 		_sceneHierarchyPanel.SetScene(_activeScene);
@@ -1211,7 +1210,6 @@ namespace Hazel
 
 		_activeScene = Scene::Copy(_editorScene);
 
-		_activeScene->OnViewportResize((uint32_t)_sceneViewportSize.x, (uint32_t)_sceneViewportSize.y);
 		_activeScene->OnSimulationStart();
 
 		_sceneHierarchyPanel.SetScene(_activeScene);

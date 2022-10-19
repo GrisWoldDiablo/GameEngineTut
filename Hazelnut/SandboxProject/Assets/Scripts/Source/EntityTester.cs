@@ -26,8 +26,9 @@ namespace Sandbox
 
 			_foundEntity = FindByName(EntityToFind ?? "");
 			Console.WriteLine($"Find By Name : {_foundEntity}");
-			if (_foundEntity is CirclePlayer player)
+			if (_foundEntity)
 			{
+				var player = _foundEntity.As<CirclePlayer>();
 				Console.WriteLine($"Find By Name  Player: {player}");
 				EntityToTest = player;
 				player.Color = NewEntityColor;

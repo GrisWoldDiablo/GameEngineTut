@@ -181,6 +181,7 @@ namespace Hazel
 	{
 		Ref<AudioSource> AudioSource;
 		bool IsVisibleInGame = false;
+		bool IsAutoPlay = false;
 
 		AudioSourceComponent() = default;
 		AudioSourceComponent(const AudioSourceComponent&) = default;

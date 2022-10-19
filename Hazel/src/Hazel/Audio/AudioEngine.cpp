@@ -62,7 +62,7 @@ namespace Hazel
 		uint32_t AudioScratchBufferSize = 10 * 1024 * 1024;
 
 		std::unordered_map<std::string, Ref<AudioSource>> UnassignedAudioSources;
-		std::vector<Weak<AudioSource>> AssignedAudioSources;
+		std::unordered_set<uint32_t> AssignedALSources;
 	};
 
 	static AudioEngineData* sAudioData = nullptr;
@@ -114,9 +114,22 @@ namespace Hazel
 			return nullptr;
 		}
 
-		sAudioData->AssignedAudioSources.push_back(newAudioSource);
+		sAudioData->AssignedALSources.emplace(newAudioSource->_alSource);
 
 		return newAudioSource;
+	}
+
+	Ref<AudioSource> AudioEngine::CloneAudioSource(const Ref<AudioSource>& audioSourceToClone)
+	{
+		auto clonedAudioSource = LoadAudioSource(audioSourceToClone->_path);
+
+		clonedAudioSource->SetGain(audioSourceToClone->_gain);
+		clonedAudioSource->SetPitch(audioSourceToClone->_pitch);
+		clonedAudioSource->SetLoop(audioSourceToClone->_isLoop);
+		clonedAudioSource->Set3D(audioSourceToClone->_is3D);
+		clonedAudioSource->SetPosition(audioSourceToClone->_position);
+
+		return clonedAudioSource;
 	}
 
 	void AudioEngine::ReleaseAudioSource(Ref<AudioSource> audioSource)
@@ -125,28 +138,22 @@ namespace Hazel
 		// TODO setup a pool, Max size of map, might be the time for an asset manager.
 		audioSource->Stop();
 		audioSource->ResetFields();
-		auto& sources = sAudioData->AssignedAudioSources;
-		for (std::vector<Weak<AudioSource>>::iterator it = sources.begin(); it != sources.end();it++)
-		{
-			if (it->lock() == audioSource)
-			{
-				it = sources.erase(it);
-				break;
-			}
-		}
-		
+		sAudioData->AssignedALSources.erase(audioSource->_alSource);
+
 		sAudioData->UnassignedAudioSources.emplace(audioSource->GetPath().string(), audioSource);
+	}
+
+	void AudioEngine::ReleaseALSource(uint32_t alSource)
+	{
+		sAudioData->AssignedALSources.erase(alSource);
 	}
 
 	void AudioEngine::StopAllAudioSources()
 	{
 		// Todo keep track of which one is actually playing.
-		for (auto& audioSource : sAudioData->AssignedAudioSources)
+		for (auto& alSource : sAudioData->AssignedALSources)
 		{
-			if (auto audioSourceRef = audioSource.lock())
-			{
-				audioSourceRef->Stop();
-			}
+			alSourceStop(alSource);
 		}
 	}
 

@@ -369,6 +369,10 @@ namespace Hazel
 			out << YAML::Key << "AudioSourceComponent";
 			out << YAML::BeginMap; // AudioSourceComponent
 
+			out << YAML::Key << "IsAutoPlay" << YAML::Value << component.IsAutoPlay;
+			
+			out << YAML::Key << "IsVisibleInGame" << YAML::Value << component.IsVisibleInGame;
+
 			if (component.AudioSource != nullptr)
 			{
 				out << YAML::Key << "AudioClipPath" << YAML::Value << component.AudioSource->GetPath(); // TODO not use path but actual texture asset.
@@ -377,8 +381,6 @@ namespace Hazel
 				out << YAML::Key << "IsLoop" << YAML::Value << component.AudioSource->GetLoop();
 				out << YAML::Key << "Is3D" << YAML::Value << component.AudioSource->Get3D();
 			}
-
-			out << YAML::Key << "IsVisibleInGame" << YAML::Value << component.IsVisibleInGame;
 
 			out << YAML::EndMap; // AudioSourceComponent
 		}
@@ -771,6 +773,10 @@ namespace Hazel
 				{
 					auto& component = deserializedEntity.AddComponent<AudioSourceComponent>();
 
+					component.IsAutoPlay = GetValue<bool>(audioSourceComponent, "IsAutoPlay", false);
+					
+					component.IsVisibleInGame = GetValue<bool>(audioSourceComponent, "IsVisibleInGame", false);
+
 					if (auto audioClipPath = audioSourceComponent["AudioClipPath"])
 					{
 						component.AudioSource = AudioSource::Create(audioClipPath.as<std::filesystem::path>()); // TODO not use path use asset.
@@ -783,8 +789,6 @@ namespace Hazel
 							component.AudioSource->SetPosition(deserializedEntity.Transform().Position);
 						}
 					}
-
-					component.IsVisibleInGame = GetValue<bool>(audioSourceComponent, "IsVisibleInGame", false);
 				}
 #pragma endregion
 

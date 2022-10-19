@@ -19,6 +19,7 @@ namespace Hazel
 
 	AudioSource::~AudioSource()
 	{
+		AudioEngine::ReleaseALSource(_alSource);
 		alDeleteSources(1, &_alSource);
 		alDeleteBuffers(1, &_alBuffer);
 	}

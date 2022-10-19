@@ -109,6 +109,11 @@ namespace Hazel
 			return new T() { Entity = this };
 		}
 
+		public T As<T>() where T : Entity, new()
+		{
+			return this as T;
+		}
+
 		public bool Destroy()
 		{
 			return InternalCalls.Entity_Destroy(Id);

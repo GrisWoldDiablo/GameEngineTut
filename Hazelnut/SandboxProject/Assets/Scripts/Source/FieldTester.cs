@@ -22,8 +22,8 @@ namespace Sandbox
 		public Vector3 @Vector3 = new Vector3(4.2f, 6.9f, 420.69f);             // In Inpsector
 		public Vector4 @Vector4 = new Vector4(4.2f, 6.9f, 420.69f, 69.420f);    // In Inpsector
 		public Color @Color = new Color(0.15f, 0.89f, 0.91f, 0.69f);            // In Inpsector
-
-		public Entity @Entity;
+		public Entity @Entity;                                                  // In Inpsector
+		public Player @Player;
 
 		static public int StaticInt;
 		const int ConstInt = 2;

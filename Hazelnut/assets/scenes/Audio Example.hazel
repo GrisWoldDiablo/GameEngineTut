@@ -10,12 +10,13 @@ Entities:
       Rotation: [0, 0, 0]
       Scale: [1, 1, 1]
     AudioSourceComponent:
+      IsAutoPlay: true
+      IsVisibleInGame: false
       AudioClipPath: assets\audio\rocavaco-Bass17w19.mp3
       Gain: 1
       Pitch: 1
       IsLoop: false
       Is3D: false
-      IsVisibleInGame: false
   - Entity: 16623845463241627882
     BaseComponent:
       Name: Audio Source SFX 3D Left
@@ -26,12 +27,13 @@ Entities:
       Rotation: [0, 0, 0]
       Scale: [1, 1, 1]
     AudioSourceComponent:
+      IsAutoPlay: false
+      IsVisibleInGame: false
       AudioClipPath: assets\audio\Splash.ogg
       Gain: 1
       Pitch: 1
       IsLoop: false
       Is3D: true
-      IsVisibleInGame: false
   - Entity: 6635671744454841129
     BaseComponent:
       Name: Audio Source SFX 3D Right
@@ -42,12 +44,13 @@ Entities:
       Rotation: [0, 0, 0]
       Scale: [1, 1, 1]
     AudioSourceComponent:
+      IsAutoPlay: false
+      IsVisibleInGame: false
       AudioClipPath: assets\audio\Splash.ogg
       Gain: 1
       Pitch: 1
       IsLoop: false
       Is3D: true
-      IsVisibleInGame: false
   - Entity: 5103971069439463806
     BaseComponent:
       Name: Audio Listener
@@ -60,7 +63,7 @@ Entities:
     ScriptComponent:
       ClassName: Sandbox.AudioListener
     AudioListenerComponent:
-      IsVisibleInGame: false
+      IsVisibleInGame: true
   - Entity: 13859934455698141505
     BaseComponent:
       Name: Camera

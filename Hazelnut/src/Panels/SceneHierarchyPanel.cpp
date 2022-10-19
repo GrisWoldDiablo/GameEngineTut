@@ -1337,23 +1337,23 @@ namespace Hazel
 				}
 			}
 
-			std::filesystem::path audioClipFilePath;
+			std::filesystem::path newAudioClipFilePath;
 
 			if (isButtonPressed && !_scene->IsRunning())
 			{
-				audioClipFilePath = FileDialogs::OpenFile("Audio Clip (*.ogg,*.mp3)\0*.ogg;*.mp3\0");
-				audioClipFilePath = std::filesystem::relative(audioClipFilePath);
+				newAudioClipFilePath = FileDialogs::OpenFile("Audio Clip (*.ogg,*.mp3)\0*.ogg;*.mp3\0");
+				newAudioClipFilePath = std::filesystem::relative(newAudioClipFilePath);
 			}
 
 			if (!_scene->IsRunning() && ImGui::BeginDragDropTarget())
 			{
 				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
 				{
-					std::filesystem::path fileSystemPath = (const wchar_t*)payload->Data;
+					std::filesystem::path fileSystemPath = static_cast<const wchar_t*>(payload->Data);
 					const auto extension = fileSystemPath.extension();
 					if (extension == ".ogg" || extension == ".mp3")
 					{
-						audioClipFilePath = fileSystemPath;
+						newAudioClipFilePath = fileSystemPath;
 					}
 				}
 				ImGui::EndDragDropTarget();
@@ -1362,21 +1362,25 @@ namespace Hazel
 			ImGui::SameLine();
 			ImGui::Text("Audio Clip");
 
-			if (!audioClipFilePath.empty())
+
+			if (!newAudioClipFilePath.empty())
 			{
 				if (audioSource)
 				{
-					if (audioSource->GetPath() != audioClipFilePath)
+					if (audioSource->GetPath() != newAudioClipFilePath)
 					{
 						AudioEngine::ReleaseAudioSource(audioSource);
-						audioSource = AudioSource::Create(audioClipFilePath);
+						audioSource = AudioSource::Create(newAudioClipFilePath);
 					}
 				}
 				else
 				{
-					audioSource = AudioSource::Create(audioClipFilePath);
+					audioSource = AudioSource::Create(newAudioClipFilePath);
 				}
 			}
+
+			ImGui::Checkbox("Auto Play", &component.IsAutoPlay);
+			ImGui::Checkbox("Visible In Game##AudioSource", &component.IsVisibleInGame);
 
 			if (audioSource == nullptr)
 			{
@@ -1472,8 +1476,6 @@ namespace Hazel
 					audioSource->SetOffset(offset);
 				}
 			}
-
-			ImGui::Checkbox("Visible In Game##AudioSource", &component.IsVisibleInGame);
 		});
 #pragma endregion
 
@@ -1547,14 +1549,14 @@ namespace Hazel
 
 		CleanUpComponent<AudioSourceComponent>(entity, [&](AudioSourceComponent& component)
 		{
-			if (_shouldKeepPlaying || _scene->IsRunning())
+			if (_scene->IsRunning())
 			{
 				return;
 			}
 
 			if (component.AudioSource && !_previousAudioSource.expired())
 			{
-				if (component.AudioSource == std::shared_ptr(_previousAudioSource))
+				if (component.AudioSource == _previousAudioSource.lock())
 				{
 					component.AudioSource->Stop();
 					_previousAudioSource.reset();
@@ -1581,20 +1583,6 @@ namespace Hazel
 		else
 		{
 			ImGui::TextDisabled(nameId.c_str());
-		}
-	}
-
-	void SceneHierarchyPanel::SetShouldKeepPlaying(bool value)
-	{
-		if (_shouldKeepPlaying == value)
-		{
-			return;
-		}
-
-		_shouldKeepPlaying = value;
-		if (!_shouldKeepPlaying && !_scene->IsRunning())
-		{
-			AudioEngine::StopAllAudioSources();
 		}
 	}
 }

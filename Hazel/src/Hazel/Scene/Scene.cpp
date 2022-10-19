@@ -49,7 +49,6 @@ namespace Hazel
 				entt::entity dstEntity = enttMap.at(src.get<IDComponent>(srcEntity).ID);
 				auto& srcComponent = src.get<Component>(srcEntity);
 				dst.emplace_or_replace<Component>(dstEntity, srcComponent);
-
 			}
 		}(), ...);
 	}
@@ -85,7 +84,7 @@ namespace Hazel
 
 		newScene->_viewportWidth = other->_viewportWidth;
 		newScene->_viewportHeight = other->_viewportHeight;
-
+		newScene->_shouldCloneAudioSource = other->_shouldCloneAudioSource;
 
 		auto& srcSceneRegistry = other->_registry;
 		auto& dstSceneRegistry = newScene->_registry;
@@ -151,18 +150,36 @@ namespace Hazel
 	{
 		_isRunning = true;
 
-		// TODO? Should we do this here?
-		AudioEngine::StopAllAudioSources();
-		
 		OnPhysic2DStart();
+
+		// Audio
+		{
+			// TODO? Should we do this here?
+			AudioEngine::StopAllAudioSources();
+			_registry.view<AudioSourceComponent>().each([&](const auto entt, AudioSourceComponent& component)
+			{
+				if (component.AudioSource)
+				{
+					if (_shouldCloneAudioSource)
+					{
+						component.AudioSource = AudioEngine::CloneAudioSource(component.AudioSource);
+					}	
+
+					if (component.IsAutoPlay)
+					{
+						component.AudioSource->Play();
+					}
+				}
+			});
+		}
 
 		// Scripting
 		{
 			ScriptEngine::OnRuntimeStart(this);
 			// Instanciate all script entities
-			_registry.view<ScriptComponent>().each([&](const auto entt, const ScriptComponent& scriptComponent)
+			_registry.view<ScriptComponent>().each([&](const auto entt, const ScriptComponent& component)
 			{
-				if (ScriptEngine::EntityClassExist(scriptComponent.ClassName))
+				if (ScriptEngine::EntityClassExist(component.ClassName))
 				{
 					Entity entity = { entt, this };
 					ScriptEngine::OnCreateEntity(entity);
@@ -388,6 +405,11 @@ namespace Hazel
 
 	void Scene::OnViewportResize(uint32_t width, uint32_t height)
 	{
+		if (_viewportWidth == width &&  _viewportHeight == height)
+		{
+			return;
+		}
+
 		_viewportWidth = width;
 		_viewportHeight = height;
 
