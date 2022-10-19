@@ -20,13 +20,13 @@ namespace Hazel
 		internal extern static bool Entity_IsValid(ulong entityId);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern static void Entity_Create(ref string name, out Entity entity);
+		internal extern static void Entity_Create(string name, out Entity entity);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern static bool Entity_Destroy(ulong entityId);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern static bool Entity_FindByName(ref string name, out Entity entity);
+		internal extern static bool Entity_FindByName(string name, out Entity entity);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern static void Entity_AddComponent(ulong entityId, Type type);
@@ -38,7 +38,7 @@ namespace Hazel
 		internal extern static void Entity_GetName(ulong entityId, out string name);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern static void Entity_SetName(ulong entityId, ref string name);
+		internal extern static void Entity_SetName(ulong entityId, string name);
 
 		//////////////
 		// Components

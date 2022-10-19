@@ -40,15 +40,18 @@ namespace Hazel
 		return scene->GetEntityByUUID(entityId);
 	}
 
-	static void Entity_Create(MonoString** name, MonoObject** outEntity)
+	static void Entity_Create(MonoString* name, MonoObject** outEntity)
 	{
 		auto* scene = ScriptEngine::GetSceneContext();
 		HZ_CORE_ASSERT(scene, "Scene is null!");
-		HZ_CORE_ASSERT(*name, "Name is null!");
+		HZ_CORE_ASSERT(name, "Name is null!");
 
 		*outEntity = nullptr;
 
-		const auto newEntity = scene->CreateEntity(mono_string_to_utf8(*name));
+		auto* entityName = mono_string_to_utf8(name);
+		const auto newEntity = scene->CreateEntity(entityName);
+		mono_free(entityName);
+
 		if (const auto& entityScriptInstance = ScriptEngine::OnCreateEntity(newEntity))
 		{
 			*outEntity = entityScriptInstance->GetInstance();
@@ -69,15 +72,18 @@ namespace Hazel
 		return false;
 	}
 
-	static bool Entity_FindByName(MonoString** name, MonoObject** outEntity)
+	static bool Entity_FindByName(MonoString* name, MonoObject** outEntity)
 	{
 		auto* scene = ScriptEngine::GetSceneContext();
 		HZ_CORE_ASSERT(scene, "Scene is null!");
-		HZ_CORE_ASSERT(*name, "Name is null!");
+		HZ_CORE_ASSERT(name, "Name is null!");
 
 		*outEntity = nullptr;
+		auto* entityName = mono_string_to_utf8(name);
+		auto foundEntity = scene->GetEntityByName(entityName);
+		mono_free(entityName);
 
-		if (auto foundEntity = scene->GetEntityByName(mono_string_to_utf8(*name)))
+		if (foundEntity)
 		{
 			if (const auto& entityScriptInstance = ScriptEngine::GetEntityScriptInstance(foundEntity.GetUUID()))
 			{
@@ -131,14 +137,16 @@ namespace Hazel
 		*outName = mono_string_new_wrapper(entity.Name().c_str());
 	}
 
-	static void Entity_SetName(UUID entityId, MonoString** name)
+	static void Entity_SetName(UUID entityId, MonoString* name)
 	{
 		auto* scene = ScriptEngine::GetSceneContext();
 		HZ_CORE_ASSERT(scene, "Scene is null!");
 		auto entity = scene->GetEntityByUUID(entityId);
 		HZ_CORE_ASSERT(entity, "Entity is null!");
 
-		entity.Name() = mono_string_to_utf8(*name);
+		auto* entityName = mono_string_to_utf8(name);
+		entity.Name() = entityName;
+		mono_free(entityName);
 	}
 #pragma endregion
 

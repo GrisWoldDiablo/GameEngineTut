@@ -15,7 +15,7 @@ namespace Hazel
 				return name;
 			}
 
-			set => InternalCalls.Entity_SetName(Id, ref value);
+			set => InternalCalls.Entity_SetName(Id, value);
 		}
 
 		private TransformComponent _transform;
@@ -126,7 +126,7 @@ namespace Hazel
 
 		public static Entity Create(string name = "Entity")
 		{
-			InternalCalls.Entity_Create(ref name, out var newEntity);
+			InternalCalls.Entity_Create(name, out var newEntity);
 
 			return newEntity;
 		}
@@ -141,7 +141,7 @@ namespace Hazel
 		/// </summary>
 		public static Entity FindByName(string name)
 		{
-			if (InternalCalls.Entity_FindByName(ref name, out Entity entity))
+			if (InternalCalls.Entity_FindByName(name, out Entity entity))
 			{
 				return entity;
 			}
