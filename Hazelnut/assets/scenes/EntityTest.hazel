@@ -1,0 +1,124 @@
+Scene: EntityTest
+Entities:
+  - Entity: 18156930741733523661
+    BaseComponent:
+      Name: ENTITY TESTER
+      Tag: 0
+      Layer: 0
+    TransformComponent:
+      Position: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    ScriptComponent:
+      ClassName: Sandbox.EntityFieldTester
+      ScriptFields:
+        - Name: EntityChild
+          Type: Entity
+          Data: 10596131271453681269
+  - Entity: 2769092974518316428
+    BaseComponent:
+      Name: AudioTester
+      Tag: 0
+      Layer: 0
+    TransformComponent:
+      Position: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    ScriptComponent:
+      ClassName: Sandbox.AudioTester
+      ScriptFields:
+        []
+  - Entity: 1249071050575132874
+    BaseComponent:
+      Name: AudioListener
+      Tag: 0
+      Layer: 0
+    TransformComponent:
+      Position: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    ScriptComponent:
+      ClassName: Sandbox.AudioListener
+  - Entity: 15454175891574307678
+    BaseComponent:
+      Name: Camera
+      Tag: 0
+      Layer: 0
+    TransformComponent:
+      Position: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    ScriptComponent:
+      ClassName: Sandbox.Camera
+  - Entity: 4502610681779128033
+    BaseComponent:
+      Name: CirclePlayer
+      Tag: 0
+      Layer: 0
+    TransformComponent:
+      Position: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    ScriptComponent:
+      ClassName: Sandbox.CirclePlayer
+      ScriptFields:
+        []
+  - Entity: 517293417842182797
+    BaseComponent:
+      Name: Player2
+      Tag: 0
+      Layer: 0
+    TransformComponent:
+      Position: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    ScriptComponent:
+      ClassName: Sandbox.Player2
+  - Entity: 1815583875402735992
+    BaseComponent:
+      Name: Player
+      Tag: 0
+      Layer: 0
+    TransformComponent:
+      Position: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    ScriptComponent:
+      ClassName: Sandbox.Player
+      ScriptFields:
+        []
+  - Entity: 17854461504714430981
+    BaseComponent:
+      Name: FieldTester
+      Tag: 0
+      Layer: 0
+    TransformComponent:
+      Position: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    ScriptComponent:
+      ClassName: Sandbox.FieldTester
+      ScriptFields:
+        []
+  - Entity: 10596131271453681269
+    BaseComponent:
+      Name: EntityChild
+      Tag: 0
+      Layer: 0
+    TransformComponent:
+      Position: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    ScriptComponent:
+      ClassName: Sandbox.EntityChild
+  - Entity: 15988241326168751145
+    BaseComponent:
+      Name: EntityGrandChild
+      Tag: 0
+      Layer: 0
+    TransformComponent:
+      Position: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    ScriptComponent:
+      ClassName: Sandbox.EntityGrandChild

@@ -130,6 +130,32 @@ namespace Hazel
 			auto it = sScriptFieldTypeMap.find(typeName);
 			if (it == sScriptFieldTypeMap.end())
 			{
+				if (auto* monoClass = mono_type_get_class(monoType))
+				{
+					std::string classNamespace;
+					std::string className;
+
+					MonoClass* monoParentClass = monoClass;
+					do
+					{
+						if (monoParentClass = mono_class_get_parent(monoParentClass))
+						{
+							classNamespace = mono_class_get_namespace(monoParentClass);
+							className = mono_class_get_name(monoParentClass);
+							if (className == "Object")
+							{
+								return ScriptFieldType::None;
+							}
+						}
+					} while (className != "Entity");
+
+					std::string classFullName = fmt::format("{}.{}", classNamespace, className);
+					if (sScriptFieldTypeMap.find(classFullName) != sScriptFieldTypeMap.end())
+					{
+						return sScriptFieldTypeMap.at(classFullName);
+					}
+				}
+
 				return ScriptFieldType::None;
 			}
 
@@ -683,5 +709,10 @@ namespace Hazel
 	Ref<ScriptClass> ScriptEngine::GetEntityClass()
 	{
 		return sScriptData->EntityBaseClass;
+	}
+
+	std::string ScriptEngine::GetEntityClassFullName()
+	{
+		return GetEntityClass()->GetFullName();
 	}
 }

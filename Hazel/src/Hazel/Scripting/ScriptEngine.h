@@ -43,6 +43,8 @@ namespace Hazel
 
 		static Ref<ScriptInstance> GetEntityScriptInstance(UUID entityID);
 
+		static std::string GetEntityClassFullName();
+
 	private:
 		static void InitMono();
 		static void ShutdownMono();

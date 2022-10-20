@@ -49,6 +49,11 @@ namespace Sandbox
 
 
 			// Sprite Renderer
+			if (!_spriteRenderer)
+			{
+				return;
+			}
+
 			if (Input.IsKeyDown(KeyCode.SPACE))
 			{
 				_spriteRenderer.Color = Color.Random();

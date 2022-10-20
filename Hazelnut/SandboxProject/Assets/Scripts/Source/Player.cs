@@ -6,6 +6,8 @@ namespace Sandbox
 {
 	public class Player : Entity
 	{
+		public float MySpeed;
+
 		private Rigidbody2DComponent _rigidbody;
 
 		private void OnCreate()
@@ -19,6 +21,11 @@ namespace Sandbox
 
 		private void OnUpdate(float timestep)
 		{
+			if (!_rigidbody)
+			{
+				return;
+			}
+
 			float speed = 0.5f;
 			var velocity = Vector3.Zero;
 

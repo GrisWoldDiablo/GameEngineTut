@@ -24,6 +24,11 @@ namespace Sandbox
 
 		private void OnUpdate(float timestep)
 		{
+			if (!_circleRenderer)
+			{
+				return;
+			}
+
 			// Sprite Renderer
 			if (Input.IsKeyDown(KeyCode.SPACE))
 			{

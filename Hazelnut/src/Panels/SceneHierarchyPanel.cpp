@@ -404,7 +404,7 @@ namespace Hazel
 
 		if (ImGui::BeginDragDropSource())
 		{
-			ImGui::SetDragDropPayload("ENTITY_NODE_ITEM", &entity, sizeof(Entity));
+			ImGui::SetDragDropPayload("ENTITY_PAY_LOAD", &entity, sizeof(Entity));
 			ImGui::Text(entity.Name().c_str());
 			ImGui::EndDragDropSource();
 		}
@@ -564,13 +564,30 @@ namespace Hazel
 				return;
 			}
 
-			auto entityDropTarget = []<typename SetFunction>(SetFunction setFunction)
+			auto entityDropTarget = []<typename SetFunction>(const std::string & className, SetFunction setFunction)
 			{
 				if (ImGui::BeginDragDropTarget())
 				{
-					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ENTITY_NODE_ITEM"))
+					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ENTITY_PAY_LOAD"))
 					{
-						setFunction(*static_cast<Entity*>(payload->Data));
+						const auto entityPayload = *static_cast<Entity*>(payload->Data);
+						const auto entityClassName = ScriptEngine::GetEntityClassFullName();
+
+						if (!entityPayload.HasComponent<ScriptComponent>() || className == entityClassName)
+						{
+							setFunction(entityPayload);
+							return;
+						}
+
+						// TODO Accept derived classes
+						const auto& scriptComponent = entityPayload.GetComponent<ScriptComponent>();
+						if (scriptComponent.ClassName == className)
+						{
+							setFunction(entityPayload);
+							return;
+						}
+
+						HZ_LWARN("Wrong type, [{}] required.", className);
 					}
 					ImGui::EndDragDropTarget();
 				}
@@ -683,6 +700,7 @@ namespace Hazel
 						case ScriptFieldType::Entity:
 						{
 							auto data = scriptInstance->GetFieldEntityValue(name);
+							const auto fieldTypeName = field.GetFieldTypeName();
 
 							const char* comboName = data ? data.Name().c_str() : "(Null)";
 							if (ImGui::BeginCombo(name.c_str(), comboName))
@@ -692,11 +710,28 @@ namespace Hazel
 									scriptInstance->SetFieldEntityValue(name, Entity());
 								}
 
+								const auto entityClassName = ScriptEngine::GetEntityClassFullName();
+								const bool isBaseEntity = fieldTypeName == entityClassName;
+
 								_scene->_registry.each([&](auto entityID)
 								{
 									Entity entity{ entityID, _scene.get() };
+									bool isSelected = false;
+									if (isBaseEntity)
+									{
+										isSelected = ImGui::Selectable(fmt::format("{0}##{1}", entity.Name(), entity.GetUUID()).c_str());
+									}
+									else if (entity.HasComponent<ScriptComponent>())
+									{
+										// TODO Accept derived classes
+										const auto& scriptComponent = entity.GetComponent<ScriptComponent>();
+										if (scriptComponent.ClassName == fieldTypeName)
+										{
+											isSelected = ImGui::Selectable(fmt::format("{0}##{1}", entity.Name(), entity.GetUUID()).c_str());
+										}
+									}
 
-									if (ImGui::Selectable(fmt::format("{0}##{1}", entity.Name(), entity.GetUUID()).c_str()))
+									if (isSelected)
 									{
 										scriptInstance->SetFieldEntityValue(name, entity);
 									}
@@ -715,7 +750,7 @@ namespace Hazel
 								_selectedEntity = data;
 							}
 
-							entityDropTarget([&](Entity entity)
+							entityDropTarget(fieldTypeName, [&](Entity entity)
 							{
 								scriptInstance->SetFieldEntityValue(name, entity);
 							});
@@ -857,6 +892,8 @@ namespace Hazel
 							auto data = scriptField.GetValue<uint64_t>();
 							auto foundEntity = _scene->GetEntityByUUID(data);
 
+							const auto fieldTypeName = field.GetFieldTypeName();
+
 							const char* comboName = foundEntity ? foundEntity.Name().c_str() : "(Null)";
 							if (ImGui::BeginCombo(name.c_str(), comboName))
 							{
@@ -865,11 +902,28 @@ namespace Hazel
 									entityFields.erase(name);
 								}
 
+								const auto entityClassName = ScriptEngine::GetEntityClassFullName();
+								const bool isBaseEntity = fieldTypeName == entityClassName;
+
 								_scene->_registry.each([&](auto entityID)
 								{
 									Entity entity{ entityID, _scene.get() };
+									bool isSelected = false;
+									if (isBaseEntity)
+									{
+										isSelected = ImGui::Selectable(fmt::format("{0}##{1}", entity.Name(), entity.GetUUID()).c_str());
+									}
+									else if (entity.HasComponent<ScriptComponent>())
+									{
+										// TODO Accept derived classes
+										const auto& scriptComponent = entity.GetComponent<ScriptComponent>();
+										if (scriptComponent.ClassName == fieldTypeName)
+										{
+											isSelected = ImGui::Selectable(fmt::format("{0}##{1}", entity.Name(), entity.GetUUID()).c_str());
+										}
+									}
 
-									if (ImGui::Selectable(fmt::format("{0}##{1}", entity.Name(), entity.GetUUID()).c_str()))
+									if (isSelected)
 									{
 										scriptField.SetValue<UUID>(entity.GetUUID());
 									}
@@ -888,7 +942,7 @@ namespace Hazel
 								_selectedEntity = foundEntity;
 							}
 
-							entityDropTarget([&](Entity entity)
+							entityDropTarget(fieldTypeName, [&](Entity entity)
 							{
 								scriptField.SetValue(entity.GetUUID());
 							});
@@ -1014,15 +1068,34 @@ namespace Hazel
 						}
 						case ScriptFieldType::Entity:
 						{
+							const auto fieldTypeName = field.GetFieldTypeName();
+
 							if (ImGui::BeginCombo(name.c_str(), "(Null)"))
 							{
 								ImGui::Selectable("(Null)");
 
+								const auto entityClassName = ScriptEngine::GetEntityClassFullName();
+								const bool isBaseEntity = fieldTypeName == entityClassName;
+
 								_scene->_registry.each([&](auto entityID)
 								{
 									Entity entity{ entityID, _scene.get() };
+									bool isSelected = false;
+									if (isBaseEntity)
+									{
+										isSelected = ImGui::Selectable(fmt::format("{0}##{1}", entity.Name(), entity.GetUUID()).c_str());
+									}
+									else if (entity.HasComponent<ScriptComponent>())
+									{
+										// TODO Accept derived classes
+										const auto& scriptComponent = entity.GetComponent<ScriptComponent>();
+										if (scriptComponent.ClassName == fieldTypeName)
+										{
+											isSelected = ImGui::Selectable(fmt::format("{0}##{1}", entity.Name(), entity.GetUUID()).c_str());
+										}
+									}
 
-									if (ImGui::Selectable(fmt::format("{0}##{1}", entity.Name(), entity.GetUUID()).c_str()))
+									if (isSelected)
 									{
 										auto& scriptFieldInstance = entityFields[name];
 										scriptFieldInstance.Field = field;
@@ -1033,7 +1106,7 @@ namespace Hazel
 								ImGui::EndCombo();
 							}
 
-							entityDropTarget([&](Entity entity)
+							entityDropTarget(fieldTypeName, [&](Entity entity)
 							{
 								auto& scriptFieldInstance = entityFields[name];
 								scriptFieldInstance.Field = field;

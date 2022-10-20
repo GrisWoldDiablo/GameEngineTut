@@ -43,6 +43,8 @@ namespace Hazel
 		{
 			return DefaultStringData;
 		}
+
+		std::string GetFieldTypeName() const;
 	};
 
 	// ScriptField + data storage

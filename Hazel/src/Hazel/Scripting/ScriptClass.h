@@ -22,11 +22,13 @@ namespace Hazel
 		MonoMethod* GetMethod(const std::string& name, int paramsCount = 0);
 		MonoObject* InvokeMethod(MonoObject* instance, MonoMethod* monoMethod, void** params = nullptr);
 
+		const std::string& GetFullName() const { return _classFullName; }
 		const std::unordered_map<std::string, ScriptField>& GetFields() const { return _fields; }
 
 	private:
 		std::string _classNamespace;
 		std::string _className;
+		std::string _classFullName;
 
 		std::unordered_map<std::string, ScriptField> _fields;
 

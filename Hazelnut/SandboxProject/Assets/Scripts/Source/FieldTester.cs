@@ -5,6 +5,8 @@ namespace Sandbox
 {
 	public class FieldTester : Entity
 	{
+		public bool SHOULD_LOG_FIELDS;
+
 		public string @String = "Hello World";                                  // In Inpsector
 		public float @float = 69.0f;                                            // In Inpsector
 		public double @double = 4.269d;                                         // In Inpsector
@@ -58,7 +60,7 @@ namespace Sandbox
 
 		void OnUpdate(float timeStep)
 		{
-			if (_timeleft <= 0.0f)
+			if (SHOULD_LOG_FIELDS && _timeleft <= 0.0f)
 			{
 				Console.WriteLine("--------------");
 				foreach (var field in GetType().GetFields())
@@ -71,7 +73,11 @@ namespace Sandbox
 			}
 
 			_timeleft -= timeStep;
-			_spriteComponent.Color = @Color;
+
+			if (_spriteComponent)
+			{
+				_spriteComponent.Color = @Color;
+			}
 		}
 	}
 }
