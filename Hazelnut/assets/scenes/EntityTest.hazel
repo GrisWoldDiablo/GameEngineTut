@@ -122,3 +122,23 @@ Entities:
       Scale: [1, 1, 1]
     ScriptComponent:
       ClassName: Sandbox.EntityGrandChild
+  - Entity: 10884289432009398543
+    BaseComponent:
+      Name: EntitySmallChild
+      Tag: 0
+      Layer: 0
+    TransformComponent:
+      Position: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    ScriptComponent:
+      ClassName: Sandbox.EntitySmallChild
+  - Entity: 17711691317068623211
+    BaseComponent:
+      Name: Entity
+      Tag: 0
+      Layer: 0
+    TransformComponent:
+      Position: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]

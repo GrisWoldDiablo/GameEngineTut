@@ -11,6 +11,7 @@
 #include "mono/metadata/assembly.h"
 #include "mono/metadata/object.h"
 #include "mono/metadata/tabledefs.h"
+#include "mono/metadata/class.h"
 
 #include "FileWatch.h"
 
@@ -130,31 +131,6 @@ namespace Hazel
 			auto it = sScriptFieldTypeMap.find(typeName);
 			if (it == sScriptFieldTypeMap.end())
 			{
-				if (auto* monoClass = mono_type_get_class(monoType))
-				{
-					std::string classNamespace;
-					std::string className;
-
-					MonoClass* monoParentClass = monoClass;
-					do
-					{
-						if (monoParentClass = mono_class_get_parent(monoParentClass))
-						{
-							classNamespace = mono_class_get_namespace(monoParentClass);
-							className = mono_class_get_name(monoParentClass);
-							if (className == "Object")
-							{
-								return ScriptFieldType::None;
-							}
-						}
-					} while (className != "Entity");
-
-					std::string classFullName = fmt::format("{}.{}", classNamespace, className);
-					if (sScriptFieldTypeMap.find(classFullName) != sScriptFieldTypeMap.end())
-					{
-						return sScriptFieldTypeMap.at(classFullName);
-					}
-				}
 
 				return ScriptFieldType::None;
 			}
@@ -163,7 +139,7 @@ namespace Hazel
 		}
 	}
 
-	struct StriptEngineData
+	struct ScriptEngineData
 	{
 		MonoDomain* RootDomain = nullptr;
 		MonoDomain* AppDomain = nullptr;
@@ -190,7 +166,7 @@ namespace Hazel
 		bool IsAssemblyReloading = false;
 	};
 
-	static StriptEngineData* sScriptData = nullptr;
+	static ScriptEngineData* sScriptData = nullptr;
 
 	static void OnAssemblyFileSystemEvent(const std::string& path, const filewatch::Event eventType)
 	{
@@ -212,7 +188,7 @@ namespace Hazel
 
 	void ScriptEngine::Init()
 	{
-		sScriptData = new StriptEngineData();
+		sScriptData = new ScriptEngineData();
 
 		InitMono();
 
@@ -586,7 +562,19 @@ namespace Hazel
 			while (MonoClassField* field = mono_class_get_fields(monoClass, &iterator))
 			{
 				const auto type = mono_field_get_type(field);
-				const auto scriptFieldType = Utils::MonoTypeToScriptFieldType(type);
+				auto scriptFieldType = Utils::MonoTypeToScriptFieldType(type);
+
+				if (scriptFieldType == ScriptFieldType::None)
+				{
+					if (auto* typeMonoClass = mono_type_get_class(type))
+					{
+						if (mono_class_is_subclass_of(typeMonoClass, entityClass, false))
+						{
+							scriptFieldType = ScriptFieldType::Entity;
+						}
+					}
+				}
+
 				const auto typeName = Utils::ScriptFieldTypeToString(scriptFieldType);
 				const auto fieldName = mono_field_get_name(field);
 				const auto flags = mono_field_get_flags(field);
@@ -711,8 +699,54 @@ namespace Hazel
 		return sScriptData->EntityBaseClass;
 	}
 
-	std::string ScriptEngine::GetEntityClassFullName()
+	bool ScriptEngine::IsBaseClass(MonoClass* monoClass)
 	{
-		return GetEntityClass()->GetFullName();
+		return monoClass == GetEntityClass()->_monoClass;
+	}
+
+	bool ScriptEngine::IsSubClassOf(MonoClass* child, MonoClass* parent)
+	{
+		auto* baseEntityClass = GetEntityClass()->_monoClass;
+
+		if (!parent)
+		{
+			return mono_class_is_subclass_of(child, baseEntityClass, false);
+		}
+
+		return mono_class_is_subclass_of(child, parent, false);
+	}
+
+	bool ScriptEngine::IsSubClassOf(MonoClass* child, const std::string& parentFullClassName, bool orSame)
+	{
+		if (EntityClassExist(parentFullClassName))
+		{
+			auto* parentClass = GetEntityClasses().at(parentFullClassName)->_monoClass;
+			return child == parentClass || mono_class_is_subclass_of(child, parentClass, false);
+		}
+
+		if (parentFullClassName == GetEntityClass()->_classFullName)
+		{
+			auto* entityBaseClass = GetEntityClass()->_monoClass;
+			return child == entityBaseClass || mono_class_is_subclass_of(child, entityBaseClass, false);
+		}
+
+		return false;
+	}
+
+	bool ScriptEngine::IsSubClassOf(const std::string& childFullClassName, MonoClass* parent, bool orSame)
+	{
+		if (EntityClassExist(childFullClassName))
+		{
+			auto* childClass = GetEntityClasses().at(childFullClassName)->_monoClass;
+			return parent == childClass || mono_class_is_subclass_of(childClass, parent, false);
+		}
+
+		if (childFullClassName == GetEntityClass()->_classFullName)
+		{
+			auto* entityBaseClass = GetEntityClass()->_monoClass;
+			return parent == entityBaseClass || mono_class_is_subclass_of(entityBaseClass, parent, false);
+		}
+
+		return false;
 	}
 }

@@ -1195,7 +1195,7 @@ namespace Hazel
 	void EditorLayer::OnScenePlay()
 	{
 		_sceneState = SceneState::Play;
-		_sceneHierarchyPanel.SetSelectedEntity(Entity());
+		_sceneHierarchyPanel.SetSelectedEntity(Entity(), true);
 
 		_activeScene = Scene::Copy(_editorScene);
 

@@ -4,7 +4,8 @@ using System;
 namespace Sandbox
 {
 	public class EntityChild : Entity { }
-	public class EntityGrandChild : EntityChild { }
+	public class EntitySmallChild : EntityChild { }
+	public class EntityGrandChild : EntitySmallChild { }
 
 	public class EntityFieldTester : Entity
 	{
@@ -15,6 +16,7 @@ namespace Sandbox
 		public Player Player;
 		public Player2 Player2;
 		public EntityChild EntityChild;
+		public EntitySmallChild EntitySmallChild;
 		public EntityGrandChild EntityGrandChild;
 		public AudioListener AudioListener;
 		public AudioTester AudioTester;

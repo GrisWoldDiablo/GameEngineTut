@@ -369,6 +369,17 @@ namespace Hazel
 		}
 	}
 
+	void SceneHierarchyPanel::SetSelectedEntity(Entity entity, bool shouldClearLocked)
+	{
+		CleanUpComponents(_selectedEntity);
+		_selectedEntity = entity;
+
+		if (shouldClearLocked)
+		{
+			_lockedEntity = Entity();
+		}
+	}
+
 	void SceneHierarchyPanel::DrawSceneName()
 	{
 		if (ImGui::BeginMenuBar())
@@ -538,14 +549,14 @@ namespace Hazel
 
 				if (ImGui::BeginListBox("##Classes Name"))
 				{
-					for (const auto& scriptClass : ScriptEngine::GetEntityClasses())
+					for (const auto& [entityClassName, _] : ScriptEngine::GetEntityClasses())
 					{
-						if (component.ClassName == scriptClass.first)
+						if (component.ClassName == entityClassName)
 						{
 							continue;
 						}
 
-						const auto* itemName = scriptClass.first.c_str();
+						const auto* itemName = entityClassName.c_str();
 						if (ImGui::Selectable(itemName))
 						{
 							component.ClassName = itemName;
@@ -564,30 +575,32 @@ namespace Hazel
 				return;
 			}
 
-			auto entityDropTarget = []<typename SetFunction>(const std::string & className, SetFunction setFunction)
+			auto entityDropTarget = []<typename SetFunction>(MonoClass * fieldTypeClass, SetFunction setFunction)
 			{
 				if (ImGui::BeginDragDropTarget())
 				{
 					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ENTITY_PAY_LOAD"))
 					{
 						const auto entityPayload = *static_cast<Entity*>(payload->Data);
-						const auto entityClassName = ScriptEngine::GetEntityClassFullName();
+						bool hasScriptComponent = entityPayload.HasComponent<ScriptComponent>();
 
-						if (!entityPayload.HasComponent<ScriptComponent>() || className == entityClassName)
+						if (!hasScriptComponent && ScriptEngine::IsBaseClass(fieldTypeClass))
 						{
 							setFunction(entityPayload);
 							return;
 						}
 
-						// TODO Accept derived classes
-						const auto& scriptComponent = entityPayload.GetComponent<ScriptComponent>();
-						if (scriptComponent.ClassName == className)
+						if (hasScriptComponent)
 						{
-							setFunction(entityPayload);
-							return;
+							const auto& scriptComponent = entityPayload.GetComponent<ScriptComponent>();
+							if (ScriptEngine::IsSubClassOf(scriptComponent.ClassName, fieldTypeClass, true))
+							{
+								setFunction(entityPayload);
+								return;
+							}
 						}
 
-						HZ_LWARN("Wrong type, [{}] required.", className);
+						HZ_LWARN("Wrong entity class type required.");
 					}
 					ImGui::EndDragDropTarget();
 				}
@@ -700,7 +713,7 @@ namespace Hazel
 						case ScriptFieldType::Entity:
 						{
 							auto data = scriptInstance->GetFieldEntityValue(name);
-							const auto fieldTypeName = field.GetFieldTypeName();
+							const auto fieldTypeClass = field.GetFieldTypeClass();
 
 							const char* comboName = data ? data.Name().c_str() : "(Null)";
 							if (ImGui::BeginCombo(name.c_str(), comboName))
@@ -710,22 +723,20 @@ namespace Hazel
 									scriptInstance->SetFieldEntityValue(name, Entity());
 								}
 
-								const auto entityClassName = ScriptEngine::GetEntityClassFullName();
-								const bool isBaseEntity = fieldTypeName == entityClassName;
+								const auto isEntityChildClass = ScriptEngine::IsSubClassOf(fieldTypeClass);
 
 								_scene->_registry.each([&](auto entityID)
 								{
 									Entity entity{ entityID, _scene.get() };
 									bool isSelected = false;
-									if (isBaseEntity)
+									if (!isEntityChildClass)
 									{
 										isSelected = ImGui::Selectable(fmt::format("{0}##{1}", entity.Name(), entity.GetUUID()).c_str());
 									}
 									else if (entity.HasComponent<ScriptComponent>())
 									{
-										// TODO Accept derived classes
 										const auto& scriptComponent = entity.GetComponent<ScriptComponent>();
-										if (scriptComponent.ClassName == fieldTypeName)
+										if (ScriptEngine::IsSubClassOf(scriptComponent.ClassName, fieldTypeClass, true))
 										{
 											isSelected = ImGui::Selectable(fmt::format("{0}##{1}", entity.Name(), entity.GetUUID()).c_str());
 										}
@@ -750,7 +761,7 @@ namespace Hazel
 								_selectedEntity = data;
 							}
 
-							entityDropTarget(fieldTypeName, [&](Entity entity)
+							entityDropTarget(fieldTypeClass, [&](Entity entity)
 							{
 								scriptInstance->SetFieldEntityValue(name, entity);
 							});
@@ -892,7 +903,7 @@ namespace Hazel
 							auto data = scriptField.GetValue<uint64_t>();
 							auto foundEntity = _scene->GetEntityByUUID(data);
 
-							const auto fieldTypeName = field.GetFieldTypeName();
+							const auto fieldTypeClass = field.GetFieldTypeClass();
 
 							const char* comboName = foundEntity ? foundEntity.Name().c_str() : "(Null)";
 							if (ImGui::BeginCombo(name.c_str(), comboName))
@@ -902,22 +913,20 @@ namespace Hazel
 									entityFields.erase(name);
 								}
 
-								const auto entityClassName = ScriptEngine::GetEntityClassFullName();
-								const bool isBaseEntity = fieldTypeName == entityClassName;
+								const auto isEntityChildClass = ScriptEngine::IsSubClassOf(fieldTypeClass);
 
 								_scene->_registry.each([&](auto entityID)
 								{
 									Entity entity{ entityID, _scene.get() };
 									bool isSelected = false;
-									if (isBaseEntity)
+									if (!isEntityChildClass)
 									{
 										isSelected = ImGui::Selectable(fmt::format("{0}##{1}", entity.Name(), entity.GetUUID()).c_str());
 									}
 									else if (entity.HasComponent<ScriptComponent>())
 									{
-										// TODO Accept derived classes
 										const auto& scriptComponent = entity.GetComponent<ScriptComponent>();
-										if (scriptComponent.ClassName == fieldTypeName)
+										if (ScriptEngine::IsSubClassOf(scriptComponent.ClassName, fieldTypeClass, true))
 										{
 											isSelected = ImGui::Selectable(fmt::format("{0}##{1}", entity.Name(), entity.GetUUID()).c_str());
 										}
@@ -942,7 +951,7 @@ namespace Hazel
 								_selectedEntity = foundEntity;
 							}
 
-							entityDropTarget(fieldTypeName, [&](Entity entity)
+							entityDropTarget(fieldTypeClass, [&](Entity entity)
 							{
 								scriptField.SetValue(entity.GetUUID());
 							});
@@ -1068,28 +1077,26 @@ namespace Hazel
 						}
 						case ScriptFieldType::Entity:
 						{
-							const auto fieldTypeName = field.GetFieldTypeName();
+							const auto fieldTypeClass = field.GetFieldTypeClass();
 
 							if (ImGui::BeginCombo(name.c_str(), "(Null)"))
 							{
 								ImGui::Selectable("(Null)");
 
-								const auto entityClassName = ScriptEngine::GetEntityClassFullName();
-								const bool isBaseEntity = fieldTypeName == entityClassName;
+								const auto isEntityChildClass = ScriptEngine::IsSubClassOf(fieldTypeClass);
 
 								_scene->_registry.each([&](auto entityID)
 								{
 									Entity entity{ entityID, _scene.get() };
 									bool isSelected = false;
-									if (isBaseEntity)
+									if (!isEntityChildClass)
 									{
 										isSelected = ImGui::Selectable(fmt::format("{0}##{1}", entity.Name(), entity.GetUUID()).c_str());
 									}
 									else if (entity.HasComponent<ScriptComponent>())
 									{
-										// TODO Accept derived classes
 										const auto& scriptComponent = entity.GetComponent<ScriptComponent>();
-										if (scriptComponent.ClassName == fieldTypeName)
+										if (ScriptEngine::IsSubClassOf(scriptComponent.ClassName, fieldTypeClass, true))
 										{
 											isSelected = ImGui::Selectable(fmt::format("{0}##{1}", entity.Name(), entity.GetUUID()).c_str());
 										}
@@ -1106,7 +1113,7 @@ namespace Hazel
 								ImGui::EndCombo();
 							}
 
-							entityDropTarget(fieldTypeName, [&](Entity entity)
+							entityDropTarget(fieldTypeClass, [&](Entity entity)
 							{
 								auto& scriptFieldInstance = entityFields[name];
 								scriptFieldInstance.Field = field;
@@ -1535,14 +1542,14 @@ namespace Hazel
 			}
 
 			float offset = audioSource->GetOffset();
-			float lenght = audioSource->GetLength();
+			float length = audioSource->GetLength();
 			int min = static_cast<int>(offset / 60);
 			float secs = (offset - (min * 60));
 			int sec = static_cast<int>(secs);
 			int ms = static_cast<int>((secs - sec) * 1000);
 
 			auto trackValue = fmt::format("{}m:{:02d}s:{:02d}ms", min, sec, ms);
-			if (ImGui::SliderFloat("Track", &offset, 0.0f, lenght, trackValue.c_str(), ImGuiSliderFlags_NoInput))
+			if (ImGui::SliderFloat("Track", &offset, 0.0f, length, trackValue.c_str(), ImGuiSliderFlags_NoInput))
 			{
 				if (state == AudioSourceState::Paused || state == AudioSourceState::Playing)
 				{

@@ -4,6 +4,7 @@ extern "C" // Forward declare of class from C
 {
 	typedef struct _MonoClassField MonoClassField;
 	typedef struct _MonoString MonoString;
+	typedef struct _MonoClass MonoClass;
 }
 
 namespace Hazel
@@ -45,6 +46,7 @@ namespace Hazel
 		}
 
 		std::string GetFieldTypeName() const;
+		MonoClass* GetFieldTypeClass() const;
 	};
 
 	// ScriptField + data storage

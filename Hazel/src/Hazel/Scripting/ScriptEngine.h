@@ -43,7 +43,10 @@ namespace Hazel
 
 		static Ref<ScriptInstance> GetEntityScriptInstance(UUID entityID);
 
-		static std::string GetEntityClassFullName();
+		static bool IsBaseClass(MonoClass* monoClass);
+		static bool IsSubClassOf(MonoClass* child, MonoClass* parent = nullptr);
+		static bool IsSubClassOf(MonoClass* child, const std::string& parentFullClassName, bool orSame = false);
+		static bool IsSubClassOf(const std::string& childFullClassName, MonoClass* parent, bool orSame = false);
 
 	private:
 		static void InitMono();

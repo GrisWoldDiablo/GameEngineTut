@@ -17,7 +17,7 @@ namespace Hazel
 
 		void EditRuntimeRigidbody(Entity entity, bool shouldZeroedVelocity = false);
 		Entity GetSelectedEntity() const { return _selectedEntity; }
-		void SetSelectedEntity(Entity entity) { CleanUpComponents(_selectedEntity); _selectedEntity = entity; }
+		void SetSelectedEntity(Entity entity, bool shouldClearLocked = false);
 
 	private:
 		void DrawSceneName();
