@@ -106,8 +106,6 @@ namespace Hazel
 				{
 				case GLFW_PRESS:
 				{
-
-					std::cout << "Pressed" << keyCode << std::endl;
 					keyStatus = Input::Status::Pressed;
 					
 					KeyPressedEvent event(keyCode);
@@ -116,7 +114,6 @@ namespace Hazel
 				}
 				case GLFW_RELEASE:
 				{
-					std::cout << "Release" << keyCode << std::endl;
 					keyStatus = Input::Status::Up;
 
 					KeyUpEvent event(keyCode);
