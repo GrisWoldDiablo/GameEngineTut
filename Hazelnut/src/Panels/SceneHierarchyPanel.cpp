@@ -632,7 +632,7 @@ namespace Hazel
 							char buffer[2] = { static_cast<char>(data) };
 							if (ImGui::InputText(name.c_str(), buffer, sizeof(buffer)))
 							{
-								data = *buffer;
+								data = static_cast<uint16_t>(static_cast<uint8_t>(*buffer));
 								scriptInstance->SetFieldValue(name, data);
 							}
 							break;
@@ -819,7 +819,7 @@ namespace Hazel
 							char buffer[2] = { static_cast<char>(data) };
 							if (ImGui::InputText(name.c_str(), buffer, sizeof(buffer)))
 							{
-								data = *buffer;
+								data = static_cast<uint16_t>(static_cast<uint8_t>(*buffer));
 								scriptField.SetValue(data);
 							}
 							break;
@@ -992,7 +992,7 @@ namespace Hazel
 							{
 								auto& scriptFieldInstance = entityFields[name];
 								scriptFieldInstance.Field = field;
-								data = *buffer;
+								data = static_cast<uint16_t>(static_cast<uint8_t>(*buffer));
 								scriptFieldInstance.SetValue(data);
 							}
 							break;

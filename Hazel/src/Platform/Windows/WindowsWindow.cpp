@@ -1,6 +1,7 @@
 #include "hzpch.h"
 #include "WindowsWindow.h"
 
+#include "Hazel/Core/Input.h"
 #include "Hazel/Events/ApplicationEvent.h"
 #include "Hazel/Events/MouseEvent.h"
 #include "Hazel/Events/KeyEvent.h"
@@ -96,23 +97,29 @@ namespace Hazel
 			glfwSetKeyCallback(_window, [](GLFWwindow* window, int key, int scancode, int action, int mods)
 			{
 				auto* data = (WindowData*)glfwGetWindowUserPointer(window);
+
+				auto keyCode = static_cast<KeyCode>(key);
+				auto& keyStatus = Input::Get().GetKeyStatus(keyCode);
+
+				// TODO : Add repeat event?
 				switch (action)
 				{
 				case GLFW_PRESS:
 				{
-					KeyPressedEvent event(static_cast<KeyCode>(key));
+
+					std::cout << "Pressed" << keyCode << std::endl;
+					keyStatus = Input::Status::Pressed;
+					
+					KeyPressedEvent event(keyCode);
 					data->EventCallback(event);
 					break;
 				}
 				case GLFW_RELEASE:
 				{
-					KeyReleasedEvent event(static_cast<KeyCode>(key));
-					data->EventCallback(event);
-					break;
-				}
-				case GLFW_REPEAT:
-				{
-					KeyPressedEvent event(static_cast<KeyCode>(key), true);
+					std::cout << "Release" << keyCode << std::endl;
+					keyStatus = Input::Status::Up;
+
+					KeyUpEvent event(keyCode);
 					data->EventCallback(event);
 					break;
 				}
@@ -130,17 +137,25 @@ namespace Hazel
 			{
 				auto* data = (WindowData*)glfwGetWindowUserPointer(window);
 
+				auto mouseCode = static_cast<MouseCode>(button);
+				auto& mouseStatus = Input::Get().GetMouseStatus(mouseCode);
+
+				// TODO : Add repeat event?
 				switch (action)
 				{
 				case GLFW_PRESS:
 				{
-					MouseButtonPressedEvent event(static_cast<MouseCode>(button));
+					mouseStatus = Input::Status::Pressed;
+
+					MouseButtonPressedEvent event(mouseCode);
 					data->EventCallback(event);
 					break;
 				}
 				case GLFW_RELEASE:
 				{
-					MouseButtonReleasedEvent event(static_cast<MouseCode>(button));
+					mouseStatus = Input::Status::Up;
+
+					MouseButtonUpEvent event(mouseCode);
 					data->EventCallback(event);
 					break;
 				}
@@ -189,14 +204,17 @@ namespace Hazel
 	{
 		HZ_PROFILE_FUNCTION();
 
-		glfwPollEvents();
-
 		if (this->GetWidth() == 0 || this->GetHeight() == 0)
 		{
 			return;
 		}
 
 		_context->SwapBuffers();
+	}
+
+	void WindowsWindow::ProcessEvents()
+	{
+		glfwPollEvents();
 	}
 
 	void WindowsWindow::SetVSync(bool enable)

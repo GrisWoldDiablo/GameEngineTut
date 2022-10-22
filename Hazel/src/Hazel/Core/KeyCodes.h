@@ -4,6 +4,8 @@ namespace Hazel
 {
 	using Key = enum class KeyCode : uint16_t
 	{
+		FIRST = 32, // Not a key used for Enum Count
+
 		SPACE = 32,
 		Apostrophe = 39,/* ' */
 		COMMA = 44,		/* , */
@@ -139,6 +141,9 @@ namespace Hazel
 		RightSuper = 347,
 
 		Menu = 348,
+
+		LAST, // Not a key used for Enum Count
+		COUNT = LAST - FIRST,
 	};
 
 	inline std::ostream& operator<<(std::ostream& os, const KeyCode& keyCode)

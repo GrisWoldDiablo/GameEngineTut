@@ -12,6 +12,9 @@ namespace Hazel
 		Button6 = 5,
 		Button7 = 6,
 		Button8 = 7,
+
+		COUNT,
+
 		ButtonLast = Button8,
 		ButtonLeft = Button1,
 		ButtonRight = Button2,

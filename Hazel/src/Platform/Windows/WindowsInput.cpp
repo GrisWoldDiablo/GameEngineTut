@@ -6,24 +6,11 @@
 
 namespace Hazel
 {
-	bool Input::IsKeyPressed(KeyCode keyCode)
+	Input Input::_sInstance = Input();
+
+	Input& Input::Get()
 	{
-		HZ_PROFILE_FUNCTION();
-
-		auto* window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
-		auto state = glfwGetKey(window, static_cast<int32_t>(keyCode));
-
-		return state == GLFW_PRESS;
-	}
-
-	bool Input::IsMouseButtonPressed(MouseCode button)
-	{
-		HZ_PROFILE_FUNCTION();
-
-		auto* window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
-		auto state = glfwGetMouseButton(window, static_cast<int32_t>(button));
-
-		return state == GLFW_PRESS;
+		return _sInstance;
 	}
 
 	glm::vec2 Input::GetMousePosition()
@@ -49,5 +36,43 @@ namespace Hazel
 		HZ_PROFILE_FUNCTION();
 
 		return GetMousePosition().y;
+	}
+
+	void Input::UpdateDownStatus()
+	{
+		for (auto& keyStatus : _keysStatus)
+		{
+			if (keyStatus == Status::Pressed)
+			{
+				keyStatus = Status::Down;
+			}
+		}
+
+		for (auto& buttonStatus : _buttonsStatus)
+		{
+			if (buttonStatus == Status::Pressed)
+			{
+				buttonStatus = Status::Down;
+			}
+		}
+	}
+
+	void Input::UpdateUpStatus()
+	{
+		for (auto& keyStatus : _keysStatus)
+		{
+			if (keyStatus == Status::Up)
+			{
+				keyStatus = Status::None;
+			}
+		}
+
+		for (auto& buttonStatus : _buttonsStatus)
+		{
+			if (buttonStatus == Status::Up)
+			{
+				buttonStatus = Status::None;
+			}
+		}
 	}
 }

@@ -1,5 +1,6 @@
 #include "hzpch.h"
 #include "Application.h"
+#include "Input.h"
 #include "Hazel/Events/Event.h"
 #include "Hazel/Renderer/Renderer.h"
 #include "Hazel/Scripting/ScriptEngine.h"
@@ -78,7 +79,11 @@ namespace Hazel
 			Time::SetTimestep(timestep);
 			Time::SetTimeElapsed(time);
 
+			Input::Get().UpdateDownStatus();
+
 			ExecuteMainThreadQueue();
+
+			_window->ProcessEvents();
 
 			// if minimized do not bother updating
 			if (!_minimized)
@@ -107,6 +112,8 @@ namespace Hazel
 			}
 
 			_window->OnUpdate();
+
+			Input::Get().UpdateUpStatus();
 		}
 	}
 

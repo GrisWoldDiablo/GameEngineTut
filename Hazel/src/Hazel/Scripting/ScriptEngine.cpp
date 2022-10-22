@@ -170,11 +170,15 @@ namespace Hazel
 
 	static void OnAssemblyFileSystemEvent(const std::string& path, const filewatch::Event eventType)
 	{
-		HZ_CORE_LDEBUG("Path: {0}, Event: {1}", path, (int)eventType);
-
 		if (!sScriptData->IsAssemblyReloading && eventType == filewatch::Event::modified)
 		{
 			sScriptData->IsAssemblyReloading = true;
+
+			if (sScriptData->SceneContext)
+			{
+				HZ_CORE_LINFO("Queuing Script Assembly reload.");
+				return;
+			}
 
 			using namespace std::chrono_literals;
 			std::this_thread::sleep_for(500ms);
@@ -224,7 +228,10 @@ namespace Hazel
 
 		sScriptData->EntityInstances.clear();
 
-		TryReload(false);
+		if (sScriptData->IsAssemblyReloading)
+		{
+			TryReload(false);
+		}
 	}
 
 	bool ScriptEngine::TryReload(bool shouldLog)
@@ -258,7 +265,7 @@ namespace Hazel
 
 	bool ScriptEngine::EntityClassExist(const std::string& fullClassName)
 	{
-		return sScriptData->EntityClasses.find(fullClassName) != sScriptData->EntityClasses.end();
+		return sScriptData->EntityClasses.contains(fullClassName);
 	}
 
 	Ref<ScriptInstance> ScriptEngine::OnCreateEntity(Entity entity)
@@ -287,7 +294,7 @@ namespace Hazel
 			sScriptData->EntityInstances[entityUUID] = instance;
 
 			// Copy field values
-			if (sScriptData->EntityScriptFields.find(entityUUID) != sScriptData->EntityScriptFields.end())
+			if (sScriptData->EntityScriptFields.contains(entityUUID))
 			{
 				const auto& fieldMap = sScriptData->EntityScriptFields.at(entityUUID);
 
@@ -328,7 +335,7 @@ namespace Hazel
 	void ScriptEngine::OnDestroyEntity(Entity entity)
 	{
 		const auto& entityUUID = entity.GetUUID();
-		HZ_CORE_ASSERT(sScriptData->EntityInstances.find(entityUUID) != sScriptData->EntityInstances.end(), "Entity UUID [{0}] missing", entityUUID);
+		HZ_CORE_ASSERT(sScriptData->EntityInstances.contains(entityUUID), "Entity UUID [{0}] missing", entityUUID);
 
 		auto& instance = sScriptData->EntityInstances.at(entityUUID);
 		instance->InvokeOnDestroy();
@@ -338,7 +345,7 @@ namespace Hazel
 	void ScriptEngine::OnUpdateEntity(Entity entity, Timestep timestep)
 	{
 		const auto& entityUUID = entity.GetUUID();
-		HZ_CORE_ASSERT(sScriptData->EntityInstances.find(entityUUID) != sScriptData->EntityInstances.end(), "Entity UUID [{0}] missing", entityUUID);
+		HZ_CORE_ASSERT(sScriptData->EntityInstances.contains(entityUUID), "Entity UUID [{0}] missing", entityUUID);
 
 		auto& instance = sScriptData->EntityInstances.at(entityUUID);
 		instance->InvokeOnUpdate(static_cast<float>(timestep));

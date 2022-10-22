@@ -21,10 +21,39 @@ namespace Hazel
 	/////////////////
 
 #pragma region Inputs
-	static bool Input_IsKeyDown(KeyCode keyCode)
+#pragma region Keyboard
+	static bool Input_IsKeyPressed(KeyCode keyCode)
 	{
 		return Input::IsKeyPressed(keyCode);
 	}
+
+	static bool Input_IsKeyDown(KeyCode keyCode)
+	{
+		return Input::IsKeyDown(keyCode);
+	}
+
+	static bool Input_IsKeyUp(KeyCode keyCode)
+	{
+		return Input::IsKeyUp(keyCode);
+	}
+#pragma endregion
+
+#pragma region Mouse
+	static bool Input_IsMouseButtonPressed(MouseCode mouseCode)
+	{
+		return Input::IsMouseButtonPressed(mouseCode);
+	}
+
+	static bool Input_IsMouseButtonDown(MouseCode mouseCode)
+	{
+		return Input::IsMouseButtonDown(mouseCode);
+	}
+
+	static bool Input_IsMouseButtonUp(MouseCode mouseCode)
+	{
+		return Input::IsMouseButtonUp(mouseCode);
+	}
+#pragma endregion
 #pragma endregion
 
 	/////////////////
@@ -739,7 +768,17 @@ namespace Hazel
 	void ScriptGlue::RegisterFunctions()
 	{
 #pragma region Inputs
+#pragma region Keyboard
+		HZ_ADD_INTERNAL_CALL(Input_IsKeyPressed);
 		HZ_ADD_INTERNAL_CALL(Input_IsKeyDown);
+		HZ_ADD_INTERNAL_CALL(Input_IsKeyUp);
+#pragma endregion
+
+#pragma region Mouse
+		HZ_ADD_INTERNAL_CALL(Input_IsMouseButtonPressed);
+		HZ_ADD_INTERNAL_CALL(Input_IsMouseButtonDown);
+		HZ_ADD_INTERNAL_CALL(Input_IsMouseButtonUp);
+#pragma endregion
 #pragma endregion
 
 #pragma region Entity

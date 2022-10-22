@@ -17,7 +17,7 @@ namespace Hazel
 		virtual void OnUpdate(Timestep timestep) override
 		{
 			if (!GetComponent<CameraComponent>().IsPrimary
-				|| !Input::IsMouseButtonPressed(MouseCode::ButtonRight))
+				|| !Input::IsMouseButtonDown(MouseCode::ButtonRight))
 			{
 				return;
 			}
@@ -26,20 +26,20 @@ namespace Hazel
 
 			float speed = 5.0f;
 
-			if (Input::IsKeyPressed(KeyCode::A))
+			if (Input::IsKeyDown(KeyCode::A))
 			{
 				position.x -= speed * timestep;
 			}
-			if (Input::IsKeyPressed(KeyCode::D))
+			if (Input::IsKeyDown(KeyCode::D))
 			{
 				position.x += speed * timestep;
 			}
 
-			if (Input::IsKeyPressed(KeyCode::W))
+			if (Input::IsKeyDown(KeyCode::W))
 			{
 				position.y += speed * timestep;
 			}
-			if (Input::IsKeyPressed(KeyCode::S))
+			if (Input::IsKeyDown(KeyCode::S))
 			{
 				position.y -= speed * timestep;
 			}
@@ -47,11 +47,11 @@ namespace Hazel
 			auto& camera = GetComponent<CameraComponent>().Camera;
 			if (camera.GetProjectionType() == SceneCamera::ProjectionType::Perspective)
 			{
-				if (Input::IsKeyPressed(KeyCode::E))
+				if (Input::IsKeyDown(KeyCode::E))
 				{
 					position.z -= speed * timestep;
 				}
-				if (Input::IsKeyPressed(KeyCode::Q))
+				if (Input::IsKeyDown(KeyCode::Q))
 				{
 					position.z += speed * timestep;
 				}
@@ -59,12 +59,12 @@ namespace Hazel
 			else
 			{
 				auto orthographicSize = camera.GetOrthographicSize();
-				if (Input::IsKeyPressed(KeyCode::E))
+				if (Input::IsKeyDown(KeyCode::E))
 				{
 					orthographicSize -= speed * timestep;
 					camera.SetOrthographicSize(orthographicSize);
 				}
-				if (Input::IsKeyPressed(KeyCode::Q))
+				if (Input::IsKeyDown(KeyCode::Q))
 				{
 					orthographicSize += speed * timestep;
 					camera.SetOrthographicSize(orthographicSize);

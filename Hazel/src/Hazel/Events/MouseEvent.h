@@ -94,16 +94,16 @@ namespace Hazel
 		EVENT_CLASS_TYPE(MouseButtonPressed)
 	};
 
-	class MouseButtonReleasedEvent : public MouseButtonEvent
+	class MouseButtonUpEvent : public MouseButtonEvent
 	{
 	public:
-		MouseButtonReleasedEvent(const MouseCode button)
+		MouseButtonUpEvent(const MouseCode button)
 			: MouseButtonEvent(button)
 		{}
 
 		std::string ToString() const override
 		{
-			return fmt::format("MouseButtonReleasedEvent : {0}", _button);
+			return fmt::format("MouseButtonUpEvent : {0}", _button);
 		}
 
 		EVENT_CLASS_TYPE(MouseButtonReleased)

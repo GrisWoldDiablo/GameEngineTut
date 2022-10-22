@@ -9,8 +9,27 @@ namespace Hazel
 		// Inputs
 		//////////////
 
+		#region Keyboard
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern static bool Input_IsKeyPressed(KeyCode keyCode);
+
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern static bool Input_IsKeyDown(KeyCode keyCode);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern static bool Input_IsKeyUp(KeyCode keyCode);
+		#endregion
+
+		#region Mouse
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern static bool Input_IsMouseButtonPressed(MouseCode mouseCode);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern static bool Input_IsMouseButtonDown(MouseCode mouseCode);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern static bool Input_IsMouseButtonUp(MouseCode mouseCode);
+		#endregion
 
 		//////////////
 		// Entity
@@ -181,5 +200,6 @@ namespace Hazel
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern static void AudioSourceComponent_SetIsVisibleInGame(UUID id, bool isVisibleInGame);
 		#endregion
+
 	}
 }

@@ -21,9 +21,6 @@ namespace Sandbox
 		private AudioSourceComponent _leftSourceAudio;
 		private AudioSourceComponent _rightSourceAudio;
 		private AudioSourceComponent _musicSourceAudio;
-		private bool _isWDown;
-		private bool _isDDown;
-		private bool _isADown;
 
 		void OnCreate()
 		{
@@ -52,11 +49,10 @@ namespace Sandbox
 
 		void OnUpdate(float timestep)
 		{
-			if (Input.IsKeyDown(KeyCode.A))
+			if (Input.IsKeyPressed(KeyCode.A))
 			{
-				if (!_isADown && _leftSourceAudio)
+				if (_leftSourceAudio)
 				{
-					_isADown = true;
 					switch (_leftSourceAudio.State)
 					{
 						case AudioSourceState.None:
@@ -76,16 +72,11 @@ namespace Sandbox
 					}
 				}
 			}
-			else
-			{
-				_isADown = false;
-			}
 
-			if (Input.IsKeyDown(KeyCode.D))
+			if (Input.IsKeyPressed(KeyCode.D))
 			{
-				if (!_isDDown && _rightSourceAudio)
+				if (_rightSourceAudio)
 				{
-					_isDDown = true;
 					switch (_rightSourceAudio.State)
 					{
 						case AudioSourceState.None:
@@ -105,16 +96,11 @@ namespace Sandbox
 					}
 				}
 			}
-			else
-			{
-				_isDDown = false;
-			}
 
-			if (Input.IsKeyDown(KeyCode.W))
+			if (Input.IsKeyPressed(KeyCode.W))
 			{
-				if (!_isWDown && _musicSourceAudio)
+				if (_musicSourceAudio)
 				{
-					_isWDown = true;
 					switch (_musicSourceAudio.State)
 					{
 						case AudioSourceState.None:
@@ -128,10 +114,6 @@ namespace Sandbox
 							break;
 					}
 				}
-			}
-			else
-			{
-				_isWDown = false;
 			}
 
 			if (_musicSourceAudio)

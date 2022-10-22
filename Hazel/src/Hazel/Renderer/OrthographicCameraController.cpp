@@ -14,23 +14,23 @@ namespace Hazel
 	void OrthographicCameraController::OnUpdate(Timestep timestep)
 	{
 		HZ_PROFILE_FUNCTION();
-		if (Input::IsKeyPressed(HZ_KEY_W))
+		if (Input::IsKeyDown(HZ_KEY_W))
 		{
 			_cameraPosition.x += -sin(glm::radians(_cameraRotation)) * _cameraTranslationSpeed * timestep;
 			_cameraPosition.y += cos(glm::radians(_cameraRotation)) * _cameraTranslationSpeed * timestep;
 		}
-		else if (Input::IsKeyPressed(HZ_KEY_S))
+		else if (Input::IsKeyDown(HZ_KEY_S))
 		{
 			_cameraPosition.x -= -sin(glm::radians(_cameraRotation)) * _cameraTranslationSpeed * timestep;
 			_cameraPosition.y -= cos(glm::radians(_cameraRotation)) * _cameraTranslationSpeed * timestep;
 		}
 
-		if (Input::IsKeyPressed(HZ_KEY_A))
+		if (Input::IsKeyDown(HZ_KEY_A))
 		{
 			_cameraPosition.x -= cos(glm::radians(_cameraRotation)) * _cameraTranslationSpeed * timestep;
 			_cameraPosition.y -= sin(glm::radians(_cameraRotation)) * _cameraTranslationSpeed * timestep;
 		}
-		else if (Input::IsKeyPressed(HZ_KEY_D))
+		else if (Input::IsKeyDown(HZ_KEY_D))
 		{
 			_cameraPosition.x += cos(glm::radians(_cameraRotation)) * _cameraTranslationSpeed * timestep;
 			_cameraPosition.y += sin(glm::radians(_cameraRotation)) * _cameraTranslationSpeed * timestep;
@@ -38,11 +38,11 @@ namespace Hazel
 
 		if (_rotation)
 		{
-			if (Input::IsKeyPressed(HZ_KEY_Q))
+			if (Input::IsKeyDown(HZ_KEY_Q))
 			{
 				_cameraRotation += _cameraRotationSpeed * timestep;
 			}
-			else if (Input::IsKeyPressed(HZ_KEY_E))
+			else if (Input::IsKeyDown(HZ_KEY_E))
 			{
 				_cameraRotation -= _cameraRotationSpeed * timestep;
 			}
@@ -59,7 +59,7 @@ namespace Hazel
 			_camera.SetRotation(_cameraRotation);
 		}
 
-		if (Input::IsKeyPressed(HZ_KEY_R))
+		if (Input::IsKeyDown(HZ_KEY_R))
 		{
 			Reset();
 		}

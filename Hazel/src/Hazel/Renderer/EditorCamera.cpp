@@ -33,27 +33,27 @@ namespace Hazel
 			return;
 		}
 
-		if (Input::IsKeyPressed(Key::LeftAlt))
+		if (Input::IsKeyDown(Key::LeftAlt))
 		{
-			if (Input::IsMouseButtonPressed(Mouse::ButtonMiddle))
+			if (Input::IsMouseButtonDown(Mouse::ButtonMiddle))
 			{
 				MousePan(delta);
 			}
-			else if (Input::IsMouseButtonPressed(Mouse::ButtonLeft))
+			else if (Input::IsMouseButtonDown(Mouse::ButtonLeft))
 			{
 				MouseRotateAround(delta);
 			}
-			else if (Input::IsMouseButtonPressed(Mouse::ButtonRight))
+			else if (Input::IsMouseButtonDown(Mouse::ButtonRight))
 			{
 				MouseZoom(delta.y);
 			}
 		}
-		else if (Input::IsMouseButtonPressed(Mouse::ButtonRight))
+		else if (Input::IsMouseButtonDown(Mouse::ButtonRight))
 		{
 			MouseRotateInPlace(delta * _rotationSpeed);
 			Drive();
 		}
-		else if (Input::IsMouseButtonPressed(Mouse::ButtonMiddle))
+		else if (Input::IsMouseButtonDown(Mouse::ButtonMiddle))
 		{
 			MousePan(delta);
 		}
@@ -97,11 +97,11 @@ namespace Hazel
 	void EditorCamera::Drive()
 	{
 		glm::vec3 delta = {};
-		delta.x = (Input::IsKeyPressed(Key::A) ? -1.0f : Input::IsKeyPressed(Key::D) ? 1.0f : 0);
-		delta.y = (Input::IsKeyPressed(Key::E) ? 1.0f : Input::IsKeyPressed(Key::Q) ? -1.0f : 0);
-		delta.z = (Input::IsKeyPressed(Key::W) ? -1.0f : Input::IsKeyPressed(Key::S) ? 1.0f : 0);
+		delta.x = (Input::IsKeyDown(Key::A) ? -1.0f : Input::IsKeyDown(Key::D) ? 1.0f : 0);
+		delta.y = (Input::IsKeyDown(Key::E) ? 1.0f : Input::IsKeyDown(Key::Q) ? -1.0f : 0);
+		delta.z = (Input::IsKeyDown(Key::W) ? -1.0f : Input::IsKeyDown(Key::S) ? 1.0f : 0);
 
-		if (Input::IsKeyPressed(Key::LeftShift))
+		if (Input::IsKeyDown(Key::LeftShift))
 		{
 			delta *= 2.0f;
 		}

@@ -43,7 +43,7 @@ namespace Sandbox
 			position += velocity;
 			Transform.Position = position;
 
-			if (Input.IsKeyDown(KeyCode.SPACE))
+			if (Input.IsKeyPressed(KeyCode.SPACE))
 			{
 				_audioListener.IsVisibleInGame = !_audioListener.IsVisibleInGame;
 			}

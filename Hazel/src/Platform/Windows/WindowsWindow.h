@@ -14,19 +14,20 @@ namespace Hazel
 		WindowsWindow(const WindowProps& props);
 		virtual ~WindowsWindow() override;
 
-		void OnUpdate() override;
+		virtual void OnUpdate() override;
+		virtual void ProcessEvents() override;
 
-		unsigned int GetWidth() const override { return _data.Width; }
-		unsigned int GetHeight() const override { return _data.Height; }
-		std::string GetTitle() const override { return _data.Title; }
+		virtual unsigned int GetWidth() const override { return _data.Width; }
+		virtual unsigned int GetHeight() const override { return _data.Height; }
+		virtual std::string GetTitle() const override { return _data.Title; }
 
 		//Window attributes
-		void SetEventCallback(const EventCallbackFn& callback) override { _data.EventCallback = callback; }
-		void SetVSync(bool enable) override;
-		bool IsVSync() const override { return _data.VSync; }
-		void SetTitle(const std::string& title) override;
+		virtual void SetEventCallback(const EventCallbackFn& callback) override { _data.EventCallback = callback; }
+		virtual void SetVSync(bool enable) override;
+		virtual bool IsVSync() const override { return _data.VSync; }
+		virtual void SetTitle(const std::string& title) override;
 
-		void* GetNativeWindow() const override { return _window; }
+		virtual void* GetNativeWindow() const override { return _window; }
 
 	private:
 		void Init(const WindowProps& props);

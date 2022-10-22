@@ -30,7 +30,7 @@ namespace Hazel
 
 	private:
 		bool OnKeyPressed(const KeyPressedEvent& keyPressedEvent);
-		bool OnMouseButtonReleased(const MouseButtonReleasedEvent& mouseButtonReleasedEvent);
+		bool OnMouseButtonUp(const MouseButtonUpEvent& mouseButtonReleasedEvent);
 		void MousePicking();
 		void OnOverlayRender();
 

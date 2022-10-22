@@ -29,7 +29,7 @@ namespace Hazel
 				isPressed = false;
 			}
 
-			if (!isPressed && Input::IsKeyPressed(KeyCode::SPACE))
+			if (!isPressed && Input::IsKeyDown(KeyCode::SPACE))
 			{
 				upward += speed;
 				isPressed = true;

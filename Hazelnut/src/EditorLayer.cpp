@@ -232,19 +232,19 @@ namespace Hazel
 
 		EventDispatcher dispatcher(event);
 		dispatcher.Dispatch<KeyPressedEvent>(HZ_BIND_EVENT_FN(OnKeyPressed));
-		dispatcher.Dispatch<MouseButtonReleasedEvent>(HZ_BIND_EVENT_FN(OnMouseButtonReleased));
+		dispatcher.Dispatch<MouseButtonUpEvent>(HZ_BIND_EVENT_FN(OnMouseButtonUp));
 	}
 
 	bool EditorLayer::OnKeyPressed(const KeyPressedEvent& keyPressedEvent)
 	{
-		if (ImGui::GetIO().WantTextInput || keyPressedEvent.IsRepeat() || Input::IsMouseButtonPressed(MouseCode::ButtonRight))
+		if (ImGui::GetIO().WantTextInput || Input::IsMouseButtonDown(MouseCode::ButtonRight))
 		{
 			return false;
 		}
 
 		bool isImGuizmoInUse = ImGuizmo::IsUsing();
-		bool isControlPressed = Input::IsKeyPressed(Key::LeftControl) || Input::IsKeyPressed(Key::RightControl);
-		bool isShiftPressed = Input::IsKeyPressed(Key::LeftShift) || Input::IsKeyPressed(Key::RightShift);
+		bool isControlPressed = Input::IsKeyDown(Key::LeftControl) || Input::IsKeyDown(Key::RightControl);
+		bool isShiftPressed = Input::IsKeyDown(Key::LeftShift) || Input::IsKeyDown(Key::RightShift);
 		bool isModiferPressed = isControlPressed || isShiftPressed;
 
 		switch (keyPressedEvent.GetKeyCode())
@@ -341,12 +341,12 @@ namespace Hazel
 		return true;
 	}
 
-	bool EditorLayer::OnMouseButtonReleased(const MouseButtonReleasedEvent& mouseButtonReleasedEvent)
+	bool EditorLayer::OnMouseButtonUp(const MouseButtonUpEvent& mouseButtonReleasedEvent)
 	{
 		// TODO Mouse picking, allow simulation, find bug where simulation stops?
 		if (mouseButtonReleasedEvent.GetMouseButton() == Mouse::ButtonLeft && _sceneState != SceneState::Simulate)
 		{
-			if (_isSceneViewportHovered && (!_sceneHierarchyPanel.GetSelectedEntity() || !ImGuizmo::IsOver()) && !Input::IsKeyPressed(Key::LeftAlt))
+			if (_isSceneViewportHovered && (!_sceneHierarchyPanel.GetSelectedEntity() || !ImGuizmo::IsOver()) && !Input::IsKeyDown(Key::LeftAlt))
 			{
 				_sceneHierarchyPanel.SetSelectedEntity(_hoveredEntity);
 			}
@@ -960,7 +960,7 @@ namespace Hazel
 				auto transform = transformComponent.GetTransformMatrix();
 
 				// Snapping
-				bool snap = Input::IsKeyPressed(Key::LeftControl);
+				bool snap = Input::IsKeyDown(Key::LeftControl);
 				float snapValue = 0.5f; // Snap to 0.5m for position and scale.
 
 				// Snap to 45 degrees for rotation.
@@ -1027,7 +1027,7 @@ namespace Hazel
 				// Move Speed
 				std::stringstream ss;
 				ss << _editorCamera.GetDrivingSpeed();
-				if (Input::IsKeyPressed(Key::LeftShift))
+				if (Input::IsKeyDown(Key::LeftShift))
 				{
 					ss << "*";
 				}
