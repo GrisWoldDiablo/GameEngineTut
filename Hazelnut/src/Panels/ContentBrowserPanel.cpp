@@ -1,7 +1,7 @@
 #include "hzpch.h"
 #include "ContentBrowserPanel.h"
-#include "Hazel/Core/Color.h"
 #include "Hazel/Utils/PlatformUtils.h"
+#include "Utils/EditorResourceManager.h"
 
 #include <imgui/imgui.h>
 
@@ -32,11 +32,7 @@ namespace Hazel
 	}
 
 	ContentBrowserPanel::ContentBrowserPanel()
-		:_currentDirectory(gAssetsPath)
-	{
-		_folderIconTexture = Texture2D::Create("Resources/Icons/ContentBrowser/FolderIcon256.png");
-		_fileIconTexture = Texture2D::Create("Resources/Icons/ContentBrowser/FileIcon256.png");
-	}
+		:_currentDirectory(gAssetsPath) {}
 
 	void ContentBrowserPanel::OnImGuiRender()
 	{
@@ -77,7 +73,7 @@ namespace Hazel
 					auto filenameString = path.filename().string();
 					ImGui::PushID(filenameString.c_str());
 
-					Ref<Texture2D> icon = directoryEntry.is_directory() ? _folderIconTexture : _fileIconTexture;
+					Ref<Texture2D> icon = directoryEntry.is_directory() ? Utils::ERM::GetTexture(Utils::Icon_Folder) : Utils::ERM::GetTexture(Utils::Icon_File);
 
 					const auto elementActions = [&]
 					{
@@ -133,7 +129,7 @@ namespace Hazel
 					if (isThumbnails)
 					{
 						ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
-						ImGui::ImageButton((ImTextureID)(intptr_t)icon->GetRendererID(), { thumbnailSize, thumbnailSize }, uv0, uv1);
+						ImGui::ImageButton(icon->GetRawID(), { thumbnailSize, thumbnailSize }, uv0, uv1);
 						ImGui::PopStyleColor();
 
 						elementActions();
@@ -145,7 +141,7 @@ namespace Hazel
 					else
 					{
 						auto maxHeight = ImGui::GetTextLineHeight();
-						ImGui::Image((ImTextureID)(intptr_t)icon->GetRendererID(), { maxHeight ,maxHeight }, uv0, uv1);
+						ImGui::Image(icon->GetRawID(), { maxHeight ,maxHeight }, uv0, uv1);
 						ImGui::SameLine();
 						ImGui::Selectable(filenameString.c_str());
 

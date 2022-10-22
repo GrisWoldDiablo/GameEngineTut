@@ -20,7 +20,9 @@ namespace Hazel::Utils
 		Icon_Simulate,
 		Icon_Lock,
 		Icon_Unlock,
-		Image_ShaderLoading
+		Image_ShaderLoading,
+		Icon_Folder,
+		Icon_File
 	};
 
 	class EditorResourceManager

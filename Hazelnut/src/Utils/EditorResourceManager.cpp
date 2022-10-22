@@ -13,7 +13,6 @@ namespace Hazel::Utils
 	{
 		sEditorResourceData = new EditorResourceData();
 
-		// Create Gizmo Icons texture.
 		sEditorResourceData->Textures =
 		{
 			{ Icon_Pan,				Texture2D::Create("Resources/Icons/Gizmo/PanIcon256White.png")		 },
@@ -31,6 +30,8 @@ namespace Hazel::Utils
 			{ Icon_Lock,			Texture2D::Create("Resources/Icons/General/Lock256.png")			 },
 			{ Icon_Unlock,			Texture2D::Create("Resources/Icons/General/Unlock256.png")			 },
 			{ Image_ShaderLoading,	Texture2D::Create("Resources/ShadersLoading.png")					 },
+			{ Icon_Folder,			Texture2D::Create("Resources/Icons/ContentBrowser/FolderIcon256.png")},
+			{ Icon_File,			Texture2D::Create("Resources/Icons/ContentBrowser/FileIcon256.png")	 },
 		};
 	}
 
