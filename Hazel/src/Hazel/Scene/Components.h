@@ -5,7 +5,6 @@
 #include "Hazel/Core/UUID.h"
 #include "Hazel/Renderer/Texture.h"
 #include "Hazel/Audio/AudioSource.h"
-#include "Hazel/Audio/AudioEngine.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -22,6 +21,17 @@ namespace Hazel
 		IDComponent() = default;
 		IDComponent(const UUID& uuid) { ID = uuid; }
 		IDComponent(const IDComponent&) = default;
+	};
+
+	struct FamilyComponent
+	{
+		UUID ParentID = 0;
+		UUID ChildID = 0;
+		UUID NextSiblingID = 0;
+		UUID PreviousSiblingID = 0;
+
+		FamilyComponent() = default;
+		FamilyComponent(const FamilyComponent&) = default;
 	};
 
 	struct BaseComponent

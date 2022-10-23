@@ -4,6 +4,8 @@
 #include "ScriptEngine.h"
 #include "ScriptInstance.h"
 
+#include "Hazel/Audio/AudioEngine.h"
+
 #include "mono/metadata/object.h"
 #include "mono/metadata/reflection.h"
 

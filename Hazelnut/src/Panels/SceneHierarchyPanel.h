@@ -11,7 +11,7 @@ namespace Hazel
 	public:
 		SceneHierarchyPanel() = default;
 
-		void SetScene(const Ref<Scene>& _scene);
+		void SetScene(const Ref<Scene>& scene);
 
 		void OnImGuiRender();
 
@@ -22,6 +22,7 @@ namespace Hazel
 	private:
 		void DrawSceneName();
 		void DrawEntityNode(Entity entity);
+		void DragDropEntityHierarchy(Entity entity);
 		void DrawComponents(Entity entity);
 		void UpdateComponents(Entity entity);
 		template<typename T>

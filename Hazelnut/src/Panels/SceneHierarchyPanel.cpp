@@ -279,11 +279,29 @@ namespace Hazel
 	{
 		ImGui::Begin("Scene Hierarchy", nullptr, ImGuiWindowFlags_MenuBar);
 
+		if (ImGui::BeginDragDropTarget())
+		{
+			DragDropEntityHierarchy(Entity());
+			ImGui::EndDragDropTarget();
+		}
+
 		DrawSceneName();
 
 		_scene->_registry.each([&](auto entityID)
 		{
 			Entity entity{ entityID, _scene.get() };
+
+			if (!entity)
+			{
+				return;
+			}
+
+			auto& familyComponent = entity.GetComponent<FamilyComponent>();
+			if (familyComponent.ParentID != UUID::Invalid)
+			{
+				return;
+			}
+
 			DrawEntityNode(entity);
 		});
 
@@ -403,7 +421,8 @@ namespace Hazel
 	void SceneHierarchyPanel::DrawEntityNode(Entity entity)
 	{
 		ImGuiTreeNodeFlags flags = ((_selectedEntity == entity) ? ImGuiTreeNodeFlags_Selected : 0) | ImGuiTreeNodeFlags_OpenOnArrow;
-		flags |= ImGuiTreeNodeFlags_SpanAvailWidth;
+		flags |= ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DefaultOpen;
+		flags |= entity.Family().ChildID ? 0 : ImGuiTreeNodeFlags_Bullet;
 
 		std::string displayName = entity.Name();
 		if (_isDebug)
@@ -418,6 +437,12 @@ namespace Hazel
 			ImGui::SetDragDropPayload("ENTITY_PAY_LOAD", &entity, sizeof(Entity));
 			ImGui::Text(entity.Name().c_str());
 			ImGui::EndDragDropSource();
+		}
+
+		if (ImGui::BeginDragDropTarget())
+		{
+			DragDropEntityHierarchy(entity);
+			ImGui::EndDragDropTarget();
 		}
 
 		if (ImGui::IsItemClicked())
@@ -443,6 +468,18 @@ namespace Hazel
 
 		if (expanded)
 		{
+			auto currentEntityID = entity.Family().ChildID;
+			while (auto childEntity = _scene->GetEntityByUUID(currentEntityID))
+			{
+				DrawEntityNode(childEntity);
+				if (!childEntity)
+				{
+					// Entity was deleted.
+					break;
+				}
+				currentEntityID = childEntity.Family().NextSiblingID;
+			}
+
 			ImGui::TreePop();
 		}
 
@@ -453,6 +490,16 @@ namespace Hazel
 			{
 				SetSelectedEntity(Entity());
 			}
+		}
+	}
+
+	void SceneHierarchyPanel::DragDropEntityHierarchy(Entity entity)
+	{
+		if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ENTITY_PAY_LOAD"))
+		{
+			const auto entityPayload = *static_cast<Entity*>(payload->Data);
+
+			_scene->ReparentEntity(entity, entityPayload);
 		}
 	}
 

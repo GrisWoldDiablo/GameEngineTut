@@ -41,6 +41,9 @@ namespace Hazel
 
 		void OnViewportResize(uint32_t  width, uint32_t height);
 
+		void ReparentEntity(Entity newParent, Entity newChild);
+		bool IsChildOf(Entity parent, Entity child);
+
 		Entity DuplicateEntity(Entity entity);
 		Entity GetEntityByUUID(UUID uuid);
 		Entity GetEntityByName(const std::string& name);

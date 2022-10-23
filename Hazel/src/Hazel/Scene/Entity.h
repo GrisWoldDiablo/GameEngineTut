@@ -73,6 +73,8 @@ namespace Hazel
 		int& Tag();
 		int& Layer();
 
+		FamilyComponent& Family();
+
 		TransformComponent& Transform();
 
 	private:

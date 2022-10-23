@@ -122,6 +122,8 @@ namespace Hazel
 
 		entity.AddComponent<IDComponent>(uuid);
 
+		entity.AddComponent<FamilyComponent>();
+
 		auto& baseComponent = entity.AddComponent<BaseComponent>();
 		baseComponent.Name = name;
 		baseComponent.Tag = tag;
@@ -136,6 +138,15 @@ namespace Hazel
 
 	void Scene::DestroyEntity(Entity entity)
 	{
+		auto currentEntityID = entity.Family().ChildID;
+		while (auto childEntity = GetEntityByUUID(currentEntityID))
+		{
+			currentEntityID = childEntity.Family().NextSiblingID;
+			DestroyEntity(childEntity);
+		}
+
+		ReparentEntity(Entity(), entity);
+
 		OnEntityDestroy(entity);
 		_entityMap.erase(entity.GetUUID());
 		_registry.destroy(entity);
@@ -163,7 +174,7 @@ namespace Hazel
 					if (_shouldCloneAudioSource)
 					{
 						component.AudioSource = AudioEngine::CloneAudioSource(component.AudioSource);
-					}	
+					}
 
 					if (component.IsAutoPlay)
 					{
@@ -192,7 +203,7 @@ namespace Hazel
 	{
 		// TODO? Should we do this here?
 		AudioEngine::StopAllAudioSources();
-		
+
 		OnPhysic2DStop();
 
 		ScriptEngine::OnRuntimeStop();
@@ -405,7 +416,7 @@ namespace Hazel
 
 	void Scene::OnViewportResize(uint32_t width, uint32_t height)
 	{
-		if (_viewportWidth == width &&  _viewportHeight == height)
+		if (_viewportWidth == width && _viewportHeight == height)
 		{
 			return;
 		}
@@ -425,6 +436,112 @@ namespace Hazel
 		}
 	}
 
+	void Scene::ReparentEntity(Entity newParent, Entity newChild)
+	{
+		FamilyComponent* newParentEntityIDs = nullptr;
+
+		if (newParent)
+		{
+			newParentEntityIDs = &newParent.Family();
+		}
+
+		auto& newChildEntityIDs = newChild.Family();
+
+		if ((newParent && (newParent.Family().ParentID == newChild.GetUUID()
+			|| newChild.Family().ParentID == newParent.GetUUID()))
+			|| IsChildOf(newParent, newChild))
+		{
+			return;
+		}
+
+
+		auto currentChildID = newParent ? newParentEntityIDs->ChildID : (UUID)UUID::Invalid;
+
+		if (newParent && !currentChildID)
+		{
+			newParentEntityIDs->ChildID = newChild.GetUUID();
+		}
+
+		if (auto newChildPreviousSibling = GetEntityByUUID(newChildEntityIDs.PreviousSiblingID))
+		{
+			auto& newChildPreviousSiblingIDs = newChildPreviousSibling.Family();
+			newChildPreviousSiblingIDs.NextSiblingID = newChildEntityIDs.NextSiblingID;
+		}
+
+		if (auto newChildNextSibling = GetEntityByUUID(newChildEntityIDs.NextSiblingID))
+		{
+			auto& newChildNextSiblingIDs = newChildNextSibling.Family();
+			newChildNextSiblingIDs.PreviousSiblingID = newChildEntityIDs.PreviousSiblingID;
+		}
+
+		if (auto newChildParent = GetEntityByUUID(newChildEntityIDs.ParentID))
+		{
+			auto& newChildParentIDs = newChildParent.Family();
+			if (newChildParentIDs.ChildID == newChild.GetUUID())
+			{
+				newChildParentIDs.ChildID = newChildEntityIDs.NextSiblingID;
+			}
+		}
+
+		newChildEntityIDs.ParentID = UUID::Invalid;
+		newChildEntityIDs.PreviousSiblingID = UUID::Invalid;
+		newChildEntityIDs.NextSiblingID = UUID::Invalid;
+
+		while (auto newParentChildEntity = GetEntityByUUID(currentChildID))
+		{
+			auto& newParentChildEntityIDs = newParentChildEntity.Family();
+			if (newParentChildEntityIDs.NextSiblingID)
+			{
+				currentChildID = newParentChildEntityIDs.NextSiblingID;
+				continue;
+			}
+
+			newParentChildEntityIDs.NextSiblingID = newChild.GetUUID();
+			newChildEntityIDs.PreviousSiblingID = newParentChildEntity.GetUUID();
+			break;
+		}
+
+		newChildEntityIDs.ParentID = newParent ? newParent.GetUUID() : (UUID)UUID::Invalid;
+	}
+
+	bool Scene::IsChildOf(Entity child, Entity entity)
+	{
+		// TODO Fix Bug nextSibling
+		if (!child || !entity)
+		{
+			return false;
+		}
+
+
+		if (child.GetUUID() == entity.GetUUID())
+		{
+			return true;
+		}
+
+		auto currentEntityID = entity.Family().ChildID;
+		while (auto entityChild = GetEntityByUUID(currentEntityID))
+		{
+			if (IsChildOf(child, entityChild))
+			{
+				return true;
+			}
+			currentEntityID = entityChild.Family().ChildID;
+		}
+
+		currentEntityID = entity.Family().NextSiblingID;
+		while (auto entityNextSibling = GetEntityByUUID(currentEntityID))
+		{
+			if (IsChildOf(child, entityNextSibling))
+			{
+				return true;
+			}
+			currentEntityID = entityNextSibling.Family().NextSiblingID;
+		}
+
+		return false;
+	}
+
+
 	Entity Scene::DuplicateEntity(Entity entity)
 	{
 		HZ_ASSERT(!_isRunning, "Cannot duplicate while scene is running.");
@@ -438,7 +555,7 @@ namespace Hazel
 	Entity Scene::GetEntityByUUID(UUID uuid)
 	{
 		// Maybe assert?
-		if (_entityMap.find(uuid) != _entityMap.end())
+		if (_entityMap.contains(uuid))
 		{
 			return { _entityMap.at(uuid), this };
 		}

@@ -23,6 +23,11 @@ namespace Hazel
 		return GetComponent<BaseComponent>().Layer;
 	}
 
+	FamilyComponent& Entity::Family()
+	{
+		return GetComponent<FamilyComponent>();
+	}
+
 	TransformComponent& Entity::Transform()
 	{
 		return GetComponent<TransformComponent>();

@@ -105,7 +105,7 @@ namespace Hazel
 		Entity _hoveredEntity;
 
 		// Tools
-		bool _shouldShowPhysicsColliders = true; // TODO Set to false once we have save editor settings ability.
+		bool _shouldShowPhysicsColliders = false;
 		bool _isDemoWidowOpen = false;
 
 		// Hover Timer

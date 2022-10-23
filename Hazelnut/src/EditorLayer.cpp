@@ -5,7 +5,6 @@
 #include "Hazel/Scene/SceneSerializer.h"
 #include "Hazel/Utils/PlatformUtils.h"
 #include "Hazel/Math/HMath.h"
-#include "Hazel/Audio/AudioEngine.h"
 
 #include <imgui/imgui.h>
 #include "ImGuizmo.h"
@@ -71,7 +70,7 @@ namespace Hazel
 	{
 		HZ_PROFILE_FUNCTION();
 		_updateTimer.Reset();
-		
+
 		_activeScene->OnViewportResize(static_cast<uint32_t>(_sceneViewportSize.x), static_cast<uint32_t>(_sceneViewportSize.y));
 
 		auto& frameBufferSpec = _framebuffer->GetSpecification();
@@ -328,16 +327,17 @@ namespace Hazel
 			}
 			break;
 		}
-		// TODO make this work, requires to make events no blocked when scene view not in focus, or more like having exceptions.
+		// TODO make this work
 		//case Key::Escape:
+		//{
 		//	auto payload = ImGui::GetDragDropPayload();
-		//	if (payload != nullptr)
+		//	if (payload)
 		//	{
-		//		ImGui::AcceptDragDropPayload(payload->DataType);
+		//		// Cancel payload.
 		//	}
 		//	break;
+		//}
 		}
-
 		return true;
 	}
 
@@ -414,7 +414,12 @@ namespace Hazel
 			return;
 		}
 
-		if (_shouldShowPhysicsColliders)
+		auto selectedEntity = _sceneHierarchyPanel.GetSelectedEntity();
+
+		if (_shouldShowPhysicsColliders ||
+			(selectedEntity &&
+			(selectedEntity.HasComponent<BoxCollider2DComponent>() ||
+			selectedEntity.HasComponent<CircleCollider2DComponent>())))
 		{
 			constexpr auto kIdentityMatrix = glm::mat4(1.0f);
 
@@ -423,18 +428,26 @@ namespace Hazel
 				auto view = _activeScene->GetAllEntitiesWith<TransformComponent, BoxCollider2DComponent>();
 				for (auto entity : view)
 				{
-					auto [tc, bc2d] = view.get<TransformComponent, BoxCollider2DComponent>(entity);
+					Entity theEntity = { entity, _activeScene.get() };
+					if (_shouldShowPhysicsColliders || theEntity == selectedEntity)
+					{
+						auto [tc, bc2d] = view.get<TransformComponent, BoxCollider2DComponent>(entity);
 
-					float sign = cameraPositionZ > tc.Position.z ? 1.0f : -1.0f;
+						float sign = cameraPositionZ > tc.Position.z ? 1.0f : -1.0f;
 
-					glm::mat4 transform = glm::translate(kIdentityMatrix, tc.Position)
-						* glm::toMat4(glm::quat(tc.Rotation))
-						* glm::translate(kIdentityMatrix, glm::vec3(bc2d.Offset, 0.001f * sign))
-						* glm::toMat4(glm::quat(glm::vec3(0.0f, 0.0f, glm::radians(bc2d.Rotation))))
-						* glm::scale(kIdentityMatrix, tc.Scale * glm::vec3(bc2d.Size * 2.0f, 1.0f));
+						glm::mat4 transform = glm::translate(kIdentityMatrix, tc.Position)
+							* glm::toMat4(glm::quat(tc.Rotation))
+							* glm::translate(kIdentityMatrix, glm::vec3(bc2d.Offset, 0.001f * sign))
+							* glm::toMat4(glm::quat(glm::vec3(0.0f, 0.0f, glm::radians(bc2d.Rotation))))
+							* glm::scale(kIdentityMatrix, tc.Scale * glm::vec3(bc2d.Size * 2.0f, 1.0f));
 
+						Renderer2D::DrawRect(transform, Color::Green);
 
-					Renderer2D::DrawRect(transform, Color::Green);
+						if (!_shouldShowPhysicsColliders)
+						{
+							break;
+						}
+					}
 				}
 			}
 
@@ -443,21 +456,30 @@ namespace Hazel
 				auto view = _activeScene->GetAllEntitiesWith<TransformComponent, CircleCollider2DComponent>();
 				for (auto entity : view)
 				{
-					auto [tc, cc2d] = view.get<TransformComponent, CircleCollider2DComponent>(entity);
+					Entity theEntity = { entity, _activeScene.get() };
+					if (_shouldShowPhysicsColliders || theEntity == selectedEntity)
+					{
+						auto [tc, cc2d] = view.get<TransformComponent, CircleCollider2DComponent>(entity);
 
-					float sign = cameraPositionZ > tc.Position.z ? 1.0f : -1.0f;
+						float sign = cameraPositionZ > tc.Position.z ? 1.0f : -1.0f;
 
-					glm::mat4 transform = glm::translate(kIdentityMatrix, tc.Position)
-						* glm::toMat4(glm::quat(tc.Rotation))
-						* glm::translate(kIdentityMatrix, glm::vec3(cc2d.Offset, 0.001f * sign))
-						* glm::scale(kIdentityMatrix, tc.Scale * glm::vec3(cc2d.Radius * 2.0f));
+						glm::mat4 transform = glm::translate(kIdentityMatrix, tc.Position)
+							* glm::toMat4(glm::quat(tc.Rotation))
+							* glm::translate(kIdentityMatrix, glm::vec3(cc2d.Offset, 0.001f * sign))
+							* glm::scale(kIdentityMatrix, tc.Scale * glm::vec3(cc2d.Radius * 2.0f));
 
-					Renderer2D::DrawCircle(transform, Color::Green, 0.01f);
+						Renderer2D::DrawCircle(transform, Color::Green, 0.01f);
+
+						if (!_shouldShowPhysicsColliders)
+						{
+							break;
+						}
+					}
 				}
 			}
 		}
 
-		if (auto selectedEntity = _sceneHierarchyPanel.GetSelectedEntity())
+		if (selectedEntity)
 		{
 			const auto& transform = selectedEntity.GetComponent<TransformComponent>();
 
@@ -1009,7 +1031,6 @@ namespace Hazel
 			Ref<Texture2D> cursorTexture;
 			if (_editorCamera.IsPanning())
 			{
-				
 				cursorTexture = Utils::ERM::GetTexture(Utils::Icon_Pan);
 			}
 			else if (_editorCamera.IsZooming())
