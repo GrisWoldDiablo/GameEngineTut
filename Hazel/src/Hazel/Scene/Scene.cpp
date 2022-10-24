@@ -401,8 +401,8 @@ namespace Hazel
 		auto viewAudioListener = _registry.view<TransformComponent, AudioListenerComponent>();
 		for (const auto entity : viewAudioListener)
 		{
-			auto [transform, audioListene] = viewAudioListener.get<TransformComponent, AudioListenerComponent>(entity);
-			if (!isRuntime || audioListene.IsVisibleInGame)
+			auto [transform, audioListener] = viewAudioListener.get<TransformComponent, AudioListenerComponent>(entity);
+			if (!isRuntime || audioListener.IsVisibleInGame)
 			{
 				float sign = cameraPositionZ > transform.Position.z ? 1.0f : -1.0f;
 				auto position = transform.Position;
@@ -438,54 +438,54 @@ namespace Hazel
 
 	void Scene::ReparentEntity(Entity newParent, Entity newChild)
 	{
-		FamilyComponent* newParentEntityIDs = nullptr;
-
-		if (newParent)
-		{
-			newParentEntityIDs = &newParent.Family();
-		}
-
-		auto& newChildEntityIDs = newChild.Family();
-
-		if ((newParent && (newParent.Family().ParentID == newChild.GetUUID()
-			|| newChild.Family().ParentID == newParent.GetUUID()))
-			|| IsChildOf(newParent, newChild))
+		if (IsChildOf(newParent, newChild))
 		{
 			return;
 		}
 
-
-		auto currentChildID = newParent ? newParentEntityIDs->ChildID : (UUID)UUID::Invalid;
-
-		if (newParent && !currentChildID)
+		auto currentChildID = UUID::Invalid;
+		if (newParent)
 		{
-			newParentEntityIDs->ChildID = newChild.GetUUID();
+			if (newParent.GetUUID() == newChild.Family().ParentID)
+			{
+				return;
+			}
+
+			auto& newParentEntityIDs = newParent.Family();
+
+			currentChildID = newParentEntityIDs.ChildID;
+
+			if (newParent && !currentChildID)
+			{
+				newParentEntityIDs.ChildID = newChild.GetUUID();
+			}
 		}
 
-		if (auto newChildPreviousSibling = GetEntityByUUID(newChildEntityIDs.PreviousSiblingID))
+		auto& newChildFamily = newChild.Family();
+		if (auto newChildPreviousSibling = GetEntityByUUID(newChildFamily.PreviousSiblingID))
 		{
 			auto& newChildPreviousSiblingIDs = newChildPreviousSibling.Family();
-			newChildPreviousSiblingIDs.NextSiblingID = newChildEntityIDs.NextSiblingID;
+			newChildPreviousSiblingIDs.NextSiblingID = newChildFamily.NextSiblingID;
 		}
 
-		if (auto newChildNextSibling = GetEntityByUUID(newChildEntityIDs.NextSiblingID))
+		if (auto newChildNextSibling = GetEntityByUUID(newChildFamily.NextSiblingID))
 		{
 			auto& newChildNextSiblingIDs = newChildNextSibling.Family();
-			newChildNextSiblingIDs.PreviousSiblingID = newChildEntityIDs.PreviousSiblingID;
+			newChildNextSiblingIDs.PreviousSiblingID = newChildFamily.PreviousSiblingID;
 		}
 
-		if (auto newChildParent = GetEntityByUUID(newChildEntityIDs.ParentID))
+		if (auto newChildParent = GetEntityByUUID(newChildFamily.ParentID))
 		{
 			auto& newChildParentIDs = newChildParent.Family();
 			if (newChildParentIDs.ChildID == newChild.GetUUID())
 			{
-				newChildParentIDs.ChildID = newChildEntityIDs.NextSiblingID;
+				newChildParentIDs.ChildID = newChildFamily.NextSiblingID;
 			}
 		}
 
-		newChildEntityIDs.ParentID = UUID::Invalid;
-		newChildEntityIDs.PreviousSiblingID = UUID::Invalid;
-		newChildEntityIDs.NextSiblingID = UUID::Invalid;
+		newChildFamily.ParentID = UUID::Invalid;
+		newChildFamily.PreviousSiblingID = UUID::Invalid;
+		newChildFamily.NextSiblingID = UUID::Invalid;
 
 		while (auto newParentChildEntity = GetEntityByUUID(currentChildID))
 		{
@@ -497,16 +497,21 @@ namespace Hazel
 			}
 
 			newParentChildEntityIDs.NextSiblingID = newChild.GetUUID();
-			newChildEntityIDs.PreviousSiblingID = newParentChildEntity.GetUUID();
+			newChildFamily.PreviousSiblingID = newParentChildEntity.GetUUID();
 			break;
 		}
 
-		newChildEntityIDs.ParentID = newParent ? newParent.GetUUID() : (UUID)UUID::Invalid;
+		newChildFamily.ParentID = newParent ? newParent.GetUUID() : (UUID)UUID::Invalid;
 	}
+
 
 	bool Scene::IsChildOf(Entity child, Entity entity)
 	{
-		// TODO Fix Bug nextSibling
+		return entity && IsChildOfImpl(child, GetEntityByUUID(entity.Family().ChildID));
+	}
+
+	bool Scene::IsChildOfImpl(Entity child, Entity entity)
+	{
 		if (!child || !entity)
 		{
 			return false;
@@ -521,7 +526,7 @@ namespace Hazel
 		auto currentEntityID = entity.Family().ChildID;
 		while (auto entityChild = GetEntityByUUID(currentEntityID))
 		{
-			if (IsChildOf(child, entityChild))
+			if (IsChildOfImpl(child, entityChild))
 			{
 				return true;
 			}
@@ -531,7 +536,7 @@ namespace Hazel
 		currentEntityID = entity.Family().NextSiblingID;
 		while (auto entityNextSibling = GetEntityByUUID(currentEntityID))
 		{
-			if (IsChildOf(child, entityNextSibling))
+			if (IsChildOfImpl(child, entityNextSibling))
 			{
 				return true;
 			}

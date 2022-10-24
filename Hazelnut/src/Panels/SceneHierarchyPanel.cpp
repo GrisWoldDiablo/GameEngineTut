@@ -290,7 +290,6 @@ namespace Hazel
 		_scene->_registry.each([&](auto entityID)
 		{
 			Entity entity{ entityID, _scene.get() };
-
 			if (!entity)
 			{
 				return;
@@ -420,6 +419,11 @@ namespace Hazel
 
 	void SceneHierarchyPanel::DrawEntityNode(Entity entity)
 	{
+		if (!entity)
+		{
+			return;
+		}
+
 		ImGuiTreeNodeFlags flags = ((_selectedEntity == entity) ? ImGuiTreeNodeFlags_Selected : 0) | ImGuiTreeNodeFlags_OpenOnArrow;
 		flags |= ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DefaultOpen;
 		flags |= entity.Family().ChildID ? 0 : ImGuiTreeNodeFlags_Bullet;
@@ -457,8 +461,14 @@ namespace Hazel
 			{
 				_scene->CreateEntity();
 			}
-			ImGui::Separator();
 
+			ImGui::Separator();
+			if (entity.Family().ParentID && ImGui::MenuItem(fmt::format("Unparent", entity.Name()).c_str()))
+			{
+				_scene->ReparentEntity(Entity(), entity);
+			}
+
+			ImGui::Separator();
 			if (ImGui::MenuItem(fmt::format("Delete Entity : [{0}]", entity.Name()).c_str()))
 			{
 				shouldDeleteEntity = true;

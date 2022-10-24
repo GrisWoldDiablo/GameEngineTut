@@ -717,7 +717,7 @@ namespace Hazel
 
 		if (!parent)
 		{
-			return mono_class_is_subclass_of(child, baseEntityClass, false);
+			return child != baseEntityClass && mono_class_is_subclass_of(child, baseEntityClass, false);
 		}
 
 		return mono_class_is_subclass_of(child, parent, false);

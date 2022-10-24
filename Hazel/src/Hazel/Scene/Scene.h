@@ -72,6 +72,8 @@ namespace Hazel
 
 		void RenderScene(const EditorCamera& camera);
 
+		bool IsChildOfLoop(Entity child, Entity entity);
+
 	private:
 		entt::registry _registry;
 		uint32_t _viewportWidth = 0;
