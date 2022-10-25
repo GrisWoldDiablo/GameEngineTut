@@ -418,8 +418,8 @@ namespace Hazel
 
 		if (_shouldShowPhysicsColliders ||
 			(selectedEntity &&
-			(selectedEntity.HasComponent<BoxCollider2DComponent>() ||
-			selectedEntity.HasComponent<CircleCollider2DComponent>())))
+				(selectedEntity.HasComponent<BoxCollider2DComponent>() ||
+					selectedEntity.HasComponent<CircleCollider2DComponent>())))
 		{
 			constexpr auto kIdentityMatrix = glm::mat4(1.0f);
 
@@ -738,19 +738,71 @@ namespace Hazel
 				ImGui::SetCursorPosX(centeredCursorPositionX);
 			}
 
-			bool isEditing = _sceneState == SceneState::Edit || _sceneState == SceneState::Simulate;
-			auto sceneStateButton = isEditing ? Utils::ERM::GetTexture(Utils::Icon_Play) : Utils::ERM::GetTexture(Utils::Icon_Stop);
+#pragma region Play.Stop.Step Button
+			const bool isPlayMode = _sceneState == SceneState::Play;
+			const bool isSimulateMode = _sceneState == SceneState::Simulate;
+			const bool isPaused = _activeScene->IsPaused();
+			Ref<Texture2D> sceneStateButton;
 
-			if (ImGui::ImageButton(sceneStateButton->GetRawID(), size, uv0, uv1, 3, isEditing ? normalColor : selectedColor, isEditing ? whiteColor : tintColor))
+			if (isPlayMode)
+			{
+				if (isPaused)
+				{
+					sceneStateButton = Utils::ERM::GetTexture(Utils::Icon_Step);
+				}
+				else
+				{
+					sceneStateButton = Utils::ERM::GetTexture(Utils::Icon_Stop);
+				}
+			}
+			else
+			{
+				if (isPaused)
+				{
+					sceneStateButton = Utils::ERM::GetTexture(Utils::Icon_Step);
+				}
+				else
+				{
+					if (isSimulateMode)
+					{
+						sceneStateButton = Utils::ERM::GetTexture(Utils::Icon_Stop);
+					}
+					else
+					{
+						sceneStateButton = Utils::ERM::GetTexture(Utils::Icon_Play);
+					}
+				}
+			}
+
+
+			if (ImGui::ImageButton(sceneStateButton->GetRawID(), size, uv0, uv1, 3, isPlayMode ? selectedColor : normalColor, isPlayMode && !isPaused ? tintColor : whiteColor))
 			{
 				switch (_sceneState)
 				{
 				case SceneState::Play:
-					OnSceneStop();
+				{
+					if (isPaused)
+					{
+						_activeScene->Step();
+					}
+					else
+					{
+						OnSceneStop();
+					}
 					break;
+				}
 				case SceneState::Simulate:
-					OnSceneStop();
-					[[fallthrough]];
+				{
+					if (isPaused)
+					{
+						_activeScene->Step();
+					}
+					else
+					{
+						OnSceneStop();
+					}
+					break;
+				}
 				case SceneState::Edit:
 					OnScenePlay();
 					break;
@@ -760,40 +812,79 @@ namespace Hazel
 			switch (_sceneState)
 			{
 			case SceneState::Play:
-				AddTooltip("Stop");
+			{
+				if (isPaused)
+				{
+					AddTooltip("Step");
+				}
+				else
+				{
+					AddTooltip("Stop");
+				}
 				break;
+			}
 			case SceneState::Simulate:
+				if (isPaused)
+				{
+					AddTooltip("Step");
+				}
+				else
+				{
+					AddTooltip("Stop");
+				}
+				break;
 			case SceneState::Edit:
 				AddTooltip("Play");
 				break;
 			}
+#pragma endregion
 
+
+#pragma region Pause Button
 			ImGui::SameLine();
-			if (ImGui::ImageButton(Utils::ERM::GetTexture(Utils::Icon_Simulate)->GetRawID(), size, uv0, uv1, 3, isEditing ? normalColor : selectedColor, _sceneState != SceneState::Simulate ? whiteColor : tintColor))
+			if (ImGui::ImageButton(Utils::ERM::GetTexture(Utils::Icon_Pause)->GetRawID(), size, uv0, uv1, 3, isPaused ? selectedColor : normalColor, isPaused ? tintColor : whiteColor))
 			{
+				_activeScene->SetPause(!isPaused);
+			}
+
+			if (!isPaused)
+			{
+				AddTooltip("Pause");
+			}
+			else
+			{
+				AddTooltip("Unpause");
+			}
+#pragma endregion
+
+#pragma region Simulate Button
+			if (!isPlayMode)
+			{
+				ImGui::SameLine();
+				if (ImGui::ImageButton(Utils::ERM::GetTexture(Utils::Icon_Simulate)->GetRawID(), size, uv0, uv1, 3, isPlayMode ? normalColor : selectedColor, !isSimulateMode ? whiteColor : tintColor))
+				{
+					switch (_sceneState)
+					{
+					case SceneState::Edit:
+						OnSceneSimulate();
+						break;
+					case SceneState::Simulate:
+						OnSceneStop();
+						break;
+					}
+				}
+
 				switch (_sceneState)
 				{
-				case SceneState::Edit:
-					OnSceneSimulate();
-					break;
 				case SceneState::Simulate:
-					OnSceneStop();
+					AddTooltip("Stop");
+					break;
+				case SceneState::Edit:
+					AddTooltip("Simulate");
 					break;
 				}
 			}
-
-			switch (_sceneState)
-			{
-			case SceneState::Play:
-				AddTooltip("Disabled");
-				break;
-			case SceneState::Simulate:
-				AddTooltip("Stop");
-				break;
-			case SceneState::Edit:
-				AddTooltip("Simulate");
-				break;
-			}
+#pragma endregion
 
 			ImGui::EndTable();
 		}
@@ -858,7 +949,7 @@ namespace Hazel
 				{
 					switch (_sceneState)
 					{
-					case Hazel::EditorLayer::SceneState::Edit:
+					case SceneState::Edit:
 					{
 						if (ImGui::MenuItem("Reload"))
 						{
@@ -866,8 +957,8 @@ namespace Hazel
 						}
 						break;
 					}
-					case Hazel::EditorLayer::SceneState::Play:
-					case Hazel::EditorLayer::SceneState::Simulate:
+					case SceneState::Play:
+					case SceneState::Simulate:
 					default:
 						ImGui::TextDisabled("Reload");
 						break;

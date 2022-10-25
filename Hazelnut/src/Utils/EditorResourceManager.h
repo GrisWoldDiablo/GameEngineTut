@@ -16,6 +16,8 @@ namespace Hazel::Utils
 		Icon_Local,
 		Icon_Global,
 		Icon_Play,
+		Icon_Pause,
+		Icon_Step,
 		Icon_Stop,
 		Icon_Simulate,
 		Icon_Lock,

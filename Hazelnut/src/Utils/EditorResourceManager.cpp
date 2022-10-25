@@ -25,6 +25,8 @@ namespace Hazel::Utils
 			{ Icon_Local,			Texture2D::Create("Resources/Icons/Gizmo/LocalGizmo256White.png")	 },
 			{ Icon_Global,			Texture2D::Create("Resources/Icons/Gizmo/GlobalGizmo256White.png")	 },
 			{ Icon_Play,			Texture2D::Create("Resources/Icons/General/PlayButton256.png")		 },
+			{ Icon_Pause,			Texture2D::Create("Resources/Icons/General/PauseButton256.png")		 },
+			{ Icon_Step,			Texture2D::Create("Resources/Icons/General/StepButton256.png")		 },
 			{ Icon_Stop,			Texture2D::Create("Resources/Icons/General/StopButton256.png")		 },
 			{ Icon_Simulate,		Texture2D::Create("Resources/Icons/General/SimulateButton256.png")	 },
 			{ Icon_Lock,			Texture2D::Create("Resources/Icons/General/Lock256.png")			 },

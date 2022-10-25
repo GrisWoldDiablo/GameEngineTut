@@ -85,6 +85,7 @@ namespace Hazel
 		newScene->_viewportWidth = other->_viewportWidth;
 		newScene->_viewportHeight = other->_viewportHeight;
 		newScene->_shouldCloneAudioSource = other->_shouldCloneAudioSource;
+		newScene->_isPaused = other->_isPaused;
 
 		auto& srcSceneRegistry = other->_registry;
 		auto& dstSceneRegistry = newScene->_registry;
@@ -223,58 +224,61 @@ namespace Hazel
 
 	void Scene::OnUpdateRuntime(Timestep timestep)
 	{
-		// C# OnUpdate Script
-		_registry.view<ScriptComponent>().each([&](const auto entt, const ScriptComponent& scriptComponent)
+		if (!_isPaused || _stepFrames-- > 0)
 		{
-			if (ScriptEngine::EntityClassExist(scriptComponent.ClassName))
+			// C# OnUpdate Script
+			_registry.view<ScriptComponent>().each([&](const auto entt, const ScriptComponent& scriptComponent)
 			{
-				Entity entity = { entt, this };
-				ScriptEngine::OnUpdateEntity(entity, timestep);
-			}
-		});
-
-		_registry.view<NativeScriptComponent>().each([=](const auto entt, auto& nsc)
-		{
-			auto& instance = nsc.Instance;
-
-			// TODO Move to OnScenePlay
-			if (instance == nullptr)
-			{
-				instance = nsc.InstantiateScript();
-				instance->_entity = { entt, this };
-				instance->OnCreate();
-			}
-
-			if (!instance->IsEnable)
-			{
-				return;
-			}
-
-			instance->OnUpdate(timestep);
-		});
-
-		// Physics
-		{
-			constexpr int32_t velocityInteration = 6;
-			constexpr int32_t positionInteration = 2;
-			_physicsWorld->Step(timestep, velocityInteration, positionInteration);
-
-			// Retrieve transform from Box2D
-			_registry.view<Rigidbody2DComponent>().each([&](const auto entt, const Rigidbody2DComponent& rb2d)
-			{
-				Entity entity = { entt, this };
-				auto& transform = entity.Transform();
-
-				if (entity.HasComponent<BoxCollider2DComponent>()
-				  || entity.HasComponent<CircleCollider2DComponent>())
+				if (ScriptEngine::EntityClassExist(scriptComponent.ClassName))
 				{
-					auto* body = static_cast<b2Body*>(rb2d.RuntimeBody);
-					const auto& position = body->GetPosition();
-					transform.Position.x = position.x;
-					transform.Position.y = position.y;
-					transform.Rotation.z = body->GetAngle();
+					Entity entity = { entt, this };
+					ScriptEngine::OnUpdateEntity(entity, timestep);
 				}
 			});
+
+			_registry.view<NativeScriptComponent>().each([=](const auto entt, auto& nsc)
+			{
+				auto& instance = nsc.Instance;
+
+				// TODO Move to OnScenePlay
+				if (instance == nullptr)
+				{
+					instance = nsc.InstantiateScript();
+					instance->_entity = { entt, this };
+					instance->OnCreate();
+				}
+
+				if (!instance->IsEnable)
+				{
+					return;
+				}
+
+				instance->OnUpdate(timestep);
+			});
+
+			// Physics
+			{
+				constexpr int32_t velocityInteration = 6;
+				constexpr int32_t positionInteration = 2;
+				_physicsWorld->Step(timestep, velocityInteration, positionInteration);
+
+				// Retrieve transform from Box2D
+				_registry.view<Rigidbody2DComponent>().each([&](const auto entt, const Rigidbody2DComponent& rb2d)
+				{
+					Entity entity = { entt, this };
+					auto& transform = entity.Transform();
+
+					if (entity.HasComponent<BoxCollider2DComponent>()
+					  || entity.HasComponent<CircleCollider2DComponent>())
+					{
+						auto* body = static_cast<b2Body*>(rb2d.RuntimeBody);
+						const auto& position = body->GetPosition();
+						transform.Position.x = position.x;
+						transform.Position.y = position.y;
+						transform.Rotation.z = body->GetAngle();
+					}
+				});
+			}
 		}
 
 		// Render 2D
@@ -310,31 +314,32 @@ namespace Hazel
 
 	void Scene::OnUpdateSimulation(Timestep timestep, const EditorCamera& camera)
 	{
-
-		// Physics
+		if (!_isPaused || _stepFrames-- > 0)
 		{
-			constexpr int32_t kVelocityInteration = 6;
-			constexpr int32_t kPositionInteration = 2;
-			_physicsWorld->Step(timestep, kVelocityInteration, kPositionInteration);
-
-			// Retrieve transform from Box2D
-			_registry.view<Rigidbody2DComponent>().each([&](const auto entt, const Rigidbody2DComponent& rb2d)
+			// Physics
 			{
-				Entity entity = { entt, this };
-				auto& transform = entity.Transform();
+				constexpr int32_t kVelocityInteration = 6;
+				constexpr int32_t kPositionInteration = 2;
+				_physicsWorld->Step(timestep, kVelocityInteration, kPositionInteration);
 
-				if (entity.HasComponent<BoxCollider2DComponent>()
-				  || entity.HasComponent<CircleCollider2DComponent>())
+				// Retrieve transform from Box2D
+				_registry.view<Rigidbody2DComponent>().each([&](const auto entt, const Rigidbody2DComponent& rb2d)
 				{
-					auto* body = static_cast<b2Body*>(rb2d.RuntimeBody);
-					const auto& position = body->GetPosition();
-					transform.Position.x = position.x;
-					transform.Position.y = position.y;
-					transform.Rotation.z = body->GetAngle();
-				}
-			});
-		}
+					Entity entity = { entt, this };
+					auto& transform = entity.Transform();
 
+					if (entity.HasComponent<BoxCollider2DComponent>()
+					  || entity.HasComponent<CircleCollider2DComponent>())
+					{
+						auto* body = static_cast<b2Body*>(rb2d.RuntimeBody);
+						const auto& position = body->GetPosition();
+						transform.Position.x = position.x;
+						transform.Position.y = position.y;
+						transform.Rotation.z = body->GetAngle();
+					}
+				});
+			}
+		}
 
 		RenderScene(camera);
 	}
@@ -342,6 +347,11 @@ namespace Hazel
 	void Scene::OnUpdateEditor(Timestep timestep, const EditorCamera& camera)
 	{
 		RenderScene(camera);
+	}
+
+	void Scene::Step(int frames)
+	{
+		_stepFrames = frames;
 	}
 
 	void Scene::DrawSpriteRenderComponent(const glm::vec3& cameraPosition)

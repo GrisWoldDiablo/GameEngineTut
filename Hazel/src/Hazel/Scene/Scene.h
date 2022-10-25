@@ -34,6 +34,7 @@ namespace Hazel
 		void OnUpdateRuntime(Timestep timestep);
 		void OnUpdateSimulation(Timestep timestep, const EditorCamera& camera);
 		void OnUpdateEditor(Timestep timestep, const EditorCamera& camera);
+		void Step(int frames = 1);
 
 		void DrawSpriteRenderComponent(const glm::vec3& cameraPosition);
 		void DrawCircleRenderComponent(const glm::vec3& cameraPosition);
@@ -57,6 +58,9 @@ namespace Hazel
 		auto GetAllEntitiesWith() { return _registry.view<Components...>(); }
 
 		bool IsRunning() const { return _isRunning; }
+		bool IsPaused() const { return _isPaused; }
+		void SetPause(bool isPaused) { _isPaused = isPaused; }
+
 		bool& ShouldCloneAudioSource() { return _shouldCloneAudioSource; }
 
 	private:
@@ -72,7 +76,7 @@ namespace Hazel
 
 		void RenderScene(const EditorCamera& camera);
 
-		bool IsChildOfLoop(Entity child, Entity entity);
+		bool IsChildOfImpl(Entity child, Entity entity);
 
 	private:
 		entt::registry _registry;
@@ -82,6 +86,8 @@ namespace Hazel
 
 		b2World* _physicsWorld = nullptr;
 		bool _isRunning = false;
+		bool _isPaused = false;
+		int _stepFrames = 0;
 
 		bool _shouldCloneAudioSource = false;
 
