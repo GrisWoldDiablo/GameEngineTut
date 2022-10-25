@@ -650,7 +650,7 @@ namespace Hazel
 						if (hasScriptComponent)
 						{
 							const auto& scriptComponent = entityPayload.GetComponent<ScriptComponent>();
-							if (ScriptEngine::IsSubClassOf(scriptComponent.ClassName, fieldTypeClass, true))
+							if (ScriptEngine::IsSubClassOf(scriptComponent.ClassName, fieldTypeClass))
 							{
 								setFunction(entityPayload);
 								return;
@@ -780,20 +780,20 @@ namespace Hazel
 									scriptInstance->SetFieldEntityValue(name, Entity());
 								}
 
-								const auto isEntityChildClass = ScriptEngine::IsSubClassOf(fieldTypeClass);
+								const auto isBaseClass = ScriptEngine::IsBaseClass(fieldTypeClass);
 
 								_scene->_registry.each([&](auto entityID)
 								{
 									Entity entity{ entityID, _scene.get() };
 									bool isSelected = false;
-									if (!isEntityChildClass)
+									if (isBaseClass)
 									{
 										isSelected = ImGui::Selectable(fmt::format("{0}##{1}", entity.Name(), entity.GetUUID()).c_str());
 									}
 									else if (entity.HasComponent<ScriptComponent>())
 									{
 										const auto& scriptComponent = entity.GetComponent<ScriptComponent>();
-										if (ScriptEngine::IsSubClassOf(scriptComponent.ClassName, fieldTypeClass, true))
+										if (ScriptEngine::IsSubClassOf(scriptComponent.ClassName, fieldTypeClass))
 										{
 											isSelected = ImGui::Selectable(fmt::format("{0}##{1}", entity.Name(), entity.GetUUID()).c_str());
 										}
@@ -970,20 +970,20 @@ namespace Hazel
 									entityFields.erase(name);
 								}
 
-								const auto isEntityChildClass = ScriptEngine::IsSubClassOf(fieldTypeClass);
+								const auto isBaseClass = ScriptEngine::IsBaseClass(fieldTypeClass);
 
 								_scene->_registry.each([&](auto entityID)
 								{
 									Entity entity{ entityID, _scene.get() };
 									bool isSelected = false;
-									if (!isEntityChildClass)
+									if (isBaseClass)
 									{
 										isSelected = ImGui::Selectable(fmt::format("{0}##{1}", entity.Name(), entity.GetUUID()).c_str());
 									}
 									else if (entity.HasComponent<ScriptComponent>())
 									{
 										const auto& scriptComponent = entity.GetComponent<ScriptComponent>();
-										if (ScriptEngine::IsSubClassOf(scriptComponent.ClassName, fieldTypeClass, true))
+										if (ScriptEngine::IsSubClassOf(scriptComponent.ClassName, fieldTypeClass))
 										{
 											isSelected = ImGui::Selectable(fmt::format("{0}##{1}", entity.Name(), entity.GetUUID()).c_str());
 										}
@@ -1140,20 +1140,20 @@ namespace Hazel
 							{
 								ImGui::Selectable("(Null)");
 
-								const auto isEntityChildClass = ScriptEngine::IsSubClassOf(fieldTypeClass);
+								const auto isBaseClass = ScriptEngine::IsBaseClass(fieldTypeClass);
 
 								_scene->_registry.each([&](auto entityID)
 								{
 									Entity entity{ entityID, _scene.get() };
 									bool isSelected = false;
-									if (!isEntityChildClass)
+									if (isBaseClass)
 									{
 										isSelected = ImGui::Selectable(fmt::format("{0}##{1}", entity.Name(), entity.GetUUID()).c_str());
 									}
 									else if (entity.HasComponent<ScriptComponent>())
 									{
 										const auto& scriptComponent = entity.GetComponent<ScriptComponent>();
-										if (ScriptEngine::IsSubClassOf(scriptComponent.ClassName, fieldTypeClass, true))
+										if (ScriptEngine::IsSubClassOf(scriptComponent.ClassName, fieldTypeClass))
 										{
 											isSelected = ImGui::Selectable(fmt::format("{0}##{1}", entity.Name(), entity.GetUUID()).c_str());
 										}

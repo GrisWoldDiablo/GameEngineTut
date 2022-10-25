@@ -706,52 +706,33 @@ namespace Hazel
 		return sScriptData->EntityBaseClass;
 	}
 
-	bool ScriptEngine::IsBaseClass(MonoClass* monoClass)
+	bool ScriptEngine::IsBaseClass(const MonoClass* monoClass)
 	{
 		return monoClass == GetEntityClass()->_monoClass;
 	}
 
-	bool ScriptEngine::IsSubClassOf(MonoClass* child, MonoClass* parent)
+	bool ScriptEngine::IsSubClassOf(MonoClass* child, MonoClass* parent, bool shouldCheckInterface)
 	{
-		auto* baseEntityClass = GetEntityClass()->_monoClass;
-
-		if (!parent)
-		{
-			return child != baseEntityClass && mono_class_is_subclass_of(child, baseEntityClass, false);
-		}
-
-		return mono_class_is_subclass_of(child, parent, false);
+		return mono_class_is_subclass_of(child, parent, shouldCheckInterface);
 	}
 
-	bool ScriptEngine::IsSubClassOf(MonoClass* child, const std::string& parentFullClassName, bool orSame)
+	bool ScriptEngine::IsSubClassOf(MonoClass* child, const std::string& parentFullClassName, bool shouldCheckInterface)
 	{
 		if (EntityClassExist(parentFullClassName))
 		{
 			auto* parentClass = GetEntityClasses().at(parentFullClassName)->_monoClass;
-			return child == parentClass || mono_class_is_subclass_of(child, parentClass, false);
-		}
-
-		if (parentFullClassName == GetEntityClass()->_classFullName)
-		{
-			auto* entityBaseClass = GetEntityClass()->_monoClass;
-			return child == entityBaseClass || mono_class_is_subclass_of(child, entityBaseClass, false);
+			return IsSubClassOf(child, parentClass, shouldCheckInterface);
 		}
 
 		return false;
 	}
 
-	bool ScriptEngine::IsSubClassOf(const std::string& childFullClassName, MonoClass* parent, bool orSame)
+	bool ScriptEngine::IsSubClassOf(const std::string& childFullClassName, MonoClass* parent, bool shouldCheckInterface)
 	{
 		if (EntityClassExist(childFullClassName))
 		{
 			auto* childClass = GetEntityClasses().at(childFullClassName)->_monoClass;
-			return parent == childClass || mono_class_is_subclass_of(childClass, parent, false);
-		}
-
-		if (childFullClassName == GetEntityClass()->_classFullName)
-		{
-			auto* entityBaseClass = GetEntityClass()->_monoClass;
-			return parent == entityBaseClass || mono_class_is_subclass_of(entityBaseClass, parent, false);
+			return IsSubClassOf(childClass, parent, shouldCheckInterface);
 		}
 
 		return false;

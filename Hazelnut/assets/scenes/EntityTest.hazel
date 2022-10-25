@@ -135,7 +135,7 @@ Entities:
       ClassName: Sandbox.EntitySmallChild
   - Entity: 17711691317068623211
     BaseComponent:
-      Name: Entity
+      Name: EntityNoScript
       Tag: 0
       Layer: 0
     TransformComponent:
