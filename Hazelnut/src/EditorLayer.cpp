@@ -344,9 +344,9 @@ namespace Hazel
 	bool EditorLayer::OnMouseButtonUp(const MouseButtonUpEvent& mouseButtonReleasedEvent)
 	{
 		// TODO Mouse picking, allow simulation, find bug where simulation stops?
-		if (mouseButtonReleasedEvent.GetMouseButton() == Mouse::ButtonLeft && _sceneState != SceneState::Simulate)
+		if (_isSceneViewportHovered && mouseButtonReleasedEvent.GetMouseButton() == Mouse::ButtonLeft && _sceneState != SceneState::Simulate)
 		{
-			if (_isSceneViewportHovered && (!_sceneHierarchyPanel.GetSelectedEntity() || !ImGuizmo::IsOver()) && !Input::IsKeyDown(Key::LeftAlt))
+			if ((!_sceneHierarchyPanel.GetSelectedEntity() || !ImGuizmo::IsOver()) && !Input::IsKeyDown(Key::LeftAlt))
 			{
 				_sceneHierarchyPanel.SetSelectedEntity(_hoveredEntity);
 			}
@@ -466,7 +466,7 @@ namespace Hazel
 						glm::mat4 transform = glm::translate(kIdentityMatrix, tc.Position)
 							* glm::toMat4(glm::quat(tc.Rotation))
 							* glm::translate(kIdentityMatrix, glm::vec3(cc2d.Offset, 0.001f * sign))
-							* glm::scale(kIdentityMatrix, tc.Scale * glm::vec3(cc2d.Radius * 2.0f));
+							* glm::scale(kIdentityMatrix, glm::vec3(glm::max(tc.Scale.x, tc.Scale.y)) * glm::vec3(cc2d.Radius * 2.0f));
 
 						Renderer2D::DrawCircle(transform, Color::Green, 0.01f);
 
@@ -508,8 +508,7 @@ namespace Hazel
 			OnSceneStop();
 		}
 
-		_editorScene = CreateRef<Scene>();
-		_editorScene->SetName(kNewSceneName);
+		_editorScene = CreateRef<Scene>(kNewSceneName);
 
 		SetWindowTitleSceneName();
 

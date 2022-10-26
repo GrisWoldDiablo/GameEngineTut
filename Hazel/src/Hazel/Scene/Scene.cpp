@@ -28,9 +28,10 @@ namespace Hazel
 		}
 	}
 
-	Scene::Scene(const std::string& name)
-		:_name(name)
-	{}
+	Scene::Scene(const std::string& name) :Scene()
+	{
+		_name = name;
+	}
 
 	Scene::~Scene()
 	{
