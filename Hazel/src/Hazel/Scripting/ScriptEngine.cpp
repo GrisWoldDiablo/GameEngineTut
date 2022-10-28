@@ -644,7 +644,9 @@ namespace Hazel
 						if (MonoObject* monoStringObject = mono_field_get_value_object(loadingDomain, field, monoObject))
 						{
 							MonoString* monoString = reinterpret_cast<MonoString*>(monoStringObject);
-							scriptField.DefaultStringData = mono_string_to_utf8(monoString);
+							auto* stringValue = mono_string_to_utf8(monoString);
+							scriptField.DefaultStringData = stringValue;
+							mono_free(stringValue);
 						}
 						break;
 					}

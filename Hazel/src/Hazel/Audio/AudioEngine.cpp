@@ -5,6 +5,8 @@
 
 #include "Hazel/Core/Timer.h"
 
+#include "glm/gtc/type_ptr.hpp"
+
 #include "alhelpers.h"
 #include "AL/alext.h"
 #include "alc/device.h"
@@ -159,7 +161,7 @@ namespace Hazel
 
 	void AudioEngine::SetListenerPosition(const glm::vec3& position)
 	{
-		alListenerfv(AL_POSITION, &position.x);
+		alListenerfv(AL_POSITION, glm::value_ptr(position));
 	}
 
 	bool AudioEngine::TryFindAudioSource(Ref<AudioSource>& audioSource, const std::filesystem::path& filePath)

@@ -286,23 +286,7 @@ namespace Hazel
 		}
 
 		DrawSceneName();
-
-		_scene->_registry.each([&](auto entityID)
-		{
-			Entity entity{ entityID, _scene.get() };
-			if (!entity)
-			{
-				return;
-			}
-
-			auto& familyComponent = entity.GetComponent<FamilyComponent>();
-			if (familyComponent.ParentID != UUID::Invalid)
-			{
-				return;
-			}
-
-			DrawEntityNode(entity);
-		});
+		DrawEntityNode(_scene->GetRootEntity());
 
 		if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
 		{
@@ -402,7 +386,7 @@ namespace Hazel
 		if (ImGui::BeginMenuBar())
 		{
 			char buffer[256] = {};
-			strcpy_s(buffer, sizeof(buffer), _scene->_name.c_str());
+			strcpy_s(buffer, sizeof(buffer), _scene->GetName().c_str());
 			if (ImGui::InputText(" : Scene", buffer, sizeof(buffer), ImGuiInputTextFlags_EnterReturnsTrue))
 			{
 				const auto newName = std::string(buffer);
@@ -424,6 +408,10 @@ namespace Hazel
 			return;
 		}
 
+		// TODO Find a cleaner way to do this.
+		// Maybe draw DrawEntitiesNode method that start from root and call this current one from it.
+		bool isRoot = entity == _scene->GetRootEntity();
+
 		ImGuiTreeNodeFlags flags = ((_selectedEntity == entity) ? ImGuiTreeNodeFlags_Selected : 0) | ImGuiTreeNodeFlags_OpenOnArrow;
 		flags |= ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DefaultOpen;
 		flags |= entity.Family().ChildID ? 0 : ImGuiTreeNodeFlags_Bullet;
@@ -434,28 +422,30 @@ namespace Hazel
 			displayName = fmt::format("{0}<{1}>", displayName, entity.GetUUID());
 		}
 
-		bool expanded = ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)entity, flags, displayName.c_str());
-
-		if (ImGui::BeginDragDropSource())
+		bool expanded = isRoot || ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)entity, flags, displayName.c_str());
+		if (!isRoot)
 		{
-			ImGui::SetDragDropPayload("ENTITY_PAY_LOAD", &entity, sizeof(Entity));
-			ImGui::Text(entity.Name().c_str());
-			ImGui::EndDragDropSource();
-		}
+			if (ImGui::BeginDragDropSource())
+			{
+				ImGui::SetDragDropPayload("ENTITY_PAY_LOAD", &entity, sizeof(Entity));
+				ImGui::Text(entity.Name().c_str());
+				ImGui::EndDragDropSource();
+			}
 
-		if (ImGui::BeginDragDropTarget())
-		{
-			DragDropEntityHierarchy(entity);
-			ImGui::EndDragDropTarget();
-		}
+			if (ImGui::BeginDragDropTarget())
+			{
+				DragDropEntityHierarchy(entity);
+				ImGui::EndDragDropTarget();
+			}
 
-		if (ImGui::IsItemClicked())
-		{
-			SetSelectedEntity(entity);
+			if (ImGui::IsItemClicked())
+			{
+				SetSelectedEntity(entity);
+			}
 		}
 
 		bool shouldDeleteEntity = false;
-		if (ImGui::BeginPopupContextItem())
+		if (!isRoot && ImGui::BeginPopupContextItem())
 		{
 			if (ImGui::MenuItem("Create New Entity"))
 			{
@@ -465,7 +455,7 @@ namespace Hazel
 			ImGui::Separator();
 			if (entity.Family().ParentID && ImGui::MenuItem(fmt::format("Unparent", entity.Name()).c_str()))
 			{
-				_scene->ReparentEntity(Entity(), entity);
+				_scene->ReparentEntity(_scene->GetRootEntity(), entity);
 			}
 
 			ImGui::Separator();
@@ -474,6 +464,36 @@ namespace Hazel
 				shouldDeleteEntity = true;
 			}
 			ImGui::EndPopup();
+		}
+
+		if (!isRoot)
+		{
+			ImGui::SameLine();
+			if (ImGui::ArrowButton("##Down", ImGuiDir_Down))
+			{
+				if (auto nextSibling = _scene->GetEntityByUUID(entity.Family().NextSiblingID))
+				{
+					auto parent = _scene->GetEntityByUUID(entity.Family().ParentID);
+					if (parent.Family().ChildID == entity.GetUUID())
+					{
+						parent.Family().ChildID = nextSibling.GetUUID();
+					}
+
+					entity.Family().NextSiblingID = nextSibling.Family().NextSiblingID;
+					if (auto newNextSibling = _scene->GetEntityByUUID(entity.Family().NextSiblingID))
+					{
+						newNextSibling.Family().PreviousSiblingID = entity.GetUUID();
+					}
+					nextSibling.Family().NextSiblingID = entity.GetUUID();
+
+					nextSibling.Family().PreviousSiblingID = entity.Family().PreviousSiblingID;
+					if (auto previousSibling = _scene->GetEntityByUUID(nextSibling.Family().PreviousSiblingID))
+					{
+						previousSibling.Family().NextSiblingID = nextSibling.GetUUID();
+					}
+					entity.Family().PreviousSiblingID = nextSibling.GetUUID();
+				}
+			}
 		}
 
 		if (expanded)
@@ -490,7 +510,10 @@ namespace Hazel
 				currentEntityID = childEntity.Family().NextSiblingID;
 			}
 
-			ImGui::TreePop();
+			if (!isRoot)
+			{
+				ImGui::TreePop();
+			}
 		}
 
 		if (shouldDeleteEntity)
@@ -782,9 +805,10 @@ namespace Hazel
 
 								const auto isBaseClass = ScriptEngine::IsBaseClass(fieldTypeClass);
 
-								_scene->_registry.each([&](auto entityID)
+								for (const auto enttID : _scene->GetEntities())
 								{
-									Entity entity{ entityID, _scene.get() };
+									Entity entity{ enttID, _scene.get() };
+
 									bool isSelected = false;
 									if (isBaseClass)
 									{
@@ -808,7 +832,7 @@ namespace Hazel
 									{
 										ImGui::SetItemDefaultFocus();
 									}
-								});
+								}
 
 								ImGui::EndCombo();
 							}
@@ -972,9 +996,10 @@ namespace Hazel
 
 								const auto isBaseClass = ScriptEngine::IsBaseClass(fieldTypeClass);
 
-								_scene->_registry.each([&](auto entityID)
+								for (const auto enttID : _scene->GetEntities())
 								{
-									Entity entity{ entityID, _scene.get() };
+									Entity entity{ enttID, _scene.get() };
+
 									bool isSelected = false;
 									if (isBaseClass)
 									{
@@ -998,7 +1023,7 @@ namespace Hazel
 									{
 										ImGui::SetItemDefaultFocus();
 									}
-								});
+								}
 
 								ImGui::EndCombo();
 							}
@@ -1142,9 +1167,10 @@ namespace Hazel
 
 								const auto isBaseClass = ScriptEngine::IsBaseClass(fieldTypeClass);
 
-								_scene->_registry.each([&](auto entityID)
+								for (const auto enttID : _scene->GetEntities())
 								{
-									Entity entity{ entityID, _scene.get() };
+									Entity entity{ enttID, _scene.get() };
+
 									bool isSelected = false;
 									if (isBaseClass)
 									{
@@ -1165,7 +1191,7 @@ namespace Hazel
 										scriptFieldInstance.Field = field;
 										scriptFieldInstance.SetValue(entity.GetUUID());
 									}
-								});
+								}
 
 								ImGui::EndCombo();
 							}
@@ -1271,7 +1297,7 @@ namespace Hazel
 
 			if (ImGui::Checkbox("Fixed Aspect Ratio", &component.IsFixedAspectRatio) && !component.IsFixedAspectRatio)
 			{
-				camera.SetViewportSize(_scene->_viewportWidth, _scene->_viewportHeight);
+				camera.SetViewportSize(_scene->GetViewportSize().x, _scene->GetViewportSize().y);
 			}
 		});
 #pragma endregion
@@ -1622,16 +1648,16 @@ namespace Hazel
 			ImGui::TextWrapped("AudioListener are only required if you have 3D Audio Sources.");
 			ImGui::Checkbox("Visible In Game##AudioListener", &component.IsVisibleInGame);
 
-			for (auto listener : _scene->GetAllEntitiesWith<AudioListenerComponent>())
+			for (const auto enttID : _scene->GetEntitiesViewWith<AudioListenerComponent>())
 			{
-				if (listener != entity)
+				if (enttID != entity)
 				{
 					ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(Color::Red.r, Color::Red.g, Color::Red.b, Color::Red.a));
 					ImGui::TextWrapped("ERROR!");
 					ImGui::TextWrapped("There is more than one listeners in the scene!");
 					ImGui::TextWrapped("Please remove one!");
 					ImGui::PopStyleColor();
-					return;
+					break;
 				}
 			}
 		});

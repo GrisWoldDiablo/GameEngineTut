@@ -77,8 +77,10 @@ namespace Hazel
 		if (TryGetField(name, field))
 		{
 			if (auto* monoString = reinterpret_cast<MonoString*>(mono_field_get_value_object(mono_object_get_domain(_instance), field.MonoClassField, _instance)))
-			{
-				data = mono_string_to_utf8(monoString);
+			{ 
+				auto* charData = mono_string_to_utf8(monoString);
+				data = charData;
+				mono_free(charData);
 				return true;
 			}
 		}

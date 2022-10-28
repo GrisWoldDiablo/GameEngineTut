@@ -2,6 +2,8 @@
 #include "Scene.h"
 #include "Components.h"
 #include "ScriptableEntity.h"
+
+#include "Hazel/Core/Random.h"
 #include "Hazel/Renderer/Renderer2D.h"
 #include "Hazel/Scripting/ScriptEngine.h"
 #include "Hazel/Audio/AudioEngine.h"
@@ -11,7 +13,6 @@
 #include "box2d/b2_fixture.h"
 #include "box2d/b2_polygon_shape.h"
 #include "box2d/b2_circle_shape.h"
-#include "Hazel/Core/Random.h"
 
 namespace Hazel
 {
@@ -26,6 +27,24 @@ namespace Hazel
 			_sAudioSourceIcon = Texture2D::Create("Resources/Icons/General/AudioSource256.png");
 			_sAudioListenerIcon = Texture2D::Create("Resources/Icons/General/AudioListener256.png");
 		}
+
+		_rootEntt = _registry.create();
+		Entity rootEntity = { _rootEntt , this };
+		_registry.emplace<Root>(_rootEntt);
+
+		auto uuid = UUID(69420);
+		rootEntity.AddComponent<IDComponent>(uuid);
+
+		rootEntity.AddComponent<FamilyComponent>();
+
+		auto& baseComponent = rootEntity.AddComponent<BaseComponent>();
+		baseComponent.Name = "Root";
+		baseComponent.Tag = 0;
+		baseComponent.Layer = 0;
+
+		rootEntity.AddComponent<TransformComponent>();
+
+		_entityMap[uuid] = rootEntity;
 	}
 
 	Scene::Scene(const std::string& name) :Scene()
@@ -60,7 +79,6 @@ namespace Hazel
 		CopyComponent<Component...>(dst, src, enttMap);
 	}
 
-
 	template<typename... Component>
 	static void CopyComponentIfExist(Entity dst, Entity src)
 	{
@@ -88,27 +106,24 @@ namespace Hazel
 		newScene->_shouldCloneAudioSource = other->_shouldCloneAudioSource;
 		newScene->_isPaused = other->_isPaused;
 
-		auto& srcSceneRegistry = other->_registry;
-		auto& dstSceneRegistry = newScene->_registry;
-		std::unordered_map<UUID, entt::entity> enttMap;
-
-		auto group = srcSceneRegistry.group<IDComponent, BaseComponent>();
-
-		// Need to run reverse to keep order of entt ID intact.
-		std::for_each(group.rbegin(), group.rend(), [&](auto entt)
+		auto group = other->GetEntitiesGroupWith<IDComponent, BaseComponent>();
+		for (const auto [enttID, idComponent, baseComponent] : group.each())
 		{
-			const auto [idComponent, baseComponent] = group.get<IDComponent, BaseComponent>(entt);
-			UUID uuid = idComponent.ID;
+			const auto uuid = idComponent.ID;
 
 			const auto& name = baseComponent.Name;
 			const auto& tag = baseComponent.Tag;
 			const auto& layer = baseComponent.Layer;
 
-			enttMap[uuid] = (entt::entity)newScene->CreateEntityWithUUID(uuid, name, tag, layer);
-		});
+			newScene->CreateEntityWithUUID(uuid, name, tag, layer);
+		}
+
+		auto& srcSceneRegistry = other->_registry;
+		auto& dstSceneRegistry = newScene->_registry;
 
 		// Copy components
-		CopyComponents(AllComponents{}, dstSceneRegistry, srcSceneRegistry, enttMap);
+		CopyComponents(AllComponents{}, dstSceneRegistry, srcSceneRegistry, newScene->_entityMap);
+		CopyComponent<FamilyComponent>(dstSceneRegistry, srcSceneRegistry, newScene->_entityMap);
 
 		return newScene;
 	}
@@ -134,6 +149,9 @@ namespace Hazel
 		entity.AddComponent<TransformComponent>();
 
 		_entityMap[uuid] = entity;
+
+		// TODO Add create entity with parent.
+		ReparentEntity(GetRootEntity(), entity);
 
 		return entity;
 	}
@@ -169,7 +187,8 @@ namespace Hazel
 		{
 			// TODO? Should we do this here?
 			AudioEngine::StopAllAudioSources();
-			_registry.view<AudioSourceComponent>().each([&](const auto entt, AudioSourceComponent& component)
+
+			for (auto&& [enttID, component] : GetEntitiesViewWith<AudioSourceComponent>().each())
 			{
 				if (component.AudioSource)
 				{
@@ -183,21 +202,21 @@ namespace Hazel
 						component.AudioSource->Play();
 					}
 				}
-			});
+			}
 		}
 
 		// Scripting
 		{
 			ScriptEngine::OnRuntimeStart(this);
 			// Instanciate all script entities
-			_registry.view<ScriptComponent>().each([&](const auto entt, const ScriptComponent& component)
+			for (auto&& [enttID, component] : GetEntitiesViewWith<ScriptComponent>().each())
 			{
 				if (ScriptEngine::EntityClassExist(component.ClassName))
 				{
-					Entity entity = { entt, this };
+					Entity entity = { enttID, this };
 					ScriptEngine::OnCreateEntity(entity);
 				}
-			});
+			}
 		}
 	}
 
@@ -228,24 +247,24 @@ namespace Hazel
 		if (!_isPaused || _stepFrames-- > 0)
 		{
 			// C# OnUpdate Script
-			_registry.view<ScriptComponent>().each([&](const auto entt, const ScriptComponent& scriptComponent)
+			for (auto&& [enttID, component] : GetEntitiesViewWith<ScriptComponent>().each())
 			{
-				if (ScriptEngine::EntityClassExist(scriptComponent.ClassName))
+				if (ScriptEngine::EntityClassExist(component.ClassName))
 				{
-					Entity entity = { entt, this };
+					Entity entity = { enttID, this };
 					ScriptEngine::OnUpdateEntity(entity, timestep);
 				}
-			});
+			}
 
-			_registry.view<NativeScriptComponent>().each([=](const auto entt, auto& nsc)
+			for (auto&& [enttID, component] : GetEntitiesViewWith<NativeScriptComponent>().each())
 			{
-				auto& instance = nsc.Instance;
+				auto& instance = component.Instance;
 
 				// TODO Move to OnScenePlay
 				if (instance == nullptr)
 				{
-					instance = nsc.InstantiateScript();
-					instance->_entity = { entt, this };
+					instance = component.InstantiateScript();
+					instance->_entity = { enttID, this };
 					instance->OnCreate();
 				}
 
@@ -255,7 +274,7 @@ namespace Hazel
 				}
 
 				instance->OnUpdate(timestep);
-			});
+			}
 
 			// Physics
 			{
@@ -264,21 +283,20 @@ namespace Hazel
 				_physicsWorld->Step(timestep, velocityInteration, positionInteration);
 
 				// Retrieve transform from Box2D
-				_registry.view<Rigidbody2DComponent>().each([&](const auto entt, const Rigidbody2DComponent& rb2d)
+				for (auto&& [enttID, component, transform] : GetEntitiesViewWith<Rigidbody2DComponent, TransformComponent>().each())
 				{
-					Entity entity = { entt, this };
-					auto& transform = entity.Transform();
+					Entity entity = { enttID, this };
 
 					if (entity.HasComponent<BoxCollider2DComponent>()
 					  || entity.HasComponent<CircleCollider2DComponent>())
 					{
-						auto* body = static_cast<b2Body*>(rb2d.RuntimeBody);
+						auto* body = static_cast<b2Body*>(component.RuntimeBody);
 						const auto& position = body->GetPosition();
 						transform.Position.x = position.x;
 						transform.Position.y = position.y;
 						transform.Rotation.z = body->GetAngle();
 					}
-				});
+				}
 			}
 		}
 
@@ -286,17 +304,16 @@ namespace Hazel
 		Camera* mainCamera = nullptr;
 		glm::mat4 cameraTransform;
 		glm::vec3 cameraPosition;
-		_registry.view<CameraComponent, TransformComponent>().each([&](const auto entity, CameraComponent& camera, const TransformComponent& transform)
+		for (const auto&& [enttID, camera, transform] : GetEntitiesViewWith<CameraComponent, TransformComponent>().each())
 		{
 			if (camera.IsPrimary)
 			{
 				mainCamera = &camera.Camera;
 				cameraTransform = transform.GetTransformMatrix();
 				cameraPosition = transform.Position;
-				return false;
+				break;
 			}
-			return true;
-		});
+		}
 
 		if (mainCamera == nullptr)
 		{
@@ -324,21 +341,20 @@ namespace Hazel
 				_physicsWorld->Step(timestep, kVelocityInteration, kPositionInteration);
 
 				// Retrieve transform from Box2D
-				_registry.view<Rigidbody2DComponent>().each([&](const auto entt, const Rigidbody2DComponent& rb2d)
+				for (auto&& [enttID, component, transform] : GetEntitiesViewWith<Rigidbody2DComponent, TransformComponent>().each())
 				{
-					Entity entity = { entt, this };
-					auto& transform = entity.Transform();
+					Entity entity = { enttID, this };
 
 					if (entity.HasComponent<BoxCollider2DComponent>()
 					  || entity.HasComponent<CircleCollider2DComponent>())
 					{
-						auto* body = static_cast<b2Body*>(rb2d.RuntimeBody);
+						auto* body = static_cast<b2Body*>(component.RuntimeBody);
 						const auto& position = body->GetPosition();
 						transform.Position.x = position.x;
 						transform.Position.y = position.y;
 						transform.Rotation.z = body->GetAngle();
 					}
-				});
+				}
 			}
 		}
 
@@ -357,8 +373,6 @@ namespace Hazel
 
 	void Scene::DrawSpriteRenderComponent(const glm::vec3& cameraPosition)
 	{
-		auto view = _registry.view<TransformComponent, SpriteRendererComponent>();
-
 		//TODO Fix sorting?. Can't have 2 groups sprite and circle render
 		//group.sort<TransformComponent>([&](const auto& lhs, const auto& rhs)
 		//{
@@ -366,11 +380,9 @@ namespace Hazel
 		//	auto rhsDistance = glm::distance(rhs.Position, cameraPosition);
 		//	return lhsDistance > rhsDistance;
 		//});
-
-		for (const auto entity : view)
+		for (const auto&& [enttID, sprite, transform] : GetEntitiesViewWith<SpriteRendererComponent, TransformComponent>().each())
 		{
-			auto [transform, sprite] = view.get<TransformComponent, SpriteRendererComponent>(entity);
-			Renderer2D::DrawSprite(transform.GetTransformMatrix(), sprite, (int)entity);
+			Renderer2D::DrawSprite(transform.GetTransformMatrix(), sprite, (int)enttID);
 
 			// Comment out to draw the sprite bounding box for testing.
 			// Renderer2D::DrawRect(transform.GetTransformMatrix(), Color::Green, (int)entity);
@@ -379,12 +391,9 @@ namespace Hazel
 
 	void Scene::DrawCircleRenderComponent(const glm::vec3& cameraPosition)
 	{
-		auto view = _registry.view<TransformComponent, CircleRendererComponent>();
-
-		for (const auto entity : view)
+		for (const auto&& [enttID, circle, transform] : GetEntitiesViewWith<CircleRendererComponent, TransformComponent>().each())
 		{
-			auto [transform, circle] = view.get<TransformComponent, CircleRendererComponent>(entity);
-			Renderer2D::DrawCircle(transform.GetTransformMatrix(), circle.Color, circle.Thickness, circle.Fade, (int)entity);
+			Renderer2D::DrawCircle(transform.GetTransformMatrix(), circle.Color, circle.Thickness, circle.Fade, (int)enttID);
 		}
 	}
 
@@ -393,11 +402,8 @@ namespace Hazel
 		//TODO create draw Icon generic.
 
 		float cameraPositionZ = cameraPosition.z;
-
-		auto viewAudioSource = _registry.view<TransformComponent, AudioSourceComponent>();
-		for (const auto entity : viewAudioSource)
+		for (const auto&& [enttID, audioSource, transform] : GetEntitiesViewWith<AudioSourceComponent, TransformComponent>().each())
 		{
-			auto [transform, audioSource] = viewAudioSource.get<TransformComponent, AudioSourceComponent>(entity);
 			if (!isRuntime || audioSource.IsVisibleInGame)
 			{
 				float sign = cameraPositionZ > transform.Position.z ? 1.0f : -1.0f;
@@ -405,14 +411,12 @@ namespace Hazel
 				position.z += 0.001f * sign;
 				auto scale = glm::vec3(1.0f);
 				scale.x *= sign;
-				Renderer2D::DrawQuad(position, scale, _sAudioSourceIcon, glm::vec2(1.0f), Color::White, (int)entity);
+				Renderer2D::DrawQuad(position, scale, _sAudioSourceIcon, glm::vec2(1.0f), Color::White, (int)enttID);
 			}
 		}
 
-		auto viewAudioListener = _registry.view<TransformComponent, AudioListenerComponent>();
-		for (const auto entity : viewAudioListener)
+		for (const auto&& [enttID, audioListener, transform] : GetEntitiesViewWith<AudioListenerComponent, TransformComponent>().each())
 		{
-			auto [transform, audioListener] = viewAudioListener.get<TransformComponent, AudioListenerComponent>(entity);
 			if (!isRuntime || audioListener.IsVisibleInGame)
 			{
 				float sign = cameraPositionZ > transform.Position.z ? 1.0f : -1.0f;
@@ -420,7 +424,7 @@ namespace Hazel
 				position.z += 0.001f * sign;
 				auto scale = glm::vec3(1.0f);
 				scale.x *= sign;
-				Renderer2D::DrawQuad(position, scale, _sAudioListenerIcon, glm::vec2(1.0f), Color::White, (int)entity);
+				Renderer2D::DrawQuad(position, scale, _sAudioListenerIcon, glm::vec2(1.0f), Color::White, (int)enttID);
 			}
 		}
 	}
@@ -436,13 +440,11 @@ namespace Hazel
 		_viewportHeight = height;
 
 		// Resize our non-FixedAspectRation cameras
-		auto view = _registry.view<CameraComponent>();
-		for (const auto entity : view)
+		for (const auto&& [enttID, component] : GetEntitiesViewWith<CameraComponent>().each())
 		{
-			auto& cameraComponent = view.get<CameraComponent>(entity);
-			if (!cameraComponent.IsFixedAspectRatio || cameraComponent.Camera.GetProjectionType() == SceneCamera::ProjectionType::Perspective)
+			if (!component.IsFixedAspectRatio || component.Camera.GetProjectionType() == SceneCamera::ProjectionType::Perspective)
 			{
-				cameraComponent.Camera.SetViewportSize(width, height);
+				component.Camera.SetViewportSize(width, height);
 			}
 		}
 	}
@@ -512,7 +514,7 @@ namespace Hazel
 			break;
 		}
 
-		newChildFamily.ParentID = newParent ? newParent.GetUUID() : (UUID)UUID::Invalid;
+		newChildFamily.ParentID = newParent ? newParent.GetUUID() : UUID::Invalid;
 	}
 
 
@@ -557,13 +559,14 @@ namespace Hazel
 		return false;
 	}
 
-
 	Entity Scene::DuplicateEntity(Entity entity)
 	{
 		HZ_ASSERT(!_isRunning, "Cannot duplicate while scene is running.");
 
 		Entity newEntity = CreateEntity(entity.Name());
 		CopyComponentsIfExist(AllComponents{}, newEntity, entity);
+
+		ReparentEntity(GetEntityByUUID(entity.Family().ParentID), newEntity);
 
 		return newEntity;
 	}
@@ -581,12 +584,11 @@ namespace Hazel
 
 	Entity Scene::GetEntityByName(const std::string& name)
 	{
-		for (const auto& [uuid, entity] : _entityMap)
+		for (const auto&& [enttID, component] : GetEntitiesViewWith<BaseComponent>().each())
 		{
-			Entity foundEntity{ entity,this };
-			if (foundEntity.Name() == name)
+			if (component.Name == name)
 			{
-				return foundEntity;
+				return { enttID, this };
 			}
 		}
 
@@ -596,24 +598,28 @@ namespace Hazel
 	Entity Scene::GetPrimaryCameraEntity()
 	{
 		auto view = _registry.view<CameraComponent>();
-		for (const auto entity : view)
+		for (const auto&& [enttID, component] : GetEntitiesViewWith<CameraComponent>().each())
 		{
-			const auto& camera = view.get<CameraComponent>(entity);
-			if (camera.IsPrimary)
+			if (component.IsPrimary)
 			{
-				return { entity, this };
+				return { enttID, this };
 			}
 		}
 
 		return {};
 	}
 
+	Entity Scene::GetRootEntity()
+	{
+		return { _rootEntt, this };
+	}
+
 	void Scene::OnPhysic2DStart()
 	{
 		_physicsWorld = new b2World({ 0.0f, -9.8f });
-		_registry.view<Rigidbody2DComponent>().each([=](const auto entt, Rigidbody2DComponent& rb2d)
+		GetEntitiesViewWith<Rigidbody2DComponent>().each([=](const auto enttID, Rigidbody2DComponent& rb2d)
 		{
-			Entity entity = { entt, this };
+			Entity entity = { enttID, this };
 			auto& transform = entity.Transform();
 
 			b2BodyDef bodyDef;
@@ -750,7 +756,7 @@ namespace Hazel
 	{
 		if (component.AudioSource)
 		{
-			const auto path = component.AudioSource->GetPath();
+			const auto& path = component.AudioSource->GetPath();
 			component.AudioSource = AudioSource::Create(path);
 		}
 	}
@@ -758,9 +764,9 @@ namespace Hazel
 	template<>
 	void Scene::OnComponentAdded<AudioListenerComponent>(Entity entity, AudioListenerComponent& component)
 	{
-		for (auto listener : GetAllEntitiesWith<AudioListenerComponent>())
+		for (const auto enttID : GetEntitiesViewWith<AudioListenerComponent>())
 		{
-			if (listener != entity)
+			if (enttID != entity)
 			{
 				return;
 			}
@@ -835,20 +841,18 @@ namespace Hazel
 	template<>
 	void Scene::OnComponentRemoved<AudioListenerComponent>(Entity entity, AudioListenerComponent& component)
 	{
-		auto listeners = GetAllEntitiesWith<TransformComponent, AudioListenerComponent>();
-
 		glm::vec3 position{};
 
-		for (auto listener : listeners)
+		for (const auto&& [enttID, component, transform] : GetEntitiesViewWith<AudioListenerComponent, TransformComponent>().each())
 		{
-			if (listener != entity)
+			if (entity != enttID)
 			{
-				position = listeners.get<TransformComponent>(listener).Position;
+				position = transform.Position;
 				break;
 			}
 		}
 
-		HZ_CORE_LINFO("Listener removed. Audio Listener position set to {0}", position);
+		HZ_CORE_LINFO("Audio Listener removed. New Listener position set to {0}", position);
 		AudioEngine::SetListenerPosition(position);
 	}
 #pragma endregion

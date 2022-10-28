@@ -14,13 +14,30 @@
 
 namespace Hazel
 {
+	//  This component is to be used exclusively for scene's root entity.
+	struct Root
+	{
+		Root() = default;
+		Root(const Root& other) = default;
+	};
+
 	struct IDComponent
 	{
 		UUID ID;
 
 		IDComponent() = default;
-		IDComponent(const UUID& uuid) { ID = uuid; }
+		IDComponent(const UUID uuid) :ID(uuid) {}
 		IDComponent(const IDComponent&) = default;
+	};
+
+	struct BaseComponent
+	{
+		std::string Name;
+		int Tag = 0;
+		int Layer = 0;
+
+		BaseComponent() = default;
+		BaseComponent(const BaseComponent&) = default;
 	};
 
 	struct FamilyComponent
@@ -32,16 +49,6 @@ namespace Hazel
 
 		FamilyComponent() = default;
 		FamilyComponent(const FamilyComponent&) = default;
-	};
-
-	struct BaseComponent
-	{
-		std::string Name;
-		int Tag = 0;
-		int Layer = 0;
-
-		BaseComponent() = default;
-		BaseComponent(const BaseComponent&) = default;
 	};
 
 	struct TransformComponent
@@ -144,8 +151,8 @@ namespace Hazel
 		Rigidbody2DComponent() = default;
 		Rigidbody2DComponent(const Rigidbody2DComponent&) = default;
 
-		static uint8_t TypeToBox2DBody(Rigidbody2DComponent::BodyType bodyType);
-		static Hazel::Rigidbody2DComponent::BodyType Box2DBodyToType(uint8_t bodyType);
+		static uint8_t TypeToBox2DBody(BodyType bodyType);
+		static BodyType Box2DBodyToType(uint8_t bodyType);
 	};
 
 	struct BoxCollider2DComponent

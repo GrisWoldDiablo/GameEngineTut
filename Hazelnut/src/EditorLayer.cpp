@@ -425,23 +425,19 @@ namespace Hazel
 
 			// Box Colliders
 			{
-				auto view = _activeScene->GetAllEntitiesWith<TransformComponent, BoxCollider2DComponent>();
-				for (auto entity : view)
+				for (const auto &&[enttID, component, transform] : _activeScene->GetEntitiesViewWith<BoxCollider2DComponent, TransformComponent>().each())
 				{
-					Entity theEntity = { entity, _activeScene.get() };
-					if (_shouldShowPhysicsColliders || theEntity == selectedEntity)
+					if (_shouldShowPhysicsColliders || enttID == selectedEntity)
 					{
-						auto [tc, bc2d] = view.get<TransformComponent, BoxCollider2DComponent>(entity);
+						float sign = cameraPositionZ > transform.Position.z ? 1.0f : -1.0f;
 
-						float sign = cameraPositionZ > tc.Position.z ? 1.0f : -1.0f;
+						glm::mat4 newTransform = glm::translate(kIdentityMatrix, transform.Position)
+							* glm::toMat4(glm::quat(transform.Rotation))
+							* glm::translate(kIdentityMatrix, glm::vec3(component.Offset, 0.001f * sign))
+							* glm::toMat4(glm::quat(glm::vec3(0.0f, 0.0f, glm::radians(component.Rotation))))
+							* glm::scale(kIdentityMatrix, transform.Scale * glm::vec3(component.Size * 2.0f, 1.0f));
 
-						glm::mat4 transform = glm::translate(kIdentityMatrix, tc.Position)
-							* glm::toMat4(glm::quat(tc.Rotation))
-							* glm::translate(kIdentityMatrix, glm::vec3(bc2d.Offset, 0.001f * sign))
-							* glm::toMat4(glm::quat(glm::vec3(0.0f, 0.0f, glm::radians(bc2d.Rotation))))
-							* glm::scale(kIdentityMatrix, tc.Scale * glm::vec3(bc2d.Size * 2.0f, 1.0f));
-
-						Renderer2D::DrawRect(transform, Color::Green);
+						Renderer2D::DrawRect(newTransform, Color::Green);
 
 						if (!_shouldShowPhysicsColliders)
 						{
@@ -453,22 +449,18 @@ namespace Hazel
 
 			// Circle Colliders
 			{
-				auto view = _activeScene->GetAllEntitiesWith<TransformComponent, CircleCollider2DComponent>();
-				for (auto entity : view)
+				for (const auto&& [enttID, component, transform] : _activeScene->GetEntitiesViewWith<CircleCollider2DComponent, TransformComponent>().each())
 				{
-					Entity theEntity = { entity, _activeScene.get() };
-					if (_shouldShowPhysicsColliders || theEntity == selectedEntity)
+					if (_shouldShowPhysicsColliders || enttID == selectedEntity)
 					{
-						auto [tc, cc2d] = view.get<TransformComponent, CircleCollider2DComponent>(entity);
+						float sign = cameraPositionZ > transform.Position.z ? 1.0f : -1.0f;
 
-						float sign = cameraPositionZ > tc.Position.z ? 1.0f : -1.0f;
+						glm::mat4 newTransform = glm::translate(kIdentityMatrix, transform.Position)
+							* glm::toMat4(glm::quat(transform.Rotation))
+							* glm::translate(kIdentityMatrix, glm::vec3(component.Offset, 0.001f * sign))
+							* glm::scale(kIdentityMatrix, glm::vec3(glm::max(transform.Scale.x, transform.Scale.y)) * glm::vec3(component.Radius * 2.0f));
 
-						glm::mat4 transform = glm::translate(kIdentityMatrix, tc.Position)
-							* glm::toMat4(glm::quat(tc.Rotation))
-							* glm::translate(kIdentityMatrix, glm::vec3(cc2d.Offset, 0.001f * sign))
-							* glm::scale(kIdentityMatrix, glm::vec3(glm::max(tc.Scale.x, tc.Scale.y)) * glm::vec3(cc2d.Radius * 2.0f));
-
-						Renderer2D::DrawCircle(transform, Color::Green, 0.01f);
+						Renderer2D::DrawCircle(newTransform, Color::Green, 0.01f);
 
 						if (!_shouldShowPhysicsColliders)
 						{

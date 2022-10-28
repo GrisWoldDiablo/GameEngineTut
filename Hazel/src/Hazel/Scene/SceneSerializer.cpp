@@ -370,7 +370,7 @@ namespace Hazel
 			out << YAML::BeginMap; // AudioSourceComponent
 
 			out << YAML::Key << "IsAutoPlay" << YAML::Value << component.IsAutoPlay;
-			
+
 			out << YAML::Key << "IsVisibleInGame" << YAML::Value << component.IsVisibleInGame;
 
 			if (component.AudioSource != nullptr)
@@ -436,24 +436,20 @@ namespace Hazel
 	void SceneSerializer::SerializeData(YAML::Emitter& out)
 	{
 		out << YAML::BeginMap;
-		out << YAML::Key << "Scene" << YAML::Value << _scene->_name;
+		out << YAML::Key << "Scene" << YAML::Value << _scene->GetName();
 		out << YAML::Key << "Entities" << YAML::Value << YAML::BeginSeq;
 
-		std::vector<Entity> entities = std::vector<Entity>();
-		_scene->_registry.each([&](auto entityID)
+		for (const auto enttID : _scene->GetEntities())
 		{
-			Entity entity = { entityID, _scene.get() };
+			Entity entity{ enttID, _scene.get() };
+
 			if (!entity)
 			{
 				return;
 			}
-			entities.push_back(entity);
-		});
 
-		std::for_each(entities.rbegin(), entities.rend(), [&](auto entity)
-		{
 			SerializeEntity(out, entity);
-		});
+		}
 
 		out << YAML::EndSeq;
 		out << YAML::EndMap;
@@ -774,7 +770,7 @@ namespace Hazel
 					auto& component = deserializedEntity.AddComponent<AudioSourceComponent>();
 
 					component.IsAutoPlay = GetValue<bool>(audioSourceComponent, "IsAutoPlay", false);
-					
+
 					component.IsVisibleInGame = GetValue<bool>(audioSourceComponent, "IsVisibleInGame", false);
 
 					if (auto audioClipPath = audioSourceComponent["AudioClipPath"])

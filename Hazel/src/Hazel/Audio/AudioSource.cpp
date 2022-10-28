@@ -4,6 +4,8 @@
 
 #include "Hazel/Math/HMath.h"
 
+#include "glm/gtc/type_ptr.hpp"
+
 #include "AL/alext.h"
 
 namespace Hazel
@@ -107,8 +109,7 @@ namespace Hazel
 		if (!HMath::IsNearlyEqual(_position, position))
 		{
 			_position = position;
-
-			alSourcefv(_alSource, AL_POSITION, &_position.x);
+			alSourcefv(_alSource, AL_POSITION, glm::value_ptr(_position));
 		}
 	}
 

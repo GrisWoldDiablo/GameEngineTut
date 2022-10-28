@@ -3,6 +3,7 @@
 #include "Hazel/Core/UUID.h"
 #include "Hazel/Renderer/EditorCamera.h"
 #include "Hazel/Renderer/Texture.h"
+#include "Hazel/Scene/Components.h"
 
 #include "entt.hpp"
 
@@ -54,14 +55,20 @@ namespace Hazel
 
 		Entity GetPrimaryCameraEntity();
 
+		Entity GetRootEntity();
+		auto GetEntities() { return _registry.view<IDComponent>(entt::exclude<Root>); }
 		template<typename... Components>
-		auto GetAllEntitiesWith() { return _registry.view<Components...>(); }
+		auto GetEntitiesViewWith() { return _registry.view<Components...>(entt::exclude<Root>); }
+		template<typename... Components>
+		auto GetEntitiesGroupWith() { return _registry.group<Components...>(entt::exclude<Root>); }
 
 		bool IsRunning() const { return _isRunning; }
 		bool IsPaused() const { return _isPaused; }
 		void SetPause(bool isPaused) { _isPaused = isPaused; }
 
 		bool& ShouldCloneAudioSource() { return _shouldCloneAudioSource; }
+
+		glm::ivec2 GetViewportSize() const { return glm::ivec2(_viewportWidth, _viewportHeight); }
 
 	private:
 		template<typename T>
@@ -79,25 +86,24 @@ namespace Hazel
 		bool IsChildOfImpl(Entity child, Entity entity);
 
 	private:
-		entt::registry _registry;
-		uint32_t _viewportWidth = 0;
-		uint32_t _viewportHeight = 0;
 		std::string _name;
-
-		b2World* _physicsWorld = nullptr;
 		bool _isRunning = false;
 		bool _isPaused = false;
 		int _stepFrames = 0;
+		uint32_t _viewportWidth = 0;
+		uint32_t _viewportHeight = 0;
 
 		bool _shouldCloneAudioSource = false;
 
+		entt::entity _rootEntt;
+		entt::registry _registry;
 		std::unordered_map<UUID, entt::entity> _entityMap;
+		
+		b2World* _physicsWorld = nullptr;
 
 		static Ref<Texture2D> _sAudioSourceIcon;
 		static Ref<Texture2D> _sAudioListenerIcon;
 
 		friend class Entity;
-		friend class SceneSerializer;
-		friend class SceneHierarchyPanel;
 	};
 }
