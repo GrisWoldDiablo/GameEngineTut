@@ -11,5 +11,15 @@ namespace Hazel
 			clampedValue = clampedValue.CompareTo(max) > 0 ? max : clampedValue;
 			return clampedValue;
 		}
+
+		public static bool IsNearlyEqual(float lhs, float rhs)
+		{
+			return Math.Abs(lhs - rhs) < float.Epsilon * float.Epsilon;
+		}
+		
+		public static bool IsNearlyEqual(double lhs, double rhs)
+		{
+			return Math.Abs(lhs - rhs) < double.Epsilon * double.Epsilon;
+		}
 	}
 }

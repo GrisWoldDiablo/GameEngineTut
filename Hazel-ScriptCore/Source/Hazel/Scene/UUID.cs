@@ -1,6 +1,6 @@
 ﻿namespace Hazel
 {
-	public struct UUID : System.IEquatable<UUID>
+	public readonly struct UUID : System.IEquatable<UUID>
 	{
 		private readonly ulong _uuid;
 

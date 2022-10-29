@@ -31,8 +31,6 @@ namespace Hazel
 
 				return _transform;
 			}
-
-			private set => _transform = value;
 		}
 
 		protected Entity()
@@ -89,12 +87,7 @@ namespace Hazel
 
 		public T GetComponent<T>() where T : Component, new()
 		{
-			if (!HasComponent<T>())
-			{
-				return null;
-			}
-
-			return new T() { Entity = this };
+			return !HasComponent<T>() ? null : new T{ Entity = this };
 		}
 
 		public T AddComponent<T>() where T : Component, new()
@@ -106,7 +99,7 @@ namespace Hazel
 
 			InternalCalls.Entity_AddComponent(Id, typeof(T));
 
-			return new T() { Entity = this };
+			return new T{ Entity = this };
 		}
 
 		public T As<T>() where T : Entity, new()
@@ -141,12 +134,7 @@ namespace Hazel
 		/// </summary>
 		public static Entity FindByName(string name)
 		{
-			if (InternalCalls.Entity_FindByName(name, out Entity entity))
-			{
-				return entity;
-			}
-
-			return null;
+			return InternalCalls.Entity_FindByName(name, out var entity) ? entity : null;
 		}
 
 		public static implicit operator bool(Entity entity)

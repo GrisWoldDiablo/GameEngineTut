@@ -1,4 +1,4 @@
-﻿namespace Hazel
+namespace Hazel
 {
 	public class Input
 	{

@@ -17,9 +17,11 @@
 
 		public Vector4(float scalar) : this(scalar, scalar, scalar, scalar) { }
 
-		public Vector4(Vector2 value, float z = 0.0f, float w = 0.0f) : this(value.X, value.Y, z, w) { }
+		public Vector4(Vector2 vector2, float z = 0.0f, float w = 0.0f) : this(vector2.X, vector2.Y, z, w) { }
 
-		public Vector4(Vector3 value, float w = 0.0f) : this(value.X, value.Y, value.Z, w) { }
+		public Vector4(Vector3 vector3, float w = 0.0f) : this(vector3.X, vector3.Y, vector3.Z, w) { }
+
+		public Vector4(Vector4 vector4) : this(vector4.X, vector4.Y, vector4.Z, vector4.W) { }
 
 		public float Lenght() => Lenght(this);
 
@@ -44,7 +46,7 @@
 
 		public bool Equals(Vector4 other)
 		{
-			return X.Equals(other.X) && Y.Equals(other.Y) && Z.Equals(other.Z) && W.Equals(other.W);
+			return X.IsNearlyEqual(other.X) && Y.IsNearlyEqual(other.Y) && Z.IsNearlyEqual(other.Z) && W.IsNearlyEqual(other.W);
 		}
 
 		public float this[int index]
@@ -96,7 +98,7 @@
 		public static Vector4 Normalize(Vector4 value)
 		{
 			float lenght = Lenght(value);
-			if (lenght > float.Epsilon)
+			if (!lenght.IsNearlyZero())
 			{
 				return value / lenght;
 			}
@@ -141,23 +143,11 @@
 
 		public static Vector4 Clamp(Vector4 value, Vector4 min, Vector4 max)
 		{
-			var x = value.X;
-			x = x > max.X ? max.X : x;
-			x = x < min.X ? min.X : x;
-
-			var y = value.Y;
-			y = y > max.Y ? max.Y : y;
-			y = y < min.Y ? min.Y : y;
-
-			var z = value.Z;
-			z = z > max.Z ? max.Z : z;
-			z = z < min.Z ? min.Z : z;
-
-			var w = value.W;
-			w = w > max.W ? max.W : w;
-			w = w < min.W ? min.W : w;
-
-			return new Vector4(x, y, z, w);
+			value.X.Clamp(min.X, max.X);
+			value.Y.Clamp(min.Y, max.Y);
+			value.Z.Clamp(min.Z, max.Z);
+			value.W.Clamp(min.W, max.W);
+			return new Vector4(value);
 		}
 
 		public static Vector4 operator *(Vector4 value, float scalar)

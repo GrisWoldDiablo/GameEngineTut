@@ -77,7 +77,7 @@ namespace Hazel
 					case 2: return B;
 					case 3: return A;
 					default:
-						throw new System.IndexOutOfRangeException($"{nameof(Color)} invalid index!");
+						throw new IndexOutOfRangeException($"{nameof(Color)} invalid index!");
 				}
 
 			}
@@ -98,7 +98,7 @@ namespace Hazel
 						A = value;
 						break;
 					default:
-						throw new System.IndexOutOfRangeException($"{nameof(Color)} invalid index!");
+						throw new IndexOutOfRangeException($"{nameof(Color)} invalid index!");
 				}
 			}
 		}
@@ -189,23 +189,23 @@ namespace Hazel
 		/// <summary>
 		/// Compare each components separately.
 		/// </summary>
-		public static bool operator !=(Color lhs, Color rhs)
+		public static bool operator ==(Color lhs, Color rhs)
 		{
-			return (lhs.R != rhs.R &&
-					lhs.G != rhs.G &&
-					lhs.B != rhs.B &&
-					lhs.A != rhs.A);
+			return (HMath.IsNearlyEqual(lhs.R, rhs.R) &&
+					HMath.IsNearlyEqual(lhs.G, rhs.G) &&
+					HMath.IsNearlyEqual(lhs.B, rhs.B) &&
+					HMath.IsNearlyEqual(lhs.A, rhs.A));
 		}
 
 		/// <summary>
 		/// Compare each components separately.
 		/// </summary>
-		public static bool operator ==(Color lhs, Color rhs)
+		public static bool operator !=(Color lhs, Color rhs)
 		{
-			return (lhs.R == rhs.R &&
-					lhs.G == rhs.G &&
-					lhs.B == rhs.B &&
-					lhs.A == rhs.A);
+			return (!HMath.IsNearlyEqual(lhs.R, rhs.R) &&
+					!HMath.IsNearlyEqual(lhs.G, rhs.G) &&
+					!HMath.IsNearlyEqual(lhs.B, rhs.B) &&
+					!HMath.IsNearlyEqual(lhs.A, rhs.A));
 		}
 
 		/// <summary>

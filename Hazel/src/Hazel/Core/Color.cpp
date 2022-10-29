@@ -29,14 +29,14 @@ namespace Hazel
 	{
 		HZ_PROFILE_FUNCTION();
 
-		double H = hsv.x;
-		double S = hsv.y;
-		double V = hsv.z;
+		const double H = hsv.x;
+		const double S = hsv.y;
+		const double V = hsv.z;
 
-		double C = S * V;
-		double HPrime = H * 6.0;
-		double X = C * (1 - abs(fmod(HPrime, 2) - 1));
-		double m = V - C;
+		const double C = S * V;
+		const double HPrime = H * 6.0;
+		const double X = C * (1 - abs(fmod(HPrime, 2) - 1));
+		const double m = V - C;
 		double R, G, B;
 
 		switch (static_cast<int>(glm::floor(HPrime)))
@@ -90,7 +90,7 @@ namespace Hazel
 
 	void Color::RGBtoHSV(const Color& color, float& H, float& S, float& V)
 	{
-		auto hsv = RGBtoHSV(color);
+		const auto hsv = RGBtoHSV(color);
 		H = hsv.x;
 		S = hsv.y;
 		V = hsv.z;
@@ -107,9 +107,9 @@ namespace Hazel
 		double g = color.g;
 		double b = color.b;
 
-		double Xmax = glm::max(glm::max(r, g), b);
-		double Xmin = glm::min(glm::min(r, g), b);
-		double C = Xmax - Xmin;
+		const double Xmax = glm::max(glm::max(r, g), b);
+		const double Xmin = glm::min(glm::min(r, g), b);
+		const double C = Xmax - Xmin;
 
 		if (HMath::IsNearlyZero(C))
 		{
@@ -146,7 +146,7 @@ namespace Hazel
 
 	void Color::RGBtoHSL(const Color& color, float& H, float& S, float& L)
 	{
-		auto hsl = RGBtoHSL(color);
+		const auto hsl = RGBtoHSL(color);
 		H = hsl.x;
 		S = hsl.y;
 		L = hsl.z;
@@ -163,9 +163,9 @@ namespace Hazel
 		double g = color.g;
 		double b = color.b;
 
-		double Xmax = glm::max(glm::max(r, g), b);
-		double Xmin = glm::min(glm::min(r, g), b);
-		double C = Xmax - Xmin;
+		const double Xmax = glm::max(glm::max(r, g), b);
+		const double Xmin = glm::min(glm::min(r, g), b);
+		const double C = Xmax - Xmin;
 
 		if (HMath::IsNearlyZero(C))
 		{
@@ -218,10 +218,22 @@ namespace Hazel
 		{
 			switch (toupper(character))
 			{
-			case 0: case 1: case 2: case 3: case 4:
-			case 5: case 6: case 7: case 8:case 9:
-			case 'A': case 'B': case 'C':
-			case 'D': case 'E': case 'F':
+			case 0:
+			case 1:
+			case 2:
+			case 3:
+			case 4:
+			case 5:
+			case 6:
+			case 7:
+			case 8:
+			case 9:
+			case 'A':
+			case 'B':
+			case 'C':
+			case 'D':
+			case 'E':
+			case 'F':
 				break;
 			default:
 				HZ_CORE_ASSERT(0, fmt::format("[{0}] is not a valid Hexadecimal character.", character));
@@ -334,10 +346,10 @@ namespace Hazel
 			return b;
 		case 3:
 			return a;
+		default:
+			HZ_CORE_ASSERT(0, fmt::format("Color index [{0}] out of bounds!", index));
+			throw std::out_of_range("Index out of bounds!");
 		}
-
-		HZ_CORE_ASSERT(0, fmt::format("Color index [{0}] out of bounds!", index));
-		throw std::out_of_range("Index out of bounds!");
 	}
 
 	float Color::operator[](int index) const
@@ -352,10 +364,10 @@ namespace Hazel
 			return b;
 		case 3:
 			return a;
+		default:
+			HZ_CORE_ASSERT(0, fmt::format("Color index [{0}] out of bounds!", index));
+			throw std::out_of_range("Index out of bounds!");
 		}
-
-		HZ_CORE_ASSERT(0, fmt::format("Color index [{0}] out of bounds!", index));
-		throw std::out_of_range("Index out of bounds!");
 	}
 
 	Color Color::operator+(const Color& other) const

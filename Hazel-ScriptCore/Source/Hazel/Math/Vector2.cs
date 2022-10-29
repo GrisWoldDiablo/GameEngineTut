@@ -1,4 +1,4 @@
-﻿namespace Hazel
+namespace Hazel
 {
 	public struct Vector2 : System.IEquatable<Vector2>
 	{
@@ -12,6 +12,8 @@
 		}
 
 		public Vector2(float scalar) : this(scalar, scalar) { }
+
+		public Vector2(Vector2 vector2) : this(vector2.X, vector2.Y) { }
 
 		public Vector2(Vector3 vector3) : this(vector3.X, vector3.Y) { }
 
@@ -40,7 +42,7 @@
 
 		public bool Equals(Vector2 other)
 		{
-			return X.Equals(other.X) && Y.Equals(other.Y);
+			return X.IsNearlyEqual(other.X) && Y.IsNearlyEqual(other.Y);
 		}
 
 		public float this[int index]
@@ -86,7 +88,7 @@
 		public static Vector2 Normalize(Vector2 value)
 		{
 			float lenght = Lenght(value);
-			if (lenght > float.Epsilon)
+			if (!lenght.IsNearlyZero())
 			{
 				return value / lenght;
 			}
@@ -131,15 +133,9 @@
 
 		public static Vector2 Clamp(Vector2 value, Vector2 min, Vector2 max)
 		{
-			var x = value.X;
-			x = x > max.X ? max.X : x;
-			x = x < min.X ? min.X : x;
-
-			var y = value.Y;
-			y = y > max.Y ? max.Y : y;
-			y = y < min.Y ? min.Y : y;
-
-			return new Vector2(x, y);
+			value.X.Clamp(min.X, max.X);
+			value.Y.Clamp(min.Y, max.Y);
+			return new Vector2(value);
 		}
 
 		public static Vector2 operator *(Vector2 vector, float scalar)

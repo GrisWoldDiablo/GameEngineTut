@@ -40,14 +40,14 @@
 				return true;
 			}
 
-			if (rhsIsNull && !lhsIsNull)
+			if (rhsIsNull)
 			{
 				return !lhs.Entity || !lhs.Entity.HasComponent(lhs.GetType());
 			}
 
-			if (lhsIsNull && !rhsIsNull)
+			if (lhsIsNull)
 			{
-				return !rhs.Entity || !rhs.Entity.HasComponent(lhs.GetType());
+				return !rhs.Entity || !rhs.Entity.HasComponent(rhs.GetType());
 			}
 
 			// Just need to check one side for component since they are equal.
