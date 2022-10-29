@@ -6,7 +6,7 @@
 #ifdef HZ_DEBUG
 #	ifdef HZ_PLATFORM_WINDOWS
 #		define HZ_DEBUG_BREAK() __debugbreak()
-#	else 
+#	else
 #		error "Platform does not support debugbreak!"
 #	endif // HZ_PLATFORM_WINDOWS
 #	define HZ_ENABLE_ASSERTS  

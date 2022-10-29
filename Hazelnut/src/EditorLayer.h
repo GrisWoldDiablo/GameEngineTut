@@ -63,10 +63,10 @@ namespace Hazel
 		void DuplicateEntity();
 
 	private:
-		Color _clearColor = { 0.13f, 0.13f, 0.13f, 1.0f };
+		Color _clearColor = {0.13f, 0.13f, 0.13f, 1.0f};
 		Ref<Framebuffer> _framebuffer;
 
-		glm::vec2 _sceneViewportSize = { 0.0f, 0.0f };
+		glm::vec2 _sceneViewportSize = {0.0f, 0.0f};
 
 		bool _isSceneViewportFocused = false;
 		bool _isSceneViewportHovered = false;

@@ -35,7 +35,6 @@ namespace Hazel
 				MB_ICONWARNING | MB_OK
 			);
 		}, message, title).detach();
-		
 	}
 
 	bool FileDialogs::QuestionPopup(const char* message, const char* title)
@@ -54,7 +53,7 @@ namespace Hazel
 	std::string FileDialogs::OpenFile(const char* filter)
 	{
 		OPENFILENAMEA ofn;
-		CHAR szFile[260] = { 0 };
+		CHAR szFile[260] = {0};
 
 		// Initialize OPENFILENAME
 		ZeroMemory(&ofn, sizeof(OPENFILENAME));
@@ -78,7 +77,7 @@ namespace Hazel
 	std::string FileDialogs::SaveFile(const char* filter, const char* defaultFileName)
 	{
 		OPENFILENAMEA ofn;
-		CHAR szFile[260] = { 0 };
+		CHAR szFile[260] = {0};
 
 		if (defaultFileName != nullptr)
 		{

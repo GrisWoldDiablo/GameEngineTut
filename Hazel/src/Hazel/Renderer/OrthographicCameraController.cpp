@@ -6,10 +6,8 @@
 
 namespace Hazel
 {
-
 	OrthographicCameraController::OrthographicCameraController(float aspectRatio, bool rotation)
-		:_aspectRatio(aspectRatio), _bounds({ -_aspectRatio * _zoomLevel, _aspectRatio * _zoomLevel, -_zoomLevel, _zoomLevel }), _camera(_bounds.Left, _bounds.Right, _bounds.Bottom, _bounds.Top), _rotation(rotation)
-	{}
+		: _aspectRatio(aspectRatio), _bounds({-_aspectRatio * _zoomLevel, _aspectRatio * _zoomLevel, -_zoomLevel, _zoomLevel}), _camera(_bounds.Left, _bounds.Right, _bounds.Bottom, _bounds.Top), _rotation(rotation) {}
 
 	void OrthographicCameraController::OnUpdate(Timestep timestep)
 	{
@@ -131,7 +129,7 @@ namespace Hazel
 
 	void OrthographicCameraController::CalculateView()
 	{
-		_bounds = { -_aspectRatio * _zoomLevel, _aspectRatio * _zoomLevel, -_zoomLevel, _zoomLevel };
+		_bounds = {-_aspectRatio * _zoomLevel, _aspectRatio * _zoomLevel, -_zoomLevel, _zoomLevel};
 		_camera.SetProjection(_bounds.Left, _bounds.Right, _bounds.Bottom, _bounds.Top);
 	}
 

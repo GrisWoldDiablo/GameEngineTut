@@ -22,7 +22,7 @@ namespace Hazel
 
 	Color Color::HSVtoRGB(float h, float s, float v, float a)
 	{
-		return  HSVtoRGB({ h, s, v, a });
+		return HSVtoRGB({h, s, v, a});
 	}
 
 	Color Color::HSVtoRGB(const glm::vec4& hsv)
@@ -85,7 +85,7 @@ namespace Hazel
 		}
 		}
 
-		return { (R + m), (G + m), (B + m), static_cast<double>(hsv.a) };
+		return {(R + m), (G + m), (B + m), static_cast<double>(hsv.a)};
 	}
 
 	void Color::RGBtoHSV(const Color& color, float& H, float& S, float& V)
@@ -141,7 +141,7 @@ namespace Hazel
 
 		V = Xmax;
 
-		return { H, S, V , color.a };
+		return {H, S, V, color.a};
 	}
 
 	void Color::RGBtoHSL(const Color& color, float& H, float& S, float& L)
@@ -197,7 +197,7 @@ namespace Hazel
 
 		L = (Xmax - Xmin) / 2.0;
 
-		return { H, S, L , color.a };
+		return {H, S, L, color.a};
 	}
 
 	Color Color::RGBtoGrayscale(const Color& color)
@@ -205,7 +205,7 @@ namespace Hazel
 		HZ_PROFILE_FUNCTION();
 
 		auto grayscaleValue = color.GetGrayscaleValue();
-		return  { grayscaleValue, grayscaleValue, grayscaleValue, color.a };
+		return {grayscaleValue, grayscaleValue, grayscaleValue, color.a};
 	}
 
 	Color Color::HEXtoRGB(const std::string& hexValue)
@@ -246,14 +246,14 @@ namespace Hazel
 		stream << std::hex << hexValue.substr(4, 2);
 		stream >> blue;
 
-		return { red, green, blue };
+		return {red, green, blue};
 	}
 
 	Color Color::Random()
 	{
 		HZ_PROFILE_FUNCTION();
 
-		return { Random::Float(), Random::Float(), Random::Float(), Random::Float() };
+		return {Random::Float(), Random::Float(), Random::Float(), Random::Float()};
 	}
 
 	Color Color::Lerp(const Color& colorA, const Color& colorB, float lerpValue)
@@ -276,28 +276,23 @@ namespace Hazel
 		auto green = (colorB.g * lerpValue) + (colorA.g * (1.0f - lerpValue));
 		auto blue = (colorB.b * lerpValue) + (colorA.b * (1.0f - lerpValue));
 		auto alpha = (colorB.a * lerpValue) + (colorA.a * (1.0f - lerpValue));
-		return { red, green, blue, alpha };
+		return {red, green, blue, alpha};
 	}
 
 	Color::Color(float value)
-		:Color(value, value, value)
-	{}
+		: Color(value, value, value) {}
 
 	Color::Color(glm::vec4 value)
-		: Color(value.r, value.g, value.b, value.a)
-	{}
+		: Color(value.r, value.g, value.b, value.a) {}
 
 	Color::Color(int red, int green, int blue, float alpha)
-		: Color(static_cast<float>(red) / 255.0f, static_cast<float>(green) / 255.0f, static_cast<float>(blue) / 255.0f, alpha)
-	{}
+		: Color(static_cast<float>(red) / 255.0f, static_cast<float>(green) / 255.0f, static_cast<float>(blue) / 255.0f, alpha) {}
 
 	Color::Color(float red, float green, float blue, float alpha)
-		: r(red), g(green), b(blue), a(alpha)
-	{}
+		: r(red), g(green), b(blue), a(alpha) {}
 
 	Color::Color(double red, double green, double blue, double alpha)
-		: Color(static_cast<float>(red), static_cast<float>(green), static_cast<float>(blue), static_cast<float>(alpha))
-	{}
+		: Color(static_cast<float>(red), static_cast<float>(green), static_cast<float>(blue), static_cast<float>(alpha)) {}
 
 	float Color::GetGrayscaleValue() const
 	{
@@ -324,7 +319,7 @@ namespace Hazel
 
 	Color::operator glm::vec4() const
 	{
-		return { r,g,b,a };
+		return {r, g, b, a};
 	}
 
 	float& Color::operator[](int index)
@@ -369,35 +364,35 @@ namespace Hazel
 		auto green = glm::clamp(this->g + other.g, 0.0f, 1.0f);
 		auto blue = glm::clamp(this->b + other.b, 0.0f, 1.0f);
 		auto alpha = glm::clamp(this->a + other.a, 0.0f, 1.0f);
-		return { red, green, blue, alpha };
+		return {red, green, blue, alpha};
 	}
 
-	Color Color::operator-(const Color& other)const
+	Color Color::operator-(const Color& other) const
 	{
 		auto red = glm::clamp(this->r - other.r, 0.0f, 1.0f);
 		auto green = glm::clamp(this->g - other.g, 0.0f, 1.0f);
 		auto blue = glm::clamp(this->b - other.b, 0.0f, 1.0f);
 		auto alpha = glm::clamp(this->a - other.a, 0.0f, 1.0f);
-		return { red, green, blue, alpha };
+		return {red, green, blue, alpha};
 	}
 
-	Color Color::operator*(const Color& other)const
+	Color Color::operator*(const Color& other) const
 	{
 		auto red = this->r * other.r;
 		auto green = this->g * other.g;
 		auto blue = this->b * other.b;
 		auto alpha = this->a * other.a;
-		return { red, green, blue, alpha };
+		return {red, green, blue, alpha};
 	}
 
-	Color Color::operator/(float value)const
+	Color Color::operator/(float value) const
 	{
 		HZ_CORE_ASSERT(!HMath::IsNearlyZero(value), "Cannot divive by Zero!");
 		auto red = this->r / value;
 		auto green = this->g / value;
 		auto blue = this->b / value;
 		auto alpha = this->a / value;
-		return { red, green, blue, alpha };
+		return {red, green, blue, alpha};
 	}
 
 	Color& Color::operator+=(const Color& other)

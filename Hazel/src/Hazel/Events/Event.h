@@ -72,8 +72,7 @@ namespace Hazel
 		virtual ~EventDispatcher() = default;
 
 		EventDispatcher(Event& event)
-			: _event(event)
-		{}
+			: _event(event) {}
 
 		template<typename T>
 		bool Dispatch(EventFn<T> func)

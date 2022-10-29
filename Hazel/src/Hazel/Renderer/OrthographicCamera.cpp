@@ -6,7 +6,7 @@
 namespace Hazel
 {
 	OrthographicCamera::OrthographicCamera(float left, float right, float bottom, float top, glm::vec3 position, float rotation)
-		:_projectionMatrix(glm::ortho(left, right, bottom, top, -1.0f, 1.0f)), _position(position), _rotation(rotation)
+		: _projectionMatrix(glm::ortho(left, right, bottom, top, -1.0f, 1.0f)), _position(position), _rotation(rotation)
 	{
 		HZ_PROFILE_FUNCTION();
 

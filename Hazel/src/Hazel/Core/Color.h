@@ -211,7 +211,7 @@ namespace Hazel
 }
 
 // Formating  color for log
-template <>
+template<>
 struct fmt::formatter<Hazel::Color>
 {
 	// Presentation format: 'f' - fixed
@@ -231,7 +231,7 @@ struct fmt::formatter<Hazel::Color>
 		return it;
 	}
 
-	template <typename FormatContext>
+	template<typename FormatContext>
 	auto format(const Hazel::Color& color, FormatContext& ctx)
 	{
 		return format_to(ctx.out(), "[0x{}](r:{:.3f}, g:{:.3f}, b:{:.3f}, a:{:.3f})", color.GetHexValue(), color.r, color.g, color.b, color.a);

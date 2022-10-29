@@ -34,3 +34,6 @@ Hazel.sln.DotSettings.user
 # Compiled assembly from C# project.
 Hazelnut/Resources/Scripts/Hazel-ScriptCore.dll
 Hazelnut/Resources/Scripts/Hazel-ScriptCore.pdb
+
+# JetBrains
+.idea/

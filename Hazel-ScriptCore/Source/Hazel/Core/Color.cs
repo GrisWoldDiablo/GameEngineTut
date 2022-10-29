@@ -490,10 +490,10 @@ namespace Hazel
 			// TODO use own Random Class.
 			var rand = new Random();
 			return new Color(
-				(float)rand.NextDouble(),   // red
-				(float)rand.NextDouble(),   // green
-				(float)rand.NextDouble(),   // blue
-				(float)rand.NextDouble());  // alpha
+				(float)rand.NextDouble(),  // red
+				(float)rand.NextDouble(),  // green
+				(float)rand.NextDouble(),  // blue
+				(float)rand.NextDouble()); // alpha
 		}
 
 		/// <summary>

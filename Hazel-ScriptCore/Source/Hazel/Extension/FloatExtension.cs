@@ -1,5 +1,4 @@
-﻿
-namespace Hazel
+﻿namespace Hazel
 {
 	public static class FloatExtention
 	{

@@ -9,7 +9,7 @@
 namespace Hazel
 {
 	ScriptClass::ScriptClass(const std::string& classNamespace, const std::string& className, bool isCore)
-		:_classNamespace(classNamespace), _className(className)
+		: _classNamespace(classNamespace), _className(className)
 	{
 		_monoClass = mono_class_from_name(isCore ? ScriptEngine::GetCoreAssemblyImage() : ScriptEngine::GetAppAssemblyImage(), classNamespace.c_str(), className.c_str());
 		_classFullName = fmt::format("{}.{}", _classNamespace, _className);

@@ -50,7 +50,7 @@ namespace Hazel
 			_outputStream.open(filePath);
 			if (_outputStream.is_open())
 			{
-				_currentSession = new InstrumentationSession{ name };
+				_currentSession = new InstrumentationSession{name};
 				WriteHeader();
 			}
 			else
@@ -137,8 +137,7 @@ namespace Hazel
 
 	private:
 		Instrumentor()
-			:_currentSession(nullptr)
-		{}
+			: _currentSession(nullptr) {}
 
 		~Instrumentor()
 		{
@@ -186,7 +185,7 @@ namespace Hazel
 	{
 	public:
 		InstrumentationTimer(const char* name, const char* category, bool isSnapshot = false)
-			:_name(name), _category(category), _isSnapshot(isSnapshot), _isStopped(false)
+			: _name(name), _category(category), _isSnapshot(isSnapshot), _isStopped(false)
 		{
 			_profileResult.Name = name;
 			_profileResult.Category = category;
@@ -205,7 +204,7 @@ namespace Hazel
 		void Start()
 		{
 			_startTimepoint = std::chrono::steady_clock::now();
-			_profileResult.Start = FloatingPointMicroseconds{ _startTimepoint.time_since_epoch() };
+			_profileResult.Start = FloatingPointMicroseconds{_startTimepoint.time_since_epoch()};
 
 			if (_isSnapshot)
 			{
@@ -216,7 +215,7 @@ namespace Hazel
 		void Stop()
 		{
 			auto endTimepoint = std::chrono::steady_clock::now();
-			_profileResult.End = FloatingPointMicroseconds{ endTimepoint.time_since_epoch() };
+			_profileResult.End = FloatingPointMicroseconds{endTimepoint.time_since_epoch()};
 
 			if (_isSnapshot)
 			{

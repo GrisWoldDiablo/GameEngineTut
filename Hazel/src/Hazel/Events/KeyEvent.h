@@ -13,8 +13,7 @@ namespace Hazel
 
 	protected:
 		KeyEvent(const KeyCode keyCode)
-			: _keyCode(keyCode)
-		{}
+			: _keyCode(keyCode) {}
 
 		KeyCode _keyCode;
 	};
@@ -23,8 +22,7 @@ namespace Hazel
 	{
 	public:
 		KeyPressedEvent(const KeyCode keyCode)
-			: KeyEvent(keyCode)
-		{}
+			: KeyEvent(keyCode) {}
 
 		std::string ToString() const override
 		{
@@ -38,8 +36,7 @@ namespace Hazel
 	{
 	public:
 		KeyUpEvent(const KeyCode keyCode)
-			: KeyEvent(keyCode)
-		{}
+			: KeyEvent(keyCode) {}
 
 		std::string ToString() const override
 		{
@@ -53,8 +50,7 @@ namespace Hazel
 	{
 	public:
 		KeyTypedEvent(const KeyCode keyCode)
-			: KeyEvent(keyCode)
-		{}
+			: KeyEvent(keyCode) {}
 
 		std::string ToString() const override
 		{

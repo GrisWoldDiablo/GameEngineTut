@@ -200,6 +200,5 @@ namespace Hazel
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern static void AudioSourceComponent_SetIsVisibleInGame(UUID id, bool isVisibleInGame);
 		#endregion
-
 	}
 }

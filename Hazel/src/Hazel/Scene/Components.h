@@ -26,7 +26,7 @@ namespace Hazel
 		UUID ID;
 
 		IDComponent() = default;
-		IDComponent(const UUID uuid) :ID(uuid) {}
+		IDComponent(const UUID uuid) : ID(uuid) {}
 		IDComponent(const IDComponent&) = default;
 	};
 
@@ -53,9 +53,9 @@ namespace Hazel
 
 	struct TransformComponent
 	{
-		glm::vec3 Position{ 0.0f, 0.0f, 0.0f };
-		glm::vec3 Rotation{ 0.0f, 0.0f, 0.0f };
-		glm::vec3 Scale{ 1.0f, 1.0f, 1.0f };
+		glm::vec3 Position{0.0f, 0.0f, 0.0f};
+		glm::vec3 Rotation{0.0f, 0.0f, 0.0f};
+		glm::vec3 Scale{1.0f, 1.0f, 1.0f};
 
 		TransformComponent() = default;
 		TransformComponent(const TransformComponent&) = default;
@@ -78,8 +78,8 @@ namespace Hazel
 	struct SpriteRendererComponent
 	{
 		Ref<Texture2D> Texture = nullptr;
-		glm::vec2 Tiling{ 1.0f, 1.0f };
-		Color Color{ Color::White };
+		glm::vec2 Tiling{1.0f, 1.0f};
+		Color Color{Color::White};
 
 		SpriteRendererComponent() = default;
 		SpriteRendererComponent(const SpriteRendererComponent&) = default;
@@ -87,7 +87,7 @@ namespace Hazel
 
 	struct CircleRendererComponent
 	{
-		Color Color{ Color::White };
+		Color Color{Color::White};
 		float Thickness = 1.0f;
 		float Fade = 0.005f;
 
@@ -127,7 +127,11 @@ namespace Hazel
 		void Bind()
 		{
 			InstantiateScript = []() { return static_cast<ScriptableEntity*>(new T()); };
-			DestroyScript = [](NativeScriptComponent* nsc) { delete nsc->Instance; nsc->Instance = nullptr; };
+			DestroyScript = [](NativeScriptComponent* nsc)
+			{
+				delete nsc->Instance;
+				nsc->Instance = nullptr;
+			};
 		}
 	};
 
@@ -157,8 +161,8 @@ namespace Hazel
 
 	struct BoxCollider2DComponent
 	{
-		glm::vec2 Offset{ 0.0f, 0.0f };
-		glm::vec2 Size{ 0.5f, 0.5f };
+		glm::vec2 Offset{0.0f, 0.0f};
+		glm::vec2 Size{0.5f, 0.5f};
 		float Rotation = 0.0f;
 
 		// TODO move into physics material
@@ -176,7 +180,7 @@ namespace Hazel
 
 	struct CircleCollider2DComponent
 	{
-		glm::vec2 Offset{ 0.0f, 0.0f };
+		glm::vec2 Offset{0.0f, 0.0f};
 		float Radius = 0.5f;
 
 		// TODO move into physics material
@@ -216,9 +220,9 @@ namespace Hazel
 	struct ComponentGroup {};
 
 	using AllComponents =
-		ComponentGroup<TransformComponent, SpriteRendererComponent,
-		CircleRendererComponent, CameraComponent,
-		ScriptComponent, NativeScriptComponent,
-		Rigidbody2DComponent, BoxCollider2DComponent, CircleCollider2DComponent,
-		AudioSourceComponent, AudioListenerComponent>;
+	ComponentGroup<TransformComponent, SpriteRendererComponent,
+					CircleRendererComponent, CameraComponent,
+					ScriptComponent, NativeScriptComponent,
+					Rigidbody2DComponent, BoxCollider2DComponent, CircleCollider2DComponent,
+					AudioSourceComponent, AudioListenerComponent>;
 }

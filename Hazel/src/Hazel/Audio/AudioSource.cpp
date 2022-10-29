@@ -16,8 +16,7 @@ namespace Hazel
 	}
 
 	AudioSource::AudioSource(uint32_t alBuffer, const std::filesystem::path& path, float length, AudioFileFormat fileFormat)
-		: _alBuffer(alBuffer), _path(path), _length(length), _fileFormat(fileFormat)
-	{}
+		: _alBuffer(alBuffer), _path(path), _length(length), _fileFormat(fileFormat) {}
 
 	AudioSource::~AudioSource()
 	{
@@ -119,6 +118,6 @@ namespace Hazel
 		_pitch = 1.0f;
 		_is3D = false;
 		_isLoop = false;
-		_position = { 0.0f, 0.0f, 0.0f };
+		_position = {0.0f, 0.0f, 0.0f};
 	}
 }

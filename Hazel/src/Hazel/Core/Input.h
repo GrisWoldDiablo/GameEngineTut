@@ -52,7 +52,7 @@ namespace Hazel
 
 	private:
 		Status& GetKeyStatus(KeyCode keyCode) { return _keysStatus[GetKeyIndex(keyCode)]; }
-		Status& GetMouseStatus(MouseCode mouseCode){ return _buttonsStatus[(uint16_t)mouseCode]; }
+		Status& GetMouseStatus(MouseCode mouseCode) { return _buttonsStatus[(uint16_t)mouseCode]; }
 
 		void UpdateDownStatus();
 		void UpdateUpStatus();

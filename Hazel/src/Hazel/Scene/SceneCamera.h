@@ -21,24 +21,56 @@ namespace Hazel
 		void SetViewportSize(uint32_t width, uint32_t height);
 
 		float GetPerspectiveVerticalFOV() const { return _perspectiveFOV; }
-		void  SetPerspectiveVerticalFOV(float verticalFOV) { _perspectiveFOV = verticalFOV; RecalculateProjection(); }
+		void SetPerspectiveVerticalFOV(float verticalFOV)
+		{
+			_perspectiveFOV = verticalFOV;
+			RecalculateProjection();
+		}
 		float GetPerspectiveNearClip() const { return _perspectiveNear; }
-		void  SetPerspectiveNearClip(float nearClip) { _perspectiveNear = nearClip; RecalculateProjection(); }
+		void SetPerspectiveNearClip(float nearClip)
+		{
+			_perspectiveNear = nearClip;
+			RecalculateProjection();
+		}
 		float GetPerspectiveFarClip() const { return _perspectiveFar; }
-		void  SetPerspectiveFarClip(float farClip) { _perspectiveFar = farClip; RecalculateProjection(); }
+		void SetPerspectiveFarClip(float farClip)
+		{
+			_perspectiveFar = farClip;
+			RecalculateProjection();
+		}
 
 		float GetOrthographicSize() const { return _orthographicSize; }
-		void SetOrthographicSize(float size) { _orthographicSize = size; RecalculateProjection(); }
+		void SetOrthographicSize(float size)
+		{
+			_orthographicSize = size;
+			RecalculateProjection();
+		}
 		float GetOrthographicNearClip() const { return _orthographicNear; }
-		void SetOrthographicNearClip(float nearClip) { _orthographicNear = nearClip; RecalculateProjection(); }
+		void SetOrthographicNearClip(float nearClip)
+		{
+			_orthographicNear = nearClip;
+			RecalculateProjection();
+		}
 		float GetOrthographicFarClip() const { return _orthographicFar; }
-		void SetOrthographicFarClip(float farClip) { _orthographicFar = farClip; RecalculateProjection(); }
+		void SetOrthographicFarClip(float farClip)
+		{
+			_orthographicFar = farClip;
+			RecalculateProjection();
+		}
 
 		float GetAspectRatio() const { return _aspectRatio; }
-		void SetAspectRatio(float aspectRatio) { _aspectRatio = aspectRatio; RecalculateProjection(); }
+		void SetAspectRatio(float aspectRatio)
+		{
+			_aspectRatio = aspectRatio;
+			RecalculateProjection();
+		}
 
 		ProjectionType GetProjectionType() const { return _projectionType; }
-		void SetProjectionType(ProjectionType type) { _projectionType = type; RecalculateProjection(); }
+		void SetProjectionType(ProjectionType type)
+		{
+			_projectionType = type;
+			RecalculateProjection();
+		}
 
 	private:
 		void RecalculateProjection();

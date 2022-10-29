@@ -191,10 +191,10 @@ namespace Hazel
 		sData.LineShader = Shader::Create(SHADER_PATH_LINE);
 #endif // ASYNC
 
-		sData.QuadVertexPositions[0] = { -0.5f,-0.5f, 0.0f, 1.0f };
-		sData.QuadVertexPositions[1] = { 0.5f,-0.5f, 0.0f, 1.0f };
-		sData.QuadVertexPositions[2] = { 0.5f, 0.5f, 0.0f, 1.0f };
-		sData.QuadVertexPositions[3] = { -0.5f, 0.5f, 0.0f, 1.0f };
+		sData.QuadVertexPositions[0] = {-0.5f, -0.5f, 0.0f, 1.0f};
+		sData.QuadVertexPositions[1] = {0.5f, -0.5f, 0.0f, 1.0f};
+		sData.QuadVertexPositions[2] = {0.5f, 0.5f, 0.0f, 1.0f};
+		sData.QuadVertexPositions[3] = {-0.5f, 0.5f, 0.0f, 1.0f};
 
 		sData.QuadTextureCoordinates = new glm::vec2[4];
 
@@ -344,7 +344,7 @@ namespace Hazel
 #pragma region Primitive
 	void Renderer2D::DrawQuad(const glm::vec2& position, const glm::vec2& size, const Color& color)
 	{
-		DrawQuad({ position.x, position.y, 0.0f }, size, color);
+		DrawQuad({position.x, position.y, 0.0f}, size, color);
 	}
 
 	void Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec2& size, const Color& color)
@@ -352,14 +352,14 @@ namespace Hazel
 		HZ_PROFILE_FUNCTION();
 
 		glm::mat4 transform = glm::translate(_sIdentityMatrix, position)
-			* glm::scale(_sIdentityMatrix, { size.x,size.y,1.0f });
+			* glm::scale(_sIdentityMatrix, {size.x, size.y, 1.0f});
 
 		DrawQuad(transform, color);
 	}
 
 	void Renderer2D::DrawRotatedQuad(const glm::vec2& position, const glm::vec2& size, float rotation, const Color& color)
 	{
-		DrawRotatedQuad({ position.x, position.y, 0.0f }, size, rotation, color);
+		DrawRotatedQuad({position.x, position.y, 0.0f}, size, rotation, color);
 	}
 
 	void Renderer2D::DrawRotatedQuad(const glm::vec3& position, const glm::vec2& size, float rotation, const Color& color)
@@ -367,8 +367,8 @@ namespace Hazel
 		HZ_PROFILE_FUNCTION();
 
 		glm::mat4 transform = glm::translate(_sIdentityMatrix, position)
-			* glm::rotate(_sIdentityMatrix, glm::radians(rotation), { 0.0f,0.0f,1.0f })
-			* glm::scale(_sIdentityMatrix, { size.x,size.y,1.0f });
+			* glm::rotate(_sIdentityMatrix, glm::radians(rotation), {0.0f, 0.0f, 1.0f})
+			* glm::scale(_sIdentityMatrix, {size.x, size.y, 1.0f});
 
 		DrawQuad(transform, color);
 	}
@@ -384,7 +384,7 @@ namespace Hazel
 #pragma region Texture
 	void Renderer2D::DrawQuad(const glm::vec2& position, const glm::vec2& size, const Ref<Texture2D>& texture, const glm::vec2& tilingFactor, const Color& tintColor, int entityID)
 	{
-		DrawQuad({ position.x, position.y, 0.0f }, size, texture, tilingFactor, tintColor, entityID);
+		DrawQuad({position.x, position.y, 0.0f}, size, texture, tilingFactor, tintColor, entityID);
 	}
 
 	void Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec2& size, const Ref<Texture2D>& texture, const glm::vec2& tilingFactor, const Color& tintColor, int entityID)
@@ -392,14 +392,14 @@ namespace Hazel
 		HZ_PROFILE_FUNCTION();
 
 		glm::mat4 transform = glm::translate(_sIdentityMatrix, position)
-			* glm::scale(_sIdentityMatrix, { size.x,size.y,1.0f });
+			* glm::scale(_sIdentityMatrix, {size.x, size.y, 1.0f});
 
 		DrawQuad(transform, texture, tilingFactor, tintColor, entityID);
 	}
 
 	void Renderer2D::DrawRotatedQuad(const glm::vec2& position, const glm::vec2& size, float rotation, const Ref<Texture2D>& texture, const glm::vec2& tilingFactor, const Color& tintColor, int entityID)
 	{
-		DrawRotatedQuad({ position.x, position.y, 0.0f }, size, rotation, texture, tilingFactor, tintColor, entityID);
+		DrawRotatedQuad({position.x, position.y, 0.0f}, size, rotation, texture, tilingFactor, tintColor, entityID);
 	}
 
 	void Renderer2D::DrawRotatedQuad(const glm::vec3& position, const glm::vec2& size, float rotation, const Ref<Texture2D>& texture, const glm::vec2& tilingFactor, const Color& tintColor, int entityID)
@@ -407,8 +407,8 @@ namespace Hazel
 		HZ_PROFILE_FUNCTION();
 
 		glm::mat4 transform = glm::translate(_sIdentityMatrix, position)
-			* glm::rotate(_sIdentityMatrix, glm::radians(rotation), { 0.0f,0.0f,1.0f })
-			* glm::scale(_sIdentityMatrix, { size.x,size.y,1.0f });
+			* glm::rotate(_sIdentityMatrix, glm::radians(rotation), {0.0f, 0.0f, 1.0f})
+			* glm::scale(_sIdentityMatrix, {size.x, size.y, 1.0f});
 
 		DrawQuad(transform, texture, tilingFactor, tintColor, entityID);
 	}
@@ -448,10 +448,10 @@ namespace Hazel
 			sData.TextureSlotIndex++;
 		}
 
-		sData.QuadTextureCoordinates[0] = { 0.0f, 0.0f };
-		sData.QuadTextureCoordinates[1] = { 1.0f, 0.0f };
-		sData.QuadTextureCoordinates[2] = { 1.0f, 1.0f };
-		sData.QuadTextureCoordinates[3] = { 0.0f, 1.0f };
+		sData.QuadTextureCoordinates[0] = {0.0f, 0.0f};
+		sData.QuadTextureCoordinates[1] = {1.0f, 0.0f};
+		sData.QuadTextureCoordinates[2] = {1.0f, 1.0f};
+		sData.QuadTextureCoordinates[3] = {0.0f, 1.0f};
 
 		UpdateQuadData(transform, tintColor, entityID, tilingFactor, textureIndex);
 	}
@@ -460,7 +460,7 @@ namespace Hazel
 #pragma region SubTexture
 	void Renderer2D::DrawQuad(const glm::vec2& position, const glm::vec2& size, const Ref<SubTexture2D>& subTexture, const glm::vec2& tilingFactor, const Color& tintColor)
 	{
-		DrawQuad({ position.x, position.y, 0.0f }, size, subTexture, tilingFactor, tintColor);
+		DrawQuad({position.x, position.y, 0.0f}, size, subTexture, tilingFactor, tintColor);
 	}
 
 	void Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec2& size, const Ref<SubTexture2D>& subTexture, const glm::vec2& tilingFactor, const Color& tintColor)
@@ -468,14 +468,14 @@ namespace Hazel
 		HZ_PROFILE_FUNCTION();
 
 		glm::mat4 transform = glm::translate(_sIdentityMatrix, position)
-			* glm::scale(_sIdentityMatrix, { size.x,size.y,1.0f });
+			* glm::scale(_sIdentityMatrix, {size.x, size.y, 1.0f});
 
 		DrawQuad(transform, subTexture, tilingFactor, tintColor);
 	}
 
 	void Renderer2D::DrawRotatedQuad(const glm::vec2& position, const glm::vec2& size, float rotation, const Ref<SubTexture2D>& subTexture, const glm::vec2& tilingFactor, const Color& tintColor)
 	{
-		DrawRotatedQuad({ position.x, position.y, 0.0f }, size, rotation, subTexture, tilingFactor, tintColor);
+		DrawRotatedQuad({position.x, position.y, 0.0f}, size, rotation, subTexture, tilingFactor, tintColor);
 	}
 
 	void Renderer2D::DrawRotatedQuad(const glm::vec3& position, const glm::vec2& size, float rotation, const Ref<SubTexture2D>& subTexture, const glm::vec2& tilingFactor, const Color& tintColor)
@@ -483,8 +483,8 @@ namespace Hazel
 		HZ_PROFILE_FUNCTION();
 
 		glm::mat4 transform = glm::translate(_sIdentityMatrix, position)
-			* glm::rotate(_sIdentityMatrix, glm::radians(rotation), { 0.0f,0.0f,1.0f })
-			* glm::scale(_sIdentityMatrix, { size.x,size.y,1.0f });
+			* glm::rotate(_sIdentityMatrix, glm::radians(rotation), {0.0f, 0.0f, 1.0f})
+			* glm::scale(_sIdentityMatrix, {size.x, size.y, 1.0f});
 
 		DrawQuad(transform, subTexture, tilingFactor, tintColor);
 	}
@@ -732,7 +732,7 @@ namespace Hazel
 		sData.CircleIndexCount += 6;
 		sData.Stats.QuadCount++;
 	}
-	
+
 	void Renderer2D::DrawInvalidTexture(const glm::mat4& transform)
 	{
 		DrawQuad(transform, Color::Pink);

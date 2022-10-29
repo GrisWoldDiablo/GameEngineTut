@@ -29,7 +29,7 @@ namespace Hazel
 		}
 
 		_rootEntt = _registry.create();
-		Entity rootEntity = { _rootEntt , this };
+		Entity rootEntity = {_rootEntt, this};
 		_registry.emplace<Root>(_rootEntt);
 
 		auto uuid = UUID(69420);
@@ -47,7 +47,7 @@ namespace Hazel
 		_entityMap[uuid] = rootEntity;
 	}
 
-	Scene::Scene(const std::string& name) :Scene()
+	Scene::Scene(const std::string& name) : Scene()
 	{
 		_name = name;
 	}
@@ -135,7 +135,7 @@ namespace Hazel
 
 	Entity Scene::CreateEntityWithUUID(UUID uuid, const std::string& name, int tag, int layer)
 	{
-		Entity entity = { _registry.create(), this };
+		Entity entity = {_registry.create(), this};
 
 		entity.AddComponent<IDComponent>(uuid);
 
@@ -213,7 +213,7 @@ namespace Hazel
 			{
 				if (ScriptEngine::EntityClassExist(component.ClassName))
 				{
-					Entity entity = { enttID, this };
+					Entity entity = {enttID, this};
 					ScriptEngine::OnCreateEntity(entity);
 				}
 			}
@@ -251,7 +251,7 @@ namespace Hazel
 			{
 				if (ScriptEngine::EntityClassExist(component.ClassName))
 				{
-					Entity entity = { enttID, this };
+					Entity entity = {enttID, this};
 					ScriptEngine::OnUpdateEntity(entity, timestep);
 				}
 			}
@@ -264,7 +264,7 @@ namespace Hazel
 				if (instance == nullptr)
 				{
 					instance = component.InstantiateScript();
-					instance->_entity = { enttID, this };
+					instance->_entity = {enttID, this};
 					instance->OnCreate();
 				}
 
@@ -285,10 +285,10 @@ namespace Hazel
 				// Retrieve transform from Box2D
 				for (auto&& [enttID, component, transform] : GetEntitiesViewWith<Rigidbody2DComponent, TransformComponent>().each())
 				{
-					Entity entity = { enttID, this };
+					Entity entity = {enttID, this};
 
 					if (entity.HasComponent<BoxCollider2DComponent>()
-					  || entity.HasComponent<CircleCollider2DComponent>())
+						|| entity.HasComponent<CircleCollider2DComponent>())
 					{
 						auto* body = static_cast<b2Body*>(component.RuntimeBody);
 						const auto& position = body->GetPosition();
@@ -343,10 +343,10 @@ namespace Hazel
 				// Retrieve transform from Box2D
 				for (auto&& [enttID, component, transform] : GetEntitiesViewWith<Rigidbody2DComponent, TransformComponent>().each())
 				{
-					Entity entity = { enttID, this };
+					Entity entity = {enttID, this};
 
 					if (entity.HasComponent<BoxCollider2DComponent>()
-					  || entity.HasComponent<CircleCollider2DComponent>())
+						|| entity.HasComponent<CircleCollider2DComponent>())
 					{
 						auto* body = static_cast<b2Body*>(component.RuntimeBody);
 						const auto& position = body->GetPosition();
@@ -576,7 +576,7 @@ namespace Hazel
 		// Maybe assert?
 		if (_entityMap.contains(uuid))
 		{
-			return { _entityMap.at(uuid), this };
+			return {_entityMap.at(uuid), this};
 		}
 
 		return {};
@@ -588,7 +588,7 @@ namespace Hazel
 		{
 			if (component.Name == name)
 			{
-				return { enttID, this };
+				return {enttID, this};
 			}
 		}
 
@@ -602,7 +602,7 @@ namespace Hazel
 		{
 			if (component.IsPrimary)
 			{
-				return { enttID, this };
+				return {enttID, this};
 			}
 		}
 
@@ -611,15 +611,15 @@ namespace Hazel
 
 	Entity Scene::GetRootEntity()
 	{
-		return { _rootEntt, this };
+		return {_rootEntt, this};
 	}
 
 	void Scene::OnPhysic2DStart()
 	{
-		_physicsWorld = new b2World({ 0.0f, -9.8f });
+		_physicsWorld = new b2World({0.0f, -9.8f});
 		GetEntitiesViewWith<Rigidbody2DComponent>().each([=](const auto enttID, Rigidbody2DComponent& rb2d)
 		{
-			Entity entity = { enttID, this };
+			Entity entity = {enttID, this};
 			auto& transform = entity.Transform();
 
 			b2BodyDef bodyDef;
@@ -651,7 +651,7 @@ namespace Hazel
 				(
 					bc2d.Size.x * transform.Scale.x,
 					bc2d.Size.y * transform.Scale.y,
-					{ bc2d.Offset.x, bc2d.Offset.y },
+					{bc2d.Offset.x, bc2d.Offset.y},
 					glm::radians(bc2d.Rotation)
 				);
 
@@ -703,24 +703,19 @@ namespace Hazel
 	}
 
 	template<>
-	void Scene::OnComponentAdded<IDComponent>(Entity entity, IDComponent& component)
-	{}
+	void Scene::OnComponentAdded<IDComponent>(Entity entity, IDComponent& component) {}
 
 	template<>
-	void Scene::OnComponentAdded<BaseComponent>(Entity entity, BaseComponent& component)
-	{}
+	void Scene::OnComponentAdded<BaseComponent>(Entity entity, BaseComponent& component) {}
 
 	template<>
-	void Scene::OnComponentAdded<TransformComponent>(Entity entity, TransformComponent& component)
-	{}
+	void Scene::OnComponentAdded<TransformComponent>(Entity entity, TransformComponent& component) {}
 
 	template<>
-	void Scene::OnComponentAdded<SpriteRendererComponent>(Entity entity, SpriteRendererComponent& component)
-	{}
+	void Scene::OnComponentAdded<SpriteRendererComponent>(Entity entity, SpriteRendererComponent& component) {}
 
 	template<>
-	void Scene::OnComponentAdded<CircleRendererComponent>(Entity entity, CircleRendererComponent& component)
-	{}
+	void Scene::OnComponentAdded<CircleRendererComponent>(Entity entity, CircleRendererComponent& component) {}
 
 	template<>
 	void Scene::OnComponentAdded<CameraComponent>(Entity entity, CameraComponent& component)
@@ -732,24 +727,19 @@ namespace Hazel
 	}
 
 	template<>
-	void Scene::OnComponentAdded<ScriptComponent>(Entity entity, ScriptComponent& component)
-	{}
+	void Scene::OnComponentAdded<ScriptComponent>(Entity entity, ScriptComponent& component) {}
 
 	template<>
-	void Scene::OnComponentAdded<NativeScriptComponent>(Entity entity, NativeScriptComponent& component)
-	{}
+	void Scene::OnComponentAdded<NativeScriptComponent>(Entity entity, NativeScriptComponent& component) {}
 
 	template<>
-	void Scene::OnComponentAdded<Rigidbody2DComponent>(Entity entity, Rigidbody2DComponent& component)
-	{}
+	void Scene::OnComponentAdded<Rigidbody2DComponent>(Entity entity, Rigidbody2DComponent& component) {}
 
 	template<>
-	void Scene::OnComponentAdded<BoxCollider2DComponent>(Entity entity, BoxCollider2DComponent& component)
-	{}
+	void Scene::OnComponentAdded<BoxCollider2DComponent>(Entity entity, BoxCollider2DComponent& component) {}
 
 	template<>
-	void Scene::OnComponentAdded<CircleCollider2DComponent>(Entity entity, CircleCollider2DComponent& component)
-	{}
+	void Scene::OnComponentAdded<CircleCollider2DComponent>(Entity entity, CircleCollider2DComponent& component) {}
 
 	template<>
 	void Scene::OnComponentAdded<AudioSourceComponent>(Entity entity, AudioSourceComponent& component)
@@ -786,48 +776,37 @@ namespace Hazel
 	}
 
 	template<>
-	void Scene::OnComponentRemoved<IDComponent>(Entity entity, IDComponent& component)
-	{}
+	void Scene::OnComponentRemoved<IDComponent>(Entity entity, IDComponent& component) {}
 
 	template<>
-	void Scene::OnComponentRemoved<BaseComponent>(Entity entity, BaseComponent& component)
-	{}
+	void Scene::OnComponentRemoved<BaseComponent>(Entity entity, BaseComponent& component) {}
 
 	template<>
-	void Scene::OnComponentRemoved<TransformComponent>(Entity entity, TransformComponent& component)
-	{}
+	void Scene::OnComponentRemoved<TransformComponent>(Entity entity, TransformComponent& component) {}
 
 	template<>
-	void Scene::OnComponentRemoved<SpriteRendererComponent>(Entity entity, SpriteRendererComponent& component)
-	{}
+	void Scene::OnComponentRemoved<SpriteRendererComponent>(Entity entity, SpriteRendererComponent& component) {}
 
 	template<>
-	void Scene::OnComponentRemoved<CircleRendererComponent>(Entity entity, CircleRendererComponent& component)
-	{}
+	void Scene::OnComponentRemoved<CircleRendererComponent>(Entity entity, CircleRendererComponent& component) {}
 
 	template<>
-	void Scene::OnComponentRemoved<CameraComponent>(Entity entity, CameraComponent& component)
-	{}
+	void Scene::OnComponentRemoved<CameraComponent>(Entity entity, CameraComponent& component) {}
 
 	template<>
-	void Scene::OnComponentRemoved<ScriptComponent>(Entity entity, ScriptComponent& component)
-	{}
+	void Scene::OnComponentRemoved<ScriptComponent>(Entity entity, ScriptComponent& component) {}
 
 	template<>
-	void Scene::OnComponentRemoved<NativeScriptComponent>(Entity entity, NativeScriptComponent& component)
-	{}
+	void Scene::OnComponentRemoved<NativeScriptComponent>(Entity entity, NativeScriptComponent& component) {}
 
 	template<>
-	void Scene::OnComponentRemoved<Rigidbody2DComponent>(Entity entity, Rigidbody2DComponent& component)
-	{}
+	void Scene::OnComponentRemoved<Rigidbody2DComponent>(Entity entity, Rigidbody2DComponent& component) {}
 
 	template<>
-	void Scene::OnComponentRemoved<BoxCollider2DComponent>(Entity entity, BoxCollider2DComponent& component)
-	{}
+	void Scene::OnComponentRemoved<BoxCollider2DComponent>(Entity entity, BoxCollider2DComponent& component) {}
 
 	template<>
-	void Scene::OnComponentRemoved<CircleCollider2DComponent>(Entity entity, CircleCollider2DComponent& component)
-	{}
+	void Scene::OnComponentRemoved<CircleCollider2DComponent>(Entity entity, CircleCollider2DComponent& component) {}
 
 	template<>
 	void Scene::OnComponentRemoved<AudioSourceComponent>(Entity entity, AudioSourceComponent& component)

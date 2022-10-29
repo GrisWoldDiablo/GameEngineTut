@@ -151,12 +151,12 @@ namespace Hazel
 
 	inline YAML::Emitter& operator<<(YAML::Emitter& out, const std::filesystem::path& path)
 	{
-		return  out.Write(path.string());
+		return out.Write(path.string());
 	}
 
 	inline YAML::Emitter& operator<<(YAML::Emitter& out, const ScriptFieldType& type)
 	{
-		return  out.Write(Utils::ScriptFieldTypeToString(type));
+		return out.Write(Utils::ScriptFieldTypeToString(type));
 	}
 
 	class Serializer

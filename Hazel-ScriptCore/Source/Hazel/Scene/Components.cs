@@ -174,7 +174,6 @@
 	{
 		public bool IsVisibleInGame
 		{
-
 			get
 			{
 				InternalCalls.AudioListenerComponent_GetIsVisibleInGame(Entity.Id, out var isVisibleInGame);
@@ -275,7 +274,6 @@
 
 		public bool IsVisibleInGame
 		{
-
 			get
 			{
 				InternalCalls.AudioSourceComponent_GetIsVisibleInGame(Entity.Id, out var isVisibleInGame);

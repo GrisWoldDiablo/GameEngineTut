@@ -56,7 +56,7 @@ namespace Hazel
 
 	// -- IndexBuffer --------------------------
 	OpenGLIndexBuffer::OpenGLIndexBuffer(const uint32_t* indices, uint32_t count)
-		:_count(count)
+		: _count(count)
 	{
 		HZ_PROFILE_FUNCTION();
 

@@ -13,7 +13,7 @@ namespace Hazel
 	Application* Application::_sInstance = nullptr;
 
 	Application::Application(const ApplicationSpecification& specification)
-		:_specification(specification)
+		: _specification(specification)
 	{
 		HZ_PROFILE_FUNCTION();
 
@@ -44,7 +44,7 @@ namespace Hazel
 		Texture2D::ErrorTexture = []
 		{
 			auto errorTexture = Texture2D::Create(1, 1);
-			const uint8_t data[4] = { 255,128,255,255 };
+			const uint8_t data[4] = {255, 128, 255, 255};
 			errorTexture->SetData((void*)data, 4);
 			return errorTexture;
 		}();

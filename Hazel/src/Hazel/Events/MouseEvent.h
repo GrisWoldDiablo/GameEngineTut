@@ -29,7 +29,7 @@ namespace Hazel
 		}
 
 		EVENT_CLASS_TYPE(MouseMoved)
-			EVENT_CLASS_CATEGORY(EventCategoryMouse | EventCategoryInput)
+		EVENT_CLASS_CATEGORY(EventCategoryMouse | EventCategoryInput)
 
 	private:
 		inline static float _sPreviousMouseX;
@@ -45,8 +45,7 @@ namespace Hazel
 	{
 	public:
 		MouseScrolledEvent(const float xOffset, const float yOffset)
-			: _xOffset(xOffset), _yOffset(yOffset)
-		{}
+			: _xOffset(xOffset), _yOffset(yOffset) {}
 
 		float GetXOffset() const { return _xOffset; }
 		float GetYOffset() const { return _yOffset; }
@@ -57,7 +56,7 @@ namespace Hazel
 		}
 
 		EVENT_CLASS_TYPE(MouseScrolled)
-			EVENT_CLASS_CATEGORY(EventCategoryMouse | EventCategoryInput)
+		EVENT_CLASS_CATEGORY(EventCategoryMouse | EventCategoryInput)
 
 	private:
 		float _xOffset;
@@ -73,8 +72,7 @@ namespace Hazel
 
 	protected:
 		MouseButtonEvent(const MouseCode button)
-			:_button(button)
-		{}
+			: _button(button) {}
 
 		MouseCode _button;
 	};
@@ -83,8 +81,7 @@ namespace Hazel
 	{
 	public:
 		MouseButtonPressedEvent(const MouseCode button)
-			: MouseButtonEvent(button)
-		{}
+			: MouseButtonEvent(button) {}
 
 		std::string ToString() const override
 		{
@@ -98,8 +95,7 @@ namespace Hazel
 	{
 	public:
 		MouseButtonUpEvent(const MouseCode button)
-			: MouseButtonEvent(button)
-		{}
+			: MouseButtonEvent(button) {}
 
 		std::string ToString() const override
 		{

@@ -48,7 +48,8 @@ namespace Hazel
 		{
 			_projection = glm::perspective(_perspectiveFOV, _aspectRatio,
 				_perspectiveNear, _perspectiveFar);
-		}	break;
+			break;
+		}
 		case ProjectionType::Orthographic:
 		{
 			float orthoLeft = -_orthographicSize * _aspectRatio * 0.5f;
@@ -58,7 +59,8 @@ namespace Hazel
 
 			_projection = glm::ortho(orthoLeft, orthoRight, orthoBottom, orthoTop,
 				_orthographicNear, _orthographicFar);
-		}	break;
+			break;
+		}
 		}
 	}
 }

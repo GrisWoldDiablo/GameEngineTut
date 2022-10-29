@@ -12,8 +12,7 @@ namespace Hazel
 	static std::string _runtimeSceneData;
 
 	SceneSerializer::SceneSerializer(const Ref<Scene>& scene)
-		: _scene(scene)
-	{}
+		: _scene(scene) {}
 
 	static std::string ProjectionTypeToString(SceneCamera::ProjectionType projectionType)
 	{
@@ -58,12 +57,12 @@ namespace Hazel
 
 	static Rigidbody2DComponent::BodyType Rigidbody2DBodyTypeFromString(const std::string& bodyTypeString)
 	{
-		if (bodyTypeString == "Static") return  Rigidbody2DComponent::BodyType::Static;
-		if (bodyTypeString == "Dynamic") return  Rigidbody2DComponent::BodyType::Dynamic;
-		if (bodyTypeString == "Kinematic") return  Rigidbody2DComponent::BodyType::Kinematic;
+		if (bodyTypeString == "Static") return Rigidbody2DComponent::BodyType::Static;
+		if (bodyTypeString == "Dynamic") return Rigidbody2DComponent::BodyType::Dynamic;
+		if (bodyTypeString == "Kinematic") return Rigidbody2DComponent::BodyType::Kinematic;
 
 		HZ_CORE_ASSERT(false, "Unknown Body Type");
-		return  Rigidbody2DComponent::BodyType::Static;
+		return Rigidbody2DComponent::BodyType::Static;
 	}
 
 	static void SerializeEntity(YAML::Emitter& out, Entity entity)
@@ -441,7 +440,7 @@ namespace Hazel
 
 		for (const auto enttID : _scene->GetEntities())
 		{
-			Entity entity{ enttID, _scene.get() };
+			Entity entity{enttID, _scene.get()};
 
 			if (!entity)
 			{
@@ -713,7 +712,7 @@ namespace Hazel
 						}
 					}
 
-					component.Tiling = GetValue<glm::vec2>(spriteRendererComponent, "Tiling", { 1.0f,1.0f });
+					component.Tiling = GetValue<glm::vec2>(spriteRendererComponent, "Tiling", {1.0f, 1.0f});
 					component.Color = GetValue<glm::vec4>(spriteRendererComponent, "Color", Color::White);
 				}
 #pragma endregion
@@ -742,7 +741,7 @@ namespace Hazel
 				{
 					auto& component = deserializedEntity.AddComponent<BoxCollider2DComponent>();
 					component.Offset = GetValue<glm::vec2>(boxCollider2DComponent, "Offset");
-					component.Size = GetValue<glm::vec2>(boxCollider2DComponent, "Size", { 0.5f, 0.5f });
+					component.Size = GetValue<glm::vec2>(boxCollider2DComponent, "Size", {0.5f, 0.5f});
 					component.Rotation = GetValue<float>(boxCollider2DComponent, "Rotation", 0.0f);
 					component.Density = GetValue<float>(boxCollider2DComponent, "Density", 1.0f);
 					component.Friction = GetValue<float>(boxCollider2DComponent, "Friction", 0.5f);

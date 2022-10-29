@@ -93,7 +93,7 @@ namespace Hazel
 	}
 
 	OpenGLFramebuffer::OpenGLFramebuffer(const FramebufferSpecification& spec)
-		:_specification(spec)
+		: _specification(spec)
 	{
 		for (auto specification : _specification.Attachments.Attachments)
 		{
@@ -178,7 +178,7 @@ namespace Hazel
 		if (_colorAttachments.size() > 1)
 		{
 			HZ_CORE_ASSERT(_colorAttachments.size() <= 4, "Do not support more than 4 color attachments.");
-			GLenum buffers[4] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3 };
+			GLenum buffers[4] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3};
 			glDrawBuffers((GLsizei)_colorAttachments.size(), buffers);
 		}
 		else if (_colorAttachments.empty())

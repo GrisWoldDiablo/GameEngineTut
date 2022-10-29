@@ -74,7 +74,7 @@ namespace Hazel
 
 		virtual std::string GetClassFilePath() override
 		{
-			return { __FILE__ };
+			return {__FILE__};
 		}
 	};
 }

@@ -7,7 +7,6 @@
 
 namespace Hazel
 {
-
 	struct OrthographicCameraBounds
 	{
 		float Left;
@@ -66,7 +65,7 @@ namespace Hazel
 		float _zoomLevelSpeed = 0.25f;
 		float _zoomLevelMinimum = 0.1f;
 
-		glm::vec3 _cameraPosition = { 0.0f,0.0f,0.0f };
+		glm::vec3 _cameraPosition = {0.0f, 0.0f, 0.0f};
 		float _cameraRotation = 0.0f;
 		float _cameraTranslationSpeed = 5.0f;
 		float _cameraRotationSpeed = 180.0f;

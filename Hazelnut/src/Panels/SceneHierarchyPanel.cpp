@@ -26,8 +26,7 @@ namespace Hazel
 			if (ImGui::DragScalar(name.c_str(), ImGuiType, &data, 0.1f))\
 			{															\
 				scriptInstance->SetFieldValue(name, data);				\
-			}															\
-
+			}
 #define DrawScalarField(Type, ImGuiType)								\
 			auto data = scriptField.GetValue<Type>();					\
 			if (ImGui::DragScalar(name.c_str(), ImGuiType, &data, 0.1f))\
@@ -134,7 +133,7 @@ namespace Hazel
 
 			auto contentRegionAvailable = ImGui::GetContentRegionAvail();
 
-			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{ 4,4 });
+			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{4, 4});
 			float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
 			ImGui::Separator();
 			bool isTreeOpened = ImGui::TreeNodeEx((void*)typeid(T).hash_code(), treeNodeFlags, name.c_str());
@@ -145,7 +144,7 @@ namespace Hazel
 			if (typeid(T) != typeid(TransformComponent))
 			{
 				ImGui::SameLine(contentRegionAvailable.x - lineHeight * 0.5f);
-				if (ImGui::Button("+", ImVec2{ lineHeight, lineHeight }))
+				if (ImGui::Button("+", ImVec2{lineHeight, lineHeight}))
 				{
 					ImGui::OpenPopup("ComponentSettings");
 				}
@@ -192,7 +191,7 @@ namespace Hazel
 		auto boldFont = ImGui::GetIO().Fonts->Fonts[0];
 		float lineHeight = boldFont->FontSize + GImGui->Style.FramePadding.y * 2.0f;
 
-		auto buttonSize = ImVec2{ lineHeight + 3.0f, lineHeight };
+		auto buttonSize = ImVec2{lineHeight + 3.0f, lineHeight};
 
 		auto buttonColor = ImVec4(color.r, color.g, color.b, color.a);
 		auto buttonHoveredColor = buttonColor;
@@ -231,23 +230,23 @@ namespace Hazel
 		float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
 
 #pragma region ResetButton
-		hasValueChanged = ResetButton(label, values, resetValue, ImVec2{ columnWidth, lineHeight });
+		hasValueChanged = ResetButton(label, values, resetValue, ImVec2{columnWidth, lineHeight});
 #pragma endregion
 
 		ImGui::NextColumn();
 
 #pragma region FloatField
-		const char* vecLabels[4] = { "X", "Y", "Z", "W" };
+		const char* vecLabels[4] = {"X", "Y", "Z", "W"};
 		const Color vecColors[4] =
 		{
-			{ 0.8f, 0.1f, 0.15f, 1.0f }, // Red
-			{ 0.2f, 0.7f, 0.3f, 1.0f }, // Green
-			{ 0.1f ,0.25f, 0.8f, 1.0f }, // Blue
-			{ 0.666f ,0.745f, 0.098f, 1.0f }, // Yellow
+			{0.8f, 0.1f, 0.15f, 1.0f}, // Red
+			{0.2f, 0.7f, 0.3f, 1.0f}, // Green
+			{0.1f, 0.25f, 0.8f, 1.0f}, // Blue
+			{0.666f, 0.745f, 0.098f, 1.0f}, // Yellow
 		};
 
 		ImGui::PushMultiItemsWidths(valuesSize, ImGui::CalcItemWidth());
-		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 0.0f, 0.0f });
+		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{0.0f, 0.0f});
 
 		for (int i = 0; i < valuesSize; i++)
 		{
@@ -568,12 +567,12 @@ namespace Hazel
 			}
 			ImGui::PopItemWidth();
 
-			const char* tags[] = { "Default" }; // TODO Keep tags list somewhere else
+			const char* tags[] = {"Default"}; // TODO Keep tags list somewhere else
 			ImGui::Combo("##Tag", &entity.Tag(), tags, static_cast<int>(std::size(tags)));
 
 			ImGui::PushItemWidth(-1);
 			ImGui::SameLine();
-			const char* layers[] = { "Default" }; // TODO Keep layers list somewhere else
+			const char* layers[] = {"Default"}; // TODO Keep layers list somewhere else
 			ImGui::Combo("##Layer", &entity.Layer(), layers, static_cast<int>(std::size(layers)));
 			ImGui::PopItemWidth();
 		}
@@ -655,7 +654,7 @@ namespace Hazel
 				return;
 			}
 
-			auto entityDropTarget = []<typename SetFunction>(MonoClass * fieldTypeClass, SetFunction setFunction)
+			auto entityDropTarget = []<typename SetFunction>(MonoClass* fieldTypeClass, SetFunction setFunction)
 			{
 				if (ImGui::BeginDragDropTarget())
 				{
@@ -709,7 +708,7 @@ namespace Hazel
 						case ScriptFieldType::Char:
 						{
 							auto data = scriptInstance->GetFieldValue<uint16_t>(name);
-							char buffer[2] = { static_cast<char>(data) };
+							char buffer[2] = {static_cast<char>(data)};
 							if (ImGui::InputText(name.c_str(), buffer, sizeof(buffer)))
 							{
 								data = static_cast<uint16_t>(static_cast<uint8_t>(*buffer));
@@ -807,7 +806,7 @@ namespace Hazel
 
 								for (const auto enttID : _scene->GetEntities())
 								{
-									Entity entity{ enttID, _scene.get() };
+									Entity entity{enttID, _scene.get()};
 
 									bool isSelected = false;
 									if (isBaseClass)
@@ -897,7 +896,7 @@ namespace Hazel
 						case ScriptFieldType::Char:
 						{
 							auto data = scriptField.GetValue<uint16_t>();
-							char buffer[2] = { static_cast<char>(data) };
+							char buffer[2] = {static_cast<char>(data)};
 							if (ImGui::InputText(name.c_str(), buffer, sizeof(buffer)))
 							{
 								data = static_cast<uint16_t>(static_cast<uint8_t>(*buffer));
@@ -998,7 +997,7 @@ namespace Hazel
 
 								for (const auto enttID : _scene->GetEntities())
 								{
-									Entity entity{ enttID, _scene.get() };
+									Entity entity{enttID, _scene.get()};
 
 									bool isSelected = false;
 									if (isBaseClass)
@@ -1069,7 +1068,7 @@ namespace Hazel
 						case ScriptFieldType::Char:
 						{
 							auto data = field.GetDefaultValue<uint16_t>();
-							char buffer[2] = { static_cast<char>(data) };
+							char buffer[2] = {static_cast<char>(data)};
 							if (ImGui::InputText(name.c_str(), buffer, sizeof(buffer)))
 							{
 								auto& scriptFieldInstance = entityFields[name];
@@ -1169,7 +1168,7 @@ namespace Hazel
 
 								for (const auto enttID : _scene->GetEntities())
 								{
-									Entity entity{ enttID, _scene.get() };
+									Entity entity{enttID, _scene.get()};
 
 									bool isSelected = false;
 									if (isBaseClass)
@@ -1229,7 +1228,7 @@ namespace Hazel
 		{
 			auto& camera = component.Camera;
 			ImGui::Checkbox("Primary", &component.IsPrimary);
-			const char* projectionTypeStrings[] = { "Perspective","Orthographic" };
+			const char* projectionTypeStrings[] = {"Perspective", "Orthographic"};
 			const char* currentProjectionTypeString = projectionTypeStrings[(int)camera.GetProjectionType()];
 			if (ImGui::BeginCombo("Projection", currentProjectionTypeString))
 			{
@@ -1271,8 +1270,8 @@ namespace Hazel
 				{
 					camera.SetPerspectiveFarClip(perspectiveFarClip);
 				}
-
-			}	break;
+			}
+			break;
 			case SceneCamera::ProjectionType::Orthographic:
 			{
 				float orthographicSize = camera.GetOrthographicSize();
@@ -1292,7 +1291,8 @@ namespace Hazel
 				{
 					camera.SetOrthographicFarClip(orthographicFarClip);
 				}
-			}	break;
+			}
+			break;
 			}
 
 			if (ImGui::Checkbox("Fixed Aspect Ratio", &component.IsFixedAspectRatio) && !component.IsFixedAspectRatio)
@@ -1396,7 +1396,7 @@ namespace Hazel
 #pragma region Rigidbody2DComponent
 		DrawComponent<Rigidbody2DComponent>(entity, "Rigidbody 2D", [&](Rigidbody2DComponent& component)
 		{
-			const char* bodyType[] = { "Static","Dynamic","Kinematic" };
+			const char* bodyType[] = {"Static", "Dynamic", "Kinematic"};
 			const char* currentBodyType = bodyType[(int)component.Type];
 			if (ImGui::BeginCombo("Type", currentBodyType))
 			{
@@ -1662,7 +1662,6 @@ namespace Hazel
 			}
 		});
 #pragma endregion
-
 	}
 
 	void SceneHierarchyPanel::UpdateComponents(Entity entity)

@@ -21,7 +21,7 @@ namespace Hazel
 		double xPos, yPos;
 		glfwGetCursorPos(window, &xPos, &yPos);
 
-		return { (float)xPos, (float)yPos };
+		return {(float)xPos, (float)yPos};
 	}
 
 	float Input::GetMouseX()

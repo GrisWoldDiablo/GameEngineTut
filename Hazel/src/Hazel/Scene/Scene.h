@@ -41,7 +41,7 @@ namespace Hazel
 		void DrawCircleRenderComponent(const glm::vec3& cameraPosition);
 		void DrawAudioComponent(const glm::vec3& cameraPosition, bool isRuntime = false);
 
-		void OnViewportResize(uint32_t  width, uint32_t height);
+		void OnViewportResize(uint32_t width, uint32_t height);
 
 		void ReparentEntity(Entity newParent, Entity newChild);
 		bool IsChildOf(Entity parent, Entity child);
@@ -98,7 +98,7 @@ namespace Hazel
 		entt::entity _rootEntt;
 		entt::registry _registry;
 		std::unordered_map<UUID, entt::entity> _entityMap;
-		
+
 		b2World* _physicsWorld = nullptr;
 
 		static Ref<Texture2D> _sAudioSourceIcon;

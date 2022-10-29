@@ -19,7 +19,7 @@ namespace Hazel
 		LINE
 	};
 
-	constexpr const char* sRendererShaderName[] = { "Quad", "Circle", "Line" };
+	constexpr const char* sRendererShaderName[] = {"Quad", "Circle", "Line"};
 
 	constexpr const char* SHADER_PATH_QUAD = "assets/shaders/Renderer2D_Quad.glsl";
 	constexpr const char* SHADER_PATH_CIRCLE = "assets/shaders/Renderer2D_Circle.glsl";

@@ -6,7 +6,7 @@
 namespace Hazel
 {
 	OpenGLTexture2D::OpenGLTexture2D(uint32_t width, uint32_t height)
-		:_width(width), _height(height), _internalFormat(GL_RGBA8), _dataFormat(GL_RGBA)
+		: _width(width), _height(height), _internalFormat(GL_RGBA8), _dataFormat(GL_RGBA)
 	{
 		HZ_PROFILE_FUNCTION();
 
@@ -23,7 +23,7 @@ namespace Hazel
 	}
 
 	OpenGLTexture2D::OpenGLTexture2D(const std::filesystem::path& path)
-		:_path(path)
+		: _path(path)
 	{
 		HZ_PROFILE_FUNCTION();
 
@@ -43,7 +43,7 @@ namespace Hazel
 		{
 			stbi_image_free(data);
 			HZ_CORE_ASSERT(false, "Failed to load image!");
-			uint8_t dataError[4] = { 255,128,255,255 };
+			uint8_t dataError[4] = {255, 128, 255, 255};
 			data = dataError;
 			width = 1;
 			height = 1;

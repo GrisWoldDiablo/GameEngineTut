@@ -96,7 +96,7 @@ namespace Hazel
 	}
 
 	OpenGLShader::OpenGLShader(const std::string& filePath, bool shouldRecompile)
-		:_filePath(filePath)
+		: _filePath(filePath)
 	{
 		HZ_PROFILE_FUNCTION();
 
@@ -131,7 +131,7 @@ namespace Hazel
 	}
 
 	OpenGLShader::OpenGLShader(const std::string& name, const std::string& vertexSrc, const std::string& fragmentSrc)
-		:_name(name)
+		: _name(name)
 	{
 		HZ_PROFILE_FUNCTION();
 

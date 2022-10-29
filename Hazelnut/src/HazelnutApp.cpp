@@ -9,7 +9,7 @@ namespace Hazel
 	{
 	public:
 		Hazelnut(const ApplicationSpecification& spec)
-			:Application(spec)
+			: Application(spec)
 		{
 			HZ_PROFILE_FUNCTION();
 

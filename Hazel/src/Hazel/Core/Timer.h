@@ -9,7 +9,6 @@ namespace Hazel
 	public:
 		Timer()
 		{
-
 			Reset();
 		}
 

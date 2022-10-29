@@ -1,5 +1,4 @@
-﻿
-namespace Hazel
+﻿namespace Hazel
 {
 	public struct Vector3 : System.IEquatable<Vector3>
 	{

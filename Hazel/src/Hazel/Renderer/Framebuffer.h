@@ -22,8 +22,7 @@ namespace Hazel
 	{
 		FramebufferTextureSpecification() = default;
 		FramebufferTextureSpecification(FramebufferTextureFormat format)
-			: TextureFormat(format)
-		{}
+			: TextureFormat(format) {}
 
 		FramebufferTextureFormat TextureFormat = FramebufferTextureFormat::None;
 		// TODO Filtering/wrap
@@ -33,8 +32,7 @@ namespace Hazel
 	{
 		FramebufferAttachmentSpecification() = default;
 		FramebufferAttachmentSpecification(std::initializer_list<FramebufferTextureSpecification> attachments)
-			: Attachments(attachments)
-		{}
+			: Attachments(attachments) {}
 
 		std::vector<FramebufferTextureSpecification> Attachments;
 	};

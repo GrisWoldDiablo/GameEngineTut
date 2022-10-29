@@ -6,8 +6,7 @@ namespace Hazel
 	{
 	public:
 		Timestep(float time = 0.0f)
-			:_time(time)
-		{}
+			: _time(time) {}
 
 		// When casting to float it returns _time
 		operator float() const { return _time; }
@@ -30,7 +29,6 @@ namespace Hazel
 		static float GetTimeElapsed() { return _sInstance->_sTimeElapsed; }
 
 	private:
-
 		static void SetTimestep(Timestep timestep) { _sInstance->_timestep = timestep; }
 		static void SetTimeElapsed(float time) { _sTimeElapsed = time; }
 

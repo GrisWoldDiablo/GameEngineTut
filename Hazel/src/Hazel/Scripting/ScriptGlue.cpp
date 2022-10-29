@@ -724,7 +724,7 @@ namespace Hazel
 
 		component.AudioSource->Rewind();
 	}
-#pragma endregion  
+#pragma endregion
 #pragma endregion
 
 
@@ -851,7 +851,7 @@ namespace Hazel
 		HZ_ADD_INTERNAL_CALL(AudioSourceComponent_Stop);
 		HZ_ADD_INTERNAL_CALL(AudioSourceComponent_Pause);
 		HZ_ADD_INTERNAL_CALL(AudioSourceComponent_Rewind);
-#pragma endregion  
+#pragma endregion
 #pragma endregion
 	}
 }

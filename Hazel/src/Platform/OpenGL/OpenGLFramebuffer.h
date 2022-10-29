@@ -19,7 +19,11 @@ namespace Hazel
 
 		void ClearAttachment(uint32_t attachmentIndex, int value) override;
 
-		uint32_t GetColorAttachmentRenderID(uint32_t index = 0) const override { HZ_CORE_ASSERT(index < _colorAttachments.size(), "Index out of range"); return _colorAttachments[index]; }
+		uint32_t GetColorAttachmentRenderID(uint32_t index = 0) const override
+		{
+			HZ_CORE_ASSERT(index < _colorAttachments.size(), "Index out of range");
+			return _colorAttachments[index];
+		}
 		const FramebufferSpecification& GetSpecification() const override { return _specification; }
 
 	private:

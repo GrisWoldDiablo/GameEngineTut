@@ -107,7 +107,7 @@ namespace Hazel
 				case GLFW_PRESS:
 				{
 					keyStatus = Input::Status::Pressed;
-					
+
 					KeyPressedEvent event(keyCode);
 					data->EventCallback(event);
 					break;

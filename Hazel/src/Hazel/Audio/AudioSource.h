@@ -47,7 +47,7 @@ namespace Hazel
 		float _pitch = 1.0f;
 		bool _is3D = false;
 		bool _isLoop = false;
-		glm::vec3 _position{ 0.0f, 0.0f, 0.0f };
+		glm::vec3 _position{0.0f, 0.0f, 0.0f};
 
 		void ResetFields();
 

@@ -6,18 +6,19 @@ namespace Hazel
 	// Static singleton access
 	Random* Random::_sInstance = nullptr;
 
-	Random::Random(int seed)
-		:_mersenneTwister(seed)
-	{}
+	Random::Random(const int seed)
+		: _mersenneTwister(seed) {}
 
-	void Random::Init(int seed)
+	Random* Random::GetInstance()
 	{
 		if (_sInstance == nullptr)
 		{
-			_sInstance = new Random(seed);
+			_sInstance = new Random();
 		}
+		
+		return _sInstance;
 	}
-
+	
 	float Random::FloatImpl()
 	{
 		HZ_PROFILE_FUNCTION();
@@ -57,41 +58,41 @@ namespace Hazel
 	{
 		HZ_PROFILE_FUNCTION();
 
-		return { FloatImpl(),FloatImpl() };
+		return {FloatImpl(), FloatImpl()};
 	}
 
 	glm::vec3 Random::Vec3Impl()
 	{
 		HZ_PROFILE_FUNCTION();
 
-		return { FloatImpl(), FloatImpl(), FloatImpl() };
+		return {FloatImpl(), FloatImpl(), FloatImpl()};
 	}
 
 	glm::vec4 Random::Vec4Impl()
 	{
 		HZ_PROFILE_FUNCTION();
 
-		return { FloatImpl(), FloatImpl(), FloatImpl(), FloatImpl() };
+		return {FloatImpl(), FloatImpl(), FloatImpl(), FloatImpl()};
 	}
 
 	glm::vec2 Random::RangeVec2Impl(const glm::vec2& x, const glm::vec2& y)
 	{
 		HZ_PROFILE_FUNCTION();
 
-		return { RangeImpl(x.x,x.y), RangeImpl(y.x,y.y) };
+		return {RangeImpl(x.x, x.y), RangeImpl(y.x, y.y)};
 	}
 
 	glm::vec3 Random::RangeVec3Impl(const glm::vec2& x, const glm::vec2& y, const glm::vec2& z)
 	{
 		HZ_PROFILE_FUNCTION();
 
-		return { RangeImpl(x.x,x.y), RangeImpl(y.x,y.y), RangeImpl(z.x,z.y) };
+		return {RangeImpl(x.x, x.y), RangeImpl(y.x, y.y), RangeImpl(z.x, z.y)};
 	}
 
 	glm::vec4 Random::RangeVec4Impl(const glm::vec2& x, const glm::vec2& y, const glm::vec2& z, const glm::vec2& w)
 	{
 		HZ_PROFILE_FUNCTION();
 
-		return { RangeImpl(x.x,x.y), RangeImpl(y.x,y.y), RangeImpl(z.x,z.y), RangeImpl(w.x,w.y) };
+		return {RangeImpl(x.x, x.y), RangeImpl(y.x, y.y), RangeImpl(z.x, z.y), RangeImpl(w.x, w.y)};
 	}
 }

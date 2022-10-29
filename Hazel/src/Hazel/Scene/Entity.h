@@ -78,7 +78,7 @@ namespace Hazel
 		TransformComponent& Transform();
 
 	private:
-		entt::entity _entityHandle{ entt::null };
+		entt::entity _entityHandle{entt::null};
 		Scene* _scene = nullptr;
 	};
 }

@@ -14,14 +14,14 @@ namespace Hazel
 		case ShaderDataType::Float3:
 		case ShaderDataType::Float4:
 		case ShaderDataType::Mat3:
-		case ShaderDataType::Mat4:	return GL_FLOAT;
+		case ShaderDataType::Mat4: return GL_FLOAT;
 
 		case ShaderDataType::Int:
 		case ShaderDataType::Int2:
 		case ShaderDataType::Int3:
-		case ShaderDataType::Int4:	return GL_INT;
+		case ShaderDataType::Int4: return GL_INT;
 
-		case ShaderDataType::Bool:	return GL_BOOL;
+		case ShaderDataType::Bool: return GL_BOOL;
 		}
 
 		HZ_CORE_ASSERT(false, "Unknown ShaderDataType!");
@@ -130,7 +130,6 @@ namespace Hazel
 			default:
 				HZ_CORE_ASSERT(false, "Unknown ShaderDataType!");
 			}
-
 		}
 		_vertexBuffers.push_back(vertexBuffer);
 	}

@@ -25,11 +25,11 @@ namespace Hazel
 		auto imGuiLayer = Application::Get().GetImGuiLayer();
 		auto normalFontPath = "Resources/Fonts/opensans/OpenSans-SemiBold.ttf";
 		auto boldFontPath = "Resources/Fonts/opensans/OpenSans-ExtraBold.ttf";
-		imGuiLayer->SetFonts(normalFontPath, { boldFontPath });
+		imGuiLayer->SetFonts(normalFontPath, {boldFontPath});
 
 		auto framebufferSpecification = FramebufferSpecification
 		{
-			{ FramebufferTextureFormat::RGBA8, FramebufferTextureFormat::RED_INTEGER, FramebufferTextureFormat::Depth },
+			{FramebufferTextureFormat::RGBA8, FramebufferTextureFormat::RED_INTEGER, FramebufferTextureFormat::Depth},
 			1280,
 			720
 		};
@@ -109,7 +109,8 @@ namespace Hazel
 
 			// Update Scene
 			_activeScene->OnUpdateEditor(timestep, _editorCamera);
-		}	break;
+			break;
+		}
 		case SceneState::Simulate:
 		{
 			_editorCamera.IsEnable() =
@@ -119,11 +120,13 @@ namespace Hazel
 
 			// Update Scene
 			_activeScene->OnUpdateSimulation(timestep, _editorCamera);
-		}	break;
+			break;
+		}
 		case SceneState::Play:
 		{
 			_activeScene->OnUpdateRuntime(timestep);
-		}	break;
+			break;
+		}
 		}
 
 		MousePicking();
@@ -241,14 +244,14 @@ namespace Hazel
 			return false;
 		}
 
-		bool isImGuizmoInUse = ImGuizmo::IsUsing();
-		bool isControlPressed = Input::IsKeyDown(Key::LeftControl) || Input::IsKeyDown(Key::RightControl);
-		bool isShiftPressed = Input::IsKeyDown(Key::LeftShift) || Input::IsKeyDown(Key::RightShift);
-		bool isModiferPressed = isControlPressed || isShiftPressed;
+		const bool isImGuizmoInUse = ImGuizmo::IsUsing();
+		const bool isControlPressed = Input::IsKeyDown(Key::LeftControl) || Input::IsKeyDown(Key::RightControl);
+		const bool isShiftPressed = Input::IsKeyDown(Key::LeftShift) || Input::IsKeyDown(Key::RightShift);
+		const bool isModiferPressed = isControlPressed || isShiftPressed;
 
 		switch (keyPressedEvent.GetKeyCode())
 		{
-			// File Commands
+		// File Commands
 		case Key::N:
 		{
 			if (isControlPressed && !isShiftPressed)
@@ -425,7 +428,7 @@ namespace Hazel
 
 			// Box Colliders
 			{
-				for (const auto &&[enttID, component, transform] : _activeScene->GetEntitiesViewWith<BoxCollider2DComponent, TransformComponent>().each())
+				for (const auto&& [enttID, component, transform] : _activeScene->GetEntitiesViewWith<BoxCollider2DComponent, TransformComponent>().each())
 				{
 					if (_shouldShowPhysicsColliders || enttID == selectedEntity)
 					{
@@ -968,7 +971,7 @@ namespace Hazel
 	{
 		HZ_PROFILE_FUNCTION();
 
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0.0f, 0.0f });
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{0.0f, 0.0f});
 
 		ImGui::Begin("SceneViewport");
 
@@ -984,16 +987,16 @@ namespace Hazel
 		//Application::Get().GetImGuiLayer()->BlockEvents(!_isSceneViewportHovered);
 
 		auto sceneViewportPanelSize = ImGui::GetContentRegionAvail();
-		_sceneViewportSize = { sceneViewportPanelSize.x, sceneViewportPanelSize.y };
+		_sceneViewportSize = {sceneViewportPanelSize.x, sceneViewportPanelSize.y};
 
 		if (Renderer2D::IsReady())
 		{
 			auto textureID = reinterpret_cast<void*>(static_cast<intptr_t>(_framebuffer->GetColorAttachmentRenderID()));
-			ImGui::Image(textureID, { _sceneViewportSize.x, _sceneViewportSize.y }, ImVec2{ 0.0f, 1.0f }, ImVec2{ 1.0f, 0.0f });
+			ImGui::Image(textureID, {_sceneViewportSize.x, _sceneViewportSize.y}, ImVec2{0.0f, 1.0f}, ImVec2{1.0f, 0.0f});
 		}
 		else
 		{
-			ImGui::Image(Utils::ERM::GetTexture(Utils::Image_ShaderLoading)->GetRawID(), { _sceneViewportSize.x, _sceneViewportSize.y }, ImVec2{ 0.0f, 1.0f }, ImVec2{ 1.0f, 0.0f });
+			ImGui::Image(Utils::ERM::GetTexture(Utils::Image_ShaderLoading)->GetRawID(), {_sceneViewportSize.x, _sceneViewportSize.y}, ImVec2{0.0f, 1.0f}, ImVec2{1.0f, 0.0f});
 		}
 
 		if (ImGui::BeginDragDropTarget())
@@ -1019,12 +1022,12 @@ namespace Hazel
 
 		auto windowSize = ImGui::GetWindowSize();
 		auto minBound = ImGui::GetWindowPos();
-		auto maxBound = ImVec2{ minBound.x + windowSize.x, minBound.y + windowSize.y };
+		auto maxBound = ImVec2{minBound.x + windowSize.x, minBound.y + windowSize.y};
 		minBound.x += sceneViewportOffset.x;
 		minBound.y += sceneViewportOffset.y;
 
-		_sceneViewportBounds[0] = { minBound.x, minBound.y };
-		_sceneViewportBounds[1] = { maxBound.x, maxBound.y };
+		_sceneViewportBounds[0] = {minBound.x, minBound.y};
+		_sceneViewportBounds[1] = {maxBound.x, maxBound.y};
 
 #pragma region Gizmo
 		if (auto selectedEntity = _sceneHierarchyPanel.GetSelectedEntity())
@@ -1073,7 +1076,7 @@ namespace Hazel
 					snapValue = 45.0f;
 				}
 
-				float snapValues[3] = { snapValue,snapValue,snapValue };
+				float snapValues[3] = {snapValue, snapValue, snapValue};
 				int gizmoType = _hasStoredPreviousGizmoType ? _previousGizmoType : _gizmoType;
 				ImGuizmo::Manipulate(glm::value_ptr(cameraView), glm::value_ptr(cameraProjection),
 					(ImGuizmo::OPERATION)gizmoType, (ImGuizmo::MODE)_gizmoSpace, glm::value_ptr(transform),
@@ -1139,7 +1142,7 @@ namespace Hazel
 				ImGui::GetForegroundDrawList()->AddText(mousePos, IM_COL32_WHITE, ss.str().c_str());
 			}
 
-			ImGui::GetForegroundDrawList()->AddImage(cursorTexture->GetRawID(), upperLeftPos, lowerRightPos, { 0.0f, 1.0f }, { 1.0f, 0.0f }, IM_COL32_WHITE);
+			ImGui::GetForegroundDrawList()->AddImage(cursorTexture->GetRawID(), upperLeftPos, lowerRightPos, {0.0f, 1.0f}, {1.0f, 0.0f}, IM_COL32_WHITE);
 		}
 
 #pragma endregion
@@ -1320,7 +1323,6 @@ namespace Hazel
 
 	void EditorLayer::OnSceneStop()
 	{
-
 		HZ_CORE_ASSERT(_sceneState == SceneState::Play || _sceneState == SceneState::Simulate, "Invalid Scene State.");
 
 		switch (_sceneState)

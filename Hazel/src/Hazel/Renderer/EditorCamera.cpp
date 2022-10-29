@@ -80,7 +80,7 @@ namespace Hazel
 		float yFactor = 0.0366f * (y * y) - 0.1778f * y + 0.3021f;
 		yFactor *= _distance;
 
-		return { xFactor, yFactor };
+		return {xFactor, yFactor};
 	}
 
 	float EditorCamera::ZoomSpeed() const
@@ -222,7 +222,7 @@ namespace Hazel
 
 	glm::quat EditorCamera::GetOrientation() const
 	{
-		return { _rotation };
+		return {_rotation};
 	}
 
 	void EditorCamera::Reset()

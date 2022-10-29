@@ -131,7 +131,6 @@ namespace Hazel
 			auto it = sScriptFieldTypeMap.find(typeName);
 			if (it == sScriptFieldTypeMap.end())
 			{
-
 				return ScriptFieldType::None;
 			}
 
@@ -302,12 +301,12 @@ namespace Hazel
 				{
 					switch (fieldInstance.Field.Type)
 					{
-					case  ScriptFieldType::String:
+					case ScriptFieldType::String:
 					{
 						instance->TrySetFieldStringValueInternal(name, fieldInstance._stringData);
 						break;
 					}
-					case  ScriptFieldType::Entity:
+					case ScriptFieldType::Entity:
 					{
 						const auto fieldEntityUUID = fieldInstance.GetValue<uint64_t>();
 						if (auto foundEntity = sScriptData->SceneContext->GetEntityByUUID(fieldEntityUUID))
@@ -470,7 +469,7 @@ namespace Hazel
 
 			const std::string fieldName = "Id";
 			auto field = mono_class_get_field_from_name(baseClass->_monoClass, fieldName.c_str());
-			baseClass->_fields[fieldName] = ScriptField{ ScriptFieldType::ULong, fieldName, field };
+			baseClass->_fields[fieldName] = ScriptField{ScriptFieldType::ULong, fieldName, field};
 
 			sScriptData->EntityBaseClass = baseClass;
 		}
@@ -635,7 +634,7 @@ namespace Hazel
 					MonoObject* monoObject = mono_object_new(loadingDomain, monoClass);
 					mono_runtime_object_init(monoObject);
 
-					ScriptField scriptField = { scriptFieldType, fieldName, field };
+					ScriptField scriptField = {scriptFieldType, fieldName, field};
 
 					switch (scriptFieldType)
 					{

@@ -32,7 +32,7 @@ namespace Hazel
 	}
 
 	ContentBrowserPanel::ContentBrowserPanel()
-		:_currentDirectory(gAssetsPath) {}
+		: _currentDirectory(gAssetsPath) {}
 
 	void ContentBrowserPanel::OnImGuiRender()
 	{
@@ -40,7 +40,7 @@ namespace Hazel
 		ImGui::Begin("Content Browser", nullptr, ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoScrollbar);
 		auto panelSize = ImGui::GetContentRegionAvail();
 		const float panelHeight = panelSize.y - footer;
-		if (panelHeight > 0.0f &&ImGui::BeginChild(ImGui::GetID("Folders"), ImVec2(panelSize.x * 0.25f, panelHeight), true, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_HorizontalScrollbar))
+		if (panelHeight > 0.0f && ImGui::BeginChild(ImGui::GetID("Folders"), ImVec2(panelSize.x * 0.25f, panelHeight), true, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_HorizontalScrollbar))
 		{
 			LoopDirectory(gAssetsPath);
 			ImGui::EndChild();
@@ -129,7 +129,7 @@ namespace Hazel
 					if (isThumbnails)
 					{
 						ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
-						ImGui::ImageButton(icon->GetRawID(), { thumbnailSize, thumbnailSize }, uv0, uv1);
+						ImGui::ImageButton(icon->GetRawID(), {thumbnailSize, thumbnailSize}, uv0, uv1);
 						ImGui::PopStyleColor();
 
 						elementActions();
@@ -141,7 +141,7 @@ namespace Hazel
 					else
 					{
 						auto maxHeight = ImGui::GetTextLineHeight();
-						ImGui::Image(icon->GetRawID(), { maxHeight ,maxHeight }, uv0, uv1);
+						ImGui::Image(icon->GetRawID(), {maxHeight, maxHeight}, uv0, uv1);
 						ImGui::SameLine();
 						ImGui::Selectable(filenameString.c_str());
 
@@ -152,7 +152,6 @@ namespace Hazel
 							ImGui::SameLine();
 							ImGui::Text("Size %.2f KB", std::filesystem::file_size(path) / 1000.0f);
 						}
-
 					}
 
 					ImGui::PopID();
@@ -209,9 +208,7 @@ namespace Hazel
 
 	void ContentBrowserPanel::LoopDirectory(const std::filesystem::path& currentPath)
 	{
-
 		std::vector<std::tuple<std::filesystem::directory_entry, bool>> directories;
-
 
 		for (auto& folderElement : std::filesystem::directory_iterator(currentPath))
 		{
@@ -220,18 +217,16 @@ namespace Hazel
 				continue;
 			}
 
-			directories.push_back({ folderElement, ContainDirectory(folderElement.path()) });
+			directories.emplace_back(folderElement, ContainDirectory(folderElement.path()));
 		}
 
-		for (const auto& tupleItem : directories)
+		for (const auto& [folderElement, hasDirectory] : directories)
 		{
-			const auto& folderElement = std::get<0>(tupleItem);
 			const auto& directoryPath = folderElement.path();
 			auto directoryName = directoryPath.filename().string();
 
 			auto treeNodeFlags = ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_OpenOnArrow;
 
-			bool hasDirectory = std::get<1>(tupleItem);
 			if (!hasDirectory)
 			{
 				treeNodeFlags |= ImGuiTreeNodeFlags_Leaf;
@@ -242,7 +237,7 @@ namespace Hazel
 				treeNodeFlags |= ImGuiTreeNodeFlags_Selected;
 			}
 
-			bool isExpanded = ImGui::TreeNodeEx(directoryPath.string().c_str(), treeNodeFlags, directoryName.c_str());
+			const bool isExpanded = ImGui::TreeNodeEx(directoryPath.string().c_str(), treeNodeFlags, directoryName.c_str());
 			if (ImGui::IsItemClicked())
 			{
 				_currentDirectory = directoryPath;
