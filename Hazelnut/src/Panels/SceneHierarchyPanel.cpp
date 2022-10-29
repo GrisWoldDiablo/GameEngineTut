@@ -136,7 +136,7 @@ namespace Hazel
 			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{4, 4});
 			float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
 			ImGui::Separator();
-			bool isTreeOpened = ImGui::TreeNodeEx((void*)typeid(T).hash_code(), treeNodeFlags, name.c_str());
+			bool isTreeOpened = ImGui::TreeNodeEx(reinterpret_cast<void*>(typeid(T).hash_code()), treeNodeFlags, name.c_str());
 			ImGui::PopStyleVar();
 
 			ImGui::PushID(name.c_str());
@@ -421,7 +421,7 @@ namespace Hazel
 			displayName = fmt::format("{0}<{1}>", displayName, entity.GetUUID());
 		}
 
-		bool expanded = isRoot || ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)entity, flags, displayName.c_str());
+		const bool expanded = isRoot || ImGui::TreeNodeEx(reinterpret_cast<void*>(static_cast<uint64_t>(static_cast<uint32_t>(entity))), flags, displayName.c_str());
 		if (!isRoot)
 		{
 			if (ImGui::BeginDragDropSource())
@@ -1310,7 +1310,7 @@ namespace Hazel
 			bool isSpritePressed;
 			if (component.Texture != nullptr)
 			{
-				isSpritePressed = ImGui::ImageButton((ImTextureID)(intptr_t)component.Texture->GetRendererID(), ImVec2(50.0f, 50.0f), ImVec2(0.0f, 1.0f), ImVec2(1.0f, 0.0f), 3);
+				isSpritePressed = ImGui::ImageButton(component.Texture->GetRawID(), ImVec2(50.0f, 50.0f), ImVec2(0.0f, 1.0f), ImVec2(1.0f, 0.0f), 3);
 			}
 			else
 			{
@@ -1324,7 +1324,7 @@ namespace Hazel
 			{
 				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
 				{
-					std::filesystem::path fileSystemPath = (const wchar_t*)payload->Data;
+					std::filesystem::path fileSystemPath = static_cast<const wchar_t*>(payload->Data);
 
 					if (fileSystemPath.extension() == ".png")
 					{
@@ -1586,7 +1586,7 @@ namespace Hazel
 
 			ImGui::Text("Lenght: %.3f sec", audioSource->GetLength());
 
-			auto state = audioSource->GetState();
+			const auto state = audioSource->GetState();
 			switch (state)
 			{
 			case AudioSourceState::Initial:

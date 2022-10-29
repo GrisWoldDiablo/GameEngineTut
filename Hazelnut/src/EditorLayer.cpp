@@ -163,7 +163,7 @@ namespace Hazel
 		ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
 		if (opt_fullscreen)
 		{
-			ImGuiViewport* viewport = ImGui::GetMainViewport();
+			const ImGuiViewport* viewport = ImGui::GetMainViewport();
 			ImGui::SetNextWindowPos(viewport->Pos);
 			ImGui::SetNextWindowSize(viewport->Size);
 			ImGui::SetNextWindowViewport(viewport->ID);
@@ -774,17 +774,6 @@ namespace Hazel
 				switch (_sceneState)
 				{
 				case SceneState::Play:
-				{
-					if (isPaused)
-					{
-						_activeScene->Step();
-					}
-					else
-					{
-						OnSceneStop();
-					}
-					break;
-				}
 				case SceneState::Simulate:
 				{
 					if (isPaused)
@@ -806,6 +795,7 @@ namespace Hazel
 			switch (_sceneState)
 			{
 			case SceneState::Play:
+			case SceneState::Simulate:
 			{
 				if (isPaused)
 				{
@@ -817,16 +807,6 @@ namespace Hazel
 				}
 				break;
 			}
-			case SceneState::Simulate:
-				if (isPaused)
-				{
-					AddTooltip("Step");
-				}
-				else
-				{
-					AddTooltip("Stop");
-				}
-				break;
 			case SceneState::Edit:
 				AddTooltip("Play");
 				break;
@@ -1003,7 +983,7 @@ namespace Hazel
 		{
 			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
 			{
-				std::filesystem::path filePath = (const wchar_t*)payload->Data;
+				std::filesystem::path filePath = static_cast<const wchar_t*>(payload->Data);
 
 				if (filePath.extension() == ".hazel")
 				{

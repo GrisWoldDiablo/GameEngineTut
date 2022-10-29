@@ -115,7 +115,7 @@ namespace Hazel
 							if (!directoryEntry.is_directory())
 							{
 								ImGui::Separator();
-								if (ImGui::MenuItem("Open Externaly"))
+								if (ImGui::MenuItem("Open Externally"))
 								{
 									FileDialogs::ExecuteFile(path.string().c_str());
 									ImGui::CloseCurrentPopup();
@@ -195,15 +195,12 @@ namespace Hazel
 
 	bool ContentBrowserPanel::ContainDirectory(const std::filesystem::path& currentPath)
 	{
-		for (auto& folderElement : std::filesystem::directory_iterator(currentPath))
+		auto isDirectory = [](const std::filesystem::directory_entry& folderElement)
 		{
-			if (folderElement.is_directory())
-			{
-				return true;
-			}
-		}
-
-		return false;
+			return folderElement.is_directory();
+		};
+		
+		return std::ranges::any_of(std::filesystem::directory_iterator(currentPath),isDirectory);
 	}
 
 	void ContentBrowserPanel::LoopDirectory(const std::filesystem::path& currentPath)
