@@ -59,7 +59,7 @@ namespace Hazel
 		return false;
 	}
 
-	bool ScriptInstance::TrySetFieldValueInternal(const std::string& name, const void* data)
+	bool ScriptInstance::TrySetFieldValueInternal(const std::string& name, const void* data) const
 	{
 		ScriptField field;
 		if (TryGetField(name, field))
@@ -88,7 +88,7 @@ namespace Hazel
 		return false;
 	}
 
-	bool ScriptInstance::TrySetFieldStringValueInternal(const std::string& name, const std::string& data)
+	bool ScriptInstance::TrySetFieldStringValueInternal(const std::string& name, const std::string& data) const
 	{
 		ScriptField field;
 		if (TryGetField(name, field))
@@ -119,7 +119,7 @@ namespace Hazel
 		return false;
 	}
 
-	bool ScriptInstance::TrySetFieldEntityValueInternal(const std::string& name, const Entity& data)
+	bool ScriptInstance::TrySetFieldEntityValueInternal(const std::string& name, const Entity& data) const
 	{
 		ScriptField field;
 		if (TryGetField(name, field))

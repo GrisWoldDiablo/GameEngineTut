@@ -12,6 +12,9 @@
 #include "mono/metadata/object.h"
 #include "mono/metadata/tabledefs.h"
 #include "mono/metadata/class.h"
+#include "mono/metadata/mono-debug.h"
+#include "mono/metadata/threads.h"
+#include "mono/metadata/mono-gc.h"
 
 #include "FileWatch.h"
 
@@ -75,7 +78,7 @@ namespace Hazel
 			return buffer;
 		}
 
-		static MonoAssembly* LoadMonoAssembly(const std::filesystem::path& filePath)
+		static MonoAssembly* LoadMonoAssembly(const std::filesystem::path& filePath, const bool shouldLoadPDB = false)
 		{
 			uint32_t fileSize = 0;
 			char* fileData = ReadBytes(filePath.string(), &fileSize);
@@ -94,9 +97,29 @@ namespace Hazel
 				return nullptr;
 			}
 
+			if (shouldLoadPDB)
+			{
+				std::filesystem::path pdbPath = filePath;
+				pdbPath.replace_extension(".pdb");
+				if (std::filesystem::exists(pdbPath))
+				{
+					uint32_t pdbFileSize = 0;
+					char* pdbFileData = ReadBytes(pdbPath, &pdbFileSize);
+					if (pdbFileData == nullptr)
+					{
+						HZ_CORE_LDEBUG("Failed to load PDB: {}", pdbPath);
+					}
+					else
+					{
+						mono_debug_open_image_from_memory(image, reinterpret_cast<const mono_byte*>(pdbFileData), static_cast<int>(pdbFileSize));
+						delete[] pdbFileData;
+						HZ_CORE_LDEBUG("Loaded PDB: {}", pdbPath);
+					}
+				}
+			}
+
 			MonoAssembly* assembly = mono_assembly_load_from_full(image, filePath.string().c_str(), &status, 0);
 			mono_image_close(image);
-
 			delete[] fileData;
 			return assembly;
 		}
@@ -163,6 +186,9 @@ namespace Hazel
 		Scope<filewatch::FileWatch<std::string>> CoreAssemblyFileWatcher;
 		Scope<filewatch::FileWatch<std::string>> AppAssemblyFileWatcher;
 		bool IsAssemblyReloading = false;
+
+		// Debugging with Hazel Tool extension
+		bool IsDebuggingEnabled = true;
 	};
 
 	static ScriptEngineData* sScriptData = nullptr;
@@ -200,8 +226,8 @@ namespace Hazel
 			return;
 		}
 
-		Utils::PrintAssemblyType(sScriptData->CoreAssembly);
-		Utils::PrintAssemblyType(sScriptData->AppAssembly);
+		//Utils::PrintAssemblyType(sScriptData->CoreAssembly);
+		//Utils::PrintAssemblyType(sScriptData->AppAssembly);
 	}
 
 	void ScriptEngine::Shutdown()
@@ -227,6 +253,8 @@ namespace Hazel
 
 		sScriptData->EntityInstances.clear();
 
+		mono_domain_finalize(mono_get_root_domain(), -1);
+		
 		if (sScriptData->IsAssemblyReloading)
 		{
 			TryReload(false);
@@ -271,7 +299,7 @@ namespace Hazel
 	{
 		Ref<ScriptInstance> instance = nullptr;
 
-		UUID entityUUID = entity.GetUUID();
+		const UUID entityUUID = entity.GetUUID();
 
 		if (instance = GetEntityScriptInstance(entityUUID))
 		{
@@ -347,7 +375,7 @@ namespace Hazel
 		HZ_CORE_ASSERT(sScriptData->EntityInstances.contains(entityUUID), "Entity UUID [{0}] missing", entityUUID);
 
 		auto& instance = sScriptData->EntityInstances.at(entityUUID);
-		instance->InvokeOnUpdate(static_cast<float>(timestep));
+		instance->InvokeOnUpdate(timestep);
 	}
 
 	Scene* ScriptEngine::GetSceneContext()
@@ -399,6 +427,18 @@ namespace Hazel
 	{
 		mono_set_assemblies_path("mono/lib");
 
+		if (sScriptData->IsDebuggingEnabled)
+		{
+			const char* argv[2]
+			{
+				"--debugger-agent=transport=dt_socket,address=127.0.0.1:2550,server=y,suspend=n,loglevel=3,logfile=MonoDebugger.log",
+				"--soft-breakpoints"
+			};
+
+			mono_jit_parse_options(2, const_cast<char**>(argv));
+			mono_debug_init(MONO_DEBUG_FORMAT_MONO);
+		}
+
 		MonoDomain* rootDomain = mono_jit_init("HazelJITRuntime");
 		HZ_CORE_ASSERT(rootDomain, "Root Domain could not be initialized!");
 
@@ -406,6 +446,8 @@ namespace Hazel
 		sScriptData->RootDomain = rootDomain;
 
 		LoadAppDomain();
+
+		mono_thread_set_main(mono_thread_current());
 	}
 
 	void ScriptEngine::ShutdownMono()
@@ -428,6 +470,7 @@ namespace Hazel
 	{
 		// Since we are unloading the current domain we need to set one before.
 		mono_domain_set(sScriptData->RootDomain, false);
+		mono_thread_set_main(mono_thread_attach(sScriptData->RootDomain));
 
 		mono_domain_unload(sScriptData->AppDomain);
 		sScriptData->AppDomain = nullptr;
@@ -465,11 +508,11 @@ namespace Hazel
 
 		// TODO ? Move somewhere else.
 		{
-			auto baseClass = CreateRef<ScriptClass>("Hazel", "Entity", true);
+			const auto baseClass = CreateRef<ScriptClass>("Hazel", "Entity", true);
 
 			const std::string fieldName = "Id";
-			auto field = mono_class_get_field_from_name(baseClass->_monoClass, fieldName.c_str());
-			baseClass->_fields[fieldName] = ScriptField{ScriptFieldType::ULong, fieldName, field};
+			const auto field = mono_class_get_field_from_name(baseClass->_monoClass, fieldName.c_str());
+			baseClass->_fields.emplace(fieldName, ScriptField{ScriptFieldType::ULong, fieldName, field});
 
 			sScriptData->EntityBaseClass = baseClass;
 		}
@@ -479,7 +522,7 @@ namespace Hazel
 
 	bool ScriptEngine::TryLoadCoreAssembly(const std::filesystem::path& filePath)
 	{
-		MonoAssembly* coreAssembly = Utils::LoadMonoAssembly(filePath);
+		MonoAssembly* coreAssembly = Utils::LoadMonoAssembly(filePath, sScriptData->IsDebuggingEnabled);
 
 		if (!coreAssembly)
 		{
@@ -498,7 +541,7 @@ namespace Hazel
 
 	bool ScriptEngine::TryLoadAppAssembly(const std::filesystem::path& filePath)
 	{
-		MonoAssembly* appAssembly = Utils::LoadMonoAssembly(filePath);
+		MonoAssembly* appAssembly = Utils::LoadMonoAssembly(filePath, sScriptData->IsDebuggingEnabled);
 
 		if (!appAssembly)
 		{

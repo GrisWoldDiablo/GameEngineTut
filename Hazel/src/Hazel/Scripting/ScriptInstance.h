@@ -19,7 +19,7 @@ namespace Hazel
 
 		void InvokeOnCreate();
 		void InvokeOnDestroy();
-		void InvokeOnUpdate(float ts);
+		void InvokeOnUpdate(float timestep);
 
 		Ref<ScriptClass> GetScriptClass() const { return _scriptClass; }
 		MonoObject* GetInstance() const { return _instance; }
@@ -80,13 +80,13 @@ namespace Hazel
 
 	private:
 		bool TryGetFieldValueInternal(const std::string& name, void* data) const;
-		bool TrySetFieldValueInternal(const std::string& name, const void* data);
+		bool TrySetFieldValueInternal(const std::string& name, const void* data) const;
 
 		bool TryGetFieldStringValueInternal(const std::string& name, std::string& data) const;
-		bool TrySetFieldStringValueInternal(const std::string& name, const std::string& data);
+		bool TrySetFieldStringValueInternal(const std::string& name, const std::string& data) const;
 
 		bool TryGetFieldEntityValueInternal(const std::string& name, Entity& data) const;
-		bool TrySetFieldEntityValueInternal(const std::string& name, const Entity& data);
+		bool TrySetFieldEntityValueInternal(const std::string& name, const Entity& data) const;
 
 		bool TryGetField(const std::string& name, ScriptField& scriptField) const;
 

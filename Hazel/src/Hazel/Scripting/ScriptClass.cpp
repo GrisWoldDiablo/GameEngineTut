@@ -56,6 +56,7 @@ namespace Hazel
 
 	MonoObject* ScriptClass::InvokeMethod(MonoObject* instance, MonoMethod* monoMethod, void** params)
 	{
-		return mono_runtime_invoke(monoMethod, instance, params, nullptr);
+		MonoObject* exception = nullptr;
+		return mono_runtime_invoke(monoMethod, instance, params, &exception);
 	}
 }

@@ -87,7 +87,7 @@ namespace Hazel
 
 		public T GetComponent<T>() where T : Component, new()
 		{
-			return !HasComponent<T>() ? null : new T{ Entity = this };
+			return !HasComponent<T>() ? null : new T { Entity = this };
 		}
 
 		public T AddComponent<T>() where T : Component, new()
@@ -99,7 +99,7 @@ namespace Hazel
 
 			InternalCalls.Entity_AddComponent(Id, typeof(T));
 
-			return new T{ Entity = this };
+			return new T { Entity = this };
 		}
 
 		public T As<T>() where T : Entity, new()

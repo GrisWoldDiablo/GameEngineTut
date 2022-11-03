@@ -1,4 +1,4 @@
-﻿using Hazel;
+using Hazel;
 using System;
 using System.Reflection;
 
@@ -9,6 +9,11 @@ namespace Sandbox
 		public float MySpeed;
 
 		private Rigidbody2DComponent _rigidbody;
+
+		~Player()
+		{
+			Console.WriteLine($"{nameof(Player)} Finalizer(Destructor)");
+		}
 
 		private void OnCreate()
 		{
