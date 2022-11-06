@@ -1,5 +1,4 @@
 using Hazel;
-using System;
 
 namespace Sandbox
 {
@@ -17,19 +16,19 @@ namespace Sandbox
 
 		public void OnCreate()
 		{
-			Console.WriteLine($"New Entity : [{NewEntityName}]");
+			Debug.Log($"New Entity : [{NewEntityName}]");
 			var newEnityID = Create(NewEntityName ?? "Missing name");
-			Console.WriteLine($"New Entity ID : [{newEnityID}]");
+			Debug.Log($"New Entity ID : [{newEnityID}]");
 
 			var spriteComponent = newEnityID.AddComponent<SpriteRendererComponent>();
 			spriteComponent.Color = NewEntityColor;
 
 			_foundEntity = FindByName(EntityToFind ?? "");
-			Console.WriteLine($"Find By Name : {_foundEntity}");
+			Debug.Log($"Find By Name : {_foundEntity}");
 			if (_foundEntity)
 			{
 				var player = _foundEntity.As<CirclePlayer>();
-				Console.WriteLine($"Find By Name  Player: {player}");
+				Debug.Log($"Find By Name  Player: {player}");
 				EntityToTest = player;
 				player.Color = NewEntityColor;
 				_cr = player.GetComponent<CircleRendererComponent>();
@@ -38,7 +37,7 @@ namespace Sandbox
 
 		public void OnDestroy()
 		{
-			Console.WriteLine($"Destroy [{Name}<{Id}>]");
+			Debug.Log($"Destroy [{Name}<{Id}>]");
 		}
 
 		public void OnUpdate(float timestep)
@@ -64,7 +63,7 @@ namespace Sandbox
 
 			if (lifeTime < 0.0f)
 			{
-				Console.WriteLine($"DESTROY {_foundEntity}!");
+				Debug.Log($"DESTROY {_foundEntity}!");
 				Destroy(_foundEntity);
 			}
 		}

@@ -1,10 +1,17 @@
-﻿using System;
+using System;
 using System.Runtime.CompilerServices;
 
 namespace Hazel
 {
 	internal class InternalCalls
 	{
+		//////////////
+		// Logger
+		//////////////
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern static void Logger_Log(string message);
+
 		//////////////
 		// Inputs
 		//////////////

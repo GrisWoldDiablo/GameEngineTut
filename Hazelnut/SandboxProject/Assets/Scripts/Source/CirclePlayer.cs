@@ -1,5 +1,4 @@
-﻿using Hazel;
-using System;
+using Hazel;
 using System.Reflection;
 
 namespace Sandbox
@@ -12,14 +11,14 @@ namespace Sandbox
 
 		private void OnCreate()
 		{
-			Console.WriteLine($"{GetType().FullName}.{MethodBase.GetCurrentMethod().Name} - {Id}");
+			Debug.Log($"{GetType().FullName}.{MethodBase.GetCurrentMethod().Name} - {Id}");
 
 			_circleRenderer = GetComponent<CircleRendererComponent>();
 		}
 
 		public void OnDestroy()
 		{
-			Console.WriteLine($"Destroy [{Name}<{Id}>]");
+			Debug.Log($"Destroy [{Name}<{Id}>]");
 		}
 
 		private void OnUpdate(float timestep)

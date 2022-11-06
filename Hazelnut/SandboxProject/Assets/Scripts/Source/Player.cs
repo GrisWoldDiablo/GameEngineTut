@@ -1,5 +1,4 @@
 using Hazel;
-using System;
 using System.Reflection;
 
 namespace Sandbox
@@ -12,15 +11,15 @@ namespace Sandbox
 
 		~Player()
 		{
-			Console.WriteLine($"{nameof(Player)} Finalizer(Destructor)");
+			Debug.Log($"{Name} Finalizer(Destructor)");
 		}
 
 		private void OnCreate()
 		{
-			Console.WriteLine($"{GetType().FullName}.{MethodBase.GetCurrentMethod().Name} - {Id}");
+			Debug.Log($"{GetType().FullName}.{MethodBase.GetCurrentMethod().Name} - {Id}");
 
 			_rigidbody = GetComponent<Rigidbody2DComponent>();
-			Console.WriteLine($"The entity Name: {Name}");
+			Debug.Log($"The entity Name: {Name}");
 			Name = "C# name Player";
 		}
 

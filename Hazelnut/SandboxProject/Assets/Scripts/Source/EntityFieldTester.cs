@@ -1,5 +1,4 @@
-﻿using Hazel;
-using System;
+using Hazel;
 
 namespace Sandbox
 {
@@ -29,12 +28,12 @@ namespace Sandbox
 		{
 			if (SHOULD_LOG_FIELDS && _timeleft <= 0.0f)
 			{
-				Console.WriteLine("--------------");
+				Debug.Log("--------------");
 				foreach (var field in GetType().GetFields())
 				{
-					Console.WriteLine($"{field.Name} : {field.GetValue(this)}");
+					Debug.Log($"{field.Name} : {field.GetValue(this)}");
 				}
-				Console.WriteLine("--------------");
+				Debug.Log("--------------");
 
 				_timeleft = _refreshRate;
 			}

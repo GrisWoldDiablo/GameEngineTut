@@ -19,6 +19,19 @@ namespace Hazel
 	static std::unordered_map<MonoType*, std::function<void(Entity)>> sEntityAddComponentFuncs;
 
 	/////////////////
+	/// Logger
+	/////////////////
+
+#pragma region Logger
+	static void Logger_Log(MonoString* message)
+	{
+		auto* logMessage = mono_string_to_utf8(message);
+		HZ_LDEBUG("[C#]: {0}", logMessage);
+		mono_free(logMessage);
+	}
+#pragma endregion
+
+	/////////////////
 	/// Inputs
 	/////////////////
 
@@ -769,6 +782,10 @@ namespace Hazel
 
 	void ScriptGlue::RegisterFunctions()
 	{
+#pragma region Logger
+		HZ_ADD_INTERNAL_CALL(Logger_Log);
+#pragma endregion
+
 #pragma region Inputs
 #pragma region Keyboard
 		HZ_ADD_INTERNAL_CALL(Input_IsKeyPressed);

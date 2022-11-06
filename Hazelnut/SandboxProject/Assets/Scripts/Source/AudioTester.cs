@@ -1,5 +1,4 @@
-﻿using Hazel;
-using System;
+using Hazel;
 
 namespace Sandbox
 {
@@ -27,23 +26,23 @@ namespace Sandbox
 			if (LeftSource)
 			{
 				_leftSourceAudio = LeftSource.GetComponent<AudioSourceComponent>();
-				Console.WriteLine($"Left : {(_leftSourceAudio ? _leftSourceAudio.Path : null)}");
+				Debug.Log($"Left : {(_leftSourceAudio ? _leftSourceAudio.Path : null)}");
 			}
 
 			if (RightSource)
 			{
 				_rightSourceAudio = RightSource.GetComponent<AudioSourceComponent>();
-				Console.WriteLine($"Right : {(_rightSourceAudio ? _rightSourceAudio.Path : null)}");
+				Debug.Log($"Right : {(_rightSourceAudio ? _rightSourceAudio.Path : null)}");
 			}
 
 			if (MusicSource)
 			{
 				_musicSourceAudio = MusicSource.GetComponent(typeof(AudioSourceComponent)) as AudioSourceComponent;
 
-				Console.WriteLine($"Music : {(_musicSourceAudio ? _musicSourceAudio.Path : null)}");
+				Debug.Log($"Music : {(_musicSourceAudio ? _musicSourceAudio.Path : null)}");
 				Path = _musicSourceAudio ? _musicSourceAudio.Path : null;
-				Console.WriteLine($" Has Type {typeof(TransformComponent)}: {MusicSource.HasComponent(typeof(TransformComponent))}");
-				Console.WriteLine($" Has Type {typeof(CircleRendererComponent)}: {MusicSource.HasComponent(typeof(CircleRendererComponent))}");
+				Debug.Log($" Has Type {typeof(TransformComponent)}: {MusicSource.HasComponent(typeof(TransformComponent))}");
+				Debug.Log($" Has Type {typeof(CircleRendererComponent)}: {MusicSource.HasComponent(typeof(CircleRendererComponent))}");
 			}
 		}
 
