@@ -26,23 +26,23 @@ namespace Sandbox
 			if (LeftSource)
 			{
 				_leftSourceAudio = LeftSource.GetComponent<AudioSourceComponent>();
-				Debug.Log($"Left : {(_leftSourceAudio ? _leftSourceAudio.Path : null)}");
+				Logger.Debug($"Left : {(_leftSourceAudio ? _leftSourceAudio.Path : null)}");
 			}
 
 			if (RightSource)
 			{
 				_rightSourceAudio = RightSource.GetComponent<AudioSourceComponent>();
-				Debug.Log($"Right : {(_rightSourceAudio ? _rightSourceAudio.Path : null)}");
+				Logger.Debug($"Right : {(_rightSourceAudio ? _rightSourceAudio.Path : null)}");
 			}
 
 			if (MusicSource)
 			{
 				_musicSourceAudio = MusicSource.GetComponent(typeof(AudioSourceComponent)) as AudioSourceComponent;
 
-				Debug.Log($"Music : {(_musicSourceAudio ? _musicSourceAudio.Path : null)}");
+				Logger.Debug($"Music : {(_musicSourceAudio ? _musicSourceAudio.Path : null)}");
 				Path = _musicSourceAudio ? _musicSourceAudio.Path : null;
-				Debug.Log($" Has Type {typeof(TransformComponent)}: {MusicSource.HasComponent(typeof(TransformComponent))}");
-				Debug.Log($" Has Type {typeof(CircleRendererComponent)}: {MusicSource.HasComponent(typeof(CircleRendererComponent))}");
+				Logger.Debug($" Has Type {typeof(TransformComponent)}: {MusicSource.HasComponent(typeof(TransformComponent))}");
+				Logger.Debug($" Has Type {typeof(CircleRendererComponent)}: {MusicSource.HasComponent(typeof(CircleRendererComponent))}");
 			}
 		}
 

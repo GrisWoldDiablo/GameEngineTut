@@ -23,10 +23,45 @@ namespace Hazel
 	/////////////////
 
 #pragma region Logger
-	static void Logger_Log(MonoString* message)
+	static void Logger_Trace(MonoString* message)
+	{
+		auto* logMessage = mono_string_to_utf8(message);
+		HZ_LTRACE("[C#]: {0}", logMessage);
+		mono_free(logMessage);
+	}
+
+	static void Logger_Debug(MonoString* message)
 	{
 		auto* logMessage = mono_string_to_utf8(message);
 		HZ_LDEBUG("[C#]: {0}", logMessage);
+		mono_free(logMessage);
+	}
+
+	static void Logger_Info(MonoString* message)
+	{
+		auto* logMessage = mono_string_to_utf8(message);
+		HZ_LINFO("[C#]: {0}", logMessage);
+		mono_free(logMessage);
+	}
+
+	static void Logger_Warning(MonoString* message)
+	{
+		auto* logMessage = mono_string_to_utf8(message);
+		HZ_LWARN("[C#]: {0}", logMessage);
+		mono_free(logMessage);
+	}
+
+	static void Logger_Error(MonoString* message)
+	{
+		auto* logMessage = mono_string_to_utf8(message);
+		HZ_LERROR("[C#]: {0}", logMessage);
+		mono_free(logMessage);
+	}
+
+	static void Logger_Critical(MonoString* message)
+	{
+		auto* logMessage = mono_string_to_utf8(message);
+		HZ_LCRITICAL("[C#]: {0}", logMessage);
 		mono_free(logMessage);
 	}
 #pragma endregion
@@ -783,7 +818,12 @@ namespace Hazel
 	void ScriptGlue::RegisterFunctions()
 	{
 #pragma region Logger
-		HZ_ADD_INTERNAL_CALL(Logger_Log);
+		HZ_ADD_INTERNAL_CALL(Logger_Trace);
+		HZ_ADD_INTERNAL_CALL(Logger_Debug);
+		HZ_ADD_INTERNAL_CALL(Logger_Info);
+		HZ_ADD_INTERNAL_CALL(Logger_Warning);
+		HZ_ADD_INTERNAL_CALL(Logger_Error);
+		HZ_ADD_INTERNAL_CALL(Logger_Critical);
 #pragma endregion
 
 #pragma region Inputs

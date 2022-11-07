@@ -11,14 +11,14 @@ namespace Sandbox
 
 		private void OnCreate()
 		{
-			Debug.Log($"{GetType().FullName}.{MethodBase.GetCurrentMethod().Name} - {Id}");
+			Logger.Debug($"{GetType().FullName}.{MethodBase.GetCurrentMethod().Name} - {Id}");
 
 			_circleRenderer = GetComponent<CircleRendererComponent>();
 		}
 
 		public void OnDestroy()
 		{
-			Debug.Log($"Destroy [{Name}<{Id}>]");
+			Logger.Debug($"Destroy [{Name}<{Id}>]");
 		}
 
 		private void OnUpdate(float timestep)

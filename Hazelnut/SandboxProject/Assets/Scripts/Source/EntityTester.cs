@@ -16,19 +16,19 @@ namespace Sandbox
 
 		public void OnCreate()
 		{
-			Debug.Log($"New Entity : [{NewEntityName}]");
+			Logger.Debug($"New Entity : [{NewEntityName}]");
 			var newEnityID = Create(NewEntityName ?? "Missing name");
-			Debug.Log($"New Entity ID : [{newEnityID}]");
+			Logger.Debug($"New Entity ID : [{newEnityID}]");
 
 			var spriteComponent = newEnityID.AddComponent<SpriteRendererComponent>();
 			spriteComponent.Color = NewEntityColor;
 
 			_foundEntity = FindByName(EntityToFind ?? "");
-			Debug.Log($"Find By Name : {_foundEntity}");
+			Logger.Debug($"Find By Name : {_foundEntity}");
 			if (_foundEntity)
 			{
 				var player = _foundEntity.As<CirclePlayer>();
-				Debug.Log($"Find By Name  Player: {player}");
+				Logger.Debug($"Find By Name  Player: {player}");
 				EntityToTest = player;
 				player.Color = NewEntityColor;
 				_cr = player.GetComponent<CircleRendererComponent>();
@@ -37,7 +37,7 @@ namespace Sandbox
 
 		public void OnDestroy()
 		{
-			Debug.Log($"Destroy [{Name}<{Id}>]");
+			Logger.Debug($"Destroy [{Name}<{Id}>]");
 		}
 
 		public void OnUpdate(float timestep)
@@ -63,7 +63,7 @@ namespace Sandbox
 
 			if (lifeTime < 0.0f)
 			{
-				Debug.Log($"DESTROY {_foundEntity}!");
+				Logger.Debug($"DESTROY {_foundEntity}!");
 				Destroy(_foundEntity);
 			}
 		}

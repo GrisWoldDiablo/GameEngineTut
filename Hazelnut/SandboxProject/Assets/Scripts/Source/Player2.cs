@@ -10,7 +10,7 @@ namespace Sandbox
 
 		private void OnCreate()
 		{
-			Debug.Log($"{GetType().FullName}.{MethodBase.GetCurrentMethod().Name} - {Id}");
+			Logger.Debug($"{GetType().FullName}.{MethodBase.GetCurrentMethod().Name} - {Id}");
 			_spriteRenderer = GetComponent<SpriteRendererComponent>();
 		}
 

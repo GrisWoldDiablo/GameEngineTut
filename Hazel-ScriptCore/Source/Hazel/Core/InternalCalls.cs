@@ -10,7 +10,22 @@ namespace Hazel
 		//////////////
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern static void Logger_Log(string message);
+		internal extern static void Logger_Trace(string message);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern static void Logger_Debug(string message);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern static void Logger_Info(string message);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern static void Logger_Warning(string message);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern static void Logger_Error(string message);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern static void Logger_Critical(string message);
 
 		//////////////
 		// Inputs

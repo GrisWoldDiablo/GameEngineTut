@@ -28,12 +28,12 @@ namespace Sandbox
 		{
 			if (SHOULD_LOG_FIELDS && _timeleft <= 0.0f)
 			{
-				Debug.Log("--------------");
+				Logger.Debug("--------------");
 				foreach (var field in GetType().GetFields())
 				{
-					Debug.Log($"{field.Name} : {field.GetValue(this)}");
+					Logger.Debug($"{field.Name} : {field.GetValue(this)}");
 				}
-				Debug.Log("--------------");
+				Logger.Debug("--------------");
 
 				_timeleft = _refreshRate;
 			}

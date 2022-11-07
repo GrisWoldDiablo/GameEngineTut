@@ -11,15 +11,15 @@ namespace Sandbox
 
 		~Player()
 		{
-			Debug.Log($"{Name} Finalizer(Destructor)");
+			Logger.Debug($"{Name} Finalizer(Destructor)");
 		}
 
 		private void OnCreate()
 		{
-			Debug.Log($"{GetType().FullName}.{MethodBase.GetCurrentMethod().Name} - {Id}");
+			Logger.Debug($"{GetType().FullName}.{MethodBase.GetCurrentMethod().Name} - {Id}");
 
 			_rigidbody = GetComponent<Rigidbody2DComponent>();
-			Debug.Log($"The entity Name: {Name}");
+			Logger.Debug($"The entity Name: {Name}");
 			Name = "C# name Player";
 		}
 
