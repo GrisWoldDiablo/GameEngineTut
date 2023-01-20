@@ -113,10 +113,12 @@ namespace Hazel
 #pragma region Entity
 	static bool Entity_IsValid(UUID entityId)
 	{
-		auto* scene = ScriptEngine::GetSceneContext();
-		HZ_CORE_ASSERT(scene, "Scene is null!");
+		if (auto* scene = ScriptEngine::GetSceneContext())
+		{
+			return scene->GetEntityByUUID(entityId);
+		}
 
-		return scene->GetEntityByUUID(entityId);
+		return false;
 	}
 
 	static void Entity_Create(MonoString* name, MonoObject** outEntity)
@@ -209,7 +211,12 @@ namespace Hazel
 	static void Entity_GetName(UUID entityId, MonoString** outName)
 	{
 		auto* scene = ScriptEngine::GetSceneContext();
-		HZ_CORE_ASSERT(scene, "Scene is null!");
+		if (scene == nullptr || entityId == UUID::Invalid)
+		{
+			*outName = mono_string_new_wrapper("Null");
+			return;
+		}
+
 		auto entity = scene->GetEntityByUUID(entityId);
 		HZ_CORE_ASSERT(entity, "Entity is null!");
 
