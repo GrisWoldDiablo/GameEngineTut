@@ -14,7 +14,6 @@
 #include "mono/metadata/class.h"
 #include "mono/metadata/mono-debug.h"
 #include "mono/metadata/threads.h"
-#include "mono/metadata/mono-gc.h"
 
 #include "FileWatch.h"
 
@@ -249,11 +248,11 @@ namespace Hazel
 			instance->InvokeOnDestroy();
 		}
 
+		mono_domain_finalize(mono_get_root_domain(), -1);
 		sScriptData->SceneContext = nullptr;
 
 		sScriptData->EntityInstances.clear();
 
-		mono_domain_finalize(mono_get_root_domain(), -1);
 		
 		if (sScriptData->IsAssemblyReloading)
 		{
@@ -501,10 +500,10 @@ namespace Hazel
 
 		sScriptData->IsAssemblyReloading = false;
 
-		LoadAssemblyClasses();
-
-		ScriptGlue::RegisterComponents();
 		ScriptGlue::RegisterFunctions();
+		ScriptGlue::RegisterComponents();
+		
+		LoadAssemblyClasses();
 
 		// TODO ? Move somewhere else.
 		{
