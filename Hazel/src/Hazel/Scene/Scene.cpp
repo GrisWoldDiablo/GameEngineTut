@@ -290,7 +290,7 @@ namespace Hazel
 					if (entity.HasComponent<BoxCollider2DComponent>()
 						|| entity.HasComponent<CircleCollider2DComponent>())
 					{
-						auto* body = static_cast<b2Body*>(component.RuntimeBody);
+						const auto* body = static_cast<b2Body*>(component.RuntimeBody);
 						const auto& position = body->GetPosition();
 						transform.Position.x = position.x;
 						transform.Position.y = position.y;
@@ -309,7 +309,7 @@ namespace Hazel
 			if (camera.IsPrimary)
 			{
 				mainCamera = &camera.Camera;
-				cameraTransform = transform.GetTransformMatrix();
+				cameraTransform = transform.GetWorldTransformMatrix();
 				cameraPosition = transform.Position;
 				break;
 			}
@@ -348,7 +348,7 @@ namespace Hazel
 					if (entity.HasComponent<BoxCollider2DComponent>()
 						|| entity.HasComponent<CircleCollider2DComponent>())
 					{
-						auto* body = static_cast<b2Body*>(component.RuntimeBody);
+						const auto* body = static_cast<b2Body*>(component.RuntimeBody);
 						const auto& position = body->GetPosition();
 						transform.Position.x = position.x;
 						transform.Position.y = position.y;
@@ -373,6 +373,7 @@ namespace Hazel
 
 	void Scene::DrawSpriteRenderComponent(const glm::vec3& cameraPosition)
 	{
+		auto entities = GetEntitiesViewWith<SpriteRendererComponent, TransformComponent, FamilyComponent>();
 		//TODO Fix sorting?. Can't have 2 groups sprite and circle render
 		//group.sort<TransformComponent>([&](const auto& lhs, const auto& rhs)
 		//{
@@ -382,7 +383,7 @@ namespace Hazel
 		//});
 		for (const auto&& [enttID, sprite, transform] : GetEntitiesViewWith<SpriteRendererComponent, TransformComponent>().each())
 		{
-			Renderer2D::DrawSprite(transform.GetTransformMatrix(), sprite, (int)enttID);
+			Renderer2D::DrawSprite(transform.GetWorldTransformMatrix(), sprite, (int)enttID);
 
 			// Comment out to draw the sprite bounding box for testing.
 			// Renderer2D::DrawRect(transform.GetTransformMatrix(), Color::Green, (int)entity);
@@ -393,7 +394,7 @@ namespace Hazel
 	{
 		for (const auto&& [enttID, circle, transform] : GetEntitiesViewWith<CircleRendererComponent, TransformComponent>().each())
 		{
-			Renderer2D::DrawCircle(transform.GetTransformMatrix(), circle.Color, circle.Thickness, circle.Fade, (int)enttID);
+			Renderer2D::DrawCircle(transform.GetWorldTransformMatrix(), circle.Color, circle.Thickness, circle.Fade, (int)enttID);
 		}
 	}
 
@@ -401,17 +402,17 @@ namespace Hazel
 	{
 		//TODO create draw Icon generic.
 
-		float cameraPositionZ = cameraPosition.z;
+		const float cameraPositionZ = cameraPosition.z;
 		for (const auto&& [enttID, audioSource, transform] : GetEntitiesViewWith<AudioSourceComponent, TransformComponent>().each())
 		{
 			if (!isRuntime || audioSource.IsVisibleInGame)
 			{
-				float sign = cameraPositionZ > transform.Position.z ? 1.0f : -1.0f;
+				const float sign = cameraPositionZ > transform.Position.z ? 1.0f : -1.0f;
 				auto position = transform.Position;
 				position.z += 0.001f * sign;
 				auto scale = glm::vec3(1.0f);
 				scale.x *= sign;
-				Renderer2D::DrawQuad(position, scale, _sAudioSourceIcon, glm::vec2(1.0f), Color::White, (int)enttID);
+				Renderer2D::DrawQuad(position, scale, _sAudioSourceIcon, glm::vec2(1.0f), Color::White, static_cast<int>(enttID));
 			}
 		}
 
@@ -419,12 +420,12 @@ namespace Hazel
 		{
 			if (!isRuntime || audioListener.IsVisibleInGame)
 			{
-				float sign = cameraPositionZ > transform.Position.z ? 1.0f : -1.0f;
+				const float sign = cameraPositionZ > transform.Position.z ? 1.0f : -1.0f;
 				auto position = transform.Position;
 				position.z += 0.001f * sign;
 				auto scale = glm::vec3(1.0f);
 				scale.x *= sign;
-				Renderer2D::DrawQuad(position, scale, _sAudioListenerIcon, glm::vec2(1.0f), Color::White, (int)enttID);
+				Renderer2D::DrawQuad(position, scale, _sAudioListenerIcon, glm::vec2(1.0f), Color::White, static_cast<int>(enttID));
 			}
 		}
 	}
@@ -514,7 +515,22 @@ namespace Hazel
 			break;
 		}
 
-		newChildFamily.ParentID = newParent ? newParent.GetUUID() : UUID::Invalid;
+		if (newParent)
+		{
+			const glm::mat4 currentWorldTransform = newChild.Transform().GetWorldTransformMatrix();
+			newChildFamily.ParentID = newParent.GetUUID();
+			newChild.Transform().ParentTransform = &newParent.Transform();
+			const glm::mat4 localTransform = glm::inverse(newParent.Transform().GetWorldTransformMatrix()) * currentWorldTransform;
+			// glm::inverse(ParentTransform->GetWorldTransformMatrix()) * localTransformMatrix;
+			newChild.Transform().SetLocalTransform(localTransform);
+		}
+		else
+		{
+			const glm::mat4 currentWorldTransform = newChild.Transform().GetWorldTransformMatrix();
+			newChildFamily.ParentID = UUID::Invalid;
+			newChild.Transform().ParentTransform = nullptr;
+			newChild.Transform().SetLocalTransform(currentWorldTransform);
+		}
 	}
 
 
@@ -617,10 +633,13 @@ namespace Hazel
 	void Scene::OnPhysic2DStart()
 	{
 		_physicsWorld = new b2World({0.0f, -9.8f});
-		GetEntitiesViewWith<Rigidbody2DComponent>().each([=](const auto enttID, Rigidbody2DComponent& rb2d)
+
+		GetEntitiesViewWith<Rigidbody2DComponent>().each([&](const auto enttID, Rigidbody2DComponent& rb2d)
 		{
 			Entity entity = {enttID, this};
-			auto& transform = entity.Transform();
+			const auto& transform = entity.Transform();
+
+			if (entity.Family().ChildID) { }
 
 			b2BodyDef bodyDef;
 			bodyDef.type = static_cast<b2BodyType>(Rigidbody2DComponent::TypeToBox2DBody(rb2d.Type));
@@ -669,6 +688,28 @@ namespace Hazel
 				createFixture(circleShape, cc2d.Density, cc2d.Friction, cc2d.Restitution, cc2d.RestitutionThreshold);
 			}
 		});
+
+#if 0 // Welding parent child
+		for (const auto&& [enttID,rb2d,family] : GetEntitiesViewWith<Rigidbody2DComponent, FamilyComponent>().each())
+		{
+			if (family.ParentID)
+			{
+				if (auto parent = this->GetEntityByUUID(family.ParentID))
+				{
+					if (parent.HasComponent<Rigidbody2DComponent>())
+					{
+						const auto& parentRb2d = parent.GetComponent<Rigidbody2DComponent>();
+
+						b2WeldJointDef jointDef;
+						auto* bodyA = static_cast<b2Body*>(rb2d.RuntimeBody);
+						auto* bodyB = static_cast<b2Body*>(parentRb2d.RuntimeBody);
+						jointDef.Initialize(bodyA, bodyB, bodyB->GetPosition());
+						_physicsWorld->CreateJoint(&jointDef);
+					}
+				}
+			}
+		}
+#endif
 	}
 
 	void Scene::OnPhysic2DStop()
@@ -794,7 +835,10 @@ namespace Hazel
 	void Scene::OnComponentRemoved<CameraComponent>(Entity entity, CameraComponent& component) {}
 
 	template<>
-	void Scene::OnComponentRemoved<ScriptComponent>(Entity entity, ScriptComponent& component) {}
+	void Scene::OnComponentRemoved<ScriptComponent>(Entity entity, ScriptComponent& component)
+	{
+		// TODO deal with remove at runtime.
+	}
 
 	template<>
 	void Scene::OnComponentRemoved<NativeScriptComponent>(Entity entity, NativeScriptComponent& component) {}
