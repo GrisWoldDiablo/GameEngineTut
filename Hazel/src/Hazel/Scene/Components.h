@@ -111,7 +111,7 @@ namespace Hazel
 			
 			if (ParentTransform)
 			{
-				return GetLocalTransformMatrix() * ParentTransform->GetWorldTransformMatrix();
+				return  ParentTransform->GetWorldTransformMatrix() * GetLocalTransformMatrix();
 			}
 			
 			return GetLocalTransformMatrix();

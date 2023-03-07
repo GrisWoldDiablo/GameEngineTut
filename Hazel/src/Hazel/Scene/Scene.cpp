@@ -515,21 +515,24 @@ namespace Hazel
 			break;
 		}
 
+		auto& newChildTransform = newChild.Transform();
 		if (newParent)
 		{
-			const glm::mat4 currentWorldTransform = newChild.Transform().GetWorldTransformMatrix();
+			const glm::mat4 currentWorldTransform = newChildTransform.GetWorldTransformMatrix();
+			const glm::vec3 scale = newChildTransform.Scale;
 			newChildFamily.ParentID = newParent.GetUUID();
-			newChild.Transform().ParentTransform = &newParent.Transform();
+			newChildTransform.ParentTransform = &newParent.Transform();
 			const glm::mat4 localTransform = glm::inverse(newParent.Transform().GetWorldTransformMatrix()) * currentWorldTransform;
-			// glm::inverse(ParentTransform->GetWorldTransformMatrix()) * localTransformMatrix;
-			newChild.Transform().SetLocalTransform(localTransform);
+			// TODO fix rotation when parent scale is not vec3(1). There is some weird change to it.
+			newChildTransform.SetLocalTransform(localTransform);
+			newChildTransform.Scale = scale;
 		}
 		else
 		{
-			const glm::mat4 currentWorldTransform = newChild.Transform().GetWorldTransformMatrix();
+			const glm::mat4 currentWorldTransform = newChildTransform.GetWorldTransformMatrix();
 			newChildFamily.ParentID = UUID::Invalid;
-			newChild.Transform().ParentTransform = nullptr;
-			newChild.Transform().SetLocalTransform(currentWorldTransform);
+			newChildTransform.ParentTransform = nullptr;
+			newChildTransform.SetLocalTransform(currentWorldTransform);
 		}
 	}
 
