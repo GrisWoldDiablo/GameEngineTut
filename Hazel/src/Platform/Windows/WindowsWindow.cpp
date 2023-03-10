@@ -71,7 +71,7 @@ namespace Hazel
 		_context->Init();
 
 		glfwSetWindowUserPointer(_window, &_data);
-		SetVSync(true);
+		SetVSync(props.VSync);
 
 		{
 			HZ_PROFILE_SCOPE("glfmSetCallbacks");
