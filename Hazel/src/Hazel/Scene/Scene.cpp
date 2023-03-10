@@ -476,19 +476,19 @@ namespace Hazel
 		}
 
 		auto& newChildFamily = newChild.Family();
-		if (auto newChildPreviousSibling = GetEntityByUUID(newChildFamily.PreviousSiblingID))
+		if (const auto newChildPreviousSibling = GetEntityByUUID(newChildFamily.PreviousSiblingID))
 		{
 			auto& newChildPreviousSiblingIDs = newChildPreviousSibling.Family();
 			newChildPreviousSiblingIDs.NextSiblingID = newChildFamily.NextSiblingID;
 		}
 
-		if (auto newChildNextSibling = GetEntityByUUID(newChildFamily.NextSiblingID))
+		if (const auto newChildNextSibling = GetEntityByUUID(newChildFamily.NextSiblingID))
 		{
 			auto& newChildNextSiblingIDs = newChildNextSibling.Family();
 			newChildNextSiblingIDs.PreviousSiblingID = newChildFamily.PreviousSiblingID;
 		}
 
-		if (auto newChildParent = GetEntityByUUID(newChildFamily.ParentID))
+		if (const auto newChildParent = GetEntityByUUID(newChildFamily.ParentID))
 		{
 			auto& newChildParentIDs = newChildParent.Family();
 			if (newChildParentIDs.ChildID == newChild.GetUUID())
@@ -523,7 +523,6 @@ namespace Hazel
 			newChildFamily.ParentID = newParent.GetUUID();
 			newChildTransform.ParentTransform = &newParent.Transform();
 			const glm::mat4 localTransform = glm::inverse(newParent.Transform().GetWorldTransformMatrix()) * currentWorldTransform;
-			// TODO fix rotation when parent scale is not vec3(1). There is some weird change to it.
 			newChildTransform.SetLocalTransform(localTransform);
 			newChildTransform.Scale = scale;
 		}
@@ -548,7 +547,6 @@ namespace Hazel
 		{
 			return false;
 		}
-
 
 		if (child.GetUUID() == entity.GetUUID())
 		{
@@ -616,7 +614,6 @@ namespace Hazel
 
 	Entity Scene::GetPrimaryCameraEntity()
 	{
-		auto view = _registry.view<CameraComponent>();
 		for (const auto&& [enttID, component] : GetEntitiesViewWith<CameraComponent>().each())
 		{
 			if (component.IsPrimary)

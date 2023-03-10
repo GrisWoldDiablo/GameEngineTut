@@ -67,12 +67,6 @@ namespace Hazel
 		// World Transform
 		void SetLocalTransform(const glm::mat4& newTransform)
 		{
-			// glm::mat4 newWorldTransform = newTransform;
-			// if (isWorld && ParentTransform)
-			// {
-			// 	newWorldTransform = glm::inverse(ParentTransform->GetWorldTransformMatrix()) * newWorldTransform;
-			// }
-
 			glm::vec3 position, rotation, scale;
 			if (HMath::DecomposeTransform(newTransform, position, rotation, scale))
 			{
@@ -101,19 +95,11 @@ namespace Hazel
 
 		glm::mat4 GetWorldTransformMatrix() const
 		{
-			// constexpr auto kIdentityMatrix = glm::mat4(1.0f);
-			//
-			// const glm::mat4 worldTransformMatrix =  glm::translate(kIdentityMatrix, Position)
-			// 	* glm::toMat4(glm::quat(Rotation))
-			// 	* glm::scale(kIdentityMatrix, Scale);
-			//
-			// return worldTransformMatrix;
-			
 			if (ParentTransform)
 			{
-				return  ParentTransform->GetWorldTransformMatrix() * GetLocalTransformMatrix();
+				return ParentTransform->GetWorldTransformMatrix() * GetLocalTransformMatrix();
 			}
-			
+
 			return GetLocalTransformMatrix();
 		}
 
@@ -121,15 +107,10 @@ namespace Hazel
 		{
 			constexpr auto kIdentityMatrix = glm::mat4(1.0f);
 
-			const glm::mat4 localTransformMatrix =  glm::translate(kIdentityMatrix, Position)
+			const glm::mat4 localTransformMatrix = glm::translate(kIdentityMatrix, Position)
 				* glm::toMat4(glm::quat(Rotation))
 				* glm::scale(kIdentityMatrix, Scale);
-			
-			//if (ParentTransform)
-			//{
-			//	return  glm::inverse(ParentTransform->GetWorldTransformMatrix()) * localTransformMatrix;
-			//}
-			
+
 			return localTransformMatrix;
 		}
 
@@ -143,18 +124,9 @@ namespace Hazel
 				worldTransform.Rotation = rotation;
 				worldTransform.Scale = scale;
 			}
-			
+
 			return worldTransform;
 		}
-		//
-		// glm::mat4 GetTransformMatrix() const
-		// {
-		// 	constexpr auto kIdentityMatrix = glm::mat4(1.0f);
-		//
-		// 	return glm::translate(kIdentityMatrix, Position)
-		// 		* glm::toMat4(glm::quat(Rotation))
-		// 		* glm::scale(kIdentityMatrix, Scale);
-		// }
 	};
 
 	struct SpriteRendererComponent
