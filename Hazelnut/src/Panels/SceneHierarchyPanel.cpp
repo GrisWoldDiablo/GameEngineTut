@@ -452,47 +452,21 @@ namespace Hazel
 			}
 
 			ImGui::Separator();
-			if (entity.Family().ParentID && ImGui::MenuItem(fmt::format("Unparent", entity.Name()).c_str()))
-			{
-				_scene->ReparentEntity(_scene->GetRootEntity(), entity);
-			}
-
-			ImGui::Separator();
 			if (ImGui::MenuItem(fmt::format("Delete Entity : [{0}]", entity.Name()).c_str()))
 			{
 				shouldDeleteEntity = true;
 			}
-			ImGui::EndPopup();
-		}
-
-		if (!isRoot)
-		{
-			ImGui::SameLine();
-			if (ImGui::ArrowButton("##Down", ImGuiDir_Down))
+			
+			if (entity.Family().ParentID != _scene->GetRootEntity().GetUUID())
 			{
-				if (auto nextSibling = _scene->GetEntityByUUID(entity.Family().NextSiblingID))
+				ImGui::Separator();
+				if (ImGui::MenuItem(fmt::format("Unparent", entity.Name()).c_str()))
 				{
-					auto parent = _scene->GetEntityByUUID(entity.Family().ParentID);
-					if (parent.Family().ChildID == entity.GetUUID())
-					{
-						parent.Family().ChildID = nextSibling.GetUUID();
-					}
-
-					entity.Family().NextSiblingID = nextSibling.Family().NextSiblingID;
-					if (auto newNextSibling = _scene->GetEntityByUUID(entity.Family().NextSiblingID))
-					{
-						newNextSibling.Family().PreviousSiblingID = entity.GetUUID();
-					}
-					nextSibling.Family().NextSiblingID = entity.GetUUID();
-
-					nextSibling.Family().PreviousSiblingID = entity.Family().PreviousSiblingID;
-					if (auto previousSibling = _scene->GetEntityByUUID(nextSibling.Family().PreviousSiblingID))
-					{
-						previousSibling.Family().NextSiblingID = nextSibling.GetUUID();
-					}
-					entity.Family().PreviousSiblingID = nextSibling.GetUUID();
+					_scene->ReparentEntity(_scene->GetRootEntity(), entity);
 				}
 			}
+			
+			ImGui::EndPopup();
 		}
 
 		if (expanded)
