@@ -203,7 +203,7 @@ namespace Hazel
 						}
 						case ScriptFieldType::Byte:
 						{
-							out << scriptField.GetValue<uint16_t>();
+							out << scriptField.GetValue<uint8_t>();
 							break;
 						}
 						case ScriptFieldType::UShort:

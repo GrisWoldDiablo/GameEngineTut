@@ -187,7 +187,12 @@ namespace Hazel
 		bool IsAssemblyReloading = false;
 
 		// Debugging with Hazel Tool extension
+
+#if HZ_DEBUG
 		bool IsDebuggingEnabled = true;
+#else
+		bool IsDebuggingEnabled = false;
+#endif
 	};
 
 	static ScriptEngineData* sScriptData = nullptr;
@@ -253,7 +258,7 @@ namespace Hazel
 
 		sScriptData->EntityInstances.clear();
 
-		
+
 		if (sScriptData->IsAssemblyReloading)
 		{
 			TryReload(false);
@@ -502,7 +507,7 @@ namespace Hazel
 
 		ScriptGlue::RegisterFunctions();
 		ScriptGlue::RegisterComponents();
-		
+
 		LoadAssemblyClasses();
 
 		// TODO ? Move somewhere else.
@@ -609,10 +614,10 @@ namespace Hazel
 
 			while (MonoClassField* field = mono_class_get_fields(monoClass, &iterator))
 			{
-				const auto type = mono_field_get_type(field);
+				const auto type = mono_type_get_underlying_type(mono_field_get_type(field));
 				auto scriptFieldType = Utils::MonoTypeToScriptFieldType(type);
 
-				if (scriptFieldType == ScriptFieldType::None)
+				if (scriptFieldType == ScriptFieldType::None && mono_type_get_type(type) == MONO_TYPE_CLASS)
 				{
 					if (auto* typeMonoClass = mono_type_get_class(type))
 					{
@@ -623,13 +628,13 @@ namespace Hazel
 					}
 				}
 
-				const auto typeName = Utils::ScriptFieldTypeToString(scriptFieldType);
+				const auto typeName = scriptFieldType == ScriptFieldType::None ? mono_type_get_name(type) : Utils::ScriptFieldTypeToString(scriptFieldType);
 				const auto fieldName = mono_field_get_name(field);
 				const auto flags = mono_field_get_flags(field);
 
 				const auto accessibility = flags & FIELD_ATTRIBUTE_FIELD_ACCESS_MASK;
 
-				std::string extraAttribute = "";
+				std::string extraAttribute;
 				switch (flags & ~FIELD_ATTRIBUTE_FIELD_ACCESS_MASK)
 				{
 				case FIELD_ATTRIBUTE_STATIC:
