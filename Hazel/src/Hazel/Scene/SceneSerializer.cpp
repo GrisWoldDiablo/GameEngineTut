@@ -73,21 +73,40 @@ namespace Hazel
 		out << YAML::Key << "Entity" << YAML::Value << entity.GetUUID();
 
 #pragma region BaseComponent
-		out << YAML::Key << "BaseComponent";
-		out << YAML::BeginMap; // BaseComponent
-		out << YAML::Key << "Name" << YAML::Value << entity.Name();
-		out << YAML::Key << "Tag" << YAML::Value << entity.Tag();
-		out << YAML::Key << "Layer" << YAML::Value << entity.Layer();
-		out << YAML::EndMap; // BaseComponent  
+		{
+			const auto& component = entity.GetComponent<BaseComponent>();
+			out << YAML::Key << "BaseComponent";
+			out << YAML::BeginMap; // BaseComponent
+			out << YAML::Key << "Name" << YAML::Value << component.Name;
+			out << YAML::Key << "Tag" << YAML::Value << component.Tag;
+			out << YAML::Key << "Layer" << YAML::Value << component.Layer;
+			out << YAML::EndMap; // BaseComponent
+		}
+#pragma endregion
+
+#pragma region FamilyComponent
+		{
+			const auto& component = entity.Family();
+			out << YAML::Key << "FamilyComponent";
+			out << YAML::BeginMap; // FamilyComponent
+			out << YAML::Key << "ParentID" << YAML::Value << component.ParentID;
+			out << YAML::Key << "ChildID" << YAML::Value << component.ChildID;
+			out << YAML::Key << "NextSiblingID" << YAML::Value << component.NextSiblingID;
+			out << YAML::Key << "PreviousSiblingID" << YAML::Value << component.PreviousSiblingID;
+			out << YAML::EndMap; // FamilyComponent
+		}
 #pragma endregion
 
 #pragma region TransformComponent
-		out << YAML::Key << "TransformComponent";
-		out << YAML::BeginMap; // TransformComponent
-		out << YAML::Key << "Position" << YAML::Value << entity.Transform().Position;
-		out << YAML::Key << "Rotation" << YAML::Value << entity.Transform().Rotation;
-		out << YAML::Key << "Scale" << YAML::Value << entity.Transform().Scale;
-		out << YAML::EndMap; // TransformComponent  
+		{
+			const auto& component = entity.Transform();
+			out << YAML::Key << "TransformComponent";
+			out << YAML::BeginMap; // TransformComponent
+			out << YAML::Key << "Position" << YAML::Value << component.Position;
+			out << YAML::Key << "Rotation" << YAML::Value << component.Rotation;
+			out << YAML::Key << "Scale" << YAML::Value << component.Scale;
+			out << YAML::EndMap; // TransformComponent
+		}
 #pragma endregion
 
 #pragma region CameraComponent
@@ -436,6 +455,7 @@ namespace Hazel
 	{
 		out << YAML::BeginMap;
 		out << YAML::Key << "Scene" << YAML::Value << _scene->GetName();
+		out << YAML::Key << "RootEntityChildID" << YAML::Value << _scene->GetRootEntity().Family().ChildID;
 		out << YAML::Key << "Entities" << YAML::Value << YAML::BeginSeq;
 
 		for (const auto enttID : _scene->GetEntities())
@@ -488,13 +508,14 @@ namespace Hazel
 		{
 			HZ_CORE_LTRACE("Deserializing scene name[{0}]", sceneName);
 		}
+
 		_scene->SetName(sceneName);
 
-		if (auto entities = data["Entities"])
+		if (const auto entities = data["Entities"])
 		{
-			for (auto entity : entities)
+			for (const auto& entity : entities)
 			{
-				auto entityID = entity["Entity"].as<uint64_t>();
+				const auto entityID = entity["Entity"].as<uint64_t>();
 
 #pragma region BaseComponent
 				std::string name;
@@ -512,6 +533,9 @@ namespace Hazel
 				{
 					HZ_CORE_LTRACE(" Entity: ID[{0}], Name[{1}],Tag[{2}],Layer[{3}]", entityID, name, tag, layer);
 				}
+
+				// TODO Improve creation of entity when deserializing so reparenting can be skip,
+				//  since it will be overriden when deserializing the FamilyComponent. 
 				auto deserializedEntity = _scene->CreateEntityWithUUID(entityID, name, tag, layer);
 
 #pragma region TransformComponent
@@ -562,133 +586,133 @@ namespace Hazel
 
 							for (auto scriptField : scriptFields)
 							{
-								auto name = GetValue<std::string>(scriptField, "Name");
+								auto className = GetValue<std::string>(scriptField, "Name");
 
-								if (fields.find(name) == fields.end())
+								if (!fields.contains(className))
 								{
-									HZ_CORE_LWARN("Deserialization: Field [{0}] doesn't not exist on class [{1}]", name, component.ClassName);
+									HZ_CORE_LWARN("Deserialization: Field [{0}] doesn't not exist on class [{1}]", className, component.ClassName);
 									continue;
 								}
 
 								auto type = GetValue<ScriptFieldType>(scriptField, "Type");
-								auto& scriptFieldInstance = entityFields[name];
-								scriptFieldInstance.Field = fields.at(name);
+								auto& scriptFieldInstance = entityFields[className];
+								scriptFieldInstance.Field = fields.at(className);
 
 								switch (type)
 								{
 								case ScriptFieldType::Float:
 								{
-									auto data = GetValue<float>(scriptField, "Data");
-									scriptFieldInstance.SetValue(data);
+									auto fieldData = GetValue<float>(scriptField, "Data");
+									scriptFieldInstance.SetValue(fieldData);
 									break;
 								}
 								case ScriptFieldType::Double:
 								{
-									auto data = GetValue<double>(scriptField, "Data");
-									scriptFieldInstance.SetValue(data);
+									auto fieldData = GetValue<double>(scriptField, "Data");
+									scriptFieldInstance.SetValue(fieldData);
 									break;
 								}
 								case ScriptFieldType::Char:
 								{
-									auto data = static_cast<uint16_t>(GetValue<char>(scriptField, "Data"));
-									scriptFieldInstance.SetValue(data);
+									auto fieldData = static_cast<uint16_t>(GetValue<char>(scriptField, "Data"));
+									scriptFieldInstance.SetValue(fieldData);
 									break;
 								}
 								case ScriptFieldType::Bool:
 								{
-									auto data = GetValue<bool>(scriptField, "Data");
-									scriptFieldInstance.SetValue(data);
+									auto fieldData = GetValue<bool>(scriptField, "Data");
+									scriptFieldInstance.SetValue(fieldData);
 									break;
 								}
 								case ScriptFieldType::SByte:
 								{
-									auto data = GetValue<int8_t>(scriptField, "Data");
-									scriptFieldInstance.SetValue(data);
+									auto fieldData = GetValue<int8_t>(scriptField, "Data");
+									scriptFieldInstance.SetValue(fieldData);
 									break;
 								}
 								case ScriptFieldType::Short:
 								{
-									auto data = GetValue<int16_t>(scriptField, "Data");
-									scriptFieldInstance.SetValue(data);
+									auto fieldData = GetValue<int16_t>(scriptField, "Data");
+									scriptFieldInstance.SetValue(fieldData);
 									break;
 								}
 								case ScriptFieldType::Int:
 								{
-									auto data = GetValue<int32_t>(scriptField, "Data");
-									scriptFieldInstance.SetValue(data);
+									auto fieldData = GetValue<int32_t>(scriptField, "Data");
+									scriptFieldInstance.SetValue(fieldData);
 									break;
 								}
 								case ScriptFieldType::Long:
 								{
-									auto data = GetValue<int64_t>(scriptField, "Data");
-									scriptFieldInstance.SetValue(data);
+									auto fieldData = GetValue<int64_t>(scriptField, "Data");
+									scriptFieldInstance.SetValue(fieldData);
 									break;
 								}
 								case ScriptFieldType::Byte:
 								{
-									auto data = GetValue<uint8_t>(scriptField, "Data");
-									scriptFieldInstance.SetValue(data);
+									auto fieldData = GetValue<uint8_t>(scriptField, "Data");
+									scriptFieldInstance.SetValue(fieldData);
 									break;
 								}
 								case ScriptFieldType::UShort:
 								{
-									auto data = GetValue<uint16_t>(scriptField, "Data");
-									scriptFieldInstance.SetValue(data);
+									auto fieldData = GetValue<uint16_t>(scriptField, "Data");
+									scriptFieldInstance.SetValue(fieldData);
 									break;
 								}
 								case ScriptFieldType::UInt:
 								{
-									auto data = GetValue<uint32_t>(scriptField, "Data");
-									scriptFieldInstance.SetValue(data);
+									auto fieldData = GetValue<uint32_t>(scriptField, "Data");
+									scriptFieldInstance.SetValue(fieldData);
 									break;
 								}
 								case ScriptFieldType::ULong:
 								{
-									auto data = GetValue<uint64_t>(scriptField, "Data");
-									scriptFieldInstance.SetValue(data);
+									auto fieldData = GetValue<uint64_t>(scriptField, "Data");
+									scriptFieldInstance.SetValue(fieldData);
 									break;
 								}
 								case ScriptFieldType::Vector2:
 								{
-									auto data = GetValue<glm::vec2>(scriptField, "Data");
-									scriptFieldInstance.SetValue(data);
+									auto fieldData = GetValue<glm::vec2>(scriptField, "Data");
+									scriptFieldInstance.SetValue(fieldData);
 									break;
 								}
 								case ScriptFieldType::Vector3:
 								{
-									auto data = GetValue<glm::vec3>(scriptField, "Data");
-									scriptFieldInstance.SetValue(data);
+									auto fieldData = GetValue<glm::vec3>(scriptField, "Data");
+									scriptFieldInstance.SetValue(fieldData);
 									break;
 								}
 								case ScriptFieldType::Vector4:
 								{
-									auto data = GetValue<glm::vec4>(scriptField, "Data");
-									scriptFieldInstance.SetValue(data);
+									auto fieldData = GetValue<glm::vec4>(scriptField, "Data");
+									scriptFieldInstance.SetValue(fieldData);
 									break;
 								}
 								case ScriptFieldType::Color:
 								{
-									auto data = GetValue<glm::vec4>(scriptField, "Data");
-									scriptFieldInstance.SetValue(data);
+									auto fieldData = GetValue<glm::vec4>(scriptField, "Data");
+									scriptFieldInstance.SetValue(fieldData);
 									break;
 								}
 								case ScriptFieldType::Entity:
 								{
-									auto data = GetValue<uint64_t>(scriptField, "Data");
-									scriptFieldInstance.SetValue(data);
+									auto fieldData = GetValue<uint64_t>(scriptField, "Data");
+									scriptFieldInstance.SetValue(fieldData);
 									break;
 								}
 								case ScriptFieldType::String:
 								{
-									auto data = GetValue<std::string>(scriptField, "Data");
-									scriptFieldInstance.SetStringValue(data);
+									auto fieldData = GetValue<std::string>(scriptField, "Data");
+									scriptFieldInstance.SetStringValue(fieldData);
 									break;
 								}
 								case ScriptFieldType::None:
 								default:
 								{
-									auto data = "";
-									scriptFieldInstance.SetValue(data);
+									auto fieldData = "";
+									scriptFieldInstance.SetValue(fieldData);
 									break;
 								}
 								}
@@ -794,6 +818,36 @@ namespace Hazel
 					component.IsVisibleInGame = GetValue<bool>(audioListenerComponent, "IsVisibleInGame", false);
 				}
 #pragma endregion
+			}
+		}
+
+		// Checks for backward compatibility with scenes that did not serialize hierarchy
+		if (const auto rootEntityChildID = GetValue<uint64_t>(data, "RootEntityChildID"))
+		{
+			_scene->GetRootEntity().Family().ChildID = rootEntityChildID;
+		}
+
+		// Deserialization and setup for the FamilyComponent has to be done after all entities were created.
+		if (const auto entities = data["Entities"])
+		{
+			for (const auto& entity : entities)
+			{
+				const auto entityID = entity["Entity"].as<uint64_t>();
+
+				if (auto familyComponent = entity["FamilyComponent"])
+				{
+					const auto entityByUuid = _scene->GetEntityByUUID(entityID);
+
+					// Entities always have FamilyComponent
+					auto& component = entityByUuid.Family();
+					component.ParentID = familyComponent["ParentID"].as<uint64_t>();
+					component.ChildID = familyComponent["ChildID"].as<uint64_t>();
+					component.NextSiblingID = familyComponent["NextSiblingID"].as<uint64_t>();
+					component.PreviousSiblingID = familyComponent["PreviousSiblingID"].as<uint64_t>();
+
+					// Set the parent transform pointer.
+					entityByUuid.Transform().ParentTransform = &_scene->GetEntityByUUID(component.ParentID).Transform();
+				}
 			}
 		}
 

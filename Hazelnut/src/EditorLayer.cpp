@@ -1,10 +1,12 @@
 #include "EditorLayer.h"
+
+#include <Box2D/include/box2d/b2_body.h>
+
 #include "Utils/EditorResourceManager.h"
 #include "NativeScripts.h"
 
 #include "Hazel/Scene/SceneSerializer.h"
 #include "Hazel/Utils/PlatformUtils.h"
-#include "Hazel/Math/HMath.h"
 
 #include <imgui/imgui.h>
 #include "ImGuizmo.h"
@@ -397,8 +399,8 @@ namespace Hazel
 			}
 
 			auto& camera = primaryCamera.GetComponent<CameraComponent>().Camera;
-			auto& transformComponent = primaryCamera.GetComponent<TransformComponent>();
-			auto transform = transformComponent.GetTransformMatrix();
+			auto& transformComponent = primaryCamera.Transform();
+			auto transform = transformComponent.GetWorldTransformMatrix();
 			if (camera.GetProjectionType() == SceneCamera::ProjectionType::Perspective)
 			{
 				cameraPositionZ = transformComponent.Position.z;
@@ -432,7 +434,18 @@ namespace Hazel
 				{
 					if (_shouldShowPhysicsColliders || enttID == selectedEntity)
 					{
-						float sign = cameraPositionZ > transform.Position.z ? 1.0f : -1.0f;
+						if (_sceneState != SceneState::Edit)
+						{
+							Entity entity = {enttID, _activeScene.get()};
+							if (entity.HasComponent<Rigidbody2DComponent>())
+							{
+								const auto& rb2d = entity.GetComponent<Rigidbody2DComponent>();
+								transform.Position.x = static_cast<b2Body*>(rb2d.RuntimeBody)->GetPosition().x;
+								transform.Position.y = static_cast<b2Body*>(rb2d.RuntimeBody)->GetPosition().y;
+								transform.Rotation.z = static_cast<b2Body*>(rb2d.RuntimeBody)->GetAngle();
+							}
+						}
+						const float sign = cameraPositionZ > transform.Position.z ? 1.0f : -1.0f;
 
 						glm::mat4 newTransform = glm::translate(kIdentityMatrix, transform.Position)
 							* glm::toMat4(glm::quat(transform.Rotation))
@@ -456,7 +469,18 @@ namespace Hazel
 				{
 					if (_shouldShowPhysicsColliders || enttID == selectedEntity)
 					{
-						float sign = cameraPositionZ > transform.Position.z ? 1.0f : -1.0f;
+						if (_sceneState != SceneState::Edit)
+						{
+							Entity entity = {enttID, _activeScene.get()};
+							if (entity.HasComponent<Rigidbody2DComponent>())
+							{
+								const auto& rb2d = entity.GetComponent<Rigidbody2DComponent>();
+								transform.Position.x = static_cast<b2Body*>(rb2d.RuntimeBody)->GetPosition().x;
+								transform.Position.y = static_cast<b2Body*>(rb2d.RuntimeBody)->GetPosition().y;
+								transform.Rotation.z = static_cast<b2Body*>(rb2d.RuntimeBody)->GetAngle();
+							}
+						}
+						const float sign = cameraPositionZ > transform.Position.z ? 1.0f : -1.0f;
 
 						glm::mat4 newTransform = glm::translate(kIdentityMatrix, transform.Position)
 							* glm::toMat4(glm::quat(transform.Rotation))
@@ -476,9 +500,9 @@ namespace Hazel
 
 		if (selectedEntity)
 		{
-			const auto& transform = selectedEntity.GetComponent<TransformComponent>();
+			const auto& transform = selectedEntity.Transform();
 
-			Renderer2D::DrawRect(transform.GetTransformMatrix(), Color::Orange);
+			Renderer2D::DrawRect(transform.GetWorldTransformMatrix(), Color::Orange);
 		}
 
 		Renderer2D::EndScene();
@@ -1023,7 +1047,7 @@ namespace Hazel
 						// Runtime Camera;
 						const auto& camera = cameraEntity.GetComponent<CameraComponent>().Camera;
 						cameraProjection = camera.GetProjection();
-						cameraView = glm::inverse(cameraEntity.Transform().GetTransformMatrix());
+						cameraView = glm::inverse(cameraEntity.Transform().GetWorldTransformMatrix());
 						ImGuizmo::SetOrthographic(camera.GetProjectionType() == SceneCamera::ProjectionType::Orthographic);
 					}
 				}
@@ -1037,17 +1061,17 @@ namespace Hazel
 
 				ImGuizmo::SetDrawlist();
 
-				auto windowWidth = (float)ImGui::GetWindowWidth();
-				auto windowHeight = (float)ImGui::GetWindowHeight();
+				auto windowWidth = ImGui::GetWindowWidth();
+				auto windowHeight = ImGui::GetWindowHeight();
 				ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, windowWidth, windowHeight);
 
 
 				// Entity transform
 				auto& transformComponent = selectedEntity.Transform();
-				auto transform = transformComponent.GetTransformMatrix();
+				auto worldTransform = transformComponent.GetWorldTransformMatrix();
 
 				// Snapping
-				bool snap = Input::IsKeyDown(Key::LeftControl);
+				const bool snap = Input::IsKeyDown(Key::LeftControl);
 				float snapValue = 0.5f; // Snap to 0.5m for position and scale.
 
 				// Snap to 45 degrees for rotation.
@@ -1056,24 +1080,25 @@ namespace Hazel
 					snapValue = 45.0f;
 				}
 
-				float snapValues[3] = {snapValue, snapValue, snapValue};
+				const float snapValues[3] = {snapValue, snapValue, snapValue};
 				int gizmoType = _hasStoredPreviousGizmoType ? _previousGizmoType : _gizmoType;
 				ImGuizmo::Manipulate(glm::value_ptr(cameraView), glm::value_ptr(cameraProjection),
-					(ImGuizmo::OPERATION)gizmoType, (ImGuizmo::MODE)_gizmoSpace, glm::value_ptr(transform),
-					nullptr, snap ? snapValues : nullptr);
+					static_cast<ImGuizmo::OPERATION>(gizmoType), static_cast<ImGuizmo::MODE>(_gizmoSpace),
+					glm::value_ptr(worldTransform), nullptr, snap ? snapValues : nullptr);
 
 				if (ImGuizmo::IsUsing() && !_hasStoredPreviousGizmoType)
 				{
-					glm::vec3 position, rotation, scale;
-					if (HMath::DecomposeTransform(transform, position, rotation, scale))
-					{
-						transformComponent.Position = position;
-						auto rotationDelta = rotation - transformComponent.Rotation;
-						transformComponent.Rotation += rotationDelta;
-						transformComponent.Scale = scale;
-
-						_sceneHierarchyPanel.EditRuntimeRigidbody(selectedEntity, true);
-					}
+					transformComponent.SetWorldTransform(worldTransform);
+					// glm::vec3 position, rotation, scale;
+					// if (HMath::DecomposeTransform(transform, position, rotation, scale))
+					// {
+					// 	transformComponent.Position = position;
+					// 	auto rotationDelta = rotation - transformComponent.Rotation;
+					// 	transformComponent.Rotation += rotationDelta;
+					// 	transformComponent.Scale = scale;
+					//
+					// 	_sceneHierarchyPanel.EditRuntimeRigidbody(selectedEntity, true);
+					// }
 				}
 			}
 		}

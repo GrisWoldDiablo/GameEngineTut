@@ -1,0 +1,90 @@
+Scene: Hierarchy Example
+RootEntityChildID: 6743838690665385785
+Entities:
+  - Entity: 6743838690665385785
+    BaseComponent:
+      Name: Parent
+      Tag: 0
+      Layer: 0
+    FamilyComponent:
+      ParentID: 69420
+      ChildID: 11419151614518552506
+      NextSiblingID: 0
+      PreviousSiblingID: 0
+    TransformComponent:
+      Position: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    SpriteRendererComponent:
+      TexturePath: assets\textures\Ship.png
+      MagFilter: 9728
+      Tiling: [1, 1]
+      Color: [1, 1, 1, 1]
+  - Entity: 11419151614518552506
+    BaseComponent:
+      Name: Child
+      Tag: 0
+      Layer: 0
+    FamilyComponent:
+      ParentID: 6743838690665385785
+      ChildID: 15445775326339004703
+      NextSiblingID: 735278747442671756
+      PreviousSiblingID: 0
+    TransformComponent:
+      Position: [1.5, 0.755142272, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1.5, 1.5, 1.5]
+    SpriteRendererComponent:
+      Tiling: [1, 1]
+      Color: [1, 0, 0, 1]
+  - Entity: 15445775326339004703
+    BaseComponent:
+      Name: Child of Child
+      Tag: 0
+      Layer: 0
+    FamilyComponent:
+      ParentID: 11419151614518552506
+      ChildID: 0
+      NextSiblingID: 5023951043975805530
+      PreviousSiblingID: 0
+    TransformComponent:
+      Position: [1.5, 0.613204896, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    SpriteRendererComponent:
+      Tiling: [1, 1]
+      Color: [0, 1, 1, 1]
+  - Entity: 5023951043975805530
+    BaseComponent:
+      Name: Child of Child Sibiling
+      Tag: 0
+      Layer: 0
+    FamilyComponent:
+      ParentID: 11419151614518552506
+      ChildID: 0
+      NextSiblingID: 0
+      PreviousSiblingID: 15445775326339004703
+    TransformComponent:
+      Position: [1.5, -0.675918639, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    SpriteRendererComponent:
+      Tiling: [1, 1]
+      Color: [0, 0.316602468, 1, 1]
+  - Entity: 735278747442671756
+    BaseComponent:
+      Name: Child Sibling
+      Tag: 0
+      Layer: 0
+    FamilyComponent:
+      ParentID: 6743838690665385785
+      ChildID: 0
+      NextSiblingID: 0
+      PreviousSiblingID: 11419151614518552506
+    TransformComponent:
+      Position: [1.5, -0.789931059, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    SpriteRendererComponent:
+      Tiling: [1, 1]
+      Color: [0, 0.849420786, 1, 1]

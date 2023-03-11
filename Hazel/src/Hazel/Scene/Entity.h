@@ -69,13 +69,13 @@ namespace Hazel
 			return !(*this == other);
 		}
 
-		std::string& Name();
-		int& Tag();
-		int& Layer();
+		std::string& Name() const;
+		int& Tag() const;
+		int& Layer() const;
 
-		FamilyComponent& Family();
+		FamilyComponent& Family() const;
 
-		TransformComponent& Transform();
+		TransformComponent& Transform() const;
 
 	private:
 		entt::entity _entityHandle{entt::null};

@@ -12,6 +12,8 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
 
+#include "Hazel/Math/HMath.h"
+
 namespace Hazel
 {
 	//  This component is to be used exclusively for scene's root entity.
@@ -57,21 +59,73 @@ namespace Hazel
 		glm::vec3 Rotation{0.0f, 0.0f, 0.0f};
 		glm::vec3 Scale{1.0f, 1.0f, 1.0f};
 
+		const TransformComponent* ParentTransform = nullptr;
+
 		TransformComponent() = default;
 		TransformComponent(const TransformComponent&) = default;
 
-		glm::mat4 GetTransformMatrix() const
+		// World Transform
+		void SetLocalTransform(const glm::mat4& newTransform)
 		{
-			const auto kIdentityMatrix = glm::mat4(1.0f);
-			glm::mat4 rotation = glm::toMat4(glm::quat(Rotation));
-			// This give different outcome.
-			/*auto rotation = glm::rotate(identityMatrix, Rotation.x, { 1, 0, 0 })
-				* glm::rotate(identityMatrix, Rotation.y, { 0, 1, 0 })
-				* glm::rotate(identityMatrix, Rotation.z, { 0, 0, 1 });*/
+			glm::vec3 position, rotation, scale;
+			if (HMath::DecomposeTransform(newTransform, position, rotation, scale))
+			{
+				Position = position;
+				Rotation = rotation;
+				Scale = scale;
+			}
+		}
 
-			return glm::translate(kIdentityMatrix, Position)
-				* rotation
+		void SetWorldTransform(const glm::mat4& newTransform)
+		{
+			glm::mat4 newWorldTransform = newTransform;
+			if (ParentTransform)
+			{
+				newWorldTransform = glm::inverse(ParentTransform->GetWorldTransformMatrix()) * newWorldTransform;
+			}
+
+			glm::vec3 position, rotation, scale;
+			if (HMath::DecomposeTransform(newWorldTransform, position, rotation, scale))
+			{
+				Position = position;
+				Rotation = rotation;
+				Scale = scale;
+			}
+		}
+
+		glm::mat4 GetWorldTransformMatrix() const
+		{
+			if (ParentTransform)
+			{
+				return ParentTransform->GetWorldTransformMatrix() * GetLocalTransformMatrix();
+			}
+
+			return GetLocalTransformMatrix();
+		}
+
+		glm::mat4 GetLocalTransformMatrix() const
+		{
+			constexpr auto kIdentityMatrix = glm::mat4(1.0f);
+
+			const glm::mat4 localTransformMatrix = glm::translate(kIdentityMatrix, Position)
+				* glm::toMat4(glm::quat(Rotation))
 				* glm::scale(kIdentityMatrix, Scale);
+
+			return localTransformMatrix;
+		}
+
+		TransformComponent GetRelativeTransform() const
+		{
+			TransformComponent worldTransform;
+			glm::vec3 position, rotation, scale;
+			if (HMath::DecomposeTransform(GetLocalTransformMatrix(), position, rotation, scale))
+			{
+				worldTransform.Position = position;
+				worldTransform.Rotation = rotation;
+				worldTransform.Scale = scale;
+			}
+
+			return worldTransform;
 		}
 	};
 
