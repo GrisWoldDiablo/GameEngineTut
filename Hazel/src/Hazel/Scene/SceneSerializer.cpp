@@ -533,7 +533,7 @@ namespace Hazel
 				{
 					HZ_CORE_LTRACE(" Entity: ID[{0}], Name[{1}],Tag[{2}],Layer[{3}]", entityID, name, tag, layer);
 				}
-				
+
 				// TODO Improve creation of entity when deserializing so reparenting can be skip,
 				//  since it will be overriden when deserializing the FamilyComponent. 
 				auto deserializedEntity = _scene->CreateEntityWithUUID(entityID, name, tag, layer);

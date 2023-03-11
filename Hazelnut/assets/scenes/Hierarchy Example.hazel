@@ -1,74 +1,6 @@
 Scene: Hierarchy Example
 RootEntityChildID: 6743838690665385785
 Entities:
-  - Entity: 735278747442671756
-    BaseComponent:
-      Name: Child Sibling
-      Tag: 0
-      Layer: 0
-    FamilyComponent:
-      ParentID: 6743838690665385785
-      ChildID: 0
-      NextSiblingID: 0
-      PreviousSiblingID: 11419151614518552506
-    TransformComponent:
-      Position: [1.35366952, 0.157851338, 0.423742384]
-      Rotation: [1.14916861, -0.72874701, 1.66754723]
-      Scale: [2.10579062, 1.00000024, 0.999999881]
-    SpriteRendererComponent:
-      Tiling: [1, 1]
-      Color: [1, 0, 0, 0.53725493]
-  - Entity: 5023951043975805530
-    BaseComponent:
-      Name: Child of Child Sibiling
-      Tag: 0
-      Layer: 0
-    FamilyComponent:
-      ParentID: 11419151614518552506
-      ChildID: 0
-      NextSiblingID: 0
-      PreviousSiblingID: 15445775326339004703
-    TransformComponent:
-      Position: [-0.476443678, -0.359310895, -1.07924545]
-      Rotation: [0.764734983, -1.29638553, -1.33954048]
-      Scale: [0.999999881, 0.999999881, 2.18903089]
-    SpriteRendererComponent:
-      Tiling: [1, 1]
-      Color: [0, 1, 0.941176474, 1]
-  - Entity: 15445775326339004703
-    BaseComponent:
-      Name: Child of Child
-      Tag: 0
-      Layer: 0
-    FamilyComponent:
-      ParentID: 11419151614518552506
-      ChildID: 0
-      NextSiblingID: 5023951043975805530
-      PreviousSiblingID: 0
-    TransformComponent:
-      Position: [-0.476443529, -0.359311312, -1.07924664]
-      Rotation: [0.764734745, -1.29638529, -1.33954072]
-      Scale: [0.999999881, 0.999999881, 2.18903089]
-    SpriteRendererComponent:
-      Tiling: [1, 1]
-      Color: [0, 1, 0.941176474, 1]
-  - Entity: 11419151614518552506
-    BaseComponent:
-      Name: Child
-      Tag: 0
-      Layer: 0
-    FamilyComponent:
-      ParentID: 6743838690665385785
-      ChildID: 15445775326339004703
-      NextSiblingID: 735278747442671756
-      PreviousSiblingID: 0
-    TransformComponent:
-      Position: [1.35366952, 0.157851368, 0.423742205]
-      Rotation: [1.14916897, -0.728747487, 1.66754675]
-      Scale: [2.10579062, 1.00000024, 0.999999881]
-    SpriteRendererComponent:
-      Tiling: [1, 1]
-      Color: [1, 0, 0, 0.53725493]
   - Entity: 6743838690665385785
     BaseComponent:
       Name: Parent
@@ -80,11 +12,79 @@ Entities:
       NextSiblingID: 0
       PreviousSiblingID: 0
     TransformComponent:
-      Position: [-0.530368388, -0.271560907, -2.38418579e-07]
-      Rotation: [0.36310941, 0.483058214, -0.0544203743]
-      Scale: [3.19202209, 3.5545392, 1.75000095]
+      Position: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
     SpriteRendererComponent:
       TexturePath: assets\textures\Ship.png
       MagFilter: 9728
       Tiling: [1, 1]
       Color: [1, 1, 1, 1]
+  - Entity: 11419151614518552506
+    BaseComponent:
+      Name: Child
+      Tag: 0
+      Layer: 0
+    FamilyComponent:
+      ParentID: 6743838690665385785
+      ChildID: 15445775326339004703
+      NextSiblingID: 735278747442671756
+      PreviousSiblingID: 0
+    TransformComponent:
+      Position: [1.5, 0.755142272, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1.5, 1.5, 1.5]
+    SpriteRendererComponent:
+      Tiling: [1, 1]
+      Color: [1, 0, 0, 1]
+  - Entity: 15445775326339004703
+    BaseComponent:
+      Name: Child of Child
+      Tag: 0
+      Layer: 0
+    FamilyComponent:
+      ParentID: 11419151614518552506
+      ChildID: 0
+      NextSiblingID: 5023951043975805530
+      PreviousSiblingID: 0
+    TransformComponent:
+      Position: [1.5, 0.613204896, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    SpriteRendererComponent:
+      Tiling: [1, 1]
+      Color: [0, 1, 1, 1]
+  - Entity: 5023951043975805530
+    BaseComponent:
+      Name: Child of Child Sibiling
+      Tag: 0
+      Layer: 0
+    FamilyComponent:
+      ParentID: 11419151614518552506
+      ChildID: 0
+      NextSiblingID: 0
+      PreviousSiblingID: 15445775326339004703
+    TransformComponent:
+      Position: [1.5, -0.675918639, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    SpriteRendererComponent:
+      Tiling: [1, 1]
+      Color: [0, 0.316602468, 1, 1]
+  - Entity: 735278747442671756
+    BaseComponent:
+      Name: Child Sibling
+      Tag: 0
+      Layer: 0
+    FamilyComponent:
+      ParentID: 6743838690665385785
+      ChildID: 0
+      NextSiblingID: 0
+      PreviousSiblingID: 11419151614518552506
+    TransformComponent:
+      Position: [1.5, -0.789931059, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    SpriteRendererComponent:
+      Tiling: [1, 1]
+      Color: [0, 0.849420786, 1, 1]
