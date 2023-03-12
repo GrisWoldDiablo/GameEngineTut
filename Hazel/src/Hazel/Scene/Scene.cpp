@@ -249,11 +249,8 @@ namespace Hazel
 			// C# OnUpdate Script
 			for (auto&& [enttID, component] : GetEntitiesViewWith<ScriptComponent>().each())
 			{
-				if (ScriptEngine::EntityClassExist(component.ClassName))
-				{
-					Entity entity = {enttID, this};
-					ScriptEngine::OnUpdateEntity(entity, timestep);
-				}
+				Entity entity = {enttID, this};
+				ScriptEngine::OnUpdateEntity(entity, timestep);
 			}
 
 			for (auto&& [enttID, component] : GetEntitiesViewWith<NativeScriptComponent>().each())
@@ -591,7 +588,7 @@ namespace Hazel
 	Entity Scene::GetEntityByUUID(UUID uuid)
 	{
 		// Maybe assert?
-		if (_entityMap.contains(uuid))
+		if (uuid != UUID::Invalid && _entityMap.contains(uuid))
 		{
 			return {_entityMap.at(uuid), this};
 		}
@@ -911,10 +908,7 @@ namespace Hazel
 		{
 			CleanUpComponent<ScriptComponent>(entity, [&](ScriptComponent& component)
 			{
-				if (ScriptEngine::EntityClassExist(component.ClassName))
-				{
-					ScriptEngine::OnDestroyEntity(entity);
-				}
+				ScriptEngine::OnDestroyEntity(entity);
 			});
 		}
 	}

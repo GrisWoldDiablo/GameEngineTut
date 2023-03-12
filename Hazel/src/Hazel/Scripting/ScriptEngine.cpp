@@ -1,6 +1,7 @@
 #include "hzpch.h"
 #include "Hazel/Scene/Scene.h"
 #include "Hazel/Core/Application.h"
+#include "Hazel/Core/FileSystem.h"
 
 #include "ScriptEngine.h"
 #include "ScriptGlue.h"
@@ -47,47 +48,16 @@ namespace Hazel
 			{ "Hazel.Entity"	,	ScriptFieldType::Entity	 },
 		};
 
-		// TODO: Move to FileSystem Class
-		static char* ReadBytes(const std::filesystem::path& filePath, uint32_t* outSize)
-		{
-			std::ifstream stream(filePath, std::ios::binary | std::ios::ate);
-
-			if (!stream)
-			{
-				HZ_CORE_LERROR("Fail to load filePath {0}!", filePath);
-				return nullptr;
-			}
-
-			const std::streampos end = stream.tellg();
-			stream.seekg(0, std::ios::beg);
-			const auto size = static_cast<uint32_t>(end - stream.tellg());
-
-			if (size == 0)
-			{
-				HZ_CORE_LERROR("File empty!");
-				return nullptr;
-			}
-
-			char* buffer = new char[size];
-			stream.read(buffer, size);
-			stream.close();
-
-			*outSize = size;
-
-			return buffer;
-		}
-
 		static MonoAssembly* LoadMonoAssembly(const std::filesystem::path& filePath, const bool shouldLoadPDB = false)
 		{
-			uint32_t fileSize = 0;
-			char* fileData = ReadBytes(filePath.string(), &fileSize);
+			ScopedBuffer fileData = FileSystem::ReadFileBinary(filePath.string());
 			if (!fileData)
 			{
 				return nullptr;
 			}
 
 			MonoImageOpenStatus status;
-			MonoImage* image = mono_image_open_from_data_full(fileData, fileSize, 1, &status, 0);
+			MonoImage* image = mono_image_open_from_data_full(fileData.As<char>(), static_cast<uint32_t>(fileData.Size()), 1, &status, 0);
 
 			if (status != MONO_IMAGE_OK)
 			{
@@ -102,16 +72,14 @@ namespace Hazel
 				pdbPath.replace_extension(".pdb");
 				if (std::filesystem::exists(pdbPath))
 				{
-					uint32_t pdbFileSize = 0;
-					char* pdbFileData = ReadBytes(pdbPath, &pdbFileSize);
-					if (pdbFileData == nullptr)
+					ScopedBuffer pdbFileData = FileSystem::ReadFileBinary(pdbPath);
+					if (!pdbFileData)
 					{
 						HZ_CORE_LDEBUG("Failed to load PDB: {}", pdbPath);
 					}
 					else
 					{
-						mono_debug_open_image_from_memory(image, reinterpret_cast<const mono_byte*>(pdbFileData), static_cast<int>(pdbFileSize));
-						delete[] pdbFileData;
+						mono_debug_open_image_from_memory(image, pdbFileData.As<const mono_byte>(), static_cast<int>(pdbFileData.Size()));
 						HZ_CORE_LDEBUG("Loaded PDB: {}", pdbPath);
 					}
 				}
@@ -119,7 +87,6 @@ namespace Hazel
 
 			MonoAssembly* assembly = mono_assembly_load_from_full(image, filePath.string().c_str(), &status, 0);
 			mono_image_close(image);
-			delete[] fileData;
 			return assembly;
 		}
 
@@ -351,7 +318,6 @@ namespace Hazel
 					}
 					default:
 						instance->TrySetFieldValueInternal(name, fieldInstance._dataBuffer);
-
 						break;
 					}
 				}
@@ -365,21 +331,31 @@ namespace Hazel
 
 	void ScriptEngine::OnDestroyEntity(Entity entity)
 	{
-		const auto& entityUUID = entity.GetUUID();
-		HZ_CORE_ASSERT(sScriptData->EntityInstances.contains(entityUUID), "Entity UUID [{0}] missing", entityUUID);
-
-		auto& instance = sScriptData->EntityInstances.at(entityUUID);
-		instance->InvokeOnDestroy();
-		sScriptData->EntityInstances.erase(entityUUID);
+		const auto entityUUID = entity.GetUUID();
+		if (sScriptData->EntityInstances.contains(entityUUID))
+		{
+			const auto& instance = sScriptData->EntityInstances[entityUUID];
+			instance->InvokeOnDestroy();
+			sScriptData->EntityInstances.erase(entityUUID);
+		}
+		else
+		{
+			HZ_CORE_LERROR("Entity UUID [{0}] missing ScriptInstance", entityUUID);
+		}
 	}
 
 	void ScriptEngine::OnUpdateEntity(Entity entity, Timestep timestep)
 	{
-		const auto& entityUUID = entity.GetUUID();
-		HZ_CORE_ASSERT(sScriptData->EntityInstances.contains(entityUUID), "Entity UUID [{0}] missing", entityUUID);
-
-		auto& instance = sScriptData->EntityInstances.at(entityUUID);
-		instance->InvokeOnUpdate(timestep);
+		const auto entityUUID = entity.GetUUID();
+		if (sScriptData->EntityInstances.contains(entityUUID))
+		{
+			const auto& instance = sScriptData->EntityInstances[entityUUID];
+			instance->InvokeOnUpdate(timestep);
+		}
+		else
+		{
+			HZ_CORE_LERROR("Entity UUID [{0}] missing ScriptInstance", entityUUID);
+		}
 	}
 
 	Scene* ScriptEngine::GetSceneContext()
