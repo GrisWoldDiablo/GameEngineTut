@@ -11,6 +11,7 @@ namespace Hazel
 {
 	// Static singleton access
 	Application* Application::_sInstance = nullptr;
+	std::thread::id Application::_sMainThreadID;
 
 	Application::Application(const ApplicationSpecification& specification)
 		: _specification(specification)
@@ -25,6 +26,7 @@ namespace Hazel
 		HZ_CORE_ASSERT(!_sInstance, "Application already exist!")
 		{
 			_sInstance = this;
+			_sMainThreadID = std::this_thread::get_id();
 			Time::_sInstance = new Time();
 		}
 
@@ -209,5 +211,10 @@ namespace Hazel
 		}
 
 		_mainThreadQueue.clear();
+	}
+	
+	bool Application::IsMainThread()
+	{
+		return _sMainThreadID == std::this_thread::get_id();
 	}
 }

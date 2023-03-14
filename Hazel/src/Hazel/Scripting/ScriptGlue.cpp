@@ -144,7 +144,7 @@ namespace Hazel
 		auto* scene = ScriptEngine::GetSceneContext();
 		HZ_CORE_ASSERT(scene, "Scene is null!");
 
-		if (auto entity = scene->GetEntityByUUID(entityId))
+		if (const auto entity = scene->GetEntityByUUID(entityId))
 		{
 			scene->DestroyEntity(entity);
 			return true;
@@ -161,7 +161,7 @@ namespace Hazel
 
 		*outEntity = nullptr;
 		auto* entityName = mono_string_to_utf8(name);
-		auto foundEntity = scene->GetEntityByName(entityName);
+		const auto foundEntity = scene->GetEntityByName(entityName);
 		mono_free(entityName);
 
 		if (foundEntity)
@@ -186,30 +186,35 @@ namespace Hazel
 	{
 		auto* scene = ScriptEngine::GetSceneContext();
 		HZ_CORE_ASSERT(scene, "Scene is null!");
-		auto entity = scene->GetEntityByUUID(entityId);
+		const auto entity = scene->GetEntityByUUID(entityId);
 		HZ_CORE_ASSERT(entity, "Entity is null!");
 
 		auto* managedType = mono_reflection_type_get_type(componentType);
-		HZ_CORE_ASSERT(sEntityAddComponentFuncs.find(managedType) != sEntityAddComponentFuncs.end(), "Invalid Type!");
+		HZ_CORE_ASSERT(sEntityAddComponentFuncs.contains(managedType), "Invalid Type!");
 
-		sEntityAddComponentFuncs.at(managedType)(entity);
+		sEntityAddComponentFuncs[managedType](entity);
 	}
 
 	static bool Entity_HasComponent(UUID entityId, MonoReflectionType* componentType)
 	{
 		auto* scene = ScriptEngine::GetSceneContext();
 		HZ_CORE_ASSERT(scene, "Scene is null!");
-		auto entity = scene->GetEntityByUUID(entityId);
+		const auto entity = scene->GetEntityByUUID(entityId);
 		HZ_CORE_ASSERT(entity, "Entity is null!");
 
 		auto* managedType = mono_reflection_type_get_type(componentType);
-		HZ_CORE_ASSERT(sEntityHasComponentFuncs.find(managedType) != sEntityHasComponentFuncs.end(), "Invalid Type!");
+		HZ_CORE_ASSERT(sEntityHasComponentFuncs.contains(managedType), "Invalid Type!");
 
-		return sEntityHasComponentFuncs.at(managedType)(entity);
+		return sEntityHasComponentFuncs[managedType](entity);
 	}
 
 	static void Entity_GetName(UUID entityId, MonoString** outName)
 	{
+		if (!HZ_CORE_ENSURE_MSG(Application::IsMainThread(), "Entity_GetName can only be called from the Main Thread!"))
+		{
+			return;
+		}
+
 		auto* scene = ScriptEngine::GetSceneContext();
 		if (scene == nullptr || entityId == UUID::Invalid)
 		{
@@ -217,22 +222,37 @@ namespace Hazel
 			return;
 		}
 
-		auto entity = scene->GetEntityByUUID(entityId);
-		HZ_CORE_ASSERT(entity, "Entity is null!");
-
-		*outName = mono_string_new_wrapper(entity.Name().c_str());
+		if (const auto entity = scene->GetEntityByUUID(entityId))
+		{
+			*outName = mono_string_new_wrapper(entity.Name().c_str());
+			return;
+		}
+		
+		HZ_CORE_LERROR("Entity {0} not found.", entityId);
 	}
 
 	static void Entity_SetName(UUID entityId, MonoString* name)
 	{
-		auto* scene = ScriptEngine::GetSceneContext();
-		HZ_CORE_ASSERT(scene, "Scene is null!");
-		auto entity = scene->GetEntityByUUID(entityId);
-		HZ_CORE_ASSERT(entity, "Entity is null!");
+		if (!HZ_CORE_ENSURE_MSG(Application::IsMainThread(), "Entity_SetName can only be called from the Main Thread!"))
+		{
+			return;
+		}
 
-		auto* entityName = mono_string_to_utf8(name);
-		entity.Name() = entityName;
-		mono_free(entityName);
+		auto* scene = ScriptEngine::GetSceneContext();
+		if (scene == nullptr || entityId == UUID::Invalid)
+		{
+			return;
+		}
+
+		if (const auto entity = scene->GetEntityByUUID(entityId))
+		{
+			auto* entityName = mono_string_to_utf8(name);
+			entity.Name() = entityName;
+			mono_free(entityName);
+			return;
+		}
+		
+		HZ_CORE_LERROR("Entity {0} not found.", entityId);
 	}
 #pragma endregion
 
@@ -246,7 +266,7 @@ namespace Hazel
 	{
 		auto* scene = ScriptEngine::GetSceneContext();
 		HZ_CORE_ASSERT(scene, "Scene is null!");
-		auto entity = scene->GetEntityByUUID(entityId);
+		const auto entity = scene->GetEntityByUUID(entityId);
 		HZ_CORE_ASSERT(entity, "Entity is null!");
 
 		*outPosition = entity.Transform().Position;
@@ -256,7 +276,7 @@ namespace Hazel
 	{
 		auto* scene = ScriptEngine::GetSceneContext();
 		HZ_CORE_ASSERT(scene, "Scene is null!");
-		auto entity = scene->GetEntityByUUID(entityId);
+		const auto entity = scene->GetEntityByUUID(entityId);
 		HZ_CORE_ASSERT(entity, "Entity is null!");
 
 		entity.Transform().Position = *position;
@@ -268,7 +288,7 @@ namespace Hazel
 
 		if (entity.HasComponent<AudioSourceComponent>())
 		{
-			auto& component = entity.GetComponent<AudioSourceComponent>();
+			const auto& component = entity.GetComponent<AudioSourceComponent>();
 			if (auto& source = component.AudioSource)
 			{
 				if (source->Get3D())
@@ -283,7 +303,7 @@ namespace Hazel
 	{
 		auto* scene = ScriptEngine::GetSceneContext();
 		HZ_CORE_ASSERT(scene, "Scene is null!");
-		auto entity = scene->GetEntityByUUID(entityId);
+		const auto entity = scene->GetEntityByUUID(entityId);
 		HZ_CORE_ASSERT(entity, "Entity is null!");
 
 		*outRotation = glm::degrees(entity.Transform().Rotation);
@@ -293,7 +313,7 @@ namespace Hazel
 	{
 		auto* scene = ScriptEngine::GetSceneContext();
 		HZ_CORE_ASSERT(scene, "Scene is null!");
-		auto entity = scene->GetEntityByUUID(entityId);
+		const auto entity = scene->GetEntityByUUID(entityId);
 		HZ_CORE_ASSERT(entity, "Entity is null!");
 
 		entity.Transform().Rotation = glm::radians(*rotation);
@@ -303,7 +323,7 @@ namespace Hazel
 	{
 		auto* scene = ScriptEngine::GetSceneContext();
 		HZ_CORE_ASSERT(scene, "Scene is null!");
-		auto entity = scene->GetEntityByUUID(entityId);
+		const auto entity = scene->GetEntityByUUID(entityId);
 		HZ_CORE_ASSERT(entity, "Entity is null!");
 
 		*outScale = entity.Transform().Scale;
@@ -313,7 +333,7 @@ namespace Hazel
 	{
 		auto* scene = ScriptEngine::GetSceneContext();
 		HZ_CORE_ASSERT(scene, "Scene is null!");
-		auto entity = scene->GetEntityByUUID(entityId);
+		const auto entity = scene->GetEntityByUUID(entityId);
 		HZ_CORE_ASSERT(entity, "Entity is null!");
 
 		entity.Transform().Scale = *scale;
@@ -328,10 +348,10 @@ namespace Hazel
 	{
 		auto* scene = ScriptEngine::GetSceneContext();
 		HZ_CORE_ASSERT(scene, "Scene is null!");
-		auto entity = scene->GetEntityByUUID(entityId);
+		const auto entity = scene->GetEntityByUUID(entityId);
 		HZ_CORE_ASSERT(entity, "Entity is null!");
 
-		auto& component = entity.GetComponent<SpriteRendererComponent>();
+		const auto& component = entity.GetComponent<SpriteRendererComponent>();
 
 		*outTiling = component.Tiling;
 	}
@@ -340,7 +360,7 @@ namespace Hazel
 	{
 		auto* scene = ScriptEngine::GetSceneContext();
 		HZ_CORE_ASSERT(scene, "Scene is null!");
-		auto entity = scene->GetEntityByUUID(entityId);
+		const auto entity = scene->GetEntityByUUID(entityId);
 		HZ_CORE_ASSERT(entity, "Entity is null!");
 
 		auto& component = entity.GetComponent<SpriteRendererComponent>();
@@ -352,10 +372,10 @@ namespace Hazel
 	{
 		auto* scene = ScriptEngine::GetSceneContext();
 		HZ_CORE_ASSERT(scene, "Scene is null!");
-		auto entity = scene->GetEntityByUUID(entityId);
+		const auto entity = scene->GetEntityByUUID(entityId);
 		HZ_CORE_ASSERT(entity, "Entity is null!");
 
-		auto& component = entity.GetComponent<SpriteRendererComponent>();
+		const auto& component = entity.GetComponent<SpriteRendererComponent>();
 
 		*outColor = component.Color;
 	}
@@ -364,7 +384,7 @@ namespace Hazel
 	{
 		auto* scene = ScriptEngine::GetSceneContext();
 		HZ_CORE_ASSERT(scene, "Scene is null!");
-		auto entity = scene->GetEntityByUUID(entityId);
+		const auto entity = scene->GetEntityByUUID(entityId);
 		HZ_CORE_ASSERT(entity, "Entity is null!");
 
 		auto& component = entity.GetComponent<SpriteRendererComponent>();
@@ -379,10 +399,10 @@ namespace Hazel
 	{
 		auto* scene = ScriptEngine::GetSceneContext();
 		HZ_CORE_ASSERT(scene, "Scene is null!");
-		auto entity = scene->GetEntityByUUID(entityId);
+		const auto entity = scene->GetEntityByUUID(entityId);
 		HZ_CORE_ASSERT(entity, "Entity is null!");
 
-		auto& component = entity.GetComponent<CircleRendererComponent>();
+		const auto& component = entity.GetComponent<CircleRendererComponent>();
 
 		*outColor = component.Color;
 	}
@@ -391,7 +411,7 @@ namespace Hazel
 	{
 		auto* scene = ScriptEngine::GetSceneContext();
 		HZ_CORE_ASSERT(scene, "Scene is null!");
-		auto entity = scene->GetEntityByUUID(entityId);
+		const auto entity = scene->GetEntityByUUID(entityId);
 		HZ_CORE_ASSERT(entity, "Entity is null!");
 
 		auto& component = entity.GetComponent<CircleRendererComponent>();
@@ -403,10 +423,10 @@ namespace Hazel
 	{
 		auto* scene = ScriptEngine::GetSceneContext();
 		HZ_CORE_ASSERT(scene, "Scene is null!");
-		auto entity = scene->GetEntityByUUID(entityId);
+		const auto entity = scene->GetEntityByUUID(entityId);
 		HZ_CORE_ASSERT(entity, "Entity is null!");
 
-		auto& component = entity.GetComponent<CircleRendererComponent>();
+		const auto& component = entity.GetComponent<CircleRendererComponent>();
 
 		*outThickness = component.Thickness;
 	}
@@ -415,7 +435,7 @@ namespace Hazel
 	{
 		auto* scene = ScriptEngine::GetSceneContext();
 		HZ_CORE_ASSERT(scene, "Scene is null!");
-		auto entity = scene->GetEntityByUUID(entityId);
+		const auto entity = scene->GetEntityByUUID(entityId);
 		HZ_CORE_ASSERT(entity, "Entity is null!");
 
 		auto& component = entity.GetComponent<CircleRendererComponent>();
@@ -427,10 +447,10 @@ namespace Hazel
 	{
 		auto* scene = ScriptEngine::GetSceneContext();
 		HZ_CORE_ASSERT(scene, "Scene is null!");
-		auto entity = scene->GetEntityByUUID(entityId);
+		const auto entity = scene->GetEntityByUUID(entityId);
 		HZ_CORE_ASSERT(entity, "Entity is null!");
 
-		auto& component = entity.GetComponent<CircleRendererComponent>();
+		const auto& component = entity.GetComponent<CircleRendererComponent>();
 
 		*outFade = component.Fade;
 	}
@@ -439,7 +459,7 @@ namespace Hazel
 	{
 		auto* scene = ScriptEngine::GetSceneContext();
 		HZ_CORE_ASSERT(scene, "Scene is null!");
-		auto entity = scene->GetEntityByUUID(entityId);
+		const auto entity = scene->GetEntityByUUID(entityId);
 		HZ_CORE_ASSERT(entity, "Entity is null!");
 
 		auto& component = entity.GetComponent<CircleRendererComponent>();
@@ -453,10 +473,10 @@ namespace Hazel
 	{
 		auto* scene = ScriptEngine::GetSceneContext();
 		HZ_CORE_ASSERT(scene, "Scene is null!");
-		auto entity = scene->GetEntityByUUID(entityId);
+		const auto entity = scene->GetEntityByUUID(entityId);
 		HZ_CORE_ASSERT(entity, "Entity is null!");
 
-		auto& component = entity.GetComponent<Rigidbody2DComponent>();
+		const auto& component = entity.GetComponent<Rigidbody2DComponent>();
 		auto* body = static_cast<b2Body*>(component.RuntimeBody);
 
 		body->ApplyLinearImpulse(b2Vec2(impulse->x, impulse->y), b2Vec2(worldPoint->x, worldPoint->y), wake);
@@ -466,10 +486,10 @@ namespace Hazel
 	{
 		auto* scene = ScriptEngine::GetSceneContext();
 		HZ_CORE_ASSERT(scene, "Scene is null!");
-		auto entity = scene->GetEntityByUUID(entityId);
+		const auto entity = scene->GetEntityByUUID(entityId);
 		HZ_CORE_ASSERT(entity, "Entity is null!");
 
-		auto& component = entity.GetComponent<Rigidbody2DComponent>();
+		const auto& component = entity.GetComponent<Rigidbody2DComponent>();
 		auto* body = static_cast<b2Body*>(component.RuntimeBody);
 
 		body->ApplyLinearImpulseToCenter(b2Vec2(impulse->x, impulse->y), wake);
@@ -479,10 +499,10 @@ namespace Hazel
 	{
 		auto* scene = ScriptEngine::GetSceneContext();
 		HZ_CORE_ASSERT(scene, "Scene is null!");
-		auto entity = scene->GetEntityByUUID(entityId);
+		const auto entity = scene->GetEntityByUUID(entityId);
 		HZ_CORE_ASSERT(entity, "Entity is null!");
 
-		auto& component = entity.GetComponent<Rigidbody2DComponent>();
+		const auto& component = entity.GetComponent<Rigidbody2DComponent>();
 		auto* body = static_cast<b2Body*>(component.RuntimeBody);
 
 		body->ApplyAngularImpulse(impulse, wake);
@@ -494,11 +514,11 @@ namespace Hazel
 	{
 		auto* scene = ScriptEngine::GetSceneContext();
 		HZ_CORE_ASSERT(scene, "Scene is null!");
-		auto entity = scene->GetEntityByUUID(entityId);
+		const auto entity = scene->GetEntityByUUID(entityId);
 		HZ_CORE_ASSERT(entity, "Entity is null!");
 
 		// Will crash if entity does not have component.
-		auto& component = entity.GetComponent<AudioListenerComponent>();
+		const auto& component = entity.GetComponent<AudioListenerComponent>();
 
 		*outIsVisibleInGame = component.IsVisibleInGame;
 	}
@@ -507,7 +527,7 @@ namespace Hazel
 	{
 		auto* scene = ScriptEngine::GetSceneContext();
 		HZ_CORE_ASSERT(scene, "Scene is null!");
-		auto entity = scene->GetEntityByUUID(entityId);
+		const auto entity = scene->GetEntityByUUID(entityId);
 		HZ_CORE_ASSERT(entity, "Entity is null!");
 
 		// Will crash if entity does not have component.
@@ -521,11 +541,11 @@ namespace Hazel
 	{
 		auto* scene = ScriptEngine::GetSceneContext();
 		HZ_CORE_ASSERT(scene, "Scene is null!");
-		auto entity = scene->GetEntityByUUID(entityId);
+		const auto entity = scene->GetEntityByUUID(entityId);
 		HZ_CORE_ASSERT(entity, "Entity is null!");
 
 		// Will crash if entity does not have component.
-		auto& component = entity.GetComponent<AudioSourceComponent>();
+		const auto& component = entity.GetComponent<AudioSourceComponent>();
 		HZ_CORE_ASSERT(component.AudioSource, "AudioSource is Null!");
 
 		*outGain = component.AudioSource->GetGain();
@@ -535,11 +555,11 @@ namespace Hazel
 	{
 		auto* scene = ScriptEngine::GetSceneContext();
 		HZ_CORE_ASSERT(scene, "Scene is null!");
-		auto entity = scene->GetEntityByUUID(entityId);
+		const auto entity = scene->GetEntityByUUID(entityId);
 		HZ_CORE_ASSERT(entity, "Entity is null!");
 
 		// Will crash if entity does not have component.
-		auto& component = entity.GetComponent<AudioSourceComponent>();
+		const auto& component = entity.GetComponent<AudioSourceComponent>();
 		HZ_CORE_ASSERT(component.AudioSource, "AudioSource is Null!");
 
 		component.AudioSource->SetGain(gain);
@@ -549,11 +569,11 @@ namespace Hazel
 	{
 		auto* scene = ScriptEngine::GetSceneContext();
 		HZ_CORE_ASSERT(scene, "Scene is null!");
-		auto entity = scene->GetEntityByUUID(entityId);
+		const auto entity = scene->GetEntityByUUID(entityId);
 		HZ_CORE_ASSERT(entity, "Entity is null!");
 
 		// Will crash if entity does not have component.
-		auto& component = entity.GetComponent<AudioSourceComponent>();
+		const auto& component = entity.GetComponent<AudioSourceComponent>();
 		HZ_CORE_ASSERT(component.AudioSource, "AudioSource is Null!");
 
 		*outPitch = component.AudioSource->GetPitch();
@@ -563,11 +583,11 @@ namespace Hazel
 	{
 		auto* scene = ScriptEngine::GetSceneContext();
 		HZ_CORE_ASSERT(scene, "Scene is null!");
-		auto entity = scene->GetEntityByUUID(entityId);
+		const auto entity = scene->GetEntityByUUID(entityId);
 		HZ_CORE_ASSERT(entity, "Entity is null!");
 
 		// Will crash if entity does not have component.
-		auto& component = entity.GetComponent<AudioSourceComponent>();
+		const auto& component = entity.GetComponent<AudioSourceComponent>();
 		HZ_CORE_ASSERT(component.AudioSource, "AudioSource is Null!");
 
 		component.AudioSource->SetPitch(pitch);
@@ -577,11 +597,11 @@ namespace Hazel
 	{
 		auto* scene = ScriptEngine::GetSceneContext();
 		HZ_CORE_ASSERT(scene, "Scene is null!");
-		auto entity = scene->GetEntityByUUID(entityId);
+		const auto entity = scene->GetEntityByUUID(entityId);
 		HZ_CORE_ASSERT(entity, "Entity is null!");
 
 		// Will crash if entity does not have component.
-		auto& component = entity.GetComponent<AudioSourceComponent>();
+		const auto& component = entity.GetComponent<AudioSourceComponent>();
 		HZ_CORE_ASSERT(component.AudioSource, "AudioSource is Null!");
 
 		*outIsLoop = component.AudioSource->GetLoop();
@@ -591,11 +611,11 @@ namespace Hazel
 	{
 		auto* scene = ScriptEngine::GetSceneContext();
 		HZ_CORE_ASSERT(scene, "Scene is null!");
-		auto entity = scene->GetEntityByUUID(entityId);
+		const auto entity = scene->GetEntityByUUID(entityId);
 		HZ_CORE_ASSERT(entity, "Entity is null!");
 
 		// Will crash if entity does not have component.
-		auto& component = entity.GetComponent<AudioSourceComponent>();
+		const auto& component = entity.GetComponent<AudioSourceComponent>();
 		HZ_CORE_ASSERT(component.AudioSource, "AudioSource is Null!");
 
 		component.AudioSource->SetLoop(loop);
@@ -605,11 +625,11 @@ namespace Hazel
 	{
 		auto* scene = ScriptEngine::GetSceneContext();
 		HZ_CORE_ASSERT(scene, "Scene is null!");
-		auto entity = scene->GetEntityByUUID(entityId);
+		const auto entity = scene->GetEntityByUUID(entityId);
 		HZ_CORE_ASSERT(entity, "Entity is null!");
 
 		// Will crash if entity does not have component.
-		auto& component = entity.GetComponent<AudioSourceComponent>();
+		const auto& component = entity.GetComponent<AudioSourceComponent>();
 		HZ_CORE_ASSERT(component.AudioSource, "AudioSource is Null!");
 
 		*outIs3D = component.AudioSource->Get3D();
@@ -619,11 +639,11 @@ namespace Hazel
 	{
 		auto* scene = ScriptEngine::GetSceneContext();
 		HZ_CORE_ASSERT(scene, "Scene is null!");
-		auto entity = scene->GetEntityByUUID(entityId);
+		const auto entity = scene->GetEntityByUUID(entityId);
 		HZ_CORE_ASSERT(entity, "Entity is null!");
 
 		// Will crash if entity does not have component.
-		auto& component = entity.GetComponent<AudioSourceComponent>();
+		const auto& component = entity.GetComponent<AudioSourceComponent>();
 		HZ_CORE_ASSERT(component.AudioSource, "AudioSource is Null!");
 
 		component.AudioSource->Set3D(is3D);
@@ -633,11 +653,11 @@ namespace Hazel
 	{
 		auto* scene = ScriptEngine::GetSceneContext();
 		HZ_CORE_ASSERT(scene, "Scene is null!");
-		auto entity = scene->GetEntityByUUID(entityId);
+		const auto entity = scene->GetEntityByUUID(entityId);
 		HZ_CORE_ASSERT(entity, "Entity is null!");
 
 		// Will crash if entity does not have component.
-		auto& component = entity.GetComponent<AudioSourceComponent>();
+		const auto& component = entity.GetComponent<AudioSourceComponent>();
 		HZ_CORE_ASSERT(component.AudioSource, "AudioSource is Null!");
 
 		*outState = static_cast<int>(component.AudioSource->GetState());
@@ -647,11 +667,11 @@ namespace Hazel
 	{
 		auto* scene = ScriptEngine::GetSceneContext();
 		HZ_CORE_ASSERT(scene, "Scene is null!");
-		auto entity = scene->GetEntityByUUID(entityId);
+		const auto entity = scene->GetEntityByUUID(entityId);
 		HZ_CORE_ASSERT(entity, "Entity is null!");
 
 		// Will crash if entity does not have component.
-		auto& component = entity.GetComponent<AudioSourceComponent>();
+		const auto& component = entity.GetComponent<AudioSourceComponent>();
 		HZ_CORE_ASSERT(component.AudioSource, "AudioSource is Null!");
 
 		*outOffset = component.AudioSource->GetOffset();
@@ -661,11 +681,11 @@ namespace Hazel
 	{
 		auto* scene = ScriptEngine::GetSceneContext();
 		HZ_CORE_ASSERT(scene, "Scene is null!");
-		auto entity = scene->GetEntityByUUID(entityId);
+		const auto entity = scene->GetEntityByUUID(entityId);
 		HZ_CORE_ASSERT(entity, "Entity is null!");
 
 		// Will crash if entity does not have component.
-		auto& component = entity.GetComponent<AudioSourceComponent>();
+		const auto& component = entity.GetComponent<AudioSourceComponent>();
 		HZ_CORE_ASSERT(component.AudioSource, "AudioSource is Null!");
 
 		component.AudioSource->SetOffset(*offset);
@@ -675,11 +695,11 @@ namespace Hazel
 	{
 		auto* scene = ScriptEngine::GetSceneContext();
 		HZ_CORE_ASSERT(scene, "Scene is null!");
-		auto entity = scene->GetEntityByUUID(entityId);
+		const auto entity = scene->GetEntityByUUID(entityId);
 		HZ_CORE_ASSERT(entity, "Entity is null!");
 
 		// Will crash if entity does not have component.
-		auto& component = entity.GetComponent<AudioSourceComponent>();
+		const auto& component = entity.GetComponent<AudioSourceComponent>();
 		HZ_CORE_ASSERT(component.AudioSource, "AudioSource is Null!");
 
 		*outLenght = component.AudioSource->GetLength();
@@ -689,11 +709,11 @@ namespace Hazel
 	{
 		auto* scene = ScriptEngine::GetSceneContext();
 		HZ_CORE_ASSERT(scene, "Scene is null!");
-		auto entity = scene->GetEntityByUUID(entityId);
+		const auto entity = scene->GetEntityByUUID(entityId);
 		HZ_CORE_ASSERT(entity, "Entity is null!");
 
 		// Will crash if entity does not have component.
-		auto& component = entity.GetComponent<AudioSourceComponent>();
+		const auto& component = entity.GetComponent<AudioSourceComponent>();
 		HZ_CORE_ASSERT(component.AudioSource, "AudioSource is Null!");
 
 		*outPath = mono_string_new_wrapper(component.AudioSource->GetPath().string().c_str());
@@ -703,11 +723,11 @@ namespace Hazel
 	{
 		auto* scene = ScriptEngine::GetSceneContext();
 		HZ_CORE_ASSERT(scene, "Scene is null!");
-		auto entity = scene->GetEntityByUUID(entityId);
+		const auto entity = scene->GetEntityByUUID(entityId);
 		HZ_CORE_ASSERT(entity, "Entity is null!");
 
 		// Will crash if entity does not have component.
-		auto& component = entity.GetComponent<AudioSourceComponent>();
+		const auto& component = entity.GetComponent<AudioSourceComponent>();
 
 		*outIsVisibleInGame = component.IsVisibleInGame;
 	}
@@ -716,7 +736,7 @@ namespace Hazel
 	{
 		auto* scene = ScriptEngine::GetSceneContext();
 		HZ_CORE_ASSERT(scene, "Scene is null!");
-		auto entity = scene->GetEntityByUUID(entityId);
+		const auto entity = scene->GetEntityByUUID(entityId);
 		HZ_CORE_ASSERT(entity, "Entity is null!");
 
 		// Will crash if entity does not have component.
@@ -728,11 +748,11 @@ namespace Hazel
 	{
 		auto* scene = ScriptEngine::GetSceneContext();
 		HZ_CORE_ASSERT(scene, "Scene is null!");
-		auto entity = scene->GetEntityByUUID(entityId);
+		const auto entity = scene->GetEntityByUUID(entityId);
 		HZ_CORE_ASSERT(entity, "Entity is null!");
 
 		// Will crash if entity does not have component.
-		auto& component = entity.GetComponent<AudioSourceComponent>();
+		const auto& component = entity.GetComponent<AudioSourceComponent>();
 		HZ_CORE_ASSERT(component.AudioSource, "AudioSource is Null!");
 
 		component.AudioSource->Play();
@@ -742,11 +762,11 @@ namespace Hazel
 	{
 		auto* scene = ScriptEngine::GetSceneContext();
 		HZ_CORE_ASSERT(scene, "Scene is null!");
-		auto entity = scene->GetEntityByUUID(entityId);
+		const auto entity = scene->GetEntityByUUID(entityId);
 		HZ_CORE_ASSERT(entity, "Entity is null!");
 
 		// Will crash if entity does not have component.
-		auto& component = entity.GetComponent<AudioSourceComponent>();
+		const auto& component = entity.GetComponent<AudioSourceComponent>();
 		HZ_CORE_ASSERT(component.AudioSource, "AudioSource is Null!");
 
 		component.AudioSource->Stop();
@@ -756,11 +776,11 @@ namespace Hazel
 	{
 		auto* scene = ScriptEngine::GetSceneContext();
 		HZ_CORE_ASSERT(scene, "Scene is null!");
-		auto entity = scene->GetEntityByUUID(entityId);
+		const auto entity = scene->GetEntityByUUID(entityId);
 		HZ_CORE_ASSERT(entity, "Entity is null!");
 
 		// Will crash if entity does not have component.
-		auto& component = entity.GetComponent<AudioSourceComponent>();
+		const auto& component = entity.GetComponent<AudioSourceComponent>();
 		HZ_CORE_ASSERT(component.AudioSource, "AudioSource is Null!");
 
 		component.AudioSource->Pause();
@@ -770,11 +790,11 @@ namespace Hazel
 	{
 		auto* scene = ScriptEngine::GetSceneContext();
 		HZ_CORE_ASSERT(scene, "Scene is null!");
-		auto entity = scene->GetEntityByUUID(entityId);
+		const auto entity = scene->GetEntityByUUID(entityId);
 		HZ_CORE_ASSERT(entity, "Entity is null!");
 
 		// Will crash if entity does not have component.
-		auto& component = entity.GetComponent<AudioSourceComponent>();
+		const auto& component = entity.GetComponent<AudioSourceComponent>();
 		HZ_CORE_ASSERT(component.AudioSource, "AudioSource is Null!");
 
 		component.AudioSource->Rewind();
@@ -792,8 +812,8 @@ namespace Hazel
 	{
 		([]()
 		{
-			std::string_view typeName = typeid(TComponent).name();
-			size_t pos = typeName.find_last_of(':');
+			const std::string_view typeName = typeid(TComponent).name();
+			const size_t pos = typeName.find_last_of(':');
 			std::string_view componentName = typeName.substr(pos + 1);
 			std::string managedTypeName = fmt::format("Hazel.{0}", componentName);
 

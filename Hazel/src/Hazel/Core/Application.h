@@ -73,9 +73,14 @@ namespace Hazel
 		std::vector<std::function<void()>> _mainThreadQueue;
 		std::mutex _mainThreadQueueMutex;
 
+	public:
+		static bool IsMainThread();
+		
 	private:
 		// Singleton related.
 		static Application* _sInstance;
+		static std::thread::id _sMainThreadID;
+		
 		friend int Hazel::Main(int argc, char** argv);
 	};
 

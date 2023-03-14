@@ -11,7 +11,8 @@ namespace Sandbox
 
 		~Player()
 		{
-			Logger.Debug($"{Name} Finalizer(Destructor)");
+			// Can't call GetName in destructor as this is call by the garbage collector from a different thread.
+			//Logger.Debug($"{Name} Finalizer(Destructor)");
 		}
 
 		private void OnCreate()
