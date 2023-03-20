@@ -32,12 +32,12 @@
 #	define HZ_ASSERT(x, ...)
 #	define HZ_ASSERT_ONCE(x, ...)
 
-#	define HZ_CORE_ENSURE(x)
-#	define HZ_CORE_ENSURE_ONCE(x)
-#	define HZ_CORE_ENSURE_MSG(x, ...)
-#	define HZ_ENSURE(x)
-#	define HZ_ENSURE_ONCE(x)
-#	define HZ_ENSURE_MSG(x, ...) 
+#	define HZ_CORE_ENSURE(x) ((x))
+#	define HZ_CORE_ENSURE_ONCE(x) ((x))
+#	define HZ_CORE_ENSURE_MSG(x, ...) ((x))
+#	define HZ_ENSURE(x) ((x))
+#	define HZ_ENSURE_ONCE(x) ((x))
+#	define HZ_ENSURE_MSG(x, ...) ((x))
 #endif // HZ_ENABLE_ASSERTS
 
 // This macro is for enum flags.

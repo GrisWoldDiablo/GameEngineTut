@@ -4,6 +4,7 @@
 #include "Entity.h"
 #include "Components.h"
 
+#include "Hazel/Project/Project.h"
 #include "Hazel/Scripting/ScriptEngine.h"
 #include "Hazel/Scripting/ScriptClass.h"
 
@@ -481,9 +482,9 @@ namespace Hazel
 		{
 			data = YAML::LoadFile(filepath.string());
 		}
-		catch (YAML::ParserException& e)
+		catch (YAML::Exception& e)
 		{
-			HZ_CORE_LERROR("Failed to load file [{0}].\n\t'{1}'", filepath, e.what());
+			HZ_CORE_LERROR("Scene deserialization failed. YAML Exception : '{0}'", e.what());
 			return false;
 		}
 
@@ -729,7 +730,8 @@ namespace Hazel
 
 					if (auto texturePath = spriteRendererComponent["TexturePath"])
 					{
-						component.Texture = Texture2D::Create(texturePath.as<std::filesystem::path>()); // TODO not use path use asset.
+						const auto filePath = texturePath.as<std::filesystem::path>();
+						component.Texture = Texture2D::Create(Project::GetAssetFileSystemPath(filePath)); // TODO not use path use asset.
 						if (component.Texture != nullptr)
 						{
 							component.Texture->SetMagFilter(GetValue<uint32_t>(spriteRendererComponent, "MagFilter", 0x2601));
@@ -798,7 +800,8 @@ namespace Hazel
 
 					if (auto audioClipPath = audioSourceComponent["AudioClipPath"])
 					{
-						component.AudioSource = AudioSource::Create(audioClipPath.as<std::filesystem::path>()); // TODO not use path use asset.
+						const auto filePath = audioClipPath.as<std::filesystem::path>();
+						component.AudioSource = AudioSource::Create(Project::GetAssetFileSystemPath(filePath)); // TODO not use path use asset.
 						if (component.AudioSource != nullptr)
 						{
 							component.AudioSource->SetGain(GetValue<float>(audioSourceComponent, "Gain", 1.0f));

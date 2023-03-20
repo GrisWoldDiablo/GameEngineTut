@@ -172,7 +172,7 @@ namespace Hazel
 		_registry.destroy(entity);
 	}
 
-	bool Scene::CheckEntityValidity(const entt::entity& entity) const
+	bool Scene::CheckEntityValidity(const entt::entity entity) const
 	{
 		return _registry.valid(entity);
 	}

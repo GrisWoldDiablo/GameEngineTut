@@ -32,28 +32,33 @@ namespace Hazel
 		bool OnKeyPressed(const KeyPressedEvent& keyPressedEvent);
 		bool OnMouseButtonUp(const MouseButtonUpEvent& mouseButtonReleasedEvent);
 		void MousePicking();
-		void OnOverlayRender();
+		void OnOverlayRender() const;
 
-		bool ClearSceneCheck();
+		bool ClearSceneCheck() const;
 		void NewScene(bool withCheck = false);
 		void OpenScene();
 		void OpenScene(const std::filesystem::path& path, bool withCheck = false);
 		void SaveScene();
+		bool SaveSceneAs(const std::filesystem::path& defaultPath);
+		void SerializeScene() const;
 
-		void SerializeScene();
-
-		void SaveSceneAs();
-
+		void NewProject();
+		void OpenProject();
+		void OpenProject(const std::filesystem::path& path);
+		void SaveProject() const;
+		void SetProjectStartSceneToCurrent() const;
+		
 	private:
 		void DrawToolbar();
 		void DrawFileMenu();
+		void DrawNewProjectPopup();
 		void DrawSceneViewport();
 		void DrawStats();
 		void DrawTools();
 		void SafetyShutdownCheck();
 		void CalculateFPS();
 
-		void SetWindowTitleSceneName(const std::filesystem::path& scenePath = "");
+		void SetWindowTitleSceneName(const std::filesystem::path& scenePath = "") const;
 		void AddTooltip(const std::string& tooltipMessage);
 
 		void OnScenePlay();
@@ -94,7 +99,7 @@ namespace Hazel
 
 		// Panels
 		SceneHierarchyPanel _sceneHierarchyPanel;
-		ContentBrowserPanel _contentBrowserPanel;
+		Scope<ContentBrowserPanel> _contentBrowserPanel;
 
 		// SceneViewport
 		int _gizmoType = -1;
@@ -107,6 +112,11 @@ namespace Hazel
 		// Tools
 		bool _shouldShowPhysicsColliders = false;
 		bool _isDemoWidowOpen = false;
+
+		// New Project Popup Modal
+		bool _shouldOpenNewProjectModal = false;
+		std::string _newProjectName;
+		std::filesystem::path _newProjectPath;
 
 		// Hover Timer
 		float _timeSpentHovering = 0;

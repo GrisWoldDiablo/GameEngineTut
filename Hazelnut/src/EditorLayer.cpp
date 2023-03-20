@@ -1,15 +1,18 @@
 #include "EditorLayer.h"
 
-#include <Box2D/include/box2d/b2_body.h>
-
 #include "Utils/EditorResourceManager.h"
 #include "NativeScripts.h"
 
 #include "Hazel/Scene/SceneSerializer.h"
 #include "Hazel/Utils/PlatformUtils.h"
+#include "Hazel/Core/FileSystem.h"
+#include "Hazel/Scripting/ScriptEngine.h"
+
+#include <Box2D/include/box2d/b2_body.h>
 
 #include <imgui/imgui.h>
-#include "ImGuizmo.h"
+#include <imgui/imgui_internal.h>
+#include <ImGuizmo.h>
 
 #include <glm/gtc/type_ptr.hpp>
 
@@ -24,12 +27,12 @@ namespace Hazel
 		Utils::EditorResourceManager::Init();
 
 		// Set Fonts
-		auto imGuiLayer = Application::Get().GetImGuiLayer();
-		auto normalFontPath = "Resources/Fonts/opensans/OpenSans-SemiBold.ttf";
-		auto boldFontPath = "Resources/Fonts/opensans/OpenSans-ExtraBold.ttf";
+		auto* imGuiLayer = Application::Get().GetImGuiLayer();
+		const auto normalFontPath = "Resources/Fonts/opensans/OpenSans-SemiBold.ttf";
+		const auto boldFontPath = "Resources/Fonts/opensans/OpenSans-ExtraBold.ttf";
 		imGuiLayer->SetFonts(normalFontPath, {boldFontPath});
 
-		auto framebufferSpecification = FramebufferSpecification
+		const auto framebufferSpecification = FramebufferSpecification
 		{
 			{FramebufferTextureFormat::RGBA8, FramebufferTextureFormat::RED_INTEGER, FramebufferTextureFormat::Depth},
 			1280,
@@ -40,20 +43,21 @@ namespace Hazel
 		const auto commandLineArgs = Application::Get().GetSpecification().CommandLineArgs;
 		if (commandLineArgs.Count > 1)
 		{
-			auto sceneFilePath = commandLineArgs[1];
-			if (std::filesystem::exists(sceneFilePath))
+			const auto projectFilePath = commandLineArgs[1];
+			if (std::filesystem::exists(projectFilePath))
 			{
-				OpenScene(sceneFilePath, false);
+				OpenProject(projectFilePath);
 			}
 			else
 			{
-				HZ_CORE_LERROR("No scene found at {0}", sceneFilePath);
-				NewScene();
+				HZ_CORE_LERROR("No project found at {0}", projectFilePath);
 			}
 		}
-		else
+
+		// TODO prompt file user select directory for new project.
+		if (!Project::GetActive())
 		{
-			NewScene();
+			FileDialogs::MessagePopup("Open Project or Create a new one.", "Need Project!");
 		}
 
 		_editorCamera = EditorCamera(30.0f, 1.778f, 0.1f, 1000.0f);
@@ -72,6 +76,11 @@ namespace Hazel
 	{
 		HZ_PROFILE_FUNCTION();
 		_updateTimer.Reset();
+
+		if (!_activeScene)
+		{
+			return;
+		}
 
 		_activeScene->OnViewportResize(static_cast<uint32_t>(_sceneViewportSize.x), static_cast<uint32_t>(_sceneViewportSize.y));
 
@@ -205,11 +214,15 @@ namespace Hazel
 		style.WindowMinSize = originalWindowMinSize;
 
 		DrawFileMenu();
+		DrawNewProjectPopup();
 		DrawSceneViewport();
 		DrawTools();
 
 		_sceneHierarchyPanel.OnImGuiRender();
-		_contentBrowserPanel.OnImGuiRender();
+		if (_contentBrowserPanel)
+		{
+			_contentBrowserPanel->OnImGuiRender();
+		}
 
 		DrawStats();
 
@@ -276,7 +289,7 @@ namespace Hazel
 			{
 				if (isShiftPressed)
 				{
-					SaveSceneAs();
+					SaveSceneAs(Project::GetAssetDirectory());
 				}
 				else
 				{
@@ -343,7 +356,7 @@ namespace Hazel
 		//	break;
 		//}
 		}
-		
+
 		return true;
 	}
 
@@ -373,35 +386,35 @@ namespace Hazel
 		imMouseX -= _sceneViewportBounds[0].x;
 		imMouseY -= _sceneViewportBounds[0].y;
 
-		glm::vec2 sceneViewportSize = _sceneViewportBounds[1] - _sceneViewportBounds[0];
+		const glm::vec2 sceneViewportSize = _sceneViewportBounds[1] - _sceneViewportBounds[0];
 		imMouseY = sceneViewportSize.y - imMouseY;
-		auto mouseX = (int)imMouseX;
-		auto mouseY = (int)imMouseY;
+		const auto mouseX = static_cast<int>(imMouseX);
+		const auto mouseY = static_cast<int>(imMouseY);
 
-		if (mouseX >= 0 && mouseY >= 0 && mouseX < (int)sceneViewportSize.x && mouseY < (int)sceneViewportSize.y)
+		if (mouseX >= 0 && mouseY >= 0 && mouseX < static_cast<int>(sceneViewportSize.x) && mouseY < static_cast<int>(sceneViewportSize.y))
 		{
 			int pixelData = _framebuffer->ReadPixel(1, mouseX, mouseY);
 
-			_hoveredEntity = pixelData == -1 ? Entity() : _activeScene->CheckEntityValidity((entt::entity)pixelData) ? Entity((entt::entity)pixelData, _activeScene.get()) : Entity();
+			_hoveredEntity = pixelData == -1 ? Entity() : _activeScene->CheckEntityValidity(static_cast<entt::entity>(pixelData)) ? Entity(static_cast<entt::entity>(pixelData), _activeScene.get()) : Entity();
 		}
 	}
 
-	void EditorLayer::OnOverlayRender()
+	void EditorLayer::OnOverlayRender() const
 	{
 		float cameraPositionZ = 1.0f;
 		bool hasSceneBegun;
 
 		if (_sceneState == SceneState::Play)
 		{
-			auto primaryCamera = _activeScene->GetPrimaryCameraEntity();
+			const auto primaryCamera = _activeScene->GetPrimaryCameraEntity();
 			if (!primaryCamera)
 			{
 				return;
 			}
 
-			auto& camera = primaryCamera.GetComponent<CameraComponent>().Camera;
-			auto& transformComponent = primaryCamera.Transform();
-			auto transform = transformComponent.GetWorldTransformMatrix();
+			const auto& camera = primaryCamera.GetComponent<CameraComponent>().Camera;
+			const auto& transformComponent = primaryCamera.Transform();
+			const auto transform = transformComponent.GetWorldTransformMatrix();
 			if (camera.GetProjectionType() == SceneCamera::ProjectionType::Perspective)
 			{
 				cameraPositionZ = transformComponent.Position.z;
@@ -420,7 +433,7 @@ namespace Hazel
 			return;
 		}
 
-		auto selectedEntity = _sceneHierarchyPanel.GetSelectedEntity();
+		const auto selectedEntity = _sceneHierarchyPanel.GetSelectedEntity();
 
 		if (_shouldShowPhysicsColliders ||
 			(selectedEntity &&
@@ -509,7 +522,7 @@ namespace Hazel
 		Renderer2D::EndScene();
 	}
 
-	bool EditorLayer::ClearSceneCheck()
+	bool EditorLayer::ClearSceneCheck() const
 	{
 		const char* message = "You will lose current scene's unsaved progress.\nDo you want to continue?";
 		const char* title = "Warning!";
@@ -518,14 +531,15 @@ namespace Hazel
 
 	void EditorLayer::NewScene(bool withCheck)
 	{
-		if (withCheck && !ClearSceneCheck())
+		if (_sceneState != SceneState::Edit)
 		{
+			HZ_CORE_LWARN("Stop Current scene before creating a new one.");
 			return;
 		}
 
-		if (_sceneState != SceneState::Edit)
+		if (withCheck && !ClearSceneCheck())
 		{
-			OnSceneStop();
+			return;
 		}
 
 		_editorScene = CreateRef<Scene>(kNewSceneName);
@@ -535,12 +549,12 @@ namespace Hazel
 		_activeScene = _editorScene;
 		_sceneHierarchyPanel.SetScene(_activeScene);
 
-		_editorScenePath = std::filesystem::path();
+		_editorScenePath.clear();
 	}
 
 	void EditorLayer::OpenScene()
 	{
-		auto filePath = FileDialogs::OpenFile("Hazel Scene (*.hazel)\0*.hazel\0");
+		const auto filePath = FileDialogs::OpenFile("Hazel Scene (*.hazel)\0*.hazel\0");
 		if (!filePath.empty())
 		{
 			OpenScene(filePath, true);
@@ -551,7 +565,13 @@ namespace Hazel
 	{
 		if (path.extension().string() != ".hazel")
 		{
-			HZ_CORE_LWARN("Could not load {0} - not a scene file.", path.filename().string());
+			HZ_CORE_LERROR("Could not load {0} - not a scene file.", path.filename().string());
+			return;
+		}
+
+		if (_sceneState != SceneState::Edit)
+		{
+			HZ_CORE_LWARN("Stop Current scene before opening a new one.");
 			return;
 		}
 
@@ -560,12 +580,8 @@ namespace Hazel
 			return;
 		}
 
-		if (_sceneState != SceneState::Edit)
-		{
-			OnSceneStop();
-		}
-
 		_editorScene = CreateRef<Scene>();
+		_editorScenePath.clear();
 		SceneSerializer serializer(_editorScene);
 		if (serializer.Deserialize(path.string(), withCheck))
 		{
@@ -592,44 +608,150 @@ namespace Hazel
 		}
 		else
 		{
-			SaveSceneAs();
+			SaveSceneAs(Project::GetAssetDirectory());
 		}
 	}
 
-	void EditorLayer::SaveSceneAs()
+	bool EditorLayer::SaveSceneAs(const std::filesystem::path& defaultPath)
 	{
 		if (_sceneState != SceneState::Edit)
 		{
 			FileDialogs::MessagePopup("You can't save while in play mode!", "Error");
-			return;
+			return false;
 		}
 
-		auto sceneName = _activeScene->GetName();
-		auto filePath = FileDialogs::SaveFile("Hazel Scene (*.hazel)\0*.hazel\0", !sceneName.empty() ? sceneName.c_str() : nullptr);
+		const auto sceneName = _activeScene->GetName();
+		const auto filePath = FileDialogs::SaveFile("Hazel Scene (*.hazel)\0*.hazel\0", !sceneName.empty() ? sceneName.c_str() : nullptr, defaultPath);
 
 		if (!filePath.empty())
 		{
-			_editorScenePath = std::filesystem::path(filePath);
+			_editorScenePath = filePath;
 			SerializeScene();
 			SetWindowTitleSceneName(_editorScenePath);
+			if (Project::GetActive()->GetConfig().StartScene.empty())
+			{
+				SetProjectStartSceneToCurrent();
+			}
+
+			return true;
 		}
+
+		return false;
 	}
 
-	void EditorLayer::SerializeScene()
+	void EditorLayer::SerializeScene() const
 	{
 		SceneSerializer serializer(_activeScene);
 		serializer.Serialize(_editorScenePath.string());
 	}
 
-	void EditorLayer::SetWindowTitleSceneName(const std::filesystem::path& scenePath)
+	void EditorLayer::NewProject()
+	{
+		if (!ClearSceneCheck())
+		{
+			return;
+		}
+
+		if (_newProjectPath.empty() || _newProjectName.empty())
+		{
+			return;
+		}
+
+		_newProjectPath /= _newProjectName;
+		if (!std::filesystem::exists(_newProjectPath) && !std::filesystem::create_directory(_newProjectPath))
+		{
+			HZ_CORE_LERROR("Failed to create folder at path {0}", _newProjectPath);
+			return;
+		}
+
+		const std::filesystem::path assetsPath = _newProjectPath / "Assets";
+		const std::filesystem::path scriptPath = assetsPath / "Scripts";
+		std::filesystem::create_directory(assetsPath);
+		std::filesystem::create_directory(scriptPath);
+
+		// TODO cleanup this logic.
+		// Create the C# project
+		const std::filesystem::path outputFilePath(scriptPath / "premake5.lua");
+		FileSystem::ReplaceInFile("Resources/NewProjectTemplate/NewProjectTemplate.lua", outputFilePath, "newprojectname", _newProjectName);
+		const std::filesystem::path premakePath(FileSystem::GetApplicationPath().parent_path() / "vendor/premake/bin/premake5.exe");
+		const std::string executionPath = fmt::format("{0} --file=\"{1}\" vs2022", premakePath.string().c_str(), outputFilePath.string().c_str());
+		// TODO fix for project made deeper that `Hazelnut/NewProject/..`
+		// because in lua file [local HazelRootDir = "../../../.."] will be wrong
+		system(executionPath.c_str());
+		
+		Project::New(_newProjectPath);
+		auto& config = Project::GetActive()->GetConfig();
+		config.Name = _newProjectName;
+		config.AssetDirectory = std::filesystem::relative(assetsPath, _newProjectPath);
+		config.ScriptModulePath = std::filesystem::relative(scriptPath, assetsPath) / fmt::format("Binaries/{0}.dll", _newProjectName);
+
+		NewScene();
+
+		_contentBrowserPanel = CreateScope<ContentBrowserPanel>();
+		ScriptEngine::TryReload();
+		Project::SaveActive();
+	}
+
+	void EditorLayer::OpenProject()
+	{
+		const auto filePath = FileDialogs::OpenFile("Hazel Project (*.hproj)\0*.hproj\0");
+		if (!filePath.empty())
+		{
+			OpenProject(filePath);
+		}
+	}
+
+	void EditorLayer::OpenProject(const std::filesystem::path& path)
+	{
+		if (const auto project = Project::Load(path))
+		{
+			const auto startScenePath = project->GetAssetFileSystemPath(project->GetConfig().StartScene);
+			OpenScene(startScenePath);
+			if (_editorScenePath.empty())
+			{
+				HZ_CORE_LWARN("New Scene created!");
+				NewScene(false);
+			}
+
+			_contentBrowserPanel = CreateScope<ContentBrowserPanel>();
+			ScriptEngine::TryReload(true);
+		}
+	}
+
+	void EditorLayer::SaveProject() const
+	{
+		if (Project::GetActive()->GetConfig().StartScene.empty())
+		{
+			SetProjectStartSceneToCurrent();
+		}
+
+		Project::SaveActive();
+	}
+
+	void EditorLayer::SetProjectStartSceneToCurrent() const
+	{
+		const std::string message = fmt::format("Do you want to make {0} the starting scene for project {1}", _activeScene->GetName(), Project::GetActive()->GetConfig().Name);
+		if (FileDialogs::QuestionPopup(message.c_str(), "Set Startup Scene"))
+		{
+			Project::GetActive()->GetConfig().StartScene = std::filesystem::relative(_editorScenePath, Project::GetAssetDirectory());
+			SaveProject();
+		}
+	}
+
+	void EditorLayer::SetWindowTitleSceneName(const std::filesystem::path& scenePath) const
 	{
 		auto& window = Application::Get().GetWindow();
 		auto fileName = scenePath.empty() ? "Unsaved" : scenePath.stem();
-		window.SetTitle(fmt::format("{0} {1}", window.GetTitle(), fileName));
+		window.SetTitle(fmt::format("{0} [{1}] [{2}]", window.GetTitle(), Project::GetActive()->GetConfig().Name, fileName));
 	}
 
 	void EditorLayer::DrawToolbar()
 	{
+		if (!_activeScene)
+		{
+			return;
+		}
+
 		const auto size = ImVec2(25.0f, 25.0f);
 		const auto uv0 = ImVec2(0.0f, 1.0f);
 		const auto uv1 = ImVec2(1.0f, 0.0f);
@@ -793,7 +915,6 @@ namespace Hazel
 				}
 			}
 
-
 			if (ImGui::ImageButton(sceneStateButton->GetRawID(), size, uv0, uv1, 3, isPlayMode ? selectedColor : normalColor, isPlayMode && !isPaused ? tintColor : whiteColor))
 			{
 				switch (_sceneState)
@@ -895,28 +1016,85 @@ namespace Hazel
 		{
 			if (ImGui::BeginMenu("File"))
 			{
-				if (ImGui::MenuItem("New", "Ctrl+N"))
 				{
-					NewScene(true);
+					const bool shouldDisable = _sceneState != SceneState::Edit || !Project::GetActive();
+					if (shouldDisable)
+					{
+						ImGui::PushDisabled();
+					}
+
+					if (ImGui::MenuItem("New Scene", "Ctrl+N"))
+					{
+						NewScene(true);
+					}
+
+					if (ImGui::MenuItem("Open Scene...", "Ctrl+O"))
+					{
+						OpenScene();
+					}
+
+					if (ImGui::MenuItem("Save Scene", "Ctrl+S"))
+					{
+						SaveScene();
+					}
+
+					if (ImGui::MenuItem("Save Scene As...", "Ctrl+Shift+S"))
+					{
+						SaveSceneAs(Project::GetAssetDirectory());
+					}
+
+					if (shouldDisable)
+					{
+						ImGui::PopDisabled();
+					}
 				}
 
-				if (ImGui::MenuItem("Open...", "Ctrl+O"))
 				{
-					OpenScene();
-				}
+					ImGui::Separator();
+					bool shouldDisable = _sceneState != SceneState::Edit;
+					if (shouldDisable)
+					{
+						ImGui::PushDisabled();
+					}
 
-				if (ImGui::MenuItem("Save", "Ctrl+S"))
-				{
-					SaveScene();
-				}
+					if (ImGui::MenuItem("New Project"))
+					{
+						_shouldOpenNewProjectModal = true;
+					}
 
-				if (ImGui::MenuItem("Save As...", "Ctrl+Shift+S"))
-				{
-					SaveSceneAs();
+					if (ImGui::MenuItem("Open Project..."))
+					{
+						OpenProject();
+					}
+
+					if (shouldDisable)
+					{
+						ImGui::PopDisabled();
+					}
+
+					shouldDisable |= !Project::GetActive();
+					if (shouldDisable)
+					{
+						ImGui::PushDisabled();
+					}
+
+					if (ImGui::MenuItem("Save Project"))
+					{
+						SaveProject();
+					}
+
+					if (ImGui::MenuItem("Set Project Start Scene to current"))
+					{
+						SetProjectStartSceneToCurrent();
+					}
+
+					if (shouldDisable)
+					{
+						ImGui::PopDisabled();
+					}
 				}
 
 				ImGui::Separator();
-
 				if (ImGui::MenuItem("Exit"))
 				{
 					HZ_LCRITICAL("Exiting application.");
@@ -946,21 +1124,20 @@ namespace Hazel
 
 				if (ImGui::BeginMenu("Script Engine"))
 				{
-					switch (_sceneState)
+					const bool shouldDisable = _sceneState != SceneState::Edit || !Project::GetActive();
+					if (shouldDisable)
 					{
-					case SceneState::Edit:
-					{
-						if (ImGui::MenuItem("Reload"))
-						{
-							Application::Get().ReloadScriptEngine();
-						}
-						break;
+						ImGui::PushDisabled();
 					}
-					case SceneState::Play:
-					case SceneState::Simulate:
-					default:
-						ImGui::TextDisabled("Reload");
-						break;
+
+					if (ImGui::MenuItem("Reload"))
+					{
+						Application::Get().ReloadScriptEngine();
+					}
+
+					if (shouldDisable)
+					{
+						ImGui::PopDisabled();
 					}
 
 					ImGui::EndMenu();
@@ -969,6 +1146,69 @@ namespace Hazel
 				ImGui::EndMenu();
 			}
 			ImGui::EndMenuBar();
+		}
+	}
+
+	void EditorLayer::DrawNewProjectPopup()
+	{
+		if (_shouldOpenNewProjectModal)
+		{
+			ImGui::OpenPopup("NewProject");
+			_shouldOpenNewProjectModal = false;
+			_newProjectName.clear();
+			_newProjectPath.clear();
+		}
+
+		const ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+		ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+		if (ImGui::BeginPopupModal("NewProject", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+		{
+			ImGui::Text("Details");
+
+			char buffer[256] = {};
+			strcpy_s(buffer, sizeof(buffer), _newProjectName.c_str());
+			ImGui::Text("Project Name :");
+			ImGui::SameLine();
+			if (ImGui::InputText("##ProjectName", buffer, sizeof(buffer), ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_CharsNoBlank))
+			{
+				_newProjectName = buffer;
+			}
+
+			ImGui::Text("Project Path :");
+			ImGui::SameLine();
+			ImGui::Text(_newProjectPath.string().c_str());
+
+			ImGui::SameLine();
+			if (ImGui::Button("Browse..."))
+			{
+				_newProjectPath = FileDialogs::SelectFolder(FileSystem::GetApplicationPath());
+			}
+
+			const bool isDisabled = _newProjectPath.empty() || _newProjectName.empty();
+			if (isDisabled)
+			{
+				ImGui::PushDisabled();
+			}
+
+			if (ImGui::Button("Accept"))
+			{
+				NewProject();
+				ImGui::CloseCurrentPopup();
+			}
+
+			if (isDisabled)
+			{
+				ImGui::PopDisabled();
+			}
+
+			ImGui::SetItemDefaultFocus();
+
+			ImGui::SameLine();
+			if (ImGui::Button("Cancel"))
+			{
+				ImGui::CloseCurrentPopup();
+			}
+			ImGui::EndPopup();
 		}
 	}
 
@@ -1008,7 +1248,7 @@ namespace Hazel
 		{
 			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
 			{
-				std::filesystem::path filePath = static_cast<const wchar_t*>(payload->Data);
+				const std::filesystem::path filePath = static_cast<const wchar_t*>(payload->Data);
 
 				if (filePath.extension() == ".hazel")
 				{
@@ -1207,7 +1447,10 @@ namespace Hazel
 		ImGui::Begin("Tools");
 
 		ImGui::Checkbox("Show physics colliders", &_shouldShowPhysicsColliders);
-		ImGui::Checkbox("Clone AudioSource on Play", &_activeScene->ShouldCloneAudioSource());
+		if (_activeScene)
+		{
+			ImGui::Checkbox("Clone AudioSource on Play", &_activeScene->ShouldCloneAudioSource());
+		}
 
 		if (ImGui::Button("Show Demo Window"))
 		{
@@ -1232,7 +1475,7 @@ namespace Hazel
 		}*/
 		ImGui::Separator();
 
-		if (ImGui::Button("Create 50 squares"))
+		if (_activeScene && ImGui::Button("Create 50 squares"))
 		{
 			for (int i = 50 - 1; i >= 0; i--)
 			{

@@ -12,7 +12,7 @@ Entities:
     AudioSourceComponent:
       IsAutoPlay: true
       IsVisibleInGame: false
-      AudioClipPath: assets\audio\rocavaco-Bass17w19.mp3
+      AudioClipPath: audio\rocavaco-Bass17w19.mp3
       Gain: 1
       Pitch: 1
       IsLoop: false
@@ -29,7 +29,7 @@ Entities:
     AudioSourceComponent:
       IsAutoPlay: false
       IsVisibleInGame: false
-      AudioClipPath: assets\audio\Splash.ogg
+      AudioClipPath: audio\Splash.ogg
       Gain: 1
       Pitch: 1
       IsLoop: false
@@ -46,7 +46,7 @@ Entities:
     AudioSourceComponent:
       IsAutoPlay: false
       IsVisibleInGame: false
-      AudioClipPath: assets\audio\Splash.ogg
+      AudioClipPath: audio\Splash.ogg
       Gain: 1
       Pitch: 1
       IsLoop: false

@@ -25,7 +25,7 @@ namespace Hazel
 		Entity CreateEntity(const std::string& name = "Entity", int tag = 0, int layer = 0);
 		Entity CreateEntityWithUUID(UUID uuid, const std::string& name = "Entity", int tag = 0, int layer = 0);
 		void DestroyEntity(Entity entity);
-		bool CheckEntityValidity(const entt::entity& entity) const;
+		bool CheckEntityValidity(const entt::entity entity) const;
 
 		void OnRuntimeStart();
 		void OnRuntimeStop();

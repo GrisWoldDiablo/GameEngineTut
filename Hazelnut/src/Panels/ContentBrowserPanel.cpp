@@ -7,9 +7,6 @@
 
 namespace Hazel
 {
-	// TODO change once we have projects.
-	extern const std::filesystem::path gAssetsPath = "assets";
-
 	// TODO move to ImGui Utils
 	static bool Button(const std::string& label, bool isEnabled = true)
 	{
@@ -32,7 +29,8 @@ namespace Hazel
 	}
 
 	ContentBrowserPanel::ContentBrowserPanel()
-		: _currentDirectory(gAssetsPath) {}
+		: _baseDirectory(Project::GetProjectDirectory() / Project::GetAssetDirectory()),
+		_currentDirectory(_baseDirectory) {}
 
 	void ContentBrowserPanel::OnImGuiRender()
 	{
@@ -42,7 +40,7 @@ namespace Hazel
 		const float panelHeight = panelSize.y - footer;
 		if (panelHeight > 0.0f && ImGui::BeginChild(ImGui::GetID("Folders"), ImVec2(panelSize.x * 0.25f, panelHeight), true, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_HorizontalScrollbar))
 		{
-			LoopDirectory(gAssetsPath);
+			LoopDirectory(_baseDirectory);
 			ImGui::EndChild();
 		}
 
@@ -61,7 +59,7 @@ namespace Hazel
 		{
 			if (!std::filesystem::exists(_currentDirectory))
 			{
-				_currentDirectory = gAssetsPath;
+				_currentDirectory = _baseDirectory;
 			}
 
 			const auto drawnElements = [&](bool isThumbnails)
@@ -93,7 +91,7 @@ namespace Hazel
 							}
 							else if (FileDialogs::QuestionPopup("Do you want to open folderElement in external program?", "Open File"))
 							{
-								FileDialogs::ExecuteFile(path.string().c_str());
+								FileDialogs::ExecuteOpenFile(path.string().c_str());
 								// TODO Logic based on file extension.
 							}
 						}
@@ -107,17 +105,16 @@ namespace Hazel
 						{
 							if (ImGui::MenuItem("Open Containing Folder"))
 							{
-								FileDialogs::ExecuteFile(_currentDirectory.string().c_str());
+								FileDialogs::ExecuteOpenFile(_currentDirectory.string().c_str());
 								ImGui::CloseCurrentPopup();
 							}
-
 
 							if (!directoryEntry.is_directory())
 							{
 								ImGui::Separator();
 								if (ImGui::MenuItem("Open Externally"))
 								{
-									FileDialogs::ExecuteFile(path.string().c_str());
+									FileDialogs::ExecuteOpenFile(path.string().c_str());
 									ImGui::CloseCurrentPopup();
 								}
 							}
@@ -180,12 +177,12 @@ namespace Hazel
 
 		if (ImGui::BeginMenuBar())
 		{
-			if (Button("^", _currentDirectory != gAssetsPath))
+			if (Button("^", _currentDirectory != _baseDirectory))
 			{
 				_currentDirectory = _currentDirectory.parent_path();
 			}
 
-			ImGui::Text(_currentDirectory.string().c_str());
+			ImGui::Text(std::filesystem::relative(_currentDirectory, Project::GetProjectDirectory()).string().c_str());
 			ImGui::EndMenuBar();
 		}
 
@@ -199,8 +196,8 @@ namespace Hazel
 		{
 			return folderElement.is_directory();
 		};
-		
-		return std::ranges::any_of(std::filesystem::directory_iterator(currentPath),isDirectory);
+
+		return std::ranges::any_of(std::filesystem::directory_iterator(currentPath), isDirectory);
 	}
 
 	void ContentBrowserPanel::LoopDirectory(const std::filesystem::path& currentPath)

@@ -10,7 +10,7 @@ Entities:
       Rotation: [0, 0, 0]
       Scale: [10.6399994, 10.6399994, 1]
     SpriteRendererComponent:
-      TexturePath: assets\textures\Checkerboard.png
+      TexturePath: textures\Checkerboard.png
       MagFilter: 9728
       Tiling: [3.29999995, 6.19999981]
       Color: [1, 1, 1, 1]
@@ -24,7 +24,7 @@ Entities:
       Rotation: [0, 0, 0]
       Scale: [1, 1, 1]
     SpriteRendererComponent:
-      TexturePath: assets\textures\ChernoLogo.png
+      TexturePath: textures\ChernoLogo.png
       MagFilter: 9729
       Tiling: [1, 1]
       Color: [1, 1, 1, 1]

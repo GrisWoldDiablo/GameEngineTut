@@ -1,12 +1,12 @@
 #include "hzpch.h"
 #include "Hazel/Utils/PlatformUtils.h"
+#include "Hazel/Core/Application.h"
 
-#include <commdlg.h>
+#include <shlobj_core.h>
+
 #include <GLFW/glfw3.h>
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h>
-#include "Hazel/Core/Application.h"
-#include <future>
 
 namespace Hazel
 {
@@ -29,7 +29,7 @@ namespace Hazel
 		{
 			MessageBoxA
 			(
-				glfwGetWin32Window((GLFWwindow*)Application::Get().GetWindow().GetNativeWindow()),
+				glfwGetWin32Window(static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow())),
 				message,
 				title,
 				MB_ICONWARNING | MB_OK
@@ -41,7 +41,7 @@ namespace Hazel
 	{
 		auto result = MessageBoxA
 		(
-			glfwGetWin32Window((GLFWwindow*)Application::Get().GetWindow().GetNativeWindow()),
+			glfwGetWin32Window(static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow())),
 			message,
 			title,
 			MB_ICONINFORMATION | MB_YESNO
@@ -58,14 +58,14 @@ namespace Hazel
 		// Initialize OPENFILENAME
 		ZeroMemory(&ofn, sizeof(OPENFILENAME));
 		ofn.lStructSize = sizeof(OPENFILENAME);
-		ofn.hwndOwner = glfwGetWin32Window((GLFWwindow*)Application::Get().GetWindow().GetNativeWindow());
+		ofn.hwndOwner = glfwGetWin32Window(static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow()));
 		ofn.lpstrFile = szFile;
 		ofn.nMaxFile = sizeof(szFile);
 		ofn.lpstrFilter = filter;
 		ofn.nFilterIndex = 1;
-		ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR;
+		ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_READONLY | OFN_NOCHANGEDIR;
 
-		if (GetOpenFileNameA(&ofn) == TRUE)
+		if (GetOpenFileNameA(&ofn))
 		{
 			return ofn.lpstrFile;
 		}
@@ -74,30 +74,32 @@ namespace Hazel
 		return {};
 	}
 
-	std::string FileDialogs::SaveFile(const char* filter, const char* defaultFileName)
+	std::string FileDialogs::SaveFile(const char* filter, const char* defaultFileName, const std::filesystem::path& defaultPath)
 	{
 		OPENFILENAMEA ofn;
 		CHAR szFile[260] = {0};
 
 		if (defaultFileName != nullptr)
 		{
+			const auto path = defaultPath / defaultFileName;
 			std::stringstream ss;
-			ss << defaultFileName << std::strchr(filter, '\0');
+			ss << path.string().c_str() << std::strchr(filter, '\0');
 			std::strcpy(szFile, ss.str().c_str());
 		}
 
 		// Initialize OPENFILENAME
-		ZeroMemory(&ofn, sizeof(OPENFILENAME));
-		ofn.lStructSize = sizeof(OPENFILENAME);
-		ofn.hwndOwner = glfwGetWin32Window((GLFWwindow*)Application::Get().GetWindow().GetNativeWindow());
+		ZeroMemory(&ofn, sizeof(OPENFILENAMEA));
+		ofn.lStructSize = sizeof(OPENFILENAMEA);
+		ofn.lpstrInitialDir = defaultPath.string().c_str();
+		ofn.hwndOwner = glfwGetWin32Window(static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow()));
 		ofn.lpstrFile = szFile;
 		ofn.nMaxFile = sizeof(szFile);
 		ofn.lpstrFilter = filter;
 		ofn.lpstrDefExt = std::strchr(filter, '\0') + 1;
 		ofn.nFilterIndex = 1;
-		ofn.Flags = OFN_PATHMUSTEXIST | OFN_OVERWRITEPROMPT | OFN_NOCHANGEDIR;
+		ofn.Flags = OFN_OVERWRITEPROMPT | OFN_NOCHANGEDIR;
 
-		if (GetSaveFileNameA(&ofn) == TRUE)
+		if (GetSaveFileNameA(&ofn))
 		{
 			return ofn.lpstrFile;
 		}
@@ -105,9 +107,33 @@ namespace Hazel
 		return {};
 	}
 
-	void FileDialogs::ExecuteFile(const char* filePath)
+	std::filesystem::path FileDialogs::SelectFolder(const std::filesystem::path& rootPath)
 	{
-		auto hwnd = glfwGetWin32Window((GLFWwindow*)Application::Get().GetWindow().GetNativeWindow());
-		ShellExecuteA(hwnd, "open", filePath, nullptr, nullptr, SW_SHOW);
+		ITEMIDLIST* pidlRoot;
+		SHParseDisplayName(rootPath.c_str(), nullptr, &pidlRoot, 0, nullptr);
+
+		BROWSEINFOA bi;
+		char path[MAX_PATH + 1];
+		bi.hwndOwner = glfwGetWin32Window(static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow()));
+		bi.pidlRoot = pidlRoot;
+		bi.pszDisplayName = path;
+		bi.lpszTitle = "Choose New Project's Folder";
+		bi.ulFlags = BIF_RETURNONLYFSDIRS | BIF_NEWDIALOGSTYLE | BIF_STATUSTEXT;
+		bi.lpfn = nullptr;
+		bi.lParam = 0;
+
+		const LPITEMIDLIST pidl = SHBrowseForFolderA(&bi);
+		if (pidl != nullptr && SHGetPathFromIDListA(pidl, path))
+		{
+			return path;
+		}
+
+		return {};
+	}
+
+	void FileDialogs::ExecuteOpenFile(const char* filePath)
+	{
+		const auto hwnd = glfwGetWin32Window(static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow()));
+		ShellExecuteA(hwnd, nullptr, filePath, nullptr, nullptr, SW_SHOW);
 	}
 }

@@ -10,6 +10,7 @@ namespace Hazel
 		void OnImGuiRender();
 
 	private:
+		std::filesystem::path _baseDirectory;
 		std::filesystem::path _currentDirectory;
 
 		bool ContainDirectory(const std::filesystem::path& currentPath);

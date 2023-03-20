@@ -16,7 +16,7 @@ Entities:
       Rotation: [0, 0, 0]
       Scale: [1, 1, 1]
     SpriteRendererComponent:
-      TexturePath: assets\textures\Ship.png
+      TexturePath: textures\Ship.png
       MagFilter: 9728
       Tiling: [1, 1]
       Color: [1, 1, 1, 1]

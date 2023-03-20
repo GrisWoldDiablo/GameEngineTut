@@ -1,10 +1,16 @@
 Scene: 2D Physic
+RootEntityChildID: 1632462983521309121
 Entities:
   - Entity: 1632462983521309121
     BaseComponent:
       Name: Slope
       Tag: 0
       Layer: 0
+    FamilyComponent:
+      ParentID: 69420
+      ChildID: 0
+      NextSiblingID: 13760894420886024348
+      PreviousSiblingID: 0
     TransformComponent:
       Position: [0, -2.4570334, 0]
       Rotation: [0, 0, -0.287857264]
@@ -28,6 +34,11 @@ Entities:
       Name: Square
       Tag: 0
       Layer: 0
+    FamilyComponent:
+      ParentID: 69420
+      ChildID: 0
+      NextSiblingID: 3550356962882268774
+      PreviousSiblingID: 1632462983521309121
     TransformComponent:
       Position: [0.724173248, 7.80342054, -6.10351562e-05]
       Rotation: [0, 0, 0]
@@ -58,6 +69,11 @@ Entities:
       Name: Camera
       Tag: 0
       Layer: 0
+    FamilyComponent:
+      ParentID: 69420
+      ChildID: 0
+      NextSiblingID: 1064095580862351179
+      PreviousSiblingID: 13760894420886024348
     TransformComponent:
       Position: [-1.1920929e-07, -5.96046448e-08, 0]
       Rotation: [0, 0, 0]
@@ -71,16 +87,23 @@ Entities:
         OrthographicSize: 10
         OrthographicNearClip: -1
         OrthographicFarClip: 1
-        AspectRatio: 1.63450837
+        AspectRatio: 2.25773191
       IsPrimary: true
       IsFixedAspectRatio: false
     ScriptComponent:
       ClassName: Sandbox.Camera
+      ScriptFields:
+        []
   - Entity: 1064095580862351179
     BaseComponent:
       Name: Wall
       Tag: 0
       Layer: 0
+    FamilyComponent:
+      ParentID: 69420
+      ChildID: 0
+      NextSiblingID: 18170605317098829854
+      PreviousSiblingID: 3550356962882268774
     TransformComponent:
       Position: [7.51363277, -0.758702874, 0]
       Rotation: [0, 0, 0]
@@ -104,12 +127,17 @@ Entities:
       Name: Circle
       Tag: 0
       Layer: 0
+    FamilyComponent:
+      ParentID: 69420
+      ChildID: 0
+      NextSiblingID: 5985586717480783343
+      PreviousSiblingID: 1064095580862351179
     TransformComponent:
       Position: [-2.13000011, -0.361146927, 0]
       Rotation: [0, 0, 0]
       Scale: [2, 2, 1]
     SpriteRendererComponent:
-      TexturePath: assets\textures\ChernoLogo.png
+      TexturePath: F:\Users\grisw\Documents\Visual.Studio.Project\GameEngineTut\Hazelnut\SandboxProject\Assets\textures\ChernoLogo.png
       MagFilter: 9729
       Tiling: [1, 1]
       Color: [1, 1, 1, 1]
@@ -128,12 +156,17 @@ Entities:
       Name: unwrap_helper.png
       Tag: 0
       Layer: 0
+    FamilyComponent:
+      ParentID: 69420
+      ChildID: 0
+      NextSiblingID: 6923272651620727073
+      PreviousSiblingID: 18170605317098829854
     TransformComponent:
       Position: [-1.66934705, 2.46567798, 6.10351562e-05]
       Rotation: [0, 0, 0]
       Scale: [0.400000006, 1, 1]
     SpriteRendererComponent:
-      TexturePath: assets\textures\unwrap_helper.png
+      TexturePath: F:\Users\grisw\Documents\Visual.Studio.Project\GameEngineTut\Hazelnut\SandboxProject\Assets\textures\unwrap_helper.png
       MagFilter: 9729
       Tiling: [1, 1]
       Color: [1, 1, 1, 1]
@@ -153,6 +186,11 @@ Entities:
       Name: Circle
       Tag: 0
       Layer: 0
+    FamilyComponent:
+      ParentID: 69420
+      ChildID: 0
+      NextSiblingID: 14263202880808732667
+      PreviousSiblingID: 5985586717480783343
     TransformComponent:
       Position: [0.174769819, 2.1493578, 0.266410768]
       Rotation: [0, 0, 0]
@@ -176,6 +214,11 @@ Entities:
       Name: Player
       Tag: 0
       Layer: 0
+    FamilyComponent:
+      ParentID: 69420
+      ChildID: 0
+      NextSiblingID: 10121501930715311659
+      PreviousSiblingID: 6923272651620727073
     TransformComponent:
       Position: [-2.51970673, 1.25817871, 0]
       Rotation: [0, 0, 0]
@@ -185,7 +228,7 @@ Entities:
       ScriptFields:
         []
     SpriteRendererComponent:
-      TexturePath: assets\textures\Ship.png
+      TexturePath: F:\Users\grisw\Documents\Visual.Studio.Project\GameEngineTut\Hazelnut\SandboxProject\Assets\textures\Ship.png
       MagFilter: 9728
       Tiling: [1, 1]
       Color: [1, 1, 1, 1]
@@ -205,6 +248,11 @@ Entities:
       Name: Player2 Rotate
       Tag: 0
       Layer: 0
+    FamilyComponent:
+      ParentID: 69420
+      ChildID: 0
+      NextSiblingID: 5051573955425461706
+      PreviousSiblingID: 14263202880808732667
     TransformComponent:
       Position: [0, 0, 0]
       Rotation: [0, 0, 0]
@@ -212,7 +260,7 @@ Entities:
     ScriptComponent:
       ClassName: Sandbox.Player2
     SpriteRendererComponent:
-      TexturePath: assets\textures\Triangle.png
+      TexturePath: F:\Users\grisw\Documents\Visual.Studio.Project\GameEngineTut\Hazelnut\SandboxProject\Assets\textures\Triangle.png
       MagFilter: 9729
       Tiling: [1, 1]
       Color: [1, 1, 1, 1]
@@ -221,12 +269,19 @@ Entities:
       Name: Circle Player
       Tag: 0
       Layer: 0
+    FamilyComponent:
+      ParentID: 69420
+      ChildID: 0
+      NextSiblingID: 14339827444151018024
+      PreviousSiblingID: 10121501930715311659
     TransformComponent:
       Position: [1.62836075, 0.024299562, 0]
       Rotation: [0, 0, 0]
       Scale: [1, 1, 1]
     ScriptComponent:
       ClassName: Sandbox.CirclePlayer
+      ScriptFields:
+        []
     CircleRendererComponent:
       Color: [1, 1, 1, 1]
       Thickness: 1
@@ -236,6 +291,11 @@ Entities:
       Name: FieldTester
       Tag: 0
       Layer: 0
+    FamilyComponent:
+      ParentID: 69420
+      ChildID: 0
+      NextSiblingID: 5914586758935991626
+      PreviousSiblingID: 5051573955425461706
     TransformComponent:
       Position: [0.763527155, 1.1367836, -3.9653969e-10]
       Rotation: [0, 0, 0]
@@ -243,9 +303,7 @@ Entities:
     ScriptComponent:
       ClassName: Sandbox.FieldTester
       ScriptFields:
-        - Name: Entity
-          Type: Entity
-          Data: 5051573955425461706
+        []
     SpriteRendererComponent:
       Tiling: [1, 1]
       Color: [1, 1, 1, 1]
@@ -254,6 +312,11 @@ Entities:
       Name: EntityTester
       Tag: 0
       Layer: 0
+    FamilyComponent:
+      ParentID: 69420
+      ChildID: 0
+      NextSiblingID: 0
+      PreviousSiblingID: 14339827444151018024
     TransformComponent:
       Position: [3.92547989, 1.03641129, 0]
       Rotation: [0, 0, 0]
@@ -261,15 +324,4 @@ Entities:
     ScriptComponent:
       ClassName: Sandbox.EntityTester
       ScriptFields:
-        - Name: NewEntityName
-          Type: String
-          Data: Create C# Entity
-        - Name: NewEntityColor
-          Type: Color
-          Data: [0.768627465, 0, 0, 1]
-        - Name: EntityToFind
-          Type: String
-          Data: Circle Player
-        - Name: EntityToFindColor
-          Type: Color
-          Data: [1, 0.440154433, 0, 1]
+        []

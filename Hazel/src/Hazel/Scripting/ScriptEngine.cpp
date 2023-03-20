@@ -2,6 +2,7 @@
 #include "Hazel/Scene/Scene.h"
 #include "Hazel/Core/Application.h"
 #include "Hazel/Core/FileSystem.h"
+#include "Hazel/Project/Project.h"
 
 #include "ScriptEngine.h"
 #include "ScriptGlue.h"
@@ -474,7 +475,7 @@ namespace Hazel
 			return false;
 		}
 
-		if (!TryLoadAppAssembly("SandboxProject/Assets/Scripts/Binaries/Sandbox.dll"))
+		if (!Project::GetActive() || !TryLoadAppAssembly(Project::GetAssetDirectory() / Project::GetActive()->GetConfig().ScriptModulePath))
 		{
 			return false;
 		}

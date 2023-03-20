@@ -1,4 +1,4 @@
-local ProjectName = "Sandbox"
+local ProjectName = "newprojectname"
 local HazelRootDir = "../../../.."
 include (HazelRootDir .. "/vendor/premake/premake_customization/solution_items.lua")
 

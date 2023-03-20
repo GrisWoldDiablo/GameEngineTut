@@ -131,12 +131,12 @@ namespace Hazel
 			auto& component = entity.GetComponent<T>();
 			constexpr auto treeNodeFlags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_FramePadding;
 
-			auto contentRegionAvailable = ImGui::GetContentRegionAvail();
+			const auto contentRegionAvailable = ImGui::GetContentRegionAvail();
 
 			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{4, 4});
-			float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
+			const float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
 			ImGui::Separator();
-			bool isTreeOpened = ImGui::TreeNodeEx(reinterpret_cast<void*>(typeid(T).hash_code()), treeNodeFlags, name.c_str());
+			const bool isTreeOpened = ImGui::TreeNodeEx(reinterpret_cast<void*>(typeid(T).hash_code()), treeNodeFlags, name.c_str());
 			ImGui::PopStyleVar();
 
 			ImGui::PushID(name.c_str());
@@ -276,6 +276,11 @@ namespace Hazel
 
 	void SceneHierarchyPanel::OnImGuiRender()
 	{
+		if (!_scene)
+		{
+			return;
+		}
+		
 		ImGui::Begin("Scene Hierarchy", nullptr, ImGuiWindowFlags_MenuBar);
 
 		if (ImGui::BeginDragDropTarget())
