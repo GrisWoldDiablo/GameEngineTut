@@ -4,39 +4,37 @@
 #include "Utils/EditorResourceManager.h"
 
 #include <imgui/imgui.h>
+#include <imgui/imgui_internal.h>
 
 namespace Hazel
 {
 	// TODO move to ImGui Utils
 	static bool Button(const std::string& label, bool isEnabled = true)
 	{
-		if (isEnabled)
+		if (!isEnabled)
 		{
-			return ImGui::Button(label.c_str());
+			ImGui::PushDisabled();
 		}
 
-		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImGui::GetStyleColorVec4(ImGuiCol_Button));
-		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImGui::GetStyleColorVec4(ImGuiCol_Button));
-		ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyleColorVec4(ImGuiCol_TextDisabled));
+		const bool wasButtonPressed = ImGui::Button(label.c_str());
 
-		ImGui::Button(label.c_str());
+		if (!isEnabled)
+		{
+			ImGui::PopDisabled();
+		}
 
-		ImGui::PopStyleColor();
-		ImGui::PopStyleColor();
-		ImGui::PopStyleColor();
-
-		return false;
+		return wasButtonPressed;
 	}
 
 	ContentBrowserPanel::ContentBrowserPanel()
-		: _baseDirectory(Project::GetProjectDirectory() / Project::GetAssetDirectory()),
+		: _baseDirectory(Project::GetAssetDirectory()),
 		_currentDirectory(_baseDirectory) {}
 
 	void ContentBrowserPanel::OnImGuiRender()
 	{
 		const float footer = ImGui::GetFrameHeightWithSpacing();
 		ImGui::Begin("Content Browser", nullptr, ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoScrollbar);
-		auto panelSize = ImGui::GetContentRegionAvail();
+		const auto panelSize = ImGui::GetContentRegionAvail();
 		const float panelHeight = panelSize.y - footer;
 		if (panelHeight > 0.0f && ImGui::BeginChild(ImGui::GetID("Folders"), ImVec2(panelSize.x * 0.25f, panelHeight), true, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_HorizontalScrollbar))
 		{
