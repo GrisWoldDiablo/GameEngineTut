@@ -45,8 +45,8 @@ namespace Hazel
 		void NewProject();
 		void OpenProject();
 		void OpenProject(const std::filesystem::path& path);
-		void SaveProject() const;
-		void SetProjectStartSceneToCurrent() const;
+		void SaveProject();
+		void SetProjectStartSceneToCurrent();
 		
 	private:
 		void DrawToolbar();

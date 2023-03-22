@@ -109,8 +109,11 @@ namespace Hazel
 
 	std::filesystem::path FileDialogs::SelectFolder(const std::filesystem::path& rootPath)
 	{
-		ITEMIDLIST* pidlRoot;
-		SHParseDisplayName(rootPath.c_str(), nullptr, &pidlRoot, 0, nullptr);
+		ITEMIDLIST* pidlRoot = nullptr;
+		if (!rootPath.empty())
+		{
+			SHParseDisplayName(rootPath.c_str(), nullptr, &pidlRoot, 0, nullptr);
+		}
 
 		BROWSEINFOA bi;
 		char path[MAX_PATH + 1];

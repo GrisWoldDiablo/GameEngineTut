@@ -1,6 +1,3 @@
-# top-most EditorConfig file
-root = true
-
 [*]
 charset = utf-8
 end_of_line = crlf
@@ -9,3 +6,52 @@ indent_style = tab
 insert_final_newline = true
 max_line_length = 250
 tab_width = 4
+
+# ReSharper properties
+resharper_align_multiline_expression_braces = true
+resharper_align_multiline_type_parameter = false
+resharper_align_ternary = none
+resharper_blank_lines_after_block_statements = 0
+resharper_blank_lines_around_class_definition = 0
+resharper_blank_lines_around_function_definition = 0
+resharper_braces_for_foreach = required
+resharper_braces_redundant = false
+resharper_break_template_declaration = do_not_change
+resharper_cpp_alignment_tab_fill_style = use_tabs_only
+resharper_cpp_align_multiline_argument = false
+resharper_cpp_align_multiple_declaration = false
+resharper_cpp_brace_style = next_line
+resharper_cpp_keep_blank_lines_in_code = 100
+resharper_cpp_keep_blank_lines_in_declarations = 100
+resharper_cpp_wrap_before_ternary_opsigns = false
+resharper_cpp_wrap_ternary_expr_style = wrap_if_long
+resharper_csharp_alignment_tab_fill_style = use_tabs_only
+resharper_csharp_blank_lines_inside_region = 0
+resharper_csharp_case_block_braces = next_line_shifted_2
+resharper_csharp_wrap_after_invocation_lpar = true
+resharper_csharp_wrap_arguments_style = chop_if_long
+resharper_disable_space_changes_before_trailing_comment = true
+resharper_empty_block_style = together_same_line
+resharper_enforce_line_ending_style = true
+resharper_function_declaration_return_type_style = on_single_line
+resharper_function_definition_return_type_style = on_single_line
+resharper_indent_comment = false
+resharper_indent_preprocessor_directives = do_not_change
+resharper_instance_members_qualify_declared_in = 
+resharper_int_align_comments = true
+resharper_linkage_specification_indentation = all
+resharper_new_line_before_while = false
+resharper_place_expr_accessor_on_single_line = true
+resharper_place_expr_method_on_single_line = true
+resharper_place_expr_property_on_single_line = true
+resharper_remove_blank_lines_near_braces_in_code = false
+resharper_show_autodetect_configure_formatting_tip = false
+resharper_space_before_template_params = false
+resharper_toplevel_function_declaration_return_type_style = on_single_line
+resharper_trailing_comma_in_multiline_lists = true
+resharper_use_indent_from_vs = false
+resharper_wrap_after_expression_lbrace = false
+resharper_wrap_before_expression_rbrace = false
+resharper_wrap_chained_binary_expressions = chop_if_long
+resharper_wrap_enumeration_style = wrap_if_long
+resharper_wrap_lines = true

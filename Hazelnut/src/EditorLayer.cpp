@@ -628,10 +628,6 @@ namespace Hazel
 			_editorScenePath = filePath;
 			SerializeScene();
 			SetWindowTitleSceneName(_editorScenePath);
-			if (Project::GetActive()->GetConfig().StartScene.empty())
-			{
-				SetProjectStartSceneToCurrent();
-			}
 
 			return true;
 		}
@@ -670,15 +666,16 @@ namespace Hazel
 		std::filesystem::create_directory(scriptPath);
 
 		// TODO cleanup this logic.
-		// Create the C# project
-		const std::filesystem::path outputFilePath(scriptPath / "premake5.lua");
-		FileSystem::ReplaceInFile("Resources/NewProjectTemplate/NewProjectTemplate.lua", outputFilePath, "newprojectname", _newProjectName);
+		// This will generate a premake file and create a visual studio 2022 project
+		const std::filesystem::path outputFilePathTemp(scriptPath / "premake5Temp.lua");
+		FileSystem::ReplaceInFile("Resources/NewProjectTemplate/NewProjectTemplate.lua", outputFilePathTemp, "newprojectname", _newProjectName);
+		const std::filesystem::path outputFilePathFinal(scriptPath / "premake5.lua");
+		FileSystem::ReplaceInFile(outputFilePathTemp, outputFilePathFinal, "../../../..", FileSystem::GetApplicationPath().parent_path().string());
+		std::filesystem::remove(outputFilePathTemp);
 		const std::filesystem::path premakePath(FileSystem::GetApplicationPath().parent_path() / "vendor/premake/bin/premake5.exe");
-		const std::string executionPath = fmt::format("{0} --file=\"{1}\" vs2022", premakePath.string().c_str(), outputFilePath.string().c_str());
-		// TODO fix for project made deeper that `Hazelnut/NewProject/..`
-		// because in lua file [local HazelRootDir = "../../../.."] will be wrong
+		const std::string executionPath = fmt::format("{0} --file=\"{1}\" vs2022", premakePath.string().c_str(), outputFilePathFinal.string().c_str());
 		system(executionPath.c_str());
-		
+
 		Project::New(_newProjectPath);
 		auto& config = Project::GetActive()->GetConfig();
 		config.Name = _newProjectName;
@@ -705,6 +702,7 @@ namespace Hazel
 	{
 		if (const auto project = Project::Load(path))
 		{
+			_editorScenePath.clear();
 			const auto startScenePath = project->GetAssetFileSystemPath(project->GetConfig().StartScene);
 			OpenScene(startScenePath);
 			if (_editorScenePath.empty())
@@ -718,9 +716,10 @@ namespace Hazel
 		}
 	}
 
-	void EditorLayer::SaveProject() const
+	void EditorLayer::SaveProject()
 	{
-		if (Project::GetActive()->GetConfig().StartScene.empty())
+		const auto projectConfig = Project::GetActive()->GetConfig();
+		if (projectConfig.StartScene.empty())
 		{
 			SetProjectStartSceneToCurrent();
 		}
@@ -728,11 +727,16 @@ namespace Hazel
 		Project::SaveActive();
 	}
 
-	void EditorLayer::SetProjectStartSceneToCurrent() const
+	void EditorLayer::SetProjectStartSceneToCurrent()
 	{
 		const std::string message = fmt::format("Do you want to make {0} the starting scene for project {1}", _activeScene->GetName(), Project::GetActive()->GetConfig().Name);
 		if (FileDialogs::QuestionPopup(message.c_str(), "Set Startup Scene"))
 		{
+			if (_editorScenePath.empty())
+			{
+				SaveScene();
+			}
+
 			Project::GetActive()->GetConfig().StartScene = std::filesystem::relative(_editorScenePath, Project::GetAssetDirectory());
 			SaveProject();
 		}
@@ -1169,19 +1173,20 @@ namespace Hazel
 			strcpy_s(buffer, sizeof(buffer), _newProjectName.c_str());
 			ImGui::Text("Project Name :");
 			ImGui::SameLine();
-			if (ImGui::InputText("##ProjectName", buffer, sizeof(buffer), ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_CharsNoBlank))
+			if (ImGui::InputText("##ProjectName", buffer, sizeof(buffer), ImGuiInputTextFlags_CharsNoBlank))
 			{
 				_newProjectName = buffer;
 			}
 
 			ImGui::Text("Project Path :");
 			ImGui::SameLine();
-			ImGui::Text(_newProjectPath.string().c_str());
+			const std::filesystem::path actualProjectPath(_newProjectPath / _newProjectName);
+			ImGui::Text(actualProjectPath.string().c_str());
 
 			ImGui::SameLine();
 			if (ImGui::Button("Browse..."))
 			{
-				_newProjectPath = FileDialogs::SelectFolder(FileSystem::GetApplicationPath());
+				_newProjectPath = FileDialogs::SelectFolder();
 			}
 
 			const bool isDisabled = _newProjectPath.empty() || _newProjectName.empty();

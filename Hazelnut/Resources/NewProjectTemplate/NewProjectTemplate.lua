@@ -1,5 +1,5 @@
 local ProjectName = "newprojectname"
-local HazelRootDir = "../../../.."
+local HazelRootDir = [[../../../..]]
 include (HazelRootDir .. "/vendor/premake/premake_customization/solution_items.lua")
 
 workspace (ProjectName)
