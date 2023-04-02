@@ -8,14 +8,13 @@ namespace Hazel
 {
 	struct WindowProps
 	{
-	public:
 		std::string Title;
 		uint32_t Width;
 		uint32_t Height;
 		bool VSync;
 
-		WindowProps(const std::string& title = "Hazel Engine", uint32_t width = 1600, uint32_t height = 900, bool IsVSync = true)
-			: Title(title), Width(width), Height(height), VSync(IsVSync) {}
+		WindowProps(const std::string& title = "Hazel Engine", uint32_t width = 1600, uint32_t height = 900, bool isVSync = true)
+			: Title(title), Width(width), Height(height), VSync(isVSync) {}
 	};
 
 	// Interface representing a desktop system based Window

@@ -31,11 +31,11 @@ namespace Hazel
 
 	private:
 		void Init(const WindowProps& props);
-		void Shutdown();
+		void Shutdown() const;
 
 	private:
-		GLFWwindow* _window;
-		Scope<GraphicsContext> _context;
+		GLFWwindow* _window = nullptr;
+		Scope<GraphicsContext> _context = nullptr;
 
 		struct WindowData
 		{

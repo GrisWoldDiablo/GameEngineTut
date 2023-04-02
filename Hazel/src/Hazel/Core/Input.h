@@ -16,6 +16,11 @@ namespace Hazel
 		};
 
 	public:
+		static bool IsValidKeyCodeValue(int keyCodeValue)
+		{
+			return keyCodeValue >= 0 && keyCodeValue < static_cast<int>(KeyCode::LAST);
+		}
+
 		static bool IsKeyPressed(KeyCode keyCode)
 		{
 			return Get()._keysStatus[GetKeyIndex(keyCode)] == Status::Pressed;
@@ -31,19 +36,24 @@ namespace Hazel
 			return Get()._keysStatus[GetKeyIndex(keyCode)] == Status::Up;
 		}
 
+		static bool IsValidMouseCodeValue(int mouseCodeValue)
+		{
+			return mouseCodeValue >= 0 && mouseCodeValue < static_cast<int>(MouseCode::COUNT);
+		}
+
 		static bool IsMouseButtonPressed(MouseCode mouseCode)
 		{
-			return Get()._buttonsStatus[(uint16_t)mouseCode] == Status::Pressed;
+			return Get()._buttonsStatus[static_cast<uint16_t>(mouseCode)] == Status::Pressed;
 		}
 
 		static bool IsMouseButtonDown(MouseCode mouseCode)
 		{
-			return Get()._buttonsStatus[(uint16_t)mouseCode] == Status::Down;
+			return Get()._buttonsStatus[static_cast<uint16_t>(mouseCode)] == Status::Down;
 		}
 
 		static bool IsMouseButtonUp(MouseCode mouseCode)
 		{
-			return Get()._buttonsStatus[(uint16_t)mouseCode] == Status::Up;
+			return Get()._buttonsStatus[static_cast<uint16_t>(mouseCode)] == Status::Up;
 		}
 
 		static glm::vec2 GetMousePosition();
@@ -52,22 +62,20 @@ namespace Hazel
 
 	private:
 		Status& GetKeyStatus(KeyCode keyCode) { return _keysStatus[GetKeyIndex(keyCode)]; }
-		Status& GetMouseStatus(MouseCode mouseCode) { return _buttonsStatus[(uint16_t)mouseCode]; }
+		Status& GetMouseStatus(MouseCode mouseCode) { return _buttonsStatus[static_cast<uint16_t>(mouseCode)]; }
 
 		void UpdateDownStatus();
 		void UpdateUpStatus();
 
-		std::array<Status, (uint16_t)KeyCode::COUNT> _keysStatus;
-		std::array<Status, (uint16_t)MouseCode::COUNT> _buttonsStatus;
+		std::array<Status, static_cast<uint16_t>(KeyCode::COUNT)> _keysStatus;
+		std::array<Status, static_cast<uint16_t>(MouseCode::COUNT)> _buttonsStatus;
 
 		static Input& Get();
 
 		static int GetKeyIndex(KeyCode keyCode)
 		{
-			return (uint16_t)keyCode - (uint16_t)KeyCode::FIRST;
+			return static_cast<uint16_t>(keyCode) - static_cast<uint16_t>(KeyCode::FIRST);
 		}
-
-		static Input _sInstance;
 
 		friend class Application;
 		friend class WindowsWindow;

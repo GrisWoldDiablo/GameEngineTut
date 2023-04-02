@@ -53,7 +53,7 @@ namespace Hazel
 		{
 			HZ_PROFILE_SCOPE("glfwInit");
 
-			auto success = glfwInit();
+			const auto success = glfwInit();
 			HZ_CORE_ASSERT(success, "Could not initialized GLFW!");
 
 			// Made a static function to be the callback.
@@ -64,7 +64,7 @@ namespace Hazel
 		{
 			HZ_PROFILE_SCOPE("glfwCreateWindow");
 
-			_window = glfwCreateWindow((int)_data.Width, (int)_data.Height, _data.Title.c_str(), nullptr, nullptr);
+			_window = glfwCreateWindow(static_cast<int>(_data.Width), static_cast<int>(_data.Height), _data.Title.c_str(), nullptr, nullptr);
 		}
 
 		_context = CreateScope<OpenGLContext>(_window);
@@ -79,7 +79,7 @@ namespace Hazel
 			// Set GLFW callbacks
 			glfwSetWindowSizeCallback(_window, [](GLFWwindow* window, int width, int height)
 			{
-				auto* data = (WindowData*)glfwGetWindowUserPointer(window);
+				auto* data = static_cast<WindowData*>(glfwGetWindowUserPointer(window));
 				data->Width = width;
 				data->Height = height;
 
@@ -89,16 +89,20 @@ namespace Hazel
 
 			glfwSetWindowCloseCallback(_window, [](GLFWwindow* window)
 			{
-				auto* data = (WindowData*)glfwGetWindowUserPointer(window);
+				const auto* data = static_cast<WindowData*>(glfwGetWindowUserPointer(window));
 				WindowCloseEvent event;
 				data->EventCallback(event);
 			});
 
 			glfwSetKeyCallback(_window, [](GLFWwindow* window, int key, int scancode, int action, int mods)
 			{
-				auto* data = (WindowData*)glfwGetWindowUserPointer(window);
+				if (!Input::IsValidKeyCodeValue(key))
+				{
+					return;
+				}
 
-				auto keyCode = static_cast<KeyCode>(key);
+				const auto* data = static_cast<WindowData*>(glfwGetWindowUserPointer(window));
+				const auto keyCode = static_cast<KeyCode>(key);
 				auto& keyStatus = Input::Get().GetKeyStatus(keyCode);
 
 				// TODO : Add repeat event?
@@ -120,21 +124,27 @@ namespace Hazel
 					data->EventCallback(event);
 					break;
 				}
+				default: break;
 				}
 			});
 
 			glfwSetCharCallback(_window, [](GLFWwindow* window, unsigned int key)
 			{
-				auto* data = (WindowData*)glfwGetWindowUserPointer(window);
+				const auto* data = static_cast<WindowData*>(glfwGetWindowUserPointer(window));
 				KeyTypedEvent event(static_cast<KeyCode>(key));
 				data->EventCallback(event);
 			});
 
 			glfwSetMouseButtonCallback(_window, [](GLFWwindow* window, int button, int action, int mods)
 			{
-				auto* data = (WindowData*)glfwGetWindowUserPointer(window);
+				if (!Input::IsValidMouseCodeValue(button))
+				{
+					return;
+				}
+				
+				const auto* data = static_cast<WindowData*>(glfwGetWindowUserPointer(window));
 
-				auto mouseCode = static_cast<MouseCode>(button);
+				const auto mouseCode = static_cast<MouseCode>(button);
 				auto& mouseStatus = Input::Get().GetMouseStatus(mouseCode);
 
 				// TODO : Add repeat event?
@@ -156,12 +166,13 @@ namespace Hazel
 					data->EventCallback(event);
 					break;
 				}
+				default: break;
 				}
 			});
 
 			glfwSetScrollCallback(_window, [](GLFWwindow* window, double xOffset, double yOffset)
 			{
-				auto* data = (WindowData*)glfwGetWindowUserPointer(window);
+				const auto* data = static_cast<WindowData*>(glfwGetWindowUserPointer(window));
 
 				MouseScrolledEvent event((float)xOffset, (float)yOffset);
 				data->EventCallback(event);
@@ -169,7 +180,7 @@ namespace Hazel
 
 			glfwSetCursorPosCallback(_window, [](GLFWwindow* window, double xPos, double yPos)
 			{
-				auto* data = (WindowData*)glfwGetWindowUserPointer(window);
+				const auto* data = static_cast<WindowData*>(glfwGetWindowUserPointer(window));
 
 				MouseMovedEvent event((float)xPos, (float)yPos);
 				data->EventCallback(event);
@@ -177,14 +188,14 @@ namespace Hazel
 
 			glfwSetWindowPosCallback(_window, [](GLFWwindow* window, int x, int y)
 			{
-				auto* data = (WindowData*)glfwGetWindowUserPointer(window);
+				const auto* data = static_cast<WindowData*>(glfwGetWindowUserPointer(window));
 				WindowMovedEvent event(x, y);
 				data->EventCallback(event);
 			});
 		}
 	}
 
-	void WindowsWindow::Shutdown()
+	void WindowsWindow::Shutdown() const
 	{
 		HZ_PROFILE_FUNCTION();
 

@@ -6,11 +6,10 @@
 
 namespace Hazel
 {
-	Input Input::_sInstance = Input();
-
 	Input& Input::Get()
 	{
-		return _sInstance;
+		static Scope<Input> singletonInstance = CreateScope<Input>();
+		return *singletonInstance.get();
 	}
 
 	glm::vec2 Input::GetMousePosition()
