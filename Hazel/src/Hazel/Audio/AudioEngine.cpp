@@ -201,28 +201,28 @@ namespace Hazel
 		}
 
 		mp3dec_file_info_t info;
-		int loadResult = mp3dec_load(&sAudioData->Mp3d, filePath.string().c_str(), &info, nullptr, nullptr);
+		const int loadResult = mp3dec_load(&sAudioData->Mp3d, filePath.string().c_str(), &info, nullptr, nullptr);
 		if (loadResult < 0)
 		{
 			HZ_CORE_LERROR("Failed to load mp3: [{0}]", filePath.string());
 			return nullptr;
 		}
 
-		uint32_t size = static_cast<uint32_t>(info.samples * sizeof(mp3d_sample_t));
+		const auto size = static_cast<float>(info.samples * sizeof(mp3d_sample_t));
 
-		auto sampleRate = info.hz;
-		auto channels = info.channels;
-		ALenum alFormat = Utils::GetOpenALFormat(channels);
+		const auto sampleRate = info.hz;
+		const auto channels = info.channels;
+		const ALenum alFormat = Utils::GetOpenALFormat(channels);
 		// TODO investigate, this is not giving an accurate length.
-		float lenghtSeconds = size / (info.avg_bitrate_kbps * 1024.0f);
+		float lenghtSeconds = size / (static_cast<float>(info.avg_bitrate_kbps) * 1024.0f);
 
 		ALuint alBuffer;
 		alGenBuffers(1, &alBuffer);
-		alBufferData(alBuffer, alFormat, info.buffer, size, sampleRate);
+		alBufferData(alBuffer, alFormat, info.buffer, static_cast<int>(size), sampleRate);
 
 		audioSource = CreateRef<AudioSource>(alBuffer, filePath, lenghtSeconds, AudioFileFormat::MP3);
 		alGenSources(1, &audioSource->_alSource);
-		alSourcei(audioSource->_alSource, AL_BUFFER, alBuffer);
+		alSourcei(audioSource->_alSource, AL_BUFFER, static_cast<int>(alBuffer));
 
 		if (alGetError() != AL_NO_ERROR)
 		{
@@ -248,13 +248,16 @@ namespace Hazel
 		FILE* file = fopen(filePath.string().c_str(), "rb");
 		OggVorbis_File vorbisFile;
 
-		int loadResult = ov_open(file, &vorbisFile, NULL, 0);
+		int loadResult = ov_open(file, &vorbisFile, nullptr, 0);
 		if (loadResult < 0)
 		{
 			HZ_CORE_LERROR("OpenAl-Soft failed to open: [{0}]", filePath.string());
 			if (file)
 			{
-				fclose(file);
+				if(fclose(file) != 0)
+				{
+					HZ_CORE_LERROR("Failed to close: [{0}]", filePath.string());
+				}
 			}
 			return nullptr;
 		}
@@ -266,7 +269,7 @@ namespace Hazel
 
 		uint64_t samples = ov_pcm_total(&vorbisFile, -1);
 		float lenghtSeconds = static_cast<float>(samples) / static_cast<float>(sampleRate);
-		uint32_t requiredBufferSize = static_cast<uint32_t>(2.0f * channels * samples);
+		auto requiredBufferSize = static_cast<uint32_t>(2.0f * channels * samples);
 
 		if (sAudioData->AudioScratchBufferSize < requiredBufferSize)
 		{
@@ -282,7 +285,7 @@ namespace Hazel
 		while (true)
 		{
 			int currentSection;
-			long lenght = ov_read(&vorbisFile, (char*)bufferPtr, 4096, 0, 2, 1, &currentSection);
+			long lenght = ov_read(&vorbisFile, reinterpret_cast<char*>(bufferPtr), 4096, 0, 2, 1, &currentSection);
 
 			if (lenght == 0)
 			{
@@ -300,9 +303,12 @@ namespace Hazel
 			bufferPtr += lenght;
 		}
 
-		uint32_t size = static_cast<uint32_t>(bufferPtr - oggBuffer);
+		const auto size = static_cast<int>(bufferPtr - oggBuffer);
 		ov_clear(&vorbisFile);
-		fclose(file);
+		if(fclose(file) != 0)
+		{
+			HZ_CORE_LERROR("Failed to close: [{0}]", filePath.string());
+		}
 
 		if (hasReadingFailed)
 		{
@@ -315,7 +321,7 @@ namespace Hazel
 
 		audioSource = CreateRef<AudioSource>(alBuffer, filePath, lenghtSeconds, AudioFileFormat::OGG);
 		alGenSources(1, &audioSource->_alSource);
-		alSourcei(audioSource->_alSource, AL_BUFFER, alBuffer);
+		alSourcei(audioSource->_alSource, AL_BUFFER, static_cast<int>(alBuffer));
 
 		if (alGetError() != AL_NO_ERROR)
 		{

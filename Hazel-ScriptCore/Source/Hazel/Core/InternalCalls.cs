@@ -106,6 +106,22 @@ namespace Hazel
 		internal static extern void TransformComponent_SetScale(ulong entityId, ref Vector3 scale);
 		#endregion
 
+		#region Camera
+		/* Camera */
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern void CameraComponent_GetIsPrimary(ulong entityId, out bool isPrimary);
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern void CameraComponent_SetIsPrimary(ulong entityId, ref bool isPrimary);
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern void CameraComponent_GetIsFixedAspectRatio(ulong entityId, out bool isFixedAspectRatio);
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern void CameraComponent_SetIsFixedAspectRatio(ulong entityId, ref bool isFixedAspectRatio);
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern void CameraComponent_GetOrthographicSize(ulong entityId, out float size);
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern void CameraComponent_SetOrthographicSize(ulong entityId, ref float size);
+		#endregion
+
 		#region Sprite Renderer
 		/* Sprite Renderer */
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -144,6 +160,9 @@ namespace Hazel
 
 		#region Rigibody 2D
 		/* Rigibody 2D */
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern void Rigidbody2DComponent_GetLinearVelocity(ulong entityId, out Vector2 linearVelocity);
+
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern void Rigidbody2DComponent_ApplyLinearImpulse(ulong entityId, ref Vector2 impulse, ref Vector2 point, bool wake);
 

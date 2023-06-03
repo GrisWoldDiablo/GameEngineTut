@@ -25,6 +25,8 @@
 
 		public float Lenght() => Lenght(this);
 
+		public float LenghtSquared() => LenghtSquared(this);
+
 		public void Normalize() => this = Normalize(this);
 
 		public Vector4 Normalized() => Normalize(this);
@@ -55,12 +57,12 @@
 			{
 				switch (index)
 				{
-					case 0: return X;
-					case 1: return Y;
-					case 2: return Z;
-					case 3: return W;
-					default:
-						throw new System.IndexOutOfRangeException($"{nameof(Vector4)} invalid index!");
+				case 0: return X;
+				case 1: return Y;
+				case 2: return Z;
+				case 3: return W;
+				default:
+					throw new System.IndexOutOfRangeException($"{nameof(Vector4)} invalid index!");
 				}
 
 			}
@@ -68,20 +70,20 @@
 			{
 				switch (index)
 				{
-					case 0:
-						X = value;
-						break;
-					case 1:
-						Y = value;
-						break;
-					case 2:
-						Z = value;
-						break;
-					case 3:
-						W = value;
-						break;
-					default:
-						throw new System.IndexOutOfRangeException($"{nameof(Vector4)} invalid index!");
+				case 0:
+					X = value;
+					break;
+				case 1:
+					Y = value;
+					break;
+				case 2:
+					Z = value;
+					break;
+				case 3:
+					W = value;
+					break;
+				default:
+					throw new System.IndexOutOfRangeException($"{nameof(Vector4)} invalid index!");
 				}
 			}
 		}
@@ -111,14 +113,14 @@
 			return (float)System.Math.Sqrt(Dot(vector, vector));
 		}
 
-		public static float SquaredLenght(Vector4 vector)
+		public static float LenghtSquared(Vector4 vector)
 		{
 			return Dot(vector, vector);
 		}
 
 		public static Vector4 ClampLenght(Vector4 vector, float maxLenght)
 		{
-			if (SquaredLenght(vector) < maxLenght * maxLenght)
+			if (LenghtSquared(vector) < maxLenght * maxLenght)
 			{
 				return Normalize(vector) * maxLenght;
 			}

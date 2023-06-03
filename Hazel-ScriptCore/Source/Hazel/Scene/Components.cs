@@ -91,6 +91,42 @@
 		}
 	}
 
+	public class CameraComponent : Component
+	{
+		public bool IsPrimary
+		{
+			get
+			{
+				InternalCalls.CameraComponent_GetIsPrimary(Entity.Id, out var isPrimary);
+				return isPrimary;
+			}
+
+			set => InternalCalls.CameraComponent_SetIsPrimary(Entity.Id, ref value);
+		}
+
+		public bool IsFixedAspectRatio
+		{
+			get
+			{
+				InternalCalls.CameraComponent_GetIsFixedAspectRatio(Entity.Id, out var isFixedAspectRatio);
+				return isFixedAspectRatio;
+			}
+
+			set => InternalCalls.CameraComponent_SetIsFixedAspectRatio(Entity.Id, ref value);
+		}
+
+		public float GetOrthographicSize()
+		{
+			InternalCalls.CameraComponent_GetOrthographicSize(Entity.Id, out var size);
+			return size;
+		}
+
+		public void SetOrthographicSize(float value)
+		{
+			InternalCalls.CameraComponent_SetOrthographicSize(Entity.Id, ref value);
+		}
+	}
+
 	public class SpriteRendererComponent : Component
 	{
 		public Color Color
@@ -154,6 +190,15 @@
 
 	public class Rigidbody2DComponent : Component
 	{
+		public Vector2 LinearVelocity
+		{
+			get
+			{
+				InternalCalls.Rigidbody2DComponent_GetLinearVelocity(Entity.Id, out var linearVelocity);
+				return linearVelocity;
+			}
+		}
+
 		public void ApplyLinearImpulse(Vector2 impulse, Vector2 worldPoint, bool wake = true)
 		{
 			InternalCalls.Rigidbody2DComponent_ApplyLinearImpulse(Entity.Id, ref impulse, ref worldPoint, wake);

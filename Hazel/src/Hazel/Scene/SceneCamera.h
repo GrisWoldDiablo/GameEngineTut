@@ -26,12 +26,14 @@ namespace Hazel
 			_perspectiveFOV = verticalFOV;
 			RecalculateProjection();
 		}
+
 		float GetPerspectiveNearClip() const { return _perspectiveNear; }
 		void SetPerspectiveNearClip(float nearClip)
 		{
 			_perspectiveNear = nearClip;
 			RecalculateProjection();
 		}
+
 		float GetPerspectiveFarClip() const { return _perspectiveFar; }
 		void SetPerspectiveFarClip(float farClip)
 		{
@@ -45,12 +47,14 @@ namespace Hazel
 			_orthographicSize = size;
 			RecalculateProjection();
 		}
+
 		float GetOrthographicNearClip() const { return _orthographicNear; }
 		void SetOrthographicNearClip(float nearClip)
 		{
 			_orthographicNear = nearClip;
 			RecalculateProjection();
 		}
+
 		float GetOrthographicFarClip() const { return _orthographicFar; }
 		void SetOrthographicFarClip(float farClip)
 		{

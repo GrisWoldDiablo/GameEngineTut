@@ -577,7 +577,7 @@ namespace Hazel
 	{
 		HZ_ASSERT(!_isRunning, "Cannot duplicate while scene is running.");
 
-		Entity newEntity = CreateEntity(entity.Name());
+		const Entity newEntity = CreateEntity(entity.Name());
 		CopyComponentsIfExist(AllComponents{}, newEntity, entity);
 
 		ReparentEntity(GetEntityByUUID(entity.Family().ParentID), newEntity);

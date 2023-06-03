@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.InteropServices.WindowsRuntime;
 
 namespace Hazel
 {
@@ -16,10 +17,30 @@ namespace Hazel
 		{
 			return Math.Abs(lhs - rhs) < float.Epsilon * float.Epsilon;
 		}
-		
+
 		public static bool IsNearlyEqual(double lhs, double rhs)
 		{
 			return Math.Abs(lhs - rhs) < double.Epsilon * double.Epsilon;
+		}
+
+		public static float Lerp(float origin, float destination, float lerpValue)
+		{
+			return (origin * (1.0f - lerpValue)) + (destination * lerpValue);
+		}
+
+		public static float Clamp01(float value)
+		{
+			if (value < 0.0f)
+			{
+				return 0.0f;
+			}
+
+			if (value > 1.0f)
+			{
+				return 1.0f;
+			}
+
+			return value;
 		}
 	}
 }

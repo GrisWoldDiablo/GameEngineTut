@@ -227,7 +227,7 @@ namespace Hazel
 			*outName = mono_string_new_wrapper(entity.Name().c_str());
 			return;
 		}
-		
+
 		HZ_CORE_LERROR("Entity {0} not found.", entityId);
 	}
 
@@ -251,7 +251,7 @@ namespace Hazel
 			mono_free(entityName);
 			return;
 		}
-		
+
 		HZ_CORE_LERROR("Entity {0} not found.", entityId);
 	}
 #pragma endregion
@@ -339,6 +339,80 @@ namespace Hazel
 		entity.Transform().Scale = *scale;
 	}
 #pragma endregion
+
+#pragma region Camera
+	static void CameraComponent_GetIsPrimary(UUID entityId, bool* isPrimary)
+	{
+		auto* scene = ScriptEngine::GetSceneContext();
+		HZ_CORE_ASSERT(scene, "Scene is null!");
+		const auto entity = scene->GetEntityByUUID(entityId);
+		HZ_CORE_ASSERT(entity, "Entity is null!");
+
+		const auto& component = entity.GetComponent<CameraComponent>();
+
+		*isPrimary = component.IsPrimary;
+	}
+
+	static void CameraComponent_SetIsPrimary(UUID entityId, bool* isPrimary)
+	{
+		auto* scene = ScriptEngine::GetSceneContext();
+		HZ_CORE_ASSERT(scene, "Scene is null!");
+		const auto entity = scene->GetEntityByUUID(entityId);
+		HZ_CORE_ASSERT(entity, "Entity is null!");
+
+		auto& component = entity.GetComponent<CameraComponent>();
+
+		component.IsPrimary = *isPrimary;
+	}
+
+	static void CameraComponent_GetIsFixedAspectRatio(UUID entityId, bool* isFixedAspectRatio)
+	{
+		auto* scene = ScriptEngine::GetSceneContext();
+		HZ_CORE_ASSERT(scene, "Scene is null!");
+		const auto entity = scene->GetEntityByUUID(entityId);
+		HZ_CORE_ASSERT(entity, "Entity is null!");
+
+		const auto& component = entity.GetComponent<CameraComponent>();
+
+		*isFixedAspectRatio = component.IsFixedAspectRatio;
+	}
+
+	static void CameraComponent_SetIsFixedAspectRatio(UUID entityId, bool* isFixedAspectRatio)
+	{
+		auto* scene = ScriptEngine::GetSceneContext();
+		HZ_CORE_ASSERT(scene, "Scene is null!");
+		const auto entity = scene->GetEntityByUUID(entityId);
+		HZ_CORE_ASSERT(entity, "Entity is null!");
+
+		auto& component = entity.GetComponent<CameraComponent>();
+
+		component.IsFixedAspectRatio = *isFixedAspectRatio;
+	}
+	static void CameraComponent_GetOrthographicSize(UUID entityId, float* size)
+	{
+		auto* scene = ScriptEngine::GetSceneContext();
+		HZ_CORE_ASSERT(scene, "Scene is null!");
+		const auto entity = scene->GetEntityByUUID(entityId);
+		HZ_CORE_ASSERT(entity, "Entity is null!");
+
+		const auto& component = entity.GetComponent<CameraComponent>();
+
+		*size = component.Camera.GetOrthographicSize();
+	}
+
+	static void CameraComponent_SetOrthographicSize(UUID entityId, float* size)
+	{
+		auto* scene = ScriptEngine::GetSceneContext();
+		HZ_CORE_ASSERT(scene, "Scene is null!");
+		const auto entity = scene->GetEntityByUUID(entityId);
+		HZ_CORE_ASSERT(entity, "Entity is null!");
+
+		auto& component = entity.GetComponent<CameraComponent>();
+
+		component.Camera.SetOrthographicSize(*size);
+	}
+#pragma endregion
+
 
 #pragma region SpriteRenderer
 
@@ -480,6 +554,22 @@ namespace Hazel
 		auto* body = static_cast<b2Body*>(component.RuntimeBody);
 
 		body->ApplyLinearImpulse(b2Vec2(impulse->x, impulse->y), b2Vec2(worldPoint->x, worldPoint->y), wake);
+	}
+
+	static void Rigidbody2DComponent_GetLinearVelocity(UUID entityId, glm::vec2* outLinearVelocity)
+	{
+		auto* scene = ScriptEngine::GetSceneContext();
+		HZ_CORE_ASSERT(scene, "Scene is null!");
+		const auto entity = scene->GetEntityByUUID(entityId);
+		HZ_CORE_ASSERT(entity, "Entity is null!");
+
+		const auto& component = entity.GetComponent<Rigidbody2DComponent>();
+		const auto* body = static_cast<b2Body*>(component.RuntimeBody);
+
+		const auto& linearVelocity = body->GetLinearVelocity();
+
+		outLinearVelocity->x = linearVelocity.x;
+		outLinearVelocity->y = linearVelocity.y;
 	}
 
 	static void Rigidbody2DComponent_ApplyLinearImpulseToCenter(UUID entityId, glm::vec2* impulse, bool wake)
@@ -888,6 +978,15 @@ namespace Hazel
 #pragma endregion
 
 #pragma region Components
+#pragma region Camera
+		HZ_ADD_INTERNAL_CALL(CameraComponent_GetIsPrimary);
+		HZ_ADD_INTERNAL_CALL(CameraComponent_GetIsFixedAspectRatio);
+		HZ_ADD_INTERNAL_CALL(CameraComponent_SetIsFixedAspectRatio);
+		HZ_ADD_INTERNAL_CALL(CameraComponent_SetIsPrimary);
+		HZ_ADD_INTERNAL_CALL(CameraComponent_GetOrthographicSize);
+		HZ_ADD_INTERNAL_CALL(CameraComponent_SetOrthographicSize);
+#pragma endregion
+
 #pragma region Sprite Renderer
 		HZ_ADD_INTERNAL_CALL(SpriteRendererComponent_GetTiling);
 		HZ_ADD_INTERNAL_CALL(SpriteRendererComponent_SetTiling);
@@ -906,6 +1005,7 @@ namespace Hazel
 
 #pragma region Rigidbody 2D
 		HZ_ADD_INTERNAL_CALL(Rigidbody2DComponent_ApplyLinearImpulse);
+		HZ_ADD_INTERNAL_CALL(Rigidbody2DComponent_GetLinearVelocity);
 		HZ_ADD_INTERNAL_CALL(Rigidbody2DComponent_ApplyLinearImpulseToCenter);
 		HZ_ADD_INTERNAL_CALL(Rigidbody2DComponent_ApplyAngularImpulse);
 #pragma endregion

@@ -345,6 +345,17 @@ namespace Hazel
 			}
 			break;
 		}
+		case Key::Delete:
+		{
+			if (ImGui::GetActiveID() == 0)
+			{
+				if (const auto selectedEntity = _sceneHierarchyPanel.GetSelectedEntity())
+				{
+					_activeScene->DestroyEntity(selectedEntity);
+				}
+			}
+			break;
+		}
 		// TODO make this work
 		//case Key::Escape:
 		//{
@@ -639,6 +650,7 @@ namespace Hazel
 	{
 		SceneSerializer serializer(_activeScene);
 		serializer.Serialize(_editorScenePath.string());
+		HZ_CORE_LINFO("[{0}] scene serialized.",_activeScene->GetName());
 	}
 
 	void EditorLayer::NewProject()
@@ -675,6 +687,8 @@ namespace Hazel
 		const std::filesystem::path premakePath(FileSystem::GetApplicationPath().parent_path() / "vendor/premake/bin/premake5.exe");
 		const std::string executionPath = fmt::format("{0} --file=\"{1}\" vs2022", premakePath.string().c_str(), outputFilePathFinal.string().c_str());
 		system(executionPath.c_str());
+		const std::string solutionPath = fmt::format("{0}{1}", (scriptPath / _newProjectName).string().c_str(), ".sln");
+		system(solutionPath.c_str());
 
 		Project::New(_newProjectPath);
 		auto& config = Project::GetActive()->GetConfig();
@@ -702,6 +716,7 @@ namespace Hazel
 	{
 		if (const auto project = Project::Load(path))
 		{
+			ScriptEngine::TryReload(true);
 			_editorScenePath.clear();
 			const auto startScenePath = project->GetAssetFileSystemPath(project->GetConfig().StartScene);
 			OpenScene(startScenePath);
@@ -712,7 +727,6 @@ namespace Hazel
 			}
 
 			_contentBrowserPanel = CreateScope<ContentBrowserPanel>();
-			ScriptEngine::TryReload(true);
 		}
 	}
 
@@ -1444,6 +1458,9 @@ namespace Hazel
 			_imGuiTimerSlowestElapsedMillis = -FLT_MAX;
 		}
 
+		ImGui::Separator();
+		ImGui::Text("Active Id: %u", ImGui::GetActiveID());
+
 		ImGui::End();
 	}
 
@@ -1602,9 +1619,9 @@ namespace Hazel
 			return;
 		}
 
-		if (auto selectedEntity = _sceneHierarchyPanel.GetSelectedEntity())
+		if (const auto selectedEntity = _sceneHierarchyPanel.GetSelectedEntity())
 		{
-			auto newEntity = _activeScene->DuplicateEntity(selectedEntity);
+			const auto newEntity = _activeScene->DuplicateEntity(selectedEntity);
 			_sceneHierarchyPanel.SetSelectedEntity(newEntity);
 		}
 	}

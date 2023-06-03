@@ -21,6 +21,8 @@ namespace Hazel
 
 		public float Lenght() => Lenght(this);
 
+		public float LenghtSquared() => LenghtSquared(this);
+
 		public void Normalize() => this = Normalize(this);
 
 		public Vector2 Normalized() => Normalize(this);
@@ -51,10 +53,10 @@ namespace Hazel
 			{
 				switch (index)
 				{
-					case 0: return X;
-					case 1: return Y;
-					default:
-						throw new System.IndexOutOfRangeException($"{nameof(Vector2)} invalid index!");
+				case 0: return X;
+				case 1: return Y;
+				default:
+					throw new System.IndexOutOfRangeException($"{nameof(Vector2)} invalid index!");
 				}
 
 			}
@@ -62,14 +64,14 @@ namespace Hazel
 			{
 				switch (index)
 				{
-					case 0:
-						X = value;
-						break;
-					case 1:
-						Y = value;
-						break;
-					default:
-						throw new System.IndexOutOfRangeException($"{nameof(Vector2)} invalid index!");
+				case 0:
+					X = value;
+					break;
+				case 1:
+					Y = value;
+					break;
+				default:
+					throw new System.IndexOutOfRangeException($"{nameof(Vector2)} invalid index!");
 				}
 			}
 		}
@@ -101,14 +103,14 @@ namespace Hazel
 			return (float)System.Math.Sqrt(Dot(vector, vector));
 		}
 
-		public static float SquaredLenght(Vector2 vector)
+		public static float LenghtSquared(Vector2 vector)
 		{
 			return Dot(vector, vector);
 		}
 
 		public static Vector2 ClampLenght(Vector2 vector, float maxLenght)
 		{
-			if (SquaredLenght(vector) < maxLenght * maxLenght)
+			if (LenghtSquared(vector) < maxLenght * maxLenght)
 			{
 				return Normalize(vector) * maxLenght;
 			}
