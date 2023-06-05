@@ -650,7 +650,7 @@ namespace Hazel
 	{
 		SceneSerializer serializer(_activeScene);
 		serializer.Serialize(_editorScenePath.string());
-		HZ_CORE_LINFO("[{0}] scene serialized.",_activeScene->GetName());
+		HZ_CORE_LINFO("[{0}] scene serialized.", _activeScene->GetName());
 	}
 
 	void EditorLayer::NewProject()
@@ -1460,6 +1460,13 @@ namespace Hazel
 
 		ImGui::Separator();
 		ImGui::Text("Active Id: %u", ImGui::GetActiveID());
+
+		ImGui::Separator();
+		bool shouldUpdatePhysics = _activeScene->GetShouldUpdatePhysics();
+		if (ImGui::Checkbox("Update Physics", &shouldUpdatePhysics))
+		{
+			_activeScene->SetShouldUpdatePhysics(shouldUpdatePhysics);
+		}
 
 		ImGui::End();
 	}

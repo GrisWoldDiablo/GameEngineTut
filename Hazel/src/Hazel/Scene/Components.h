@@ -208,9 +208,6 @@ namespace Hazel
 
 		Rigidbody2DComponent() = default;
 		Rigidbody2DComponent(const Rigidbody2DComponent&) = default;
-
-		static uint8_t TypeToBox2DBody(BodyType bodyType);
-		static BodyType Box2DBodyToType(uint8_t bodyType);
 	};
 
 	struct BoxCollider2DComponent

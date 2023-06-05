@@ -7,6 +7,7 @@
 #include "Hazel/Renderer/Renderer2D.h"
 #include "Hazel/Scripting/ScriptEngine.h"
 #include "Hazel/Audio/AudioEngine.h"
+#include "Hazel/Physics/Physics2D.h"
 
 #include "box2d/b2_world.h"
 #include "box2d/b2_body.h"
@@ -277,7 +278,10 @@ namespace Hazel
 			{
 				constexpr int32_t velocityInteration = 6;
 				constexpr int32_t positionInteration = 2;
-				_physicsWorld->Step(timestep, velocityInteration, positionInteration);
+				if (_shouldUpdatePhysics)
+				{
+					_physicsWorld->Step(timestep, velocityInteration, positionInteration);
+				}
 
 				// Retrieve transform from Box2D
 				for (auto&& [enttID, component, transform] : GetEntitiesViewWith<Rigidbody2DComponent, TransformComponent>().each())
@@ -633,13 +637,13 @@ namespace Hazel
 
 		GetEntitiesViewWith<Rigidbody2DComponent>().each([&](const auto enttID, Rigidbody2DComponent& rb2d)
 		{
-			Entity entity = {enttID, this};
+			const Entity entity = {enttID, this};
 			const auto& transform = entity.Transform();
 
 			if (entity.Family().ChildID) { }
 
 			b2BodyDef bodyDef;
-			bodyDef.type = static_cast<b2BodyType>(Rigidbody2DComponent::TypeToBox2DBody(rb2d.Type));
+			bodyDef.type = static_cast<b2BodyType>(Utils::TypeToBox2DBody(rb2d.Type));
 			bodyDef.position.Set(transform.Position.x, transform.Position.y);
 			bodyDef.angle = transform.Rotation.z;
 

@@ -68,7 +68,10 @@ namespace Hazel
 
 		bool& ShouldCloneAudioSource() { return _shouldCloneAudioSource; }
 
-		glm::ivec2 GetViewportSize() const { return glm::ivec2(_viewportWidth, _viewportHeight); }
+		glm::ivec2 GetViewportSize() const { return {_viewportWidth, _viewportHeight}; }
+
+		bool GetShouldUpdatePhysics() const { return _shouldUpdatePhysics; }
+		void SetShouldUpdatePhysics(const bool shouldUpdatePhysics) { _shouldUpdatePhysics = shouldUpdatePhysics; }
 
 	private:
 		template<typename T>
@@ -100,7 +103,9 @@ namespace Hazel
 		std::unordered_map<UUID, entt::entity> _entityMap;
 
 		b2World* _physicsWorld = nullptr;
+		bool _shouldUpdatePhysics = true;
 
+	private:
 		static Ref<Texture2D> _sAudioSourceIcon;
 		static Ref<Texture2D> _sAudioListenerIcon;
 

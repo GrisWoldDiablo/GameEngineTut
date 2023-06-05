@@ -23,7 +23,7 @@ namespace Hazel
 #endif // HZ_DEBUG
 
 		// Initialize the singleton.
-		HZ_CORE_ASSERT(!_sInstance, "Application already exist!")
+		HZ_CORE_ASSERT(!_sInstance, "Application already exist!");
 		{
 			_sInstance = this;
 			_sMainThreadID = std::this_thread::get_id();

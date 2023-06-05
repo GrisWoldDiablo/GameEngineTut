@@ -8,6 +8,7 @@
 #include "Hazel/Scripting/ScriptClass.h"
 #include "Hazel/Scripting/ScriptInstance.h"
 #include "Hazel/Audio/AudioEngine.h"
+#include "Hazel/Physics/Physics2D.h"
 
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
@@ -362,9 +363,9 @@ namespace Hazel
 					body->SetAngularVelocity(0.0f);
 				}
 
-				if (Rigidbody2DComponent::Box2DBodyToType(body->GetType()) != component.Type)
+				if (Utils::Box2DBodyToType(body->GetType()) != component.Type)
 				{
-					body->SetType(static_cast<b2BodyType>(Rigidbody2DComponent::TypeToBox2DBody(component.Type)));
+					body->SetType(Utils::TypeToBox2DBody(component.Type));
 				}
 
 				body->SetFixedRotation(component.IsFixedRotation);
