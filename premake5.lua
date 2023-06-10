@@ -34,6 +34,7 @@ group "Dependencies"
 	include "Hazel/vendor/OpenAL-Soft"
 	include "Hazel/vendor/libogg"
 	include "Hazel/vendor/Vorbis"
+	include "Hazel/vendor/msdf-atlas-gen"
 group ""
 
 group "Core"
