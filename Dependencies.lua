@@ -23,6 +23,9 @@ IncludeDir["OpenALSoft"] = "%{wks.location}/Hazel/vendor/OpenAL-Soft"
 IncludeDir["libogg"] = "%{wks.location}/Hazel/vendor/libogg/include"
 IncludeDir["Vorbis"] = "%{wks.location}/Hazel/vendor/Vorbis/include"
 IncludeDir["minimp3"] = "%{wks.location}/Hazel/vendor/minimp3"
+--Text
+IncludeDir["msdfgen"] = "%{wks.location}/Hazel/vendor/msdf-atlas-gen/msdfgen"
+IncludeDir["msdf_atlas_gen"] = "%{wks.location}/Hazel/vendor/msdf-atlas-gen/msdf-atlas-gen"
 
 LibraryDir = {}
 LibraryDir["mono"] = "%{wks.location}/Hazel/vendor/mono/lib/%{cfg.buildcfg}"

@@ -8,6 +8,8 @@
 #include "Hazel/Core/FileSystem.h"
 #include "Hazel/Scripting/ScriptEngine.h"
 
+#include "Hazel/Renderer/Font.h"
+
 #include <Box2D/include/box2d/b2_body.h>
 
 #include <imgui/imgui.h>
@@ -18,7 +20,10 @@
 
 namespace Hazel
 {
-	EditorLayer::EditorLayer() : Layer("Hazel Editor") {}
+	EditorLayer::EditorLayer() : Layer("Hazel Editor")
+	{
+		Font Font("Resources/Fonts/opensans/OpenSans-Bold.ttf");
+	}
 
 	void EditorLayer::OnAttach()
 	{

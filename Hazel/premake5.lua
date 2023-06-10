@@ -44,7 +44,9 @@ project "Hazel"
 		"%{IncludeDir.OpenALSoft}/src/core",
 		"%{IncludeDir.libogg}",
 		"%{IncludeDir.Vorbis}",
-		"%{IncludeDir.minimp3}"
+		"%{IncludeDir.minimp3}",
+		"%{IncludeDir.msdfgen}",
+		"%{IncludeDir.msdf_atlas_gen}"
 	}
 
 	defines
@@ -66,6 +68,7 @@ project "Hazel"
 		"opengl32.lib",
 		"OpenAL-Soft",
 		"Vorbis",
+		"msdf-atlas-gen",
 
 		"%{Library.mono}"
 	}
