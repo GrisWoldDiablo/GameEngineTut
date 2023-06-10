@@ -341,7 +341,7 @@ namespace Hazel
 		}
 		else
 		{
-			HZ_CORE_LERROR("Entity UUID [{0}] missing ScriptInstance", entityUUID);
+			HZ_CORE_LERROR("Entity [{0}] UUID [{1}] missing ScriptInstance", entity.Name(), entityUUID);
 		}
 	}
 
@@ -355,7 +355,7 @@ namespace Hazel
 		}
 		else
 		{
-			HZ_CORE_LERROR("Entity UUID [{0}] missing ScriptInstance", entityUUID);
+			HZ_CORE_LERROR("Entity [{0}] UUID [{1}] missing ScriptInstance", entity.Name(), entityUUID);
 		}
 	}
 

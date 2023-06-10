@@ -299,7 +299,8 @@ namespace Hazel
 
 			if (component.Texture != nullptr)
 			{
-				out << YAML::Key << "TexturePath" << YAML::Value << component.Texture->GetPath(); // TODO not use path but actual texture asset.
+				const auto path = std::filesystem::relative(component.Texture->GetPath(), Project::GetAssetDirectory());
+				out << YAML::Key << "TexturePath" << YAML::Value << path; // TODO not use path but actual texture asset.
 				out << YAML::Key << "MagFilter" << YAML::Value << component.Texture->GetMagFilter();
 			}
 
