@@ -21,6 +21,11 @@ workspace "Hazel"
 	{
 		"MultiProcessorCompile"
 	}
+
+	defines
+	{
+		"MSDFGEN_USE_LODEPNG"
+	}
 	
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 

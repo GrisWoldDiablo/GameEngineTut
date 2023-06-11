@@ -87,13 +87,11 @@ Entities:
         OrthographicSize: 10
         OrthographicNearClip: -1
         OrthographicFarClip: 1
-        AspectRatio: 2.25773191
+        AspectRatio: 2.28205132
       IsPrimary: true
       IsFixedAspectRatio: false
     ScriptComponent:
       ClassName: Sandbox.Camera
-      ScriptFields:
-        []
   - Entity: 1064095580862351179
     BaseComponent:
       Name: Wall
@@ -137,7 +135,7 @@ Entities:
       Rotation: [0, 0, 0]
       Scale: [2, 2, 1]
     SpriteRendererComponent:
-      TexturePath: F:\Users\grisw\Documents\Visual.Studio.Project\GameEngineTut\Hazelnut\SandboxProject\Assets\textures\ChernoLogo.png
+      TexturePath: Textures\ChernoLogo.png
       MagFilter: 9729
       Tiling: [1, 1]
       Color: [1, 1, 1, 1]
@@ -166,7 +164,7 @@ Entities:
       Rotation: [0, 0, 0]
       Scale: [0.400000006, 1, 1]
     SpriteRendererComponent:
-      TexturePath: F:\Users\grisw\Documents\Visual.Studio.Project\GameEngineTut\Hazelnut\SandboxProject\Assets\textures\unwrap_helper.png
+      TexturePath: Textures\unwrap_helper.png
       MagFilter: 9729
       Tiling: [1, 1]
       Color: [1, 1, 1, 1]
@@ -228,7 +226,7 @@ Entities:
       ScriptFields:
         []
     SpriteRendererComponent:
-      TexturePath: F:\Users\grisw\Documents\Visual.Studio.Project\GameEngineTut\Hazelnut\SandboxProject\Assets\textures\Ship.png
+      TexturePath: Textures\Ship.png
       MagFilter: 9728
       Tiling: [1, 1]
       Color: [1, 1, 1, 1]
@@ -260,7 +258,7 @@ Entities:
     ScriptComponent:
       ClassName: Sandbox.Player2
     SpriteRendererComponent:
-      TexturePath: F:\Users\grisw\Documents\Visual.Studio.Project\GameEngineTut\Hazelnut\SandboxProject\Assets\textures\Triangle.png
+      TexturePath: Textures\Triangle.png
       MagFilter: 9729
       Tiling: [1, 1]
       Color: [1, 1, 1, 1]

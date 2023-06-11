@@ -7,6 +7,7 @@ namespace Hazel
 {
 	Font::Font(const std::filesystem::path& filepath)
 	{
+#if FALSE
 		msdfgen::FreetypeHandle* ft = msdfgen::initializeFreetype();
 		if (ft)
 		{
@@ -35,5 +36,6 @@ namespace Hazel
 			}
 			msdfgen::deinitializeFreetype(ft);
 		}
+#endif
 	}
 }
