@@ -15,10 +15,10 @@ namespace Hazel
 			if (font)
 			{
 				msdfgen::Shape shape;
-				constexpr char character = 'A';
-				for (int i = 0; i < 4; ++i)
+				const std::string griswold = "GRISWOLD";
+				for (const auto& letter : griswold)
 				{
-					if (msdfgen::loadGlyph(shape, font, character + i))
+					if (msdfgen::loadGlyph(shape, font, letter))
 					{
 						shape.normalize();
 						//                      max. angle
@@ -27,7 +27,7 @@ namespace Hazel
 						msdfgen::Bitmap<float, 3> msdf(32, 32);
 						//                     range, scale, translation
 						msdfgen::generateMSDF(msdf, shape, 4.0, 1.0, msdfgen::Vector2(4.0, 4.0));
-						std::string filename = fmt::format("{0}.png", character + i);
+						std::string filename = fmt::format("{0}.png", letter);
 						msdfgen::savePng(msdf, filename.c_str());
 					}
 				}
