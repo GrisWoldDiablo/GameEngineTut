@@ -1,5 +1,6 @@
 #include "hzpch.h"
 #include "Font.h"
+#include "Hazel/Core/Timer.h"
 
 #include "msdf-atlas-gen.h"
 #include "FontGeometry.h"
@@ -43,6 +44,7 @@ namespace Hazel
 	Font::Font(const std::filesystem::path& filepath)
 		: _data(new MSDFData())
 	{
+		Timer timer;
 		msdfgen::FreetypeHandle* ft = msdfgen::initializeFreetype();
 		HZ_CORE_ASSERT(ft, "freetype failed to initialize");
 
@@ -76,6 +78,7 @@ namespace Hazel
 
 		constexpr double fontScale = 1.0;
 		_data->FontGeometry = msdf_atlas::FontGeometry(&_data->GlyphsGeometry);
+
 		const int glyphsLoaded = _data->FontGeometry.loadCharset(font, fontScale, charset);
 		HZ_CORE_LINFO("Loaded {1} glyphs out of {2} from font [{0}]", filepath.filename(), glyphsLoaded, charset.size());
 
@@ -93,8 +96,34 @@ namespace Hazel
 		atlasPacker.getDimensions(width, height);
 		emSize = atlasPacker.getScale();
 
-		_atlasTexture = CreateAndCacheAtlas<uint8_t,float, 3, msdf_atlas::msdfGenerator>("Test", static_cast<float>(emSize),_data->GlyphsGeometry, _data->FontGeometry, width, height);
+#define LCG_MULTIPLIER 6364136223846793005ull
+#define LCG_INCREMENT 1442695040888963407ull
+#define DEFAULT_ANGLE_THRESHOLD 3.0
+#define THREAD_COUNT 8
 
+		uint64_t coloringSeed = 0;
+		constexpr bool isExpensiveColoring = false;
+		if (isExpensiveColoring)
+		{
+			msdf_atlas::Workload([&glyphs = _data->GlyphsGeometry, &coloringSeed](int i, int threadNo) -> bool
+			{
+				const unsigned long long glyphSeed = (LCG_MULTIPLIER * (coloringSeed ^ i) + LCG_INCREMENT) * !!coloringSeed;
+				glyphs[i].edgeColoring(msdfgen::edgeColoringInkTrap, DEFAULT_ANGLE_THRESHOLD, glyphSeed);
+				return true;
+			}, _data->GlyphsGeometry.size()).finish(THREAD_COUNT);
+		}
+		else
+		{
+			unsigned long long glyphSeed = coloringSeed;
+			for (msdf_atlas::GlyphGeometry& glyph : _data->GlyphsGeometry)
+			{
+				glyphSeed *= LCG_MULTIPLIER;
+				glyph.edgeColoring(msdfgen::edgeColoringInkTrap, DEFAULT_ANGLE_THRESHOLD, glyphSeed);
+			}
+		}
+
+		_atlasTexture = CreateAndCacheAtlas<uint8_t, float, 3, msdf_atlas::msdfGenerator>("Test", static_cast<float>(emSize), _data->GlyphsGeometry, _data->FontGeometry, width, height);
+		HZ_CORE_LINFO("Time to create Font Atlas {0}ms", timer.ElapsedMillis());
 
 #if 0
 		msdfgen::Shape shape;
