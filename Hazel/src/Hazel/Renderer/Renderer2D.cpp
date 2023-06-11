@@ -5,6 +5,7 @@
 #include "Shader.h"
 #include "UniformBuffer.h"
 #include "RenderCommand.h"
+#include "MSDFData.h"
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -606,6 +607,54 @@ namespace Hazel
 	void Renderer2D::SetLineWidth(float width)
 	{
 		sData.LineWidth = width;
+	}
+
+	void Renderer2D::DrawString(const std::string& string, const Ref<Font>& font, const glm::mat4& transform, const Color& color)
+	{
+		const auto& fontGeometry = font->GetMSDFData()->FontGeometry;
+		const auto& metrics = fontGeometry.getMetrics();
+		Ref<Texture2D> fontAtlas = font->GetAtlasTexture();
+
+		double x = 0.0;
+		double fsScale = 1.0 / (metrics.ascenderY - metrics.descenderY);
+		double y = 0.0;
+
+		char character = 'G';
+		const auto* glyph = fontGeometry.getGlyph(character);
+		if (!glyph)
+		{
+			glyph = fontGeometry.getGlyph('?');
+			if (!glyph)
+			{
+				return;
+			}
+		}
+
+		double al, ab, ar, at;
+		glyph->getQuadAtlasBounds(al, ab, ar, at);
+		glm::vec2 textCoordMin(al, ab);
+		glm::vec2 textCoordMax(ar, at);
+
+		float texelWidth = 1.0f / fontAtlas->GetWidth();
+		float texelHeight = 1.0f / fontAtlas->GetHeight();
+		textCoordMin *= glm::vec2(texelWidth, texelHeight);
+		textCoordMax *= glm::vec2(texelWidth, texelHeight);
+
+		double pl, pb, pr, pt;
+		glyph->getQuadPlaneBounds(pl, pb, pr, pt);
+		glm::vec2 quadMin(pl, pb);
+		glm::vec2 quadMax(pr, pt);
+		quadMin *= fsScale, quadMin += glm::vec2(x, y);
+		quadMax *= fsScale, quadMax += glm::vec2(x, y);
+
+		// render here
+
+		double advance = glyph->getAdvance();
+		char nextCharacter = 'W';
+		fontGeometry.getAdvance(advance, character, nextCharacter);
+
+		float kerningOffset = 0.0f; // Space between characters.
+		x += fsScale * advance + kerningOffset;
 	}
 
 	void Renderer2D::ResetStats()

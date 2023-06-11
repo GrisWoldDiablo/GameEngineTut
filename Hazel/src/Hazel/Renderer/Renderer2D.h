@@ -2,12 +2,11 @@
 
 #include "OrthographicCamera.h"
 #include "Hazel/Core/Application.h"
+#include "Hazel/Core/Color.h"
 #include "Hazel/Renderer/Texture.h"
 #include "Hazel/Renderer/SubTexture2D.h"
 #include "Hazel/Renderer/Camera.h"
-#include "Hazel/Core/Color.h"
-
-#include "Hazel/Renderer/EditorCamera.h"
+#include "Hazel/Renderer/Font.h"
 #include "Hazel/Scene/Components.h"
 
 namespace Hazel
@@ -88,6 +87,9 @@ namespace Hazel
 		static void SetLineWidth(float width);
 		// --- ----------- --- //
 
+		// --- Text --- //
+		static void DrawString(const std::string& string, const Ref<Font>& font,const glm::mat4& transform, const Color& color);
+		// --- ----------- --- //
 
 		struct Statistics
 		{

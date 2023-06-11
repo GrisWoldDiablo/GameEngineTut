@@ -1,6 +1,7 @@
 #include "hzpch.h"
 #include "Font.h"
 #include "Hazel/Core/Timer.h"
+#include "MSDFData.h"
 
 #include "msdf-atlas-gen.h"
 #include "FontGeometry.h"
@@ -8,12 +9,6 @@
 
 namespace Hazel
 {
-	struct MSDFData
-	{
-		std::vector<msdf_atlas::GlyphGeometry> GlyphsGeometry;
-		msdf_atlas::FontGeometry FontGeometry;
-	};
-
 	template<typename T, typename S, int N, msdf_atlas::GeneratorFunction<S, N> GenFunc>
 	static Ref<Texture2D> CreateAndCacheAtlas(
 		const std::string& fontName, float fontSize,

@@ -12,6 +12,7 @@ namespace Hazel
 		Font(const std::filesystem::path& filepath);
 		~Font();
 
+		MSDFData* GetMSDFData() const { return _data; }
 		Ref<Texture2D> GetAtlasTexture() const { return _atlasTexture; }
 
 	private:
