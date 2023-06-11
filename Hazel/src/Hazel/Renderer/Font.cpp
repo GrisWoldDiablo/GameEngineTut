@@ -1,4 +1,4 @@
-﻿#include "hzpch.h"
+#include "hzpch.h"
 #include "Font.h"
 
 #include "msdf-atlas-gen.h"
@@ -12,6 +12,33 @@ namespace Hazel
 		std::vector<msdf_atlas::GlyphGeometry> GlyphsGeometry;
 		msdf_atlas::FontGeometry FontGeometry;
 	};
+
+	template<typename T, typename S, int N, msdf_atlas::GeneratorFunction<S, N> GenFunc>
+	static Ref<Texture2D> CreateAndCacheAtlas(
+		const std::string& fontName, float fontSize,
+		const std::vector<msdf_atlas::GlyphGeometry>& glyphsGeometry,
+		const msdf_atlas::FontGeometry& fontGeometry, uint32_t width, uint32_t height)
+	{
+		msdf_atlas::GeneratorAttributes attributes;
+		attributes.config.overlapSupport = true;
+		attributes.scanlinePass = true;
+		msdf_atlas::ImmediateAtlasGenerator<S, N, GenFunc, msdf_atlas::BitmapAtlasStorage<T, N>> generator(width, height);
+		generator.setAttributes(attributes);
+		generator.setThreadCount(8); // TODO Check what is available get half of that.
+		generator.generate(glyphsGeometry.data(), static_cast<int>(glyphsGeometry.size()));
+
+		const auto bitmap = static_cast<msdfgen::BitmapConstRef<T, N>>(generator.atlasStorage());
+
+		TextureSpecification specification;
+		specification.Width = bitmap.width;
+		specification.Height = bitmap.height;
+		specification.Format = ImageFormat::RGB8;
+		specification.GenerateMips = false;
+
+		Ref<Texture2D> texture = Texture2D::Create(specification);
+		texture->SetData(const_cast<void*>(reinterpret_cast<const void*>(bitmap.pixels)), bitmap.width * bitmap.height * 3);
+		return texture;
+	}
 
 	Font::Font(const std::filesystem::path& filepath)
 		: _data(new MSDFData())
@@ -33,16 +60,15 @@ namespace Hazel
 			uint32_t Begin, End;
 		};
 
-		// From imgui_draw.cpp [ImFontAtlas::GetGlyphRangesDefault]
 		static constexpr CharsetRange charsetRanges[] =
 		{
-			{0x0020, 0x00FF} // Basic Latin + Latin Supplement
+			{0x0020, 0x00FF} // Basic Latin + Latin Supplement, From imgui_draw.cpp [ImFontAtlas::GetGlyphRangesDefault]
 		};
 
 		msdf_atlas::Charset charset;
-		for (const auto charsetRange : charsetRanges)
+		for (const auto& [begin, end] : charsetRanges)
 		{
-			for (uint32_t c = charsetRange.Begin; c <= charsetRange.End; c++)
+			for (uint32_t c = begin; c <= end; c++)
 			{
 				charset.add(c);
 			}
@@ -52,6 +78,23 @@ namespace Hazel
 		_data->FontGeometry = msdf_atlas::FontGeometry(&_data->GlyphsGeometry);
 		const int glyphsLoaded = _data->FontGeometry.loadCharset(font, fontScale, charset);
 		HZ_CORE_LINFO("Loaded {1} glyphs out of {2} from font [{0}]", filepath.filename(), glyphsLoaded, charset.size());
+
+		double emSize = 40.0;
+		msdf_atlas::TightAtlasPacker atlasPacker;
+		atlasPacker.setPixelRange(2.0);
+		atlasPacker.setMiterLimit(1.0);
+		atlasPacker.setPadding(0.0);
+		atlasPacker.setScale(emSize);
+		const int remaining = atlasPacker.pack(_data->GlyphsGeometry.data(), _data->GlyphsGeometry.size());
+		HZ_CORE_ASSERT(remaining == 0, "Failed to pack font.")
+
+		int width;
+		int height;
+		atlasPacker.getDimensions(width, height);
+		emSize = atlasPacker.getScale();
+
+		_atlasTexture = CreateAndCacheAtlas<uint8_t,float, 3, msdf_atlas::msdfGenerator>("Test", static_cast<float>(emSize),_data->GlyphsGeometry, _data->FontGeometry, width, height);
+
 
 #if 0
 		msdfgen::Shape shape;

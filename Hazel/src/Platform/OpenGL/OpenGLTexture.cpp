@@ -5,10 +5,40 @@
 
 namespace Hazel
 {
-	OpenGLTexture2D::OpenGLTexture2D(uint32_t width, uint32_t height)
-		: _width(width), _height(height), _internalFormat(GL_RGBA8), _dataFormat(GL_RGBA)
+	namespace Utils
+	{
+		static GLenum HazelImageFormatToGLDataFormat(ImageFormat format)
+		{
+			switch (format)
+			{
+			case ImageFormat::RGB8: return GL_RGB;
+			case ImageFormat::RGBA8: return GL_RGBA;
+			}
+
+			HZ_CORE_ASSERT(false, "Unsupported Format.")
+			return 0;
+		}
+
+		static GLenum HazelImageFormatToGLInternalFormat(ImageFormat format)
+		{
+			switch (format)
+			{
+			case ImageFormat::RGB8: return GL_RGB8;
+			case ImageFormat::RGBA8: return GL_RGBA8;
+			}
+
+			HZ_CORE_ASSERT(false, "Unsupported Format.")
+			return 0;
+		}
+	}
+
+	OpenGLTexture2D::OpenGLTexture2D(const TextureSpecification& specification)
+		: _specification(specification), _width(_specification.Width), _height(_specification.Height)
 	{
 		HZ_PROFILE_FUNCTION();
+
+		_internalFormat = Utils::HazelImageFormatToGLInternalFormat(_specification.Format);
+		_dataFormat = Utils::HazelImageFormatToGLDataFormat(_specification.Format);
 
 		glCreateTextures(GL_TEXTURE_2D, 1, &_rendererID);
 		glTextureStorage2D(_rendererID, 1, _internalFormat, _width, _height);
@@ -38,7 +68,7 @@ namespace Hazel
 			data = stbi_load(_path.string().c_str(), &width, &height, &channels, 0);
 		}
 
-		bool hasLoadingFailed = !data;
+		const bool hasLoadingFailed = !data;
 		if (hasLoadingFailed)
 		{
 			stbi_image_free(data);

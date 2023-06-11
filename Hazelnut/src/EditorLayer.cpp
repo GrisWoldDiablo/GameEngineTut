@@ -20,9 +20,12 @@
 
 namespace Hazel
 {
+	static Font* sFont;
 	EditorLayer::EditorLayer() : Layer("Hazel Editor")
 	{
-		Font Font("Resources/Fonts/opensans/OpenSans-Bold.ttf");
+		// sFont = new Font("Resources/Fonts/opensans/OpenSans-Bold.ttf");
+		//sFont = new Font("Resources/Fonts/segoe/segoesc.ttf");
+		sFont = new Font("Resources/Fonts/consola/consola.ttf");
 	}
 
 	void EditorLayer::OnAttach()
@@ -1479,6 +1482,8 @@ namespace Hazel
 	void EditorLayer::DrawTools()
 	{
 		ImGui::Begin("Tools");
+
+		ImGui::Image(sFont->GetAtlasTexture()->GetRawID(), {512, 512}, {0, 1}, {1, 0});
 
 		ImGui::Checkbox("Show physics colliders", &_shouldShowPhysicsColliders);
 		if (_activeScene)

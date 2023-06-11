@@ -8,9 +8,11 @@ namespace Hazel
 	class OpenGLTexture2D : public Texture2D
 	{
 	public:
-		OpenGLTexture2D(uint32_t width, uint32_t height);
+		OpenGLTexture2D(const TextureSpecification& specification);
 		OpenGLTexture2D(const std::filesystem::path& path);
 		virtual ~OpenGLTexture2D() override;
+
+		const TextureSpecification& GetSpecification() const override { return _specification; }
 
 		uint32_t GetWidth() const override { return _width; }
 		uint32_t GetHeight() const override { return _height; }
@@ -33,6 +35,8 @@ namespace Hazel
 		}
 
 	private:
+		TextureSpecification _specification;
+
 		std::filesystem::path _path;
 		uint32_t _width;
 		uint32_t _height;

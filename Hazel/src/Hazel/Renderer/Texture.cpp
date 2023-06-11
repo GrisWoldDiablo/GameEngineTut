@@ -9,7 +9,7 @@ namespace Hazel
 	// Assignment in Hazel::Application constructor, since the renderer need to be initialized.
 	Ref<Texture2D> Texture2D::ErrorTexture = nullptr;
 
-	Ref<Texture2D> Texture2D::Create(uint32_t width, uint32_t height)
+	Ref<Texture2D> Texture2D::Create(const TextureSpecification& specification)
 	{
 		switch (Renderer::GetAPI())
 		{
@@ -17,7 +17,7 @@ namespace Hazel
 			HZ_CORE_ASSERT(false, "RendererAPI::None is currently not supported.");
 			return nullptr;
 		case RendererAPI::API::OpenGL:
-			return CreateRef<OpenGLTexture2D>(width, height);
+			return CreateRef<OpenGLTexture2D>(specification);
 		case RendererAPI::API::DirectX:
 			HZ_CORE_ASSERT(false, "RendererAPI::DirectX is currently not supported.");
 			return nullptr;

@@ -45,8 +45,8 @@ namespace Hazel
 		// TODO move somewhere else?
 		Texture2D::ErrorTexture = []
 		{
-			auto errorTexture = Texture2D::Create(1, 1);
-			const uint8_t data[4] = {255, 128, 255, 255};
+			auto errorTexture = Texture2D::Create(TextureSpecification());
+			constexpr uint8_t data[4] = {255, 128, 255, 255};
 			errorTexture->SetData((void*)data, 4);
 			return errorTexture;
 		}();
