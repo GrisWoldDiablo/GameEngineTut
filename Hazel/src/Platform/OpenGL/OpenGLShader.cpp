@@ -160,13 +160,21 @@ namespace Hazel
 		if (!inputFileStream.bad())
 		{
 			inputFileStream.seekg(0, std::ios::end);
-			result.resize(inputFileStream.tellg());
-			inputFileStream.seekg(0, std::ios::beg);
-			inputFileStream.read(&result[0], result.size());
+			const size_t fileSize = inputFileStream.tellg();
+			if (fileSize != -1)
+			{
+				result.resize(fileSize);
+				inputFileStream.seekg(0, std::ios::beg);
+				inputFileStream.read(&result[0], result.size());
+			}
+			else
+			{
+				HZ_CORE_LERROR("Could not read from or open file [{0}].", filePath);
+			}
 		}
 		else
 		{
-			HZ_CORE_LERROR("Could not open file {0}", filePath);
+			HZ_CORE_LERROR("Could not open filestream.");
 		}
 
 		return result;
@@ -393,7 +401,7 @@ namespace Hazel
 		spirv_cross::ShaderResources resources = compiler.get_shader_resources();
 
 #if SHADER_LOG
-		HZ_CORE_LTRACE("OpenGLShader::Reflect - {0} {1}", Utils::GLShaderStageToString(stage), _path);
+		HZ_CORE_LTRACE("OpenGLShader::Reflect - {0} {1}", Utils::GLShaderStageToString(stage), _filePath);
 		HZ_CORE_LTRACE("    {0} Uniform buffer(s)", resources.uniform_buffers.size());
 		HZ_CORE_LTRACE("    {0} Resource(s)", resources.sampled_images.size());
 

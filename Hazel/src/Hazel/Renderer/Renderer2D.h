@@ -15,14 +15,16 @@ namespace Hazel
 	{
 		QUAD,
 		CIRCLE,
-		LINE
+		LINE,
+		TEXT
 	};
 
-	constexpr const char* sRendererShaderName[] = {"Quad", "Circle", "Line"};
+	constexpr const char* sRendererShaderName[] = {"Quad", "Circle", "Line", "Text"};
 
 	constexpr const char* SHADER_PATH_QUAD = "assets/shaders/Renderer2D_Quad.glsl";
 	constexpr const char* SHADER_PATH_CIRCLE = "assets/shaders/Renderer2D_Circle.glsl";
 	constexpr const char* SHADER_PATH_LINE = "assets/shaders/Renderer2D_Line.glsl";
+	constexpr const char* SHADER_PATH_TEXT = "assets/shaders/Renderer2D_Text.glsl";
 
 	class Renderer2D
 	{

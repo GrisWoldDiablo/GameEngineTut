@@ -87,6 +87,10 @@ namespace Hazel
 		float LineWidth = 2.0f;
 #pragma endregion
 
+#pragma region Text
+		Ref<Shader> TextShader;
+#pragma endregion 
+		
 		std::array<Ref<Texture2D>, MaxTextureSlots> TextureSlots;
 		uint32_t TextureSlotIndex = 0; // Default index is 1 because, index 0 is White Texture.
 
@@ -190,6 +194,7 @@ namespace Hazel
 		sData.QuadShader = Shader::Create(SHADER_PATH_QUAD);
 		sData.CircleShader = Shader::Create(SHADER_PATH_CIRCLE);
 		sData.LineShader = Shader::Create(SHADER_PATH_LINE);
+		sData.TextShader = Shader::Create(SHADER_PATH_TEXT);
 #endif // ASYNC
 
 		sData.QuadVertexPositions[0] = {-0.5f, -0.5f, 0.0f, 1.0f};
@@ -705,6 +710,13 @@ namespace Hazel
 				sData.LineShader = Shader::Create(SHADER_PATH_LINE, true);
 			});
 			break;
+		case Hazel::TEXT:
+			sData.TextShader = nullptr;
+			sAsyncShaderCreation = std::async(std::launch::async, []()
+			{
+				sData.TextShader = Shader::Create(SHADER_PATH_TEXT, true);
+			});
+			break;
 		default:
 			HZ_CORE_LERROR("No shader of that type exist.");
 			return;
@@ -716,12 +728,14 @@ namespace Hazel
 		sData.QuadShader = nullptr;
 		sData.CircleShader = nullptr;
 		sData.LineShader = nullptr;
+		sData.TextShader = nullptr;
 
 		sAsyncShaderCreation = std::async(std::launch::async, []
 		{
 			sData.QuadShader = Shader::Create(SHADER_PATH_QUAD);
 			sData.CircleShader = Shader::Create(SHADER_PATH_CIRCLE);
 			sData.LineShader = Shader::Create(SHADER_PATH_LINE);
+			sData.TextShader = Shader::Create(SHADER_PATH_TEXT);
 		});
 	}
 
