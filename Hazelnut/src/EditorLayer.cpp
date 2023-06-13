@@ -1469,13 +1469,6 @@ namespace Hazel
 		ImGui::Separator();
 		ImGui::Text("Active Id: %u", ImGui::GetActiveID());
 
-		ImGui::Separator();
-		bool shouldUpdatePhysics = _activeScene->GetShouldUpdatePhysics();
-		if (ImGui::Checkbox("Update Physics", &shouldUpdatePhysics))
-		{
-			_activeScene->SetShouldUpdatePhysics(shouldUpdatePhysics);
-		}
-
 		ImGui::End();
 	}
 
@@ -1489,6 +1482,11 @@ namespace Hazel
 		if (_activeScene)
 		{
 			ImGui::Checkbox("Clone AudioSource on Play", &_activeScene->ShouldCloneAudioSource());
+			bool shouldUpdatePhysics = _activeScene->GetShouldUpdatePhysics();
+			if (ImGui::Checkbox("Update Physics", &shouldUpdatePhysics))
+			{
+				_activeScene->SetShouldUpdatePhysics(shouldUpdatePhysics);
+			}
 		}
 
 		if (ImGui::Button("Show Demo Window"))
