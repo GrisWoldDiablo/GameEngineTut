@@ -15,7 +15,7 @@ namespace Hazel
 			case ImageFormat::RGBA8: return GL_RGBA;
 			}
 
-			HZ_CORE_ASSERT(false, "Unsupported Format.")
+			HZ_CORE_ASSERT(false, "Unsupported Format.");
 			return 0;
 		}
 
@@ -27,7 +27,7 @@ namespace Hazel
 			case ImageFormat::RGBA8: return GL_RGBA8;
 			}
 
-			HZ_CORE_ASSERT(false, "Unsupported Format.")
+			HZ_CORE_ASSERT(false, "Unsupported Format.");
 			return 0;
 		}
 	}

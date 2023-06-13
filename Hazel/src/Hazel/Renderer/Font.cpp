@@ -84,7 +84,7 @@ namespace Hazel
 		atlasPacker.setPadding(0.0);
 		atlasPacker.setScale(emSize);
 		const int remaining = atlasPacker.pack(_data->GlyphsGeometry.data(), _data->GlyphsGeometry.size());
-		HZ_CORE_ASSERT(remaining == 0, "Failed to pack font.")
+		HZ_CORE_ASSERT(remaining == 0, "Failed to pack font.");
 
 		int width;
 		int height;

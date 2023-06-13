@@ -1,116 +1,171 @@
 Scene: 2D Physic
 RootEntityChildID: 1632462983521309121
 Entities:
-  - Entity: 1632462983521309121
+  - Entity: 5914586758935991626
     BaseComponent:
-      Name: Slope
+      Name: EntityTester
       Tag: 0
       Layer: 0
     FamilyComponent:
       ParentID: 69420
       ChildID: 0
-      NextSiblingID: 13760894420886024348
-      PreviousSiblingID: 0
+      NextSiblingID: 0
+      PreviousSiblingID: 14339827444151018024
     TransformComponent:
-      Position: [0, -2.4570334, 0]
-      Rotation: [0, 0, -0.287857264]
-      Scale: [21.6888866, 0.265017986, 1]
-    SpriteRendererComponent:
-      Tiling: [1, 1]
-      Color: [0.99227798, 0.739552617, 0.222208977, 1]
-    Rigidbody2DComponent:
-      BodyType: Static
-      IsFixedRotation: false
-    BoxCollider2DComponent:
-      Offset: [0, 0]
-      Size: [0.5, 0.5]
-      Rotation: 0
-      Density: 1
-      Friction: 0.119999997
-      Restitution: 0
-      RestitutionThreshold: 0.5
-  - Entity: 13760894420886024348
-    BaseComponent:
-      Name: Square
-      Tag: 0
-      Layer: 0
-    FamilyComponent:
-      ParentID: 69420
-      ChildID: 0
-      NextSiblingID: 3550356962882268774
-      PreviousSiblingID: 1632462983521309121
-    TransformComponent:
-      Position: [0.724173248, 7.80342054, -6.10351562e-05]
+      Position: [3.92547989, 1.03641129, 0]
       Rotation: [0, 0, 0]
-      Scale: [2.4000001, 2.4000001, 1]
+      Scale: [1, 1, 1]
+    ScriptComponent:
+      ClassName: Sandbox.EntityTester
+      ScriptFields:
+        []
+  - Entity: 14339827444151018024
+    BaseComponent:
+      Name: FieldTester
+      Tag: 0
+      Layer: 0
+    FamilyComponent:
+      ParentID: 69420
+      ChildID: 0
+      NextSiblingID: 5914586758935991626
+      PreviousSiblingID: 5051573955425461706
+    TransformComponent:
+      Position: [0.763527155, 1.1367836, -3.9653969e-10]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    ScriptComponent:
+      ClassName: Sandbox.FieldTester
+      ScriptFields:
+        []
     SpriteRendererComponent:
       Tiling: [1, 1]
-      Color: [0.196911216, 0.913956225, 1, 1]
+      Color: [1, 1, 1, 1]
+  - Entity: 5051573955425461706
+    BaseComponent:
+      Name: Circle Player
+      Tag: 0
+      Layer: 0
+    FamilyComponent:
+      ParentID: 69420
+      ChildID: 0
+      NextSiblingID: 14339827444151018024
+      PreviousSiblingID: 10121501930715311659
+    TransformComponent:
+      Position: [1.62836075, 0.024299562, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    ScriptComponent:
+      ClassName: Sandbox.CirclePlayer
+      ScriptFields:
+        []
+    CircleRendererComponent:
+      Color: [1, 1, 1, 1]
+      Thickness: 1
+      Fade: 0.00499999989
+  - Entity: 10121501930715311659
+    BaseComponent:
+      Name: Player2 Rotate
+      Tag: 0
+      Layer: 0
+    FamilyComponent:
+      ParentID: 69420
+      ChildID: 0
+      NextSiblingID: 5051573955425461706
+      PreviousSiblingID: 14263202880808732667
+    TransformComponent:
+      Position: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    ScriptComponent:
+      ClassName: Sandbox.Player2
+    SpriteRendererComponent:
+      TexturePath: Textures\Triangle.png
+      MagFilter: 9729
+      Tiling: [1, 1]
+      Color: [1, 1, 1, 1]
+  - Entity: 14263202880808732667
+    BaseComponent:
+      Name: Player
+      Tag: 0
+      Layer: 0
+    FamilyComponent:
+      ParentID: 69420
+      ChildID: 0
+      NextSiblingID: 10121501930715311659
+      PreviousSiblingID: 6923272651620727073
+    TransformComponent:
+      Position: [-2.51970673, 1.25817871, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    ScriptComponent:
+      ClassName: Sandbox.Player
+      ScriptFields:
+        []
+    SpriteRendererComponent:
+      TexturePath: Textures\Ship.png
+      MagFilter: 9728
+      Tiling: [1, 1]
+      Color: [1, 1, 1, 1]
     Rigidbody2DComponent:
       BodyType: Dynamic
       IsFixedRotation: false
     BoxCollider2DComponent:
       Offset: [0, 0]
       Size: [0.5, 0.5]
-      Rotation: 45
-      Density: 1
+      Rotation: 0
+      Density: 0.360000014
       Friction: 0.5
-      Restitution: 0.529999971
-      RestitutionThreshold: 0.5
+      Restitution: 0
+      RestitutionThreshold: 0.300000012
+  - Entity: 6923272651620727073
+    BaseComponent:
+      Name: Circle
+      Tag: 0
+      Layer: 0
+    FamilyComponent:
+      ParentID: 69420
+      ChildID: 0
+      NextSiblingID: 14263202880808732667
+      PreviousSiblingID: 5985586717480783343
+    TransformComponent:
+      Position: [0.174769819, 2.1493578, 0.266410768]
+      Rotation: [0, 0, 0]
+      Scale: [2, 2, 1]
+    CircleRendererComponent:
+      Color: [0.494199753, 0, 1, 1]
+      Thickness: 0.600000024
+      Fade: 0.296999991
+    Rigidbody2DComponent:
+      BodyType: Dynamic
+      IsFixedRotation: false
     CircleCollider2DComponent:
-      Offset: [0, 0]
-      Radius: 0.670000017
+      Offset: [1.39999998, 0]
+      Radius: 0.5
       Density: 1
       Friction: 0.5
       Restitution: 0
       RestitutionThreshold: 0.5
-  - Entity: 3550356962882268774
+  - Entity: 5985586717480783343
     BaseComponent:
-      Name: Camera
+      Name: unwrap_helper.png
       Tag: 0
       Layer: 0
     FamilyComponent:
       ParentID: 69420
       ChildID: 0
-      NextSiblingID: 1064095580862351179
-      PreviousSiblingID: 13760894420886024348
+      NextSiblingID: 6923272651620727073
+      PreviousSiblingID: 18170605317098829854
     TransformComponent:
-      Position: [-1.1920929e-07, -5.96046448e-08, 0]
+      Position: [-1.66934705, 2.46567798, 6.10351562e-05]
       Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    CameraComponent:
-      Camera:
-        ProjectionType: Orthographic
-        PerspectiveVerticalFOV: 0.785398185
-        PerspectiveNearClip: 0.00999999978
-        PerspectiveFarClip: 1000
-        OrthographicSize: 10
-        OrthographicNearClip: -1
-        OrthographicFarClip: 1
-        AspectRatio: 2.28205132
-      IsPrimary: true
-      IsFixedAspectRatio: false
-    ScriptComponent:
-      ClassName: Sandbox.Camera
-  - Entity: 1064095580862351179
-    BaseComponent:
-      Name: Wall
-      Tag: 0
-      Layer: 0
-    FamilyComponent:
-      ParentID: 69420
-      ChildID: 0
-      NextSiblingID: 18170605317098829854
-      PreviousSiblingID: 3550356962882268774
-    TransformComponent:
-      Position: [7.51363277, -0.758702874, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 7.16579294, 1]
+      Scale: [0.400000006, 1, 1]
     SpriteRendererComponent:
+      TexturePath: Textures\unwrap_helper.png
+      MagFilter: 9729
       Tiling: [1, 1]
       Color: [1, 1, 1, 1]
     Rigidbody2DComponent:
-      BodyType: Static
+      BodyType: Dynamic
       IsFixedRotation: false
     BoxCollider2DComponent:
       Offset: [0, 0]
@@ -149,27 +204,25 @@ Entities:
       Friction: 0.5
       Restitution: 0
       RestitutionThreshold: 0.5
-  - Entity: 5985586717480783343
+  - Entity: 1064095580862351179
     BaseComponent:
-      Name: unwrap_helper.png
+      Name: Wall
       Tag: 0
       Layer: 0
     FamilyComponent:
       ParentID: 69420
       ChildID: 0
-      NextSiblingID: 6923272651620727073
-      PreviousSiblingID: 18170605317098829854
+      NextSiblingID: 18170605317098829854
+      PreviousSiblingID: 3550356962882268774
     TransformComponent:
-      Position: [-1.66934705, 2.46567798, 6.10351562e-05]
+      Position: [7.51363277, -0.758702874, 0]
       Rotation: [0, 0, 0]
-      Scale: [0.400000006, 1, 1]
+      Scale: [1, 7.16579294, 1]
     SpriteRendererComponent:
-      TexturePath: Textures\unwrap_helper.png
-      MagFilter: 9729
       Tiling: [1, 1]
       Color: [1, 1, 1, 1]
     Rigidbody2DComponent:
-      BodyType: Dynamic
+      BodyType: Static
       IsFixedRotation: false
     BoxCollider2DComponent:
       Offset: [0, 0]
@@ -179,147 +232,96 @@ Entities:
       Friction: 0.5
       Restitution: 0
       RestitutionThreshold: 0.5
-  - Entity: 6923272651620727073
+  - Entity: 3550356962882268774
     BaseComponent:
-      Name: Circle
+      Name: Camera
       Tag: 0
       Layer: 0
     FamilyComponent:
       ParentID: 69420
       ChildID: 0
-      NextSiblingID: 14263202880808732667
-      PreviousSiblingID: 5985586717480783343
+      NextSiblingID: 1064095580862351179
+      PreviousSiblingID: 13760894420886024348
     TransformComponent:
-      Position: [0.174769819, 2.1493578, 0.266410768]
+      Position: [-1.1920929e-07, -5.96046448e-08, 0]
       Rotation: [0, 0, 0]
-      Scale: [2, 2, 1]
-    CircleRendererComponent:
-      Color: [0.494199753, 0, 1, 1]
-      Thickness: 0.600000024
-      Fade: 0.296999991
+      Scale: [1, 1, 1]
+    CameraComponent:
+      Camera:
+        ProjectionType: Orthographic
+        PerspectiveVerticalFOV: 0.785398185
+        PerspectiveNearClip: 0.00999999978
+        PerspectiveFarClip: 1000
+        OrthographicSize: 10
+        OrthographicNearClip: -1
+        OrthographicFarClip: 1
+        AspectRatio: 1.7186898
+      IsPrimary: true
+      IsFixedAspectRatio: false
+    ScriptComponent:
+      ClassName: Sandbox.Camera
+      ScriptFields:
+        []
+  - Entity: 13760894420886024348
+    BaseComponent:
+      Name: Square
+      Tag: 0
+      Layer: 0
+    FamilyComponent:
+      ParentID: 69420
+      ChildID: 0
+      NextSiblingID: 3550356962882268774
+      PreviousSiblingID: 1632462983521309121
+    TransformComponent:
+      Position: [0.724173248, 7.80342054, -6.10351562e-05]
+      Rotation: [0, 0, 0]
+      Scale: [2.4000001, 2.4000001, 1]
+    SpriteRendererComponent:
+      Tiling: [1, 1]
+      Color: [0.196911216, 0.913956225, 1, 1]
     Rigidbody2DComponent:
       BodyType: Dynamic
       IsFixedRotation: false
+    BoxCollider2DComponent:
+      Offset: [0, 0]
+      Size: [0.5, 0.5]
+      Rotation: 45
+      Density: 1
+      Friction: 0.5
+      Restitution: 0.529999971
+      RestitutionThreshold: 0.5
     CircleCollider2DComponent:
-      Offset: [1.39999998, 0]
-      Radius: 0.5
+      Offset: [0, 0]
+      Radius: 0.670000017
       Density: 1
       Friction: 0.5
       Restitution: 0
       RestitutionThreshold: 0.5
-  - Entity: 14263202880808732667
+  - Entity: 1632462983521309121
     BaseComponent:
-      Name: Player
+      Name: Slope
       Tag: 0
       Layer: 0
     FamilyComponent:
       ParentID: 69420
       ChildID: 0
-      NextSiblingID: 10121501930715311659
-      PreviousSiblingID: 6923272651620727073
+      NextSiblingID: 13760894420886024348
+      PreviousSiblingID: 0
     TransformComponent:
-      Position: [-2.51970673, 1.25817871, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    ScriptComponent:
-      ClassName: Sandbox.Player
-      ScriptFields:
-        []
+      Position: [0, -2.4570334, 0]
+      Rotation: [0, 0, -0.287857264]
+      Scale: [21.6888866, 0.265017986, 1]
     SpriteRendererComponent:
-      TexturePath: Textures\Ship.png
-      MagFilter: 9728
       Tiling: [1, 1]
-      Color: [1, 1, 1, 1]
+      Color: [0.99227798, 0.739552617, 0.222208977, 1]
     Rigidbody2DComponent:
-      BodyType: Dynamic
+      BodyType: Static
       IsFixedRotation: false
     BoxCollider2DComponent:
       Offset: [0, 0]
       Size: [0.5, 0.5]
       Rotation: 0
-      Density: 0.360000014
-      Friction: 0.5
+      Density: 1
+      Friction: 0.119999997
       Restitution: 0
-      RestitutionThreshold: 0.300000012
-  - Entity: 10121501930715311659
-    BaseComponent:
-      Name: Player2 Rotate
-      Tag: 0
-      Layer: 0
-    FamilyComponent:
-      ParentID: 69420
-      ChildID: 0
-      NextSiblingID: 5051573955425461706
-      PreviousSiblingID: 14263202880808732667
-    TransformComponent:
-      Position: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    ScriptComponent:
-      ClassName: Sandbox.Player2
-    SpriteRendererComponent:
-      TexturePath: Textures\Triangle.png
-      MagFilter: 9729
-      Tiling: [1, 1]
-      Color: [1, 1, 1, 1]
-  - Entity: 5051573955425461706
-    BaseComponent:
-      Name: Circle Player
-      Tag: 0
-      Layer: 0
-    FamilyComponent:
-      ParentID: 69420
-      ChildID: 0
-      NextSiblingID: 14339827444151018024
-      PreviousSiblingID: 10121501930715311659
-    TransformComponent:
-      Position: [1.62836075, 0.024299562, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    ScriptComponent:
-      ClassName: Sandbox.CirclePlayer
-      ScriptFields:
-        []
-    CircleRendererComponent:
-      Color: [1, 1, 1, 1]
-      Thickness: 1
-      Fade: 0.00499999989
-  - Entity: 14339827444151018024
-    BaseComponent:
-      Name: FieldTester
-      Tag: 0
-      Layer: 0
-    FamilyComponent:
-      ParentID: 69420
-      ChildID: 0
-      NextSiblingID: 5914586758935991626
-      PreviousSiblingID: 5051573955425461706
-    TransformComponent:
-      Position: [0.763527155, 1.1367836, -3.9653969e-10]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    ScriptComponent:
-      ClassName: Sandbox.FieldTester
-      ScriptFields:
-        []
-    SpriteRendererComponent:
-      Tiling: [1, 1]
-      Color: [1, 1, 1, 1]
-  - Entity: 5914586758935991626
-    BaseComponent:
-      Name: EntityTester
-      Tag: 0
-      Layer: 0
-    FamilyComponent:
-      ParentID: 69420
-      ChildID: 0
-      NextSiblingID: 0
-      PreviousSiblingID: 14339827444151018024
-    TransformComponent:
-      Position: [3.92547989, 1.03641129, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    ScriptComponent:
-      ClassName: Sandbox.EntityTester
-      ScriptFields:
-        []
+      RestitutionThreshold: 0.5

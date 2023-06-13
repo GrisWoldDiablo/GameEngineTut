@@ -14,10 +14,10 @@
 
 // TODO: Make no arguments version of this macro.
 #ifdef HZ_ENABLE_ASSERTS // This is an (if not) function
-#	define HZ_CORE_ASSERT(x, ...) { if(!(x)) { HZ_CORE_LERROR("Assertion Failed: {0}", __VA_ARGS__); HZ_DEBUG_BREAK();} }
-#	define HZ_CORE_ASSERT_ONCE(x, ...) { static bool hasAsserted = false; if(!hasAsserted) { hasAsserted = true; HZ_CORE_ASSERT(x, __VA_ARGS__); } }
-#	define HZ_ASSERT(x, ...) { if(!(x)) { HZ_LERROR("Assertion Failed: {0}", __VA_ARGS__); HZ_DEBUG_BREAK();} }
-#	define HZ_ASSERT_ONCE(x, ...) { static bool hasAsserted = false; if(!hasAsserted) { hasAsserted = true; HZ_ASSERT(x, __VA_ARGS__);} }
+#	define HZ_CORE_ASSERT(x, ...) { if(!(x)) { HZ_CORE_LERROR("Assertion Failed: {0}", __VA_ARGS__); HZ_DEBUG_BREAK();} } void(0)
+#	define HZ_CORE_ASSERT_ONCE(x, ...) { static bool hasAsserted = false; if(!hasAsserted) { hasAsserted = true; HZ_CORE_ASSERT(x, __VA_ARGS__); } } void(0)
+#	define HZ_ASSERT(x, ...) { if(!(x)) { HZ_LERROR("Assertion Failed: {0}", __VA_ARGS__); HZ_DEBUG_BREAK();} } void(0)
+#	define HZ_ASSERT_ONCE(x, ...) { static bool hasAsserted = false; if(!hasAsserted) { hasAsserted = true; HZ_ASSERT(x, __VA_ARGS__);} } void(0)
 
 // Ensure can be used as conditions if (HZ_CORE_ENSURE(true)) { // execute logic }
 #	define HZ_CORE_ENSURE(x) ((x) || ([] { HZ_DEBUG_BREAK(); } (), false))
