@@ -20,12 +20,14 @@
 
 namespace Hazel
 {
-	static Font* sFont;
+	static Ref<Font> sFont;
 	EditorLayer::EditorLayer() : Layer("Hazel Editor")
 	{
-		// sFont = new Font("Resources/Fonts/opensans/OpenSans-Bold.ttf");
-		//sFont = new Font("Resources/Fonts/segoe/segoesc.ttf");
-		sFont = new Font("Resources/Fonts/consola/consola.ttf");
+		//sFont = CreateRef<Font>("Resources/Fonts/opensans/OpenSans-Bold.ttf");
+		//sFont = CreateRef<Font>("Resources/Fonts/opensans/OpenSans-Regular.ttf");
+		//sFont = CreateRef<Font>("Resources/Fonts/segoe/segoesc.ttf");
+		sFont = CreateRef<Font>("Resources/Fonts/consola/consola.ttf");
+		//sFont = Font::GetDefault();
 	}
 
 	void EditorLayer::OnAttach()
@@ -1512,15 +1514,30 @@ namespace Hazel
 		}*/
 		ImGui::Separator();
 
-		if (_activeScene && ImGui::Button("Create 50 squares"))
+		if (_activeScene)
 		{
-			for (int i = 50 - 1; i >= 0; i--)
+			if (ImGui::Button("Create 50 squares"))
 			{
-				auto color = Color::Random();
-				auto newEntity = _activeScene->CreateEntity("Square " + std::to_string(i) + ":" + color.GetHexValue());
-				auto& spriteRendererComponent = newEntity.AddComponent<SpriteRendererComponent>();
-				spriteRendererComponent.Color = color;
-				newEntity.Transform().Position = Random::Vec3();
+				for (int i = 50 - 1; i >= 0; i--)
+				{
+					auto color = Color::Random();
+					auto newEntity = _activeScene->CreateEntity(fmt::format("Square {0} : {1}", i, color.GetHexValue()));
+					auto& spriteRendererComponent = newEntity.AddComponent<SpriteRendererComponent>();
+					spriteRendererComponent.Color = color;
+					newEntity.Transform().Position = Random::Vec3();
+				}
+			}
+
+			if (ImGui::Button("Create 50 circles"))
+			{
+				for (int i = 50 - 1; i >= 0; i--)
+				{
+					auto color = Color::Random();
+					auto newEntity = _activeScene->CreateEntity(fmt::format("Circle {0} : {1}", i, color.GetHexValue()));
+					auto& spriteRendererComponent = newEntity.AddComponent<CircleRendererComponent>();
+					spriteRendererComponent.Color = color;
+					newEntity.Transform().Position = Random::Vec3();
+				}
 			}
 		}
 

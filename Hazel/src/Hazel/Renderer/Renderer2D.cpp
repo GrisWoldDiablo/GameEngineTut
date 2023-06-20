@@ -47,6 +47,17 @@ namespace Hazel
 		int EntityID;
 	};
 
+	struct TextVertex
+	{
+		glm::vec3 Position;
+		glm::vec4 Color;
+		glm::vec2 TextureCoord;
+
+		// TODO: BackgroundColor
+		// Editor-Only
+		int EntityID;
+	};
+
 	struct Renderer2DData
 	{
 		// Max for draw calls
@@ -88,11 +99,19 @@ namespace Hazel
 #pragma endregion
 
 #pragma region Text
+		Ref<VertexArray> TextVertexArray;
+		Ref<VertexBuffer> TextVertexBuffer;
 		Ref<Shader> TextShader;
-#pragma endregion 
-		
+
+		uint32_t TextIndexCount = 0;
+		TextVertex* TextVertexBufferBase = nullptr;
+		TextVertex* TextVertexBufferPtr = nullptr;
+
+		Ref<Texture2D> FontAtlasTexture;
+#pragma endregion
+
 		std::array<Ref<Texture2D>, MaxTextureSlots> TextureSlots;
-		uint32_t TextureSlotIndex = 0; // Default index is 1 because, index 0 is White Texture.
+		uint32_t TextureSlotIndex = 0;
 
 		static constexpr uint8_t kQuadVertexCount = 4;
 		glm::vec4 QuadVertexPositions[4];
@@ -118,7 +137,7 @@ namespace Hazel
 #pragma region Quad
 		sData.QuadVertexArray = VertexArray::Create();
 
-		sData.QuadVertexBuffer = VertexBuffer::Create(sData.MaxVertices * sizeof(QuadVertex));
+		sData.QuadVertexBuffer = VertexBuffer::Create(Renderer2DData::MaxVertices * sizeof(QuadVertex));
 		sData.QuadVertexBuffer->SetLayout(
 			{
 				{ ShaderDataType::Float3, "a_Position"		},
@@ -130,12 +149,12 @@ namespace Hazel
 			});
 		sData.QuadVertexArray->AddVertexBuffer(sData.QuadVertexBuffer);
 
-		sData.QuadVertexBufferBase = new QuadVertex[sData.MaxVertices];
+		sData.QuadVertexBufferBase = new QuadVertex[Renderer2DData::MaxVertices];
 
-		auto quadIndices = new uint32_t[sData.MaxIndices];
+		auto* quadIndices = new uint32_t[Renderer2DData::MaxIndices];
 
 		uint32_t offset = 0;
-		for (uint32_t i = 0; i < sData.MaxIndices; i += 6)
+		for (uint32_t i = 0; i < Renderer2DData::MaxIndices; i += 6)
 		{
 			quadIndices[i + 0] = offset + 0;
 			quadIndices[i + 1] = offset + 1;
@@ -148,7 +167,7 @@ namespace Hazel
 			offset += 4;
 		}
 
-		auto quadIndexBuffer = IndexBuffer::Create(quadIndices, sData.MaxIndices);
+		const auto quadIndexBuffer = IndexBuffer::Create(quadIndices, Renderer2DData::MaxIndices);
 		sData.QuadVertexArray->SetIndexBuffer(quadIndexBuffer);
 		delete[] quadIndices;
 #pragma endregion
@@ -156,7 +175,7 @@ namespace Hazel
 #pragma region Circle
 		sData.CircleVertexArray = VertexArray::Create();
 
-		sData.CircleVertexBuffer = VertexBuffer::Create(sData.MaxVertices * sizeof(CircleVertex));
+		sData.CircleVertexBuffer = VertexBuffer::Create(Renderer2DData::MaxVertices * sizeof(CircleVertex));
 		sData.CircleVertexBuffer->SetLayout(
 			{
 				{ ShaderDataType::Float3, "a_WorldPosition"	},
@@ -168,13 +187,13 @@ namespace Hazel
 			});
 		sData.CircleVertexArray->AddVertexBuffer(sData.CircleVertexBuffer);
 		sData.CircleVertexArray->SetIndexBuffer(quadIndexBuffer); // Use Quad Index Buffer
-		sData.CircleVertexBufferBase = new CircleVertex[sData.MaxVertices];
+		sData.CircleVertexBufferBase = new CircleVertex[Renderer2DData::MaxVertices];
 #pragma endregion
 
 #pragma region Line
 		sData.LineVertexArray = VertexArray::Create();
 
-		sData.LineVertexBuffer = VertexBuffer::Create(sData.MaxVertices * sizeof(LineVertex));
+		sData.LineVertexBuffer = VertexBuffer::Create(Renderer2DData::MaxVertices * sizeof(LineVertex));
 		sData.LineVertexBuffer->SetLayout(
 			{
 				{ ShaderDataType::Float3, "a_Position"	},
@@ -182,7 +201,23 @@ namespace Hazel
 				{ ShaderDataType::Int,	  "a_EntityID"	},
 			});
 		sData.LineVertexArray->AddVertexBuffer(sData.LineVertexBuffer);
-		sData.LineVertexBufferBase = new LineVertex[sData.MaxVertices];
+		sData.LineVertexBufferBase = new LineVertex[Renderer2DData::MaxVertices];
+#pragma endregion
+
+#pragma region Text
+		sData.TextVertexArray = VertexArray::Create();
+
+		sData.TextVertexBuffer = VertexBuffer::Create(Renderer2DData::MaxVertices * sizeof(TextVertex));
+		sData.TextVertexBuffer->SetLayout(
+			{
+				{ShaderDataType::Float3, "a_Position"		},
+				{ShaderDataType::Float4, "a_Color"			},
+				{ShaderDataType::Float2, "a_TextureCoord"	},
+				{ShaderDataType::Int,	 "a_EntityID"		},
+			});
+		sData.TextVertexArray->AddVertexBuffer(sData.TextVertexBuffer);
+		sData.TextVertexBufferBase = new TextVertex[Renderer2DData::MaxVertices];
+		sData.TextVertexArray->SetIndexBuffer(quadIndexBuffer); // Use Quad Index Buffer
 #pragma endregion
 
 		// -- Shader loading
@@ -237,7 +272,6 @@ namespace Hazel
 		}
 #pragma endregion
 
-
 #pragma region Circle
 		if (sData.CircleShader != nullptr && sData.CircleShader->IsLoadingCompleted())
 		{
@@ -253,6 +287,17 @@ namespace Hazel
 		if (sData.LineShader != nullptr && sData.LineShader->IsLoadingCompleted())
 		{
 			sData.LineShader->CompleteInitialization();
+		}
+		else
+		{
+			return false;
+		}
+#pragma endregion
+
+#pragma region Text
+		if (sData.TextShader != nullptr && sData.TextShader->IsLoadingCompleted())
+		{
+			sData.TextShader->CompleteInitialization();
 		}
 		else
 		{
@@ -293,6 +338,11 @@ namespace Hazel
 		sData.LineVertexBufferPtr = sData.LineVertexBufferBase;
 #pragma endregion
 
+#pragma region Text
+		sData.TextIndexCount = 0;
+		sData.TextVertexBufferPtr = sData.TextVertexBufferBase;
+#pragma endregion
+
 		sData.TextureSlotIndex = 0;
 	}
 
@@ -303,7 +353,7 @@ namespace Hazel
 #pragma region Quad
 		if (sData.QuadIndexCount > 0)
 		{
-			auto dataSize = (uint32_t)((uint8_t*)sData.QuadVertexBufferPtr - (uint8_t*)sData.QuadVertexBufferBase);
+			auto dataSize = static_cast<uint32_t>(reinterpret_cast<uint8_t*>(sData.QuadVertexBufferPtr) - reinterpret_cast<uint8_t*>(sData.QuadVertexBufferBase));
 			sData.QuadVertexBuffer->SetData(sData.QuadVertexBufferBase, dataSize);
 
 			// Bind Textures
@@ -322,7 +372,7 @@ namespace Hazel
 #pragma region Circle
 		if (sData.CircleIndexCount > 0)
 		{
-			auto dataSize = (uint32_t)((uint8_t*)sData.CircleVertexBufferPtr - (uint8_t*)sData.CircleVertexBufferBase);
+			auto dataSize = static_cast<uint32_t>(reinterpret_cast<uint8_t*>(sData.CircleVertexBufferPtr) - reinterpret_cast<uint8_t*>(sData.CircleVertexBufferBase));
 			sData.CircleVertexBuffer->SetData(sData.CircleVertexBufferBase, dataSize);
 
 			sData.CircleShader->Bind();
@@ -335,12 +385,27 @@ namespace Hazel
 #pragma region Line
 		if (sData.LineVertexCount > 0)
 		{
-			auto dataSize = (uint32_t)((uint8_t*)sData.LineVertexBufferPtr - (uint8_t*)sData.LineVertexBufferBase);
+			const auto dataSize = static_cast<uint32_t>(reinterpret_cast<uint8_t*>(sData.LineVertexBufferPtr) - reinterpret_cast<uint8_t*>(sData.LineVertexBufferBase));
 			sData.LineVertexBuffer->SetData(sData.LineVertexBufferBase, dataSize);
 
 			sData.LineShader->Bind();
 			RenderCommand::SetLineWidth(sData.LineWidth);
 			RenderCommand::DrawLines(sData.LineVertexArray, sData.LineVertexCount);
+
+			sData.Stats.DrawCalls++;
+		}
+#pragma endregion
+
+#pragma region Text
+		if (sData.TextIndexCount > 0)
+		{
+			const auto dataSize = static_cast<uint32_t>(reinterpret_cast<uint8_t*>(sData.TextVertexBufferPtr) - reinterpret_cast<uint8_t*>(sData.TextVertexBufferBase));
+			sData.TextVertexBuffer->SetData(sData.TextVertexBufferBase, dataSize);
+
+			sData.FontAtlasTexture->Bind();
+
+			sData.TextShader->Bind();
+			RenderCommand::DrawIndexed(sData.TextVertexArray, sData.TextIndexCount);
 
 			sData.Stats.DrawCalls++;
 		}
@@ -619,47 +684,123 @@ namespace Hazel
 		const auto& fontGeometry = font->GetMSDFData()->FontGeometry;
 		const auto& metrics = fontGeometry.getMetrics();
 		Ref<Texture2D> fontAtlas = font->GetAtlasTexture();
+		if (!fontAtlas)
+		{
+			return;
+		}
+
+		if (sData.FontAtlasTexture && sData.FontAtlasTexture != fontAtlas)
+		{
+			FlushAndReset();
+		}
+
+		sData.FontAtlasTexture = fontAtlas;
 
 		double x = 0.0;
 		double fsScale = 1.0 / (metrics.ascenderY - metrics.descenderY);
 		double y = 0.0;
+		double lineHeightOffset = 0.0;
 
-		char character = 'G';
-		const auto* glyph = fontGeometry.getGlyph(character);
-		if (!glyph)
+		for (size_t i = 0; i < string.size(); ++i)
 		{
-			glyph = fontGeometry.getGlyph('?');
+			char character = string[i];
+			bool isTab = false;
+			switch (character)
+			{
+			case '\r': continue; // carriage return
+			case '\n': // new line
+			{
+				x = 0;
+				y -= fsScale * metrics.lineHeight + lineHeightOffset;
+				continue;
+			}
+			case '\t': // tab
+			{
+				isTab = true;
+				character = ' ';
+				break;
+			}
+			}
+
+			const auto* glyph = fontGeometry.getGlyph(character);
 			if (!glyph)
 			{
-				return;
+				glyph = fontGeometry.getGlyph('?');
+				if (!glyph)
+				{
+					return;
+				}
+			}
+
+			double al, ab, ar, at;
+			glyph->getQuadAtlasBounds(al, ab, ar, at);
+			glm::vec2 textCoordMin(al, ab);
+			glm::vec2 textCoordMax(ar, at);
+
+			float texelWidth = 1.0f / fontAtlas->GetWidth();
+			float texelHeight = 1.0f / fontAtlas->GetHeight();
+			textCoordMin *= glm::vec2(texelWidth, texelHeight);
+			textCoordMax *= glm::vec2(texelWidth, texelHeight);
+
+			double pl, pb, pr, pt;
+			glyph->getQuadPlaneBounds(pl, pb, pr, pt);
+			glm::vec2 quadMin(pl, pb);
+			glm::vec2 quadMax(pr, pt);
+			quadMin *= fsScale;
+			quadMin += glm::vec2(x, y);
+			quadMax *= fsScale;
+			quadMax += glm::vec2(x, y);
+
+			// render here
+			if (sData.TextIndexCount >= Renderer2DData::MaxIndices)
+			{
+				FlushAndReset();
+			}
+
+			sData.TextVertexBufferPtr->Position = transform * glm::vec4(quadMin, 0.0f, 1.0f);
+			sData.TextVertexBufferPtr->Color = color;
+			sData.TextVertexBufferPtr->TextureCoord = textCoordMin;
+			sData.TextVertexBufferPtr->EntityID = 0; // TODO 
+			sData.TextVertexBufferPtr++;
+
+			sData.TextVertexBufferPtr->Position = transform * glm::vec4(quadMin.x, quadMax.y, 0.0f, 1.0f);
+			sData.TextVertexBufferPtr->Color = color;
+			sData.TextVertexBufferPtr->TextureCoord = {textCoordMin.x, textCoordMax.y};
+			sData.TextVertexBufferPtr->EntityID = 0; // TODO 
+			sData.TextVertexBufferPtr++;
+
+			sData.TextVertexBufferPtr->Position = transform * glm::vec4(quadMax, 0.0f, 1.0f);
+			sData.TextVertexBufferPtr->Color = color;
+			sData.TextVertexBufferPtr->TextureCoord = textCoordMax;
+			sData.TextVertexBufferPtr->EntityID = 0; // TODO 
+			sData.TextVertexBufferPtr++;
+
+			sData.TextVertexBufferPtr->Position = transform * glm::vec4(quadMax.x, quadMin.y, 0.0f, 1.0f);
+			sData.TextVertexBufferPtr->Color = color;
+			sData.TextVertexBufferPtr->TextureCoord = {textCoordMax.x, textCoordMin.y};
+			sData.TextVertexBufferPtr->EntityID = 0; // TODO 
+			sData.TextVertexBufferPtr++;
+
+			sData.TextIndexCount += 6;
+			sData.Stats.QuadCount++;
+
+			if (i < string.size() - 1)
+			{
+				double advance = glyph->getAdvance();
+				const char nextCharacter = string[i + 1];
+				fontGeometry.getAdvance(advance, character, nextCharacter)
+					|| fontGeometry.getAdvance(advance, character, ' '); // If we can't find the advance with the next character replace it by a space.
+
+				if (isTab)
+				{
+					int tabSize = 4; // How many spaces a tab equals. TODO modifiable
+					advance *= tabSize;
+				}
+
+				double kerningOffset = 0.0; // Space between characters. TODO modifiable
+				x += fsScale * (advance + kerningOffset);
 			}
 		}
-
-		double al, ab, ar, at;
-		glyph->getQuadAtlasBounds(al, ab, ar, at);
-		glm::vec2 textCoordMin(al, ab);
-		glm::vec2 textCoordMax(ar, at);
-
-		float texelWidth = 1.0f / fontAtlas->GetWidth();
-		float texelHeight = 1.0f / fontAtlas->GetHeight();
-		textCoordMin *= glm::vec2(texelWidth, texelHeight);
-		textCoordMax *= glm::vec2(texelWidth, texelHeight);
-
-		double pl, pb, pr, pt;
-		glyph->getQuadPlaneBounds(pl, pb, pr, pt);
-		glm::vec2 quadMin(pl, pb);
-		glm::vec2 quadMax(pr, pt);
-		quadMin *= fsScale, quadMin += glm::vec2(x, y);
-		quadMax *= fsScale, quadMax += glm::vec2(x, y);
-
-		// render here
-
-		double advance = glyph->getAdvance();
-		char nextCharacter = 'W';
-		fontGeometry.getAdvance(advance, character, nextCharacter);
-
-		float kerningOffset = 0.0f; // Space between characters.
-		x += fsScale * advance + kerningOffset;
 	}
 
 	void Renderer2D::ResetStats()
@@ -674,7 +815,7 @@ namespace Hazel
 
 	bool Renderer2D::IsReady()
 	{
-		return sData.QuadShader && sData.CircleShader && sData.LineShader;
+		return sData.QuadShader && sData.CircleShader && sData.LineShader && sData.TextShader;
 	}
 
 	void Renderer2D::ReloadShader(RendererShader rendererShader)
@@ -775,11 +916,10 @@ namespace Hazel
 	{
 		HZ_PROFILE_FUNCTION();
 
-		// TODO: Implement for circles
-		/*if (sData.CircleIndexCount >= Renderer2DData::MaxIndices)
+		if (sData.CircleIndexCount >= Renderer2DData::MaxIndices)
 		{
 			FlushAndReset();
-		}*/
+		}
 
 		for (const auto& quadVertexPosition : sData.QuadVertexPositions)
 		{

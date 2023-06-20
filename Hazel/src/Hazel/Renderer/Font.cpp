@@ -148,4 +148,10 @@ namespace Hazel
 	{
 		delete _data;
 	}
+	
+	Ref<Font> Font::GetDefault()
+	{
+		static Ref<Font> sDefaultFont = CreateRef<Font>("Resources/Fonts/opensans/OpenSans-Regular.ttf");
+		return sDefaultFont;
+	}
 }

@@ -62,7 +62,6 @@ float median(float r, float g, float b)
 
 void main()
 {
-	vec4 texColor = Input.Color * texture(u_FontAtlas, Input.TexCoord);
 	vec3 msd = texture(u_FontAtlas, Input.TexCoord).rgb;
 	float sd = median(msd.r, msd.g, msd.b);
 	float screenPxDistance = ScreenPxRange() * (sd - 0.5);
