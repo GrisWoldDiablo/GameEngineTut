@@ -24,6 +24,6 @@
 [submodule "Hazel/vendor/Box2D"]
 	path = Hazel/vendor/Box2D
 	url = https://github.com/GrisWoldDiablo/box2d
-[submodule "hazel/vendor/msdf-atlas-gen"]
-	path = hazel/vendor/msdf-atlas-gen
+[submodule "Hazel/vendor/msdf-atlas-gen"]
+	path = Hazel/vendor/msdf-atlas-gen
 	url = https://github.com/GrisWoldDiablo/msdf-atlas-gen
