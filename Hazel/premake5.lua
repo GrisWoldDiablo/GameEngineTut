@@ -19,7 +19,9 @@ project "Hazel"
 		"vendor/glm/glm/**.hpp",
 		"vendor/glm/glm/**.inl",
 		"vendor/ImGuizmo/ImGuizmo.h",
-		"vendor/ImGuizmo/ImGuizmo.cpp"
+		"vendor/ImGuizmo/ImGuizmo.cpp",
+		"vendor/ImGui/misc/cpp/imgui_stdlib.h",
+		"vendor/ImGui/misc/cpp/imgui_stdlib.cpp"
 	}
 
 	includedirs
@@ -74,6 +76,9 @@ project "Hazel"
 	}
 
 	filter "files:vendor/ImGuizmo/**.cpp"
+	flags { "NoPCH" }
+
+	filter "files:vendor/ImGui/misc/cpp/**.cpp"
 	flags { "NoPCH" }
 	
 	filter "system:windows"
