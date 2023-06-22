@@ -39,6 +39,7 @@ namespace Hazel
 
 		void DrawSpriteRenderComponent(const glm::vec3& cameraPosition);
 		void DrawCircleRenderComponent(const glm::vec3& cameraPosition);
+		void DrawTextComponent(const glm::vec3& cameraPosition);
 		void DrawAudioComponent(const glm::vec3& cameraPosition, bool isRuntime = false);
 
 		void OnViewportResize(uint32_t width, uint32_t height);

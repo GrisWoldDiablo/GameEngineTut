@@ -26,7 +26,7 @@ namespace Hazel
 		void DrawComponents(Entity entity);
 		void UpdateComponents(Entity entity);
 		template<typename T>
-		void AddComponentMenu();
+		void AddComponentMenu(const std::string& label);
 		void CleanUpComponents(Entity entity);
 
 	private:

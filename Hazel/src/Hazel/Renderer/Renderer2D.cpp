@@ -679,7 +679,12 @@ namespace Hazel
 		sData.LineWidth = width;
 	}
 
-	void Renderer2D::DrawString(const std::string& string, const Ref<Font>& font, const glm::mat4& transform, const Color& color)
+	void Renderer2D::DrawString(const glm::mat4& transform, const TextComponent& textComponent, int entityID)
+	{
+		DrawString(transform, textComponent.Text, textComponent.FontAsset, textComponent.Color, textComponent.Kerning, textComponent.LineSpace, entityID);
+	}
+
+	void Renderer2D::DrawString(const glm::mat4& transform, const std::string& string, const Ref<Font>& font, const Color& color, float kerning, float lineSpace, int entityID)
 	{
 		const auto& fontGeometry = font->GetMSDFData()->FontGeometry;
 		const auto& metrics = fontGeometry.getMetrics();
@@ -699,26 +704,26 @@ namespace Hazel
 		double x = 0.0;
 		double fsScale = 1.0 / (metrics.ascenderY - metrics.descenderY);
 		double y = 0.0;
-		double lineHeightOffset = 0.0;
+
+		int tabSize = 4; // How many spaces a tab equals. TODO modifiable
 
 		for (size_t i = 0; i < string.size(); ++i)
 		{
 			char character = string[i];
-			bool isTab = false;
 			switch (character)
 			{
 			case '\r': continue; // carriage return
 			case '\n': // new line
 			{
 				x = 0;
-				y -= fsScale * metrics.lineHeight + lineHeightOffset;
+				y -= fsScale * (metrics.lineHeight + static_cast<double>(lineSpace));
 				continue;
 			}
 			case '\t': // tab
 			{
-				isTab = true;
-				character = ' ';
-				break;
+				const double advance = fontGeometry.getGlyph(' ')->getAdvance();
+				x += fsScale * (advance + kerning) * tabSize;
+				continue;
 			}
 			}
 
@@ -737,8 +742,8 @@ namespace Hazel
 			glm::vec2 textCoordMin(al, ab);
 			glm::vec2 textCoordMax(ar, at);
 
-			float texelWidth = 1.0f / fontAtlas->GetWidth();
-			float texelHeight = 1.0f / fontAtlas->GetHeight();
+			float texelWidth = 1.0f / static_cast<float>(fontAtlas->GetWidth());
+			float texelHeight = 1.0f / static_cast<float>(fontAtlas->GetHeight());
 			textCoordMin *= glm::vec2(texelWidth, texelHeight);
 			textCoordMax *= glm::vec2(texelWidth, texelHeight);
 
@@ -760,25 +765,25 @@ namespace Hazel
 			sData.TextVertexBufferPtr->Position = transform * glm::vec4(quadMin, 0.0f, 1.0f);
 			sData.TextVertexBufferPtr->Color = color;
 			sData.TextVertexBufferPtr->TextureCoord = textCoordMin;
-			sData.TextVertexBufferPtr->EntityID = 0; // TODO 
+			sData.TextVertexBufferPtr->EntityID = entityID;
 			sData.TextVertexBufferPtr++;
 
 			sData.TextVertexBufferPtr->Position = transform * glm::vec4(quadMin.x, quadMax.y, 0.0f, 1.0f);
 			sData.TextVertexBufferPtr->Color = color;
 			sData.TextVertexBufferPtr->TextureCoord = {textCoordMin.x, textCoordMax.y};
-			sData.TextVertexBufferPtr->EntityID = 0; // TODO 
+			sData.TextVertexBufferPtr->EntityID = entityID;
 			sData.TextVertexBufferPtr++;
 
 			sData.TextVertexBufferPtr->Position = transform * glm::vec4(quadMax, 0.0f, 1.0f);
 			sData.TextVertexBufferPtr->Color = color;
 			sData.TextVertexBufferPtr->TextureCoord = textCoordMax;
-			sData.TextVertexBufferPtr->EntityID = 0; // TODO 
+			sData.TextVertexBufferPtr->EntityID = entityID;
 			sData.TextVertexBufferPtr++;
 
 			sData.TextVertexBufferPtr->Position = transform * glm::vec4(quadMax.x, quadMin.y, 0.0f, 1.0f);
 			sData.TextVertexBufferPtr->Color = color;
 			sData.TextVertexBufferPtr->TextureCoord = {textCoordMax.x, textCoordMin.y};
-			sData.TextVertexBufferPtr->EntityID = 0; // TODO 
+			sData.TextVertexBufferPtr->EntityID = entityID;
 			sData.TextVertexBufferPtr++;
 
 			sData.TextIndexCount += 6;
@@ -790,15 +795,7 @@ namespace Hazel
 				const char nextCharacter = string[i + 1];
 				fontGeometry.getAdvance(advance, character, nextCharacter)
 					|| fontGeometry.getAdvance(advance, character, ' '); // If we can't find the advance with the next character replace it by a space.
-
-				if (isTab)
-				{
-					int tabSize = 4; // How many spaces a tab equals. TODO modifiable
-					advance *= tabSize;
-				}
-
-				double kerningOffset = 0.0; // Space between characters. TODO modifiable
-				x += fsScale * (advance + kerningOffset);
+				x += fsScale * (advance + static_cast<double>(kerning));
 			}
 		}
 	}

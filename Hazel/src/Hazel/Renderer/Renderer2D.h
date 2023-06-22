@@ -90,7 +90,9 @@ namespace Hazel
 		// --- ----------- --- //
 
 		// --- Text --- //
-		static void DrawString(const std::string& string, const Ref<Font>& font,const glm::mat4& transform, const Color& color);
+		static void DrawString(const glm::mat4& transform, const TextComponent& textComponent, int entityID);
+		// Final Draw
+		static void DrawString(const glm::mat4& transform, const std::string& string, const Ref<Font>& font = Font::GetDefault(), const Color& color = Color::White, float kerning = 0.0f, float lineSpace = 0.0f, int entityID = -1);
 		// --- ----------- --- //
 
 		struct Statistics

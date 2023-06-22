@@ -12,6 +12,7 @@
 
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
+#include <imgui/misc/cpp/imgui_stdlib.h>
 
 #include <glm/gtc/type_ptr.hpp>
 
@@ -281,7 +282,7 @@ namespace Hazel
 		{
 			return;
 		}
-		
+
 		ImGui::Begin("Scene Hierarchy", nullptr, ImGuiWindowFlags_MenuBar);
 
 		if (ImGui::BeginDragDropTarget())
@@ -390,14 +391,12 @@ namespace Hazel
 	{
 		if (ImGui::BeginMenuBar())
 		{
-			char buffer[256] = {};
-			strcpy_s(buffer, sizeof(buffer), _scene->GetName().c_str());
-			if (ImGui::InputText(" : Scene", buffer, sizeof(buffer), ImGuiInputTextFlags_EnterReturnsTrue))
+			auto nameString = _scene->GetName();
+			if (ImGui::InputText(" : Scene", &nameString, ImGuiInputTextFlags_EnterReturnsTrue))
 			{
-				const auto newName = std::string(buffer);
-				if (!newName.empty())
+				if (!nameString.empty())
 				{
-					_scene->SetName(newName);
+					_scene->SetName(nameString);
 				}
 			}
 			ImGui::Checkbox("Debug", &_isDebug);
@@ -462,7 +461,7 @@ namespace Hazel
 			{
 				shouldDeleteEntity = true;
 			}
-			
+
 			if (entity.Family().ParentID != _scene->GetRootEntity().GetUUID())
 			{
 				ImGui::Separator();
@@ -471,7 +470,7 @@ namespace Hazel
 					_scene->ReparentEntity(_scene->GetRootEntity(), entity);
 				}
 			}
-			
+
 			ImGui::EndPopup();
 		}
 
@@ -534,15 +533,16 @@ namespace Hazel
 
 			if (ImGui::BeginPopup("AddComponent"))
 			{
-				AddComponentMenu<ScriptComponent>();
-				AddComponentMenu<CameraComponent>();
-				AddComponentMenu<SpriteRendererComponent>();
-				AddComponentMenu<CircleRendererComponent>();
-				AddComponentMenu<Rigidbody2DComponent>();
-				AddComponentMenu<BoxCollider2DComponent>();
-				AddComponentMenu<CircleCollider2DComponent>();
-				AddComponentMenu<AudioSourceComponent>();
-				AddComponentMenu<AudioListenerComponent>();
+				AddComponentMenu<ScriptComponent>("Script");
+				AddComponentMenu<CameraComponent>("Camera");
+				AddComponentMenu<SpriteRendererComponent>("Sprite Renderer");
+				AddComponentMenu<CircleRendererComponent>("Circle Renderer");
+				AddComponentMenu<TextComponent>("Text");
+				AddComponentMenu<Rigidbody2DComponent>("Rigidbody 2D");
+				AddComponentMenu<BoxCollider2DComponent>("Box Collider 2D");
+				AddComponentMenu<CircleCollider2DComponent>("Circle Collider 2D");
+				AddComponentMenu<AudioSourceComponent>("Audio Source");
+				AddComponentMenu<AudioListenerComponent>("Audio Listener");
 				ImGui::EndPopup();
 			}
 			ImGui::PopItemWidth();
@@ -1373,6 +1373,16 @@ namespace Hazel
 		});
 #pragma endregion
 
+#pragma region TextComponent
+		DrawComponent<TextComponent>(entity, "Text", [](TextComponent& component)
+		{
+			ImGui::InputTextMultiline("Text", &component.Text, {0.0f, 0.0f}, ImGuiInputTextFlags_AllowTabInput | ImGuiInputTextFlags_CtrlEnterForNewLine);
+			ImGui::ColorEdit4("Color", component.Color.GetValuePtr());
+			ImGui::DragFloat("Kerning", &component.Kerning, 0.025f);
+			ImGui::DragFloat("LineSpace", &component.LineSpace, 0.025f);
+		});
+#pragma endregion
+
 #pragma region Rigidbody2DComponent
 		DrawComponent<Rigidbody2DComponent>(entity, "Rigidbody 2D", [&](Rigidbody2DComponent& component)
 		{
@@ -1708,15 +1718,11 @@ namespace Hazel
 	}
 
 	template<typename T>
-	void SceneHierarchyPanel::AddComponentMenu()
+	void SceneHierarchyPanel::AddComponentMenu(const std::string& label)
 	{
-		auto nameId = std::string(typeid(T).name());
-		nameId = nameId.erase(0, nameId.find_last_of(':') + 1);
-		nameId = nameId.erase(nameId.find("Component"), nameId.length());
-
 		if (!_selectedEntity.HasComponent<T>())
 		{
-			if (ImGui::MenuItem(nameId.c_str()))
+			if (ImGui::MenuItem(label.c_str()))
 			{
 				_selectedEntity.AddComponent<T>();
 				ImGui::CloseCurrentPopup();
@@ -1724,7 +1730,7 @@ namespace Hazel
 		}
 		else
 		{
-			ImGui::TextDisabled(nameId.c_str());
+			ImGui::TextDisabled(label.c_str());
 		}
 	}
 }

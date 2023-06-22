@@ -13,6 +13,7 @@
 #include <glm/gtx/quaternion.hpp>
 
 #include "Hazel/Math/HMath.h"
+#include "Hazel/Renderer/Font.h"
 
 namespace Hazel
 {
@@ -23,6 +24,8 @@ namespace Hazel
 		Root(const Root& other) = default;
 	};
 
+	// Basic Components
+#pragma region Basics
 	struct IDComponent
 	{
 		UUID ID;
@@ -53,7 +56,8 @@ namespace Hazel
 		FamilyComponent(const FamilyComponent&) = default;
 	};
 
-	struct TransformComponent
+	// TODO Add static and dynamic so transform for statics do no have to be recalculated all the way down the parent line
+	struct TransformComponent 
 	{
 		glm::vec3 Position{0.0f, 0.0f, 0.0f};
 		glm::vec3 Rotation{0.0f, 0.0f, 0.0f};
@@ -128,7 +132,9 @@ namespace Hazel
 			return worldTransform;
 		}
 	};
+#pragma endregion
 
+#pragma region Graphics
 	struct SpriteRendererComponent
 	{
 		Ref<Texture2D> Texture = nullptr;
@@ -149,6 +155,20 @@ namespace Hazel
 		CircleRendererComponent(const CircleRendererComponent&) = default;
 	};
 
+	struct TextComponent
+	{
+		std::string Text;
+		Color Color{Color::White};
+		float Kerning = 0.0f;
+		float LineSpace = 0.0f;
+		Ref<Font> FontAsset = Font::GetDefault();
+		
+		TextComponent() = default;
+		TextComponent(const TextComponent&) = default;
+	};
+#pragma endregion
+
+#pragma region Visual
 	struct CameraComponent
 	{
 		SceneCamera Camera;
@@ -158,7 +178,9 @@ namespace Hazel
 		CameraComponent() = default;
 		CameraComponent(const CameraComponent&) = default;
 	};
+#pragma endregion
 
+#pragma region Scripting
 	struct ScriptComponent
 	{
 		std::string ClassName;
@@ -188,9 +210,9 @@ namespace Hazel
 			};
 		}
 	};
+#pragma endregion
 
-	// Physics
-
+#pragma region Physics
 	struct Rigidbody2DComponent
 	{
 		enum class BodyType
@@ -246,9 +268,9 @@ namespace Hazel
 		CircleCollider2DComponent() = default;
 		CircleCollider2DComponent(const CircleCollider2DComponent&) = default;
 	};
+#pragma endregion
 
-	// Audio
-
+#pragma region Audio
 	struct AudioSourceComponent
 	{
 		Ref<AudioSource> AudioSource;
@@ -266,14 +288,16 @@ namespace Hazel
 		AudioListenerComponent() = default;
 		AudioListenerComponent(const AudioListenerComponent&) = default;
 	};
+#pragma endregion
 
 	template<typename... Component>
 	struct ComponentGroup {};
 
 	using AllComponents =
-	ComponentGroup<TransformComponent, SpriteRendererComponent,
-					CircleRendererComponent, CameraComponent,
-					ScriptComponent, NativeScriptComponent,
-					Rigidbody2DComponent, BoxCollider2DComponent, CircleCollider2DComponent,
-					AudioSourceComponent, AudioListenerComponent>;
+	ComponentGroup<TransformComponent,
+		SpriteRendererComponent, CircleRendererComponent, TextComponent,
+		CameraComponent,
+		ScriptComponent, NativeScriptComponent,
+		Rigidbody2DComponent, BoxCollider2DComponent, CircleCollider2DComponent,
+		AudioSourceComponent, AudioListenerComponent>;
 }
