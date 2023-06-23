@@ -1013,11 +1013,7 @@ namespace Hazel
 			if (ImGui::BeginMenu("File"))
 			{
 				{
-					const bool shouldDisable = _sceneState != SceneState::Edit || !Project::GetActive();
-					if (shouldDisable)
-					{
-						ImGui::PushDisabled();
-					}
+					ImGui::BeginDisabled(_sceneState != SceneState::Edit || !Project::GetActive());
 
 					if (ImGui::MenuItem("New Scene", "Ctrl+N"))
 					{
@@ -1039,20 +1035,13 @@ namespace Hazel
 						SaveSceneAs(Project::GetAssetDirectory());
 					}
 
-					if (shouldDisable)
-					{
-						ImGui::PopDisabled();
-					}
+					ImGui::EndDisabled();
 				}
 
 				{
 					ImGui::Separator();
-					bool shouldDisable = _sceneState != SceneState::Edit;
-					if (shouldDisable)
-					{
-						ImGui::PushDisabled();
-					}
-
+					const bool shouldDisable = _sceneState != SceneState::Edit;
+					ImGui::BeginDisabled(shouldDisable);
 					if (ImGui::MenuItem("New Project"))
 					{
 						_shouldOpenNewProjectModal = true;
@@ -1063,17 +1052,9 @@ namespace Hazel
 						OpenProject();
 					}
 
-					if (shouldDisable)
-					{
-						ImGui::PopDisabled();
-					}
+					ImGui::EndDisabled();
 
-					shouldDisable |= !Project::GetActive();
-					if (shouldDisable)
-					{
-						ImGui::PushDisabled();
-					}
-
+					ImGui::BeginDisabled(shouldDisable | !Project::GetActive());
 					if (ImGui::MenuItem("Save Project"))
 					{
 						SaveProject();
@@ -1084,10 +1065,7 @@ namespace Hazel
 						SetProjectStartSceneToCurrent();
 					}
 
-					if (shouldDisable)
-					{
-						ImGui::PopDisabled();
-					}
+					ImGui::EndDisabled();
 				}
 
 				ImGui::Separator();
@@ -1120,21 +1098,13 @@ namespace Hazel
 
 				if (ImGui::BeginMenu("Script Engine"))
 				{
-					const bool shouldDisable = _sceneState != SceneState::Edit || !Project::GetActive();
-					if (shouldDisable)
-					{
-						ImGui::PushDisabled();
-					}
-
+					ImGui::BeginDisabled(_sceneState != SceneState::Edit || !Project::GetActive());
 					if (ImGui::MenuItem("Reload"))
 					{
 						Application::Get().ReloadScriptEngine();
 					}
 
-					if (shouldDisable)
-					{
-						ImGui::PopDisabled();
-					}
+					ImGui::EndDisabled();
 
 					ImGui::EndMenu();
 				}
@@ -1182,10 +1152,7 @@ namespace Hazel
 			}
 
 			const bool isDisabled = _newProjectPath.empty() || _newProjectName.empty();
-			if (isDisabled)
-			{
-				ImGui::PushDisabled();
-			}
+			ImGui::BeginDisabled(isDisabled);
 
 			if (ImGui::Button("Accept"))
 			{
@@ -1193,10 +1160,7 @@ namespace Hazel
 				ImGui::CloseCurrentPopup();
 			}
 
-			if (isDisabled)
-			{
-				ImGui::PopDisabled();
-			}
+			ImGui::EndDisabled();
 
 			ImGui::SetItemDefaultFocus();
 

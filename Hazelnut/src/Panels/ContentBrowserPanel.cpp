@@ -4,28 +4,9 @@
 #include "Utils/EditorResourceManager.h"
 
 #include <imgui/imgui.h>
-#include <imgui/imgui_internal.h>
 
 namespace Hazel
 {
-	// TODO move to ImGui Utils
-	static bool Button(const std::string& label, bool isEnabled = true)
-	{
-		if (!isEnabled)
-		{
-			ImGui::PushDisabled();
-		}
-
-		const bool wasButtonPressed = ImGui::Button(label.c_str());
-
-		if (!isEnabled)
-		{
-			ImGui::PopDisabled();
-		}
-
-		return wasButtonPressed;
-	}
-
 	ContentBrowserPanel::ContentBrowserPanel()
 		: _baseDirectory(Project::GetAssetDirectory()),
 		_currentDirectory(_baseDirectory) {}
@@ -175,10 +156,12 @@ namespace Hazel
 
 		if (ImGui::BeginMenuBar())
 		{
-			if (Button("^", _currentDirectory != _baseDirectory))
+			ImGui::BeginDisabled(_currentDirectory != _baseDirectory);
+			if (ImGui::Button("^"))
 			{
 				_currentDirectory = _currentDirectory.parent_path();
 			}
+			ImGui::EndDisabled();
 
 			ImGui::Text(std::filesystem::relative(_currentDirectory, Project::GetProjectDirectory()).string().c_str());
 			ImGui::EndMenuBar();
