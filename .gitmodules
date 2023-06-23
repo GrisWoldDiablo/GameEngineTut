@@ -23,3 +23,7 @@
 [submodule "Hazel/vendor/msdf-atlas-gen"]
 	path = Hazel/vendor/msdf-atlas-gen
 	url = https://github.com/GrisWoldDiablo/msdf-atlas-gen
+[submodule "Hazel/vendor/imgui"]
+	path = Hazel/vendor/imgui
+	url = https://github.com/GrisWoldDiablo/imgui.git
+	branch = docking
