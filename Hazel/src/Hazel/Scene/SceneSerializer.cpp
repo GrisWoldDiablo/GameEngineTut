@@ -327,6 +327,25 @@ namespace Hazel
 		}
 #pragma endregion
 
+#pragma region TextComponent
+		if (entity.HasComponent<TextComponent>())
+		{
+			const auto& component = entity.GetComponent<TextComponent>();
+
+			out << YAML::Key << "TextComponent";
+			out << YAML::BeginMap; // TextComponent
+
+			out << YAML::Key << "Text" << YAML::Value << component.Text;
+			out << YAML::Key << "Color" << YAML::Value << component.Color;
+			out << YAML::Key << "Kerning" << YAML::Value << component.Kerning;
+			out << YAML::Key << "LineSpace" << YAML::Value << component.LineSpace;
+			// TODO FontAsset
+			//out << YAML::Key << "FontAsset" << YAML::Value << component.FontAsset;
+
+			out << YAML::EndMap; // TextComponent
+		}
+#pragma endregion
+
 #pragma region Rigidbody2DComponent
 		if (entity.HasComponent<Rigidbody2DComponent>())
 		{
@@ -751,6 +770,19 @@ namespace Hazel
 					component.Color = GetValue<glm::vec4>(circleRendererComponent, "Color", Color::White);
 					component.Thickness = GetValue<float>(circleRendererComponent, "Thickness", 1.0f);
 					component.Fade = GetValue<float>(circleRendererComponent, "Fade", 0.005f);
+				}
+#pragma endregion
+
+#pragma region TextComponent
+				if (auto textComponent = entity["TextComponent"])
+				{
+					auto& component = deserializedEntity.AddComponent<TextComponent>();
+					component.Text = GetValue<std::string>(textComponent, "Text");
+					component.Color = GetValue<glm::vec4>(textComponent, "Color", Color::White);
+					component.Kerning = GetValue<float>(textComponent, "Kerning");
+					component.LineSpace = GetValue<float>(textComponent, "LineSpace");
+					// TODO FontAsset
+					//component.FontAsset = GetValue<float>(textComponent, "LineSpace");
 				}
 #pragma endregion
 

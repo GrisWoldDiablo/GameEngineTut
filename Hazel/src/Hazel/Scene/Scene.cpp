@@ -399,6 +399,7 @@ namespace Hazel
 			Renderer2D::DrawCircle(transform.GetWorldTransformMatrix(), circle.Color, circle.Thickness, circle.Fade, (int)enttID);
 		}
 	}
+
 	void Scene::DrawTextComponent(const glm::vec3& cameraPosition)
 	{
 		for (const auto&& [enttID, text, transform] : GetEntitiesViewWith<TextComponent, TransformComponent>().each())
@@ -543,7 +544,6 @@ namespace Hazel
 			newChildTransform.SetLocalTransform(currentWorldTransform);
 		}
 	}
-
 
 	bool Scene::IsChildOf(Entity child, Entity entity)
 	{

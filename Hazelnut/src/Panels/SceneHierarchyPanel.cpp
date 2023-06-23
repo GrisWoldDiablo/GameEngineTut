@@ -350,7 +350,7 @@ namespace Hazel
 	}
 
 	// TODO Move to separate class method.
-	void SceneHierarchyPanel::EditRuntimeRigidbody(Entity entity, bool shouldClearVelocity)
+	void SceneHierarchyPanel::EditRuntimeRigidbody(Entity entity, bool shouldZeroedVelocity)
 	{
 		if (entity.HasComponent<Rigidbody2DComponent>())
 		{
@@ -358,7 +358,7 @@ namespace Hazel
 			if (auto* body = static_cast<b2Body*>(component.RuntimeBody))
 			{
 				// TODO recalculate velocity instead of zeroing it.
-				if (shouldClearVelocity)
+				if (shouldZeroedVelocity)
 				{
 					body->SetLinearVelocity(b2Vec2_zero);
 					body->SetAngularVelocity(0.0f);
@@ -1376,7 +1376,12 @@ namespace Hazel
 #pragma region TextComponent
 		DrawComponent<TextComponent>(entity, "Text", [](TextComponent& component)
 		{
-			ImGui::InputTextMultiline("Text", &component.Text, {0.0f, 0.0f}, ImGuiInputTextFlags_AllowTabInput | ImGuiInputTextFlags_CtrlEnterForNewLine);
+			ImGui::InputTextMultiline("Text", &component.Text, {0.0f, ImGui::GetDefaultFont()->FontSize * 3.0f}, ImGuiInputTextFlags_AllowTabInput | ImGuiInputTextFlags_CtrlEnterForNewLine);
+			if (ImGui::IsItemHovered())
+			{
+				ImGui::SetTooltip("CTRL-ENTER for next line.");
+			}
+
 			ImGui::ColorEdit4("Color", component.Color.GetValuePtr());
 			ImGui::DragFloat("Kerning", &component.Kerning, 0.025f);
 			ImGui::DragFloat("LineSpace", &component.LineSpace, 0.025f);

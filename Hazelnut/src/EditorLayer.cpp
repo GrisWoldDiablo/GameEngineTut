@@ -20,15 +20,7 @@
 
 namespace Hazel
 {
-	static Ref<Font> sFont;
-	EditorLayer::EditorLayer() : Layer("Hazel Editor")
-	{
-		//sFont = CreateRef<Font>("Resources/Fonts/opensans/OpenSans-Bold.ttf");
-		//sFont = CreateRef<Font>("Resources/Fonts/opensans/OpenSans-Regular.ttf");
-		//sFont = CreateRef<Font>("Resources/Fonts/segoe/segoesc.ttf");
-		sFont = CreateRef<Font>("Resources/Fonts/consola/consola.ttf");
-		//sFont = Font::GetDefault();
-	}
+	EditorLayer::EditorLayer() : Layer("Hazel Editor") { }
 
 	void EditorLayer::OnAttach()
 	{
@@ -469,19 +461,7 @@ namespace Hazel
 				{
 					if (_shouldShowPhysicsColliders || enttID == selectedEntity)
 					{
-						if (_sceneState != SceneState::Edit)
-						{
-							Entity entity = {enttID, _activeScene.get()};
-							if (entity.HasComponent<Rigidbody2DComponent>())
-							{
-								const auto& rb2d = entity.GetComponent<Rigidbody2DComponent>();
-								transform.Position.x = static_cast<b2Body*>(rb2d.RuntimeBody)->GetPosition().x;
-								transform.Position.y = static_cast<b2Body*>(rb2d.RuntimeBody)->GetPosition().y;
-								transform.Rotation.z = static_cast<b2Body*>(rb2d.RuntimeBody)->GetAngle();
-							}
-						}
 						const float sign = cameraPositionZ > transform.Position.z ? 1.0f : -1.0f;
-
 						glm::mat4 newTransform = glm::translate(kIdentityMatrix, transform.Position)
 							* glm::toMat4(glm::quat(transform.Rotation))
 							* glm::translate(kIdentityMatrix, glm::vec3(component.Offset, 0.001f * sign))
@@ -504,19 +484,7 @@ namespace Hazel
 				{
 					if (_shouldShowPhysicsColliders || enttID == selectedEntity)
 					{
-						if (_sceneState != SceneState::Edit)
-						{
-							Entity entity = {enttID, _activeScene.get()};
-							if (entity.HasComponent<Rigidbody2DComponent>())
-							{
-								const auto& rb2d = entity.GetComponent<Rigidbody2DComponent>();
-								transform.Position.x = static_cast<b2Body*>(rb2d.RuntimeBody)->GetPosition().x;
-								transform.Position.y = static_cast<b2Body*>(rb2d.RuntimeBody)->GetPosition().y;
-								transform.Rotation.z = static_cast<b2Body*>(rb2d.RuntimeBody)->GetAngle();
-							}
-						}
 						const float sign = cameraPositionZ > transform.Position.z ? 1.0f : -1.0f;
-
 						glm::mat4 newTransform = glm::translate(kIdentityMatrix, transform.Position)
 							* glm::toMat4(glm::quat(transform.Rotation))
 							* glm::translate(kIdentityMatrix, glm::vec3(component.Offset, 0.001f * sign))
@@ -769,8 +737,8 @@ namespace Hazel
 	void EditorLayer::SetWindowTitleSceneName(const std::filesystem::path& scenePath) const
 	{
 		auto& window = Application::Get().GetWindow();
-		auto fileName = scenePath.empty() ? "Unsaved" : scenePath.stem();
-		window.SetTitle(fmt::format("{0} [{1}] [{2}]", window.GetTitle(), Project::GetActive()->GetConfig().Name, fileName));
+		const auto fileName = scenePath.empty() ? "Unsaved" : scenePath.stem();
+		window.SetTitle(fmt::format("{0} [{1}] [{2}]", window.GetTitle(), Project::GetActive()->GetConfig().Name, fileName.string()));
 	}
 
 	void EditorLayer::DrawToolbar()
@@ -1478,7 +1446,7 @@ namespace Hazel
 	{
 		ImGui::Begin("Tools");
 
-		ImGui::Image(sFont->GetAtlasTexture()->GetRawID(), {512, 512}, {0, 1}, {1, 0});
+		ImGui::Image(Font::GetDefault()->GetAtlasTexture()->GetRawID(), {512, 512}, {0, 1}, {1, 0});
 
 		ImGui::Checkbox("Show physics colliders", &_shouldShowPhysicsColliders);
 		if (_activeScene)
@@ -1584,6 +1552,7 @@ namespace Hazel
 		}
 	}
 
+	// TODO move this to utils namespace and make macro.
 	void EditorLayer::AddTooltip(const std::string& tooltipMessage)
 	{
 		if (ImGui::IsItemHovered())
