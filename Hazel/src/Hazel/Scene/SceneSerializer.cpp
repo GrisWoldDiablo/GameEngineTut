@@ -479,9 +479,11 @@ namespace Hazel
 		out << YAML::Key << "RootEntityChildID" << YAML::Value << _scene->GetRootEntity().Family().ChildID;
 		out << YAML::Key << "Entities" << YAML::Value << YAML::BeginSeq;
 
-		for (const auto enttID : _scene->GetEntities())
+		// Has to loop in reverse to make sure it's always serialized in the same order.
+		const auto entities = _scene->GetEntitiesGroupWith<IDComponent>();
+		for (int i = static_cast<int>(entities.size()) - 1; i >= 0; i--)
 		{
-			Entity entity{enttID, _scene.get()};
+			const Entity entity{entities[i], _scene.get()};
 
 			if (!entity)
 			{
