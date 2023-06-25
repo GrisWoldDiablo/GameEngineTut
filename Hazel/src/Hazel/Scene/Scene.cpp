@@ -302,7 +302,7 @@ namespace Hazel
 		}
 
 		// Render 2D
-		Camera* mainCamera = nullptr;
+		const Camera* mainCamera = nullptr;
 		glm::mat4 cameraTransform;
 		glm::vec3 cameraPosition;
 		for (const auto&& [enttID, camera, transform] : GetEntitiesViewWith<CameraComponent, TransformComponent>().each())

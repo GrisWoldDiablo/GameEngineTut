@@ -25,7 +25,7 @@ namespace Hazel
 	{
 		static AudioFileFormat GetAudioFileFormat(const std::filesystem::path& filePath)
 		{
-			auto extension = filePath.extension().string();
+			const auto extension = filePath.extension().string();
 
 			if (extension == ".mp3")
 			{
@@ -49,7 +49,6 @@ namespace Hazel
 			default:
 				HZ_ASSERT(false, "Unsupported ALFormat for the amount of channels [{}]", channels);
 				return AL_NONE;
-				break;
 			}
 		}
 	}
@@ -248,16 +247,13 @@ namespace Hazel
 		FILE* file = fopen(filePath.string().c_str(), "rb");
 		OggVorbis_File vorbisFile;
 
-		int loadResult = ov_open(file, &vorbisFile, nullptr, 0);
+		const int loadResult = ov_open(file, &vorbisFile, nullptr, 0);
 		if (loadResult < 0)
 		{
 			HZ_CORE_LERROR("OpenAl-Soft failed to open: [{0}]", filePath.string());
-			if (file)
+			if (file && fclose(file) != 0)
 			{
-				if(fclose(file) != 0)
-				{
-					HZ_CORE_LERROR("Failed to close: [{0}]", filePath.string());
-				}
+				HZ_CORE_LERROR("Failed to close: [{0}]", filePath.string());
 			}
 			return nullptr;
 		}
@@ -305,10 +301,6 @@ namespace Hazel
 
 		const auto size = static_cast<int>(bufferPtr - oggBuffer);
 		ov_clear(&vorbisFile);
-		if(fclose(file) != 0)
-		{
-			HZ_CORE_LERROR("Failed to close: [{0}]", filePath.string());
-		}
 
 		if (hasReadingFailed)
 		{

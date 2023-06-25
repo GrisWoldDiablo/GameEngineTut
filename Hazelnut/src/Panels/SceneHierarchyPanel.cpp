@@ -1294,7 +1294,7 @@ namespace Hazel
 			}
 			else
 			{
-				auto& color = component.Color;
+				const auto& color = component.Color;
 				isSpritePressed = ImGui::ColorButton("None", ImVec4(color.r, color.g, color.b, color.a), 0, ImVec2(56.0f, 56.0f));
 			}
 
@@ -1304,7 +1304,7 @@ namespace Hazel
 			{
 				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
 				{
-					std::filesystem::path fileSystemPath = static_cast<const wchar_t*>(payload->Data);
+					const std::filesystem::path fileSystemPath = static_cast<const wchar_t*>(payload->Data);
 
 					if (fileSystemPath.extension() == ".png")
 					{
@@ -1317,7 +1317,6 @@ namespace Hazel
 			if (isSpritePressed)
 			{
 				textureFilePath = FileDialogs::OpenFile("PNG (*.png)\0*.png\0");
-				textureFilePath = std::filesystem::relative(textureFilePath);
 			}
 
 			if (component.Texture != nullptr)
@@ -1330,16 +1329,26 @@ namespace Hazel
 
 			if (!textureFilePath.empty())
 			{
-				uint32_t magFilter = 0;
-				if (component.Texture)
+				if (Utils::Path::IsSubpath(textureFilePath, Project::GetAssetDirectory()))
 				{
-					magFilter = component.Texture->GetMagFilter();
-				}
+					uint32_t magFilter = 0;
+					if (component.Texture)
+					{
+						magFilter = component.Texture->GetMagFilter();
+					}
 
-				component.Texture = Texture2D::Create(textureFilePath);
-				if (magFilter && component.Texture != nullptr)
+					component.Texture = Texture2D::Create(textureFilePath);
+					if (magFilter && component.Texture != nullptr)
+					{
+						component.Texture->SetMagFilter(magFilter);
+					}
+				}
+				else
 				{
-					component.Texture->SetMagFilter(magFilter);
+					FileDialogs::MessagePopup(
+						fmt::format("[{0}] is not a child path of project asset's path [{1}]", textureFilePath.string(), Project::GetAssetDirectory().string()),
+						"Error!"
+					);
 				}
 			}
 
@@ -1347,8 +1356,7 @@ namespace Hazel
 			{
 				if (ImGui::Button("Mag Filter Toggle"))
 				{
-					auto currentMagFilter = component.Texture->GetMagFilter();
-					component.Texture->ToggleMagFilter(currentMagFilter);
+					component.Texture->ToggleMagFilter(component.Texture->GetMagFilter());
 				}
 				ImGui::SameLine();
 				ImGui::Text("%s", component.Texture->IsMagFilterLinear() ? "Linear" : "Nearest");
@@ -1500,20 +1508,20 @@ namespace Hazel
 			if (isButtonPressed && !_scene->IsRunning())
 			{
 				newAudioClipFilePath = FileDialogs::OpenFile("Audio Clip (*.ogg,*.mp3)\0*.ogg;*.mp3\0");
-				newAudioClipFilePath = std::filesystem::relative(newAudioClipFilePath);
 			}
 
 			if (!_scene->IsRunning() && ImGui::BeginDragDropTarget())
 			{
 				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
 				{
-					std::filesystem::path fileSystemPath = static_cast<const wchar_t*>(payload->Data);
+					const std::filesystem::path fileSystemPath = static_cast<const wchar_t*>(payload->Data);
 					const auto extension = fileSystemPath.extension();
 					if (extension == ".ogg" || extension == ".mp3")
 					{
 						newAudioClipFilePath = fileSystemPath;
 					}
 				}
+
 				ImGui::EndDragDropTarget();
 			}
 
@@ -1523,17 +1531,27 @@ namespace Hazel
 
 			if (!newAudioClipFilePath.empty())
 			{
-				if (audioSource)
+				if (Utils::Path::IsSubpath(newAudioClipFilePath, Project::GetAssetDirectory()))
 				{
-					if (audioSource->GetPath() != newAudioClipFilePath)
+					if (audioSource)
 					{
-						AudioEngine::ReleaseAudioSource(audioSource);
+						if (audioSource->GetPath() != newAudioClipFilePath)
+						{
+							AudioEngine::ReleaseAudioSource(audioSource);
+							audioSource = AudioSource::Create(newAudioClipFilePath);
+						}
+					}
+					else
+					{
 						audioSource = AudioSource::Create(newAudioClipFilePath);
 					}
 				}
 				else
 				{
-					audioSource = AudioSource::Create(newAudioClipFilePath);
+					FileDialogs::MessagePopup(
+						fmt::format("[{0}] is not a child path of project asset's path [{1}]", newAudioClipFilePath.string(), Project::GetAssetDirectory().string()),
+						"Error!"
+					);
 				}
 			}
 

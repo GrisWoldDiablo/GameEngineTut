@@ -375,8 +375,7 @@ namespace Hazel
 
 	bool EditorLayer::OnMouseButtonUp(const MouseButtonUpEvent& mouseButtonReleasedEvent)
 	{
-		// TODO Mouse picking, allow simulation, find bug where simulation stops?
-		if (_isSceneViewportHovered && mouseButtonReleasedEvent.GetMouseButton() == Mouse::ButtonLeft && _sceneState != SceneState::Simulate)
+		if (_isSceneViewportHovered && mouseButtonReleasedEvent.GetMouseButton() == Mouse::ButtonLeft)
 		{
 			if ((!_sceneHierarchyPanel.GetSelectedEntity() || !ImGuizmo::IsOver()) && !Input::IsKeyDown(Key::LeftAlt))
 			{
@@ -1181,7 +1180,7 @@ namespace Hazel
 
 		ImGui::Begin("SceneViewport");
 
-		auto sceneViewportOffset = ImGui::GetCursorPos(); // Include tab bar.
+		const auto sceneViewportOffset = ImGui::GetCursorPos(); // Include tab bar.
 
 		_isSceneViewportFocused = ImGui::IsWindowFocused();
 		_isSceneViewportHovered = ImGui::IsWindowHovered();
@@ -1197,7 +1196,7 @@ namespace Hazel
 
 		if (Renderer2D::IsReady())
 		{
-			auto textureID = reinterpret_cast<void*>(static_cast<intptr_t>(_framebuffer->GetColorAttachmentRenderID()));
+			const auto textureID = reinterpret_cast<void*>(static_cast<intptr_t>(_framebuffer->GetColorAttachmentRenderID()));
 			ImGui::Image(textureID, {_sceneViewportSize.x, _sceneViewportSize.y}, ImVec2{0.0f, 1.0f}, ImVec2{1.0f, 0.0f});
 		}
 		else
@@ -1226,7 +1225,7 @@ namespace Hazel
 			ImGui::EndDragDropTarget();
 		}
 
-		auto windowSize = ImGui::GetWindowSize();
+		const auto windowSize = ImGui::GetWindowSize();
 		auto minBound = ImGui::GetWindowPos();
 		auto maxBound = ImVec2{minBound.x + windowSize.x, minBound.y + windowSize.y};
 		minBound.x += sceneViewportOffset.x;
@@ -1236,7 +1235,7 @@ namespace Hazel
 		_sceneViewportBounds[1] = {maxBound.x, maxBound.y};
 
 #pragma region Gizmo
-		if (auto selectedEntity = _sceneHierarchyPanel.GetSelectedEntity())
+		if (const auto selectedEntity = _sceneHierarchyPanel.GetSelectedEntity())
 		{
 			if (_gizmoType != -1 || (_hasStoredPreviousGizmoType && _previousGizmoType != -1))
 			{
@@ -1244,7 +1243,7 @@ namespace Hazel
 				glm::mat4 cameraView;
 				if (_sceneState == SceneState::Play)
 				{
-					if (auto cameraEntity = _activeScene->GetPrimaryCameraEntity())
+					if (const auto cameraEntity = _activeScene->GetPrimaryCameraEntity())
 					{
 						// Runtime Camera;
 						const auto& camera = cameraEntity.GetComponent<CameraComponent>().Camera;

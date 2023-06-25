@@ -40,6 +40,12 @@ project "Hazelnut"
 	filter "system:windows"
 		systemversion "latest"
 
+		linkoptions
+		{
+			"/NODEFAULTLIB:LIBCMTD", 
+			"/IGNORE:4099"
+		}
+
 	filter "configurations:Debug"
 		defines "HZ_DEBUG"
 		runtime "Debug"

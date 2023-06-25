@@ -10,28 +10,24 @@
 
 namespace Hazel
 {
-	void FileDialogs::MessagePopup(const char* message, const char* title)
+	namespace Utils
 	{
-		// not working anymore need to fix.
-		/*std::async(std::launch::async, [](const char* message, const char* title)
+		bool Path::IsSubpath(const std::filesystem::path& subpath, const std::filesystem::path& basepath)
 		{
-			MessageBoxA
-			(
-				glfwGetWin32Window((GLFWwindow*)Application::Get().GetWindow().GetNativeWindow()),
-				message,
-				title,
-				MB_ICONWARNING | MB_OK
-			);
-		}, message, title);*/
+			const auto relativePath = std::filesystem::relative(subpath, basepath);
+			return !relativePath.empty() && relativePath.native()[0] != '.';
+		}
+	}
 
-		// Using Thread instead for now.
-		std::thread([](const char* message, const char* title)
+	void FileDialogs::MessagePopup(const std::string& message, const std::string& title)
+	{
+		std::thread([](const std::string& message, const std::string& title)
 		{
 			MessageBoxA
 			(
 				glfwGetWin32Window(static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow())),
-				message,
-				title,
+				message.c_str(),
+				title.c_str(),
 				MB_ICONWARNING | MB_OK
 			);
 		}, message, title).detach();
@@ -39,7 +35,7 @@ namespace Hazel
 
 	bool FileDialogs::QuestionPopup(const char* message, const char* title)
 	{
-		auto result = MessageBoxA
+		const auto result = MessageBoxA
 		(
 			glfwGetWin32Window(static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow())),
 			message,

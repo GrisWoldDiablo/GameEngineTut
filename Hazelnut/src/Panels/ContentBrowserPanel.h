@@ -13,7 +13,7 @@ namespace Hazel
 		std::filesystem::path _baseDirectory;
 		std::filesystem::path _currentDirectory;
 
-		bool ContainDirectory(const std::filesystem::path& currentPath);
+		bool ContainDirectory(const std::filesystem::path& currentPath) const;
 		void LoopDirectory(const std::filesystem::path& currentPath);
 	};
 }

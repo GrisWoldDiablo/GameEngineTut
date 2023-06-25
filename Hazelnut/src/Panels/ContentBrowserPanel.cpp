@@ -171,7 +171,7 @@ namespace Hazel
 		ImGui::End();
 	}
 
-	bool ContentBrowserPanel::ContainDirectory(const std::filesystem::path& currentPath)
+	bool ContentBrowserPanel::ContainDirectory(const std::filesystem::path& currentPath) const
 	{
 		auto isDirectory = [](const std::filesystem::directory_entry& folderElement)
 		{

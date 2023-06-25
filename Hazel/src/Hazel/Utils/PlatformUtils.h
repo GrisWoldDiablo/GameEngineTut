@@ -4,11 +4,20 @@
 
 namespace Hazel
 {
+	namespace Utils
+	{
+		class Path
+		{
+		public:
+			static bool IsSubpath(const std::filesystem::path& subpath, const std::filesystem::path& basepath);
+		};
+	}
+
 	class FileDialogs
 	{
 	public:
 		// Message Box with ok.
-		static void MessagePopup(const char* message, const char* title);
+		static void MessagePopup(const std::string& message, const std::string& title);
 		// Message Box with yes and no question.
 		static bool QuestionPopup(const char* message, const char* title);
 		// Returns empty string if canceled.
