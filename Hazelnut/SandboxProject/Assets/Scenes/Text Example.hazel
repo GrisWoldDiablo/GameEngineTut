@@ -1,0 +1,48 @@
+Scene: Text Example
+RootEntityChildID: 18150353052774309638
+Entities:
+  - Entity: 18150353052774309638
+    BaseComponent:
+      Name: Text
+      Tag: 0
+      Layer: 0
+    FamilyComponent:
+      ParentID: 69420
+      ChildID: 0
+      NextSiblingID: 11255250272942877520
+      PreviousSiblingID: 0
+    TransformComponent:
+      Position: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    TextComponent:
+      Text: "GrisWold\nDiablo"
+      Color: [1, 0, 0, 1]
+      Kerning: 0.375
+      LineSpace: 0.349999994
+  - Entity: 11255250272942877520
+    BaseComponent:
+      Name: Camera
+      Tag: 0
+      Layer: 0
+    FamilyComponent:
+      ParentID: 69420
+      ChildID: 0
+      NextSiblingID: 0
+      PreviousSiblingID: 18150353052774309638
+    TransformComponent:
+      Position: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    CameraComponent:
+      Camera:
+        ProjectionType: Orthographic
+        PerspectiveVerticalFOV: 0.785398185
+        PerspectiveNearClip: 0.00999999978
+        PerspectiveFarClip: 1000
+        OrthographicSize: 10
+        OrthographicNearClip: -1
+        OrthographicFarClip: 1
+        AspectRatio: 2.22448969
+      IsPrimary: true
+      IsFixedAspectRatio: false

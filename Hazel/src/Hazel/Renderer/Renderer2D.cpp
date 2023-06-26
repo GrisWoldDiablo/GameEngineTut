@@ -257,7 +257,7 @@ namespace Hazel
 		return BeginScene(camera.GetProjection() * glm::inverse(transform));
 	}
 
-	bool Renderer2D::BeginScene(glm::mat4 viewProjection)
+	bool Renderer2D::BeginScene(const glm::mat4& viewProjection)
 	{
 		HZ_PROFILE_FUNCTION();
 

@@ -1393,6 +1393,7 @@ namespace Hazel
 			ImGui::ColorEdit4("Color", component.Color.GetValuePtr());
 			ImGui::DragFloat("Kerning", &component.Kerning, 0.025f);
 			ImGui::DragFloat("LineSpace", &component.LineSpace, 0.025f);
+			ImGui::Checkbox("IsScreenSpace", &component.IsScreenSpace);
 		});
 #pragma endregion
 
@@ -1677,7 +1678,7 @@ namespace Hazel
 #pragma endregion
 	}
 
-	void SceneHierarchyPanel::UpdateComponents(Entity entity)
+	void SceneHierarchyPanel::UpdateComponents(Entity entity) const
 	{
 		if (!entity)
 		{
@@ -1722,7 +1723,7 @@ namespace Hazel
 			return;
 		}
 
-		CleanUpComponent<AudioSourceComponent>(entity, [&](AudioSourceComponent& component)
+		CleanUpComponent<AudioSourceComponent>(entity, [&](const AudioSourceComponent& component)
 		{
 			if (_scene->IsRunning())
 			{
@@ -1743,17 +1744,12 @@ namespace Hazel
 	template<typename T>
 	void SceneHierarchyPanel::AddComponentMenu(const std::string& label)
 	{
-		if (!_selectedEntity.HasComponent<T>())
+		ImGui::BeginDisabled(_selectedEntity.HasComponent<T>());
+		if (ImGui::MenuItem(label.c_str()))
 		{
-			if (ImGui::MenuItem(label.c_str()))
-			{
-				_selectedEntity.AddComponent<T>();
-				ImGui::CloseCurrentPopup();
-			}
+			_selectedEntity.AddComponent<T>();
+			ImGui::CloseCurrentPopup();
 		}
-		else
-		{
-			ImGui::TextDisabled(label.c_str());
-		}
+		ImGui::EndDisabled();
 	}
 }

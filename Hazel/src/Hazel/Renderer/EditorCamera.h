@@ -17,10 +17,10 @@ namespace Hazel
 		void OnUpdate(Timestep timestep);
 		void OnEvent(Event& event);
 
-		inline float GetDistance() const { return _distance; }
-		inline void SetDistance(float distance) { _distance = distance; }
+		float GetDistance() const { return _distance; }
+		void SetDistance(float distance) { _distance = distance; }
 
-		inline void SetViewportSize(float width, float height)
+		void SetViewportSize(float width, float height)
 		{
 			_viewportWidth = width;
 			_viewportHeight = height;
@@ -28,7 +28,7 @@ namespace Hazel
 		}
 
 		const glm::mat4& GetViewMatrix() const { return _viewMatrix; }
-		glm::mat4 GetViewProjection() const { return _projection * _viewMatrix; }
+		virtual const glm::mat4 GetViewProjection(const glm::mat4& transform = glm::mat4(0.0f)) const override { return _projection * _viewMatrix; }
 
 		glm::vec3 GetUpDirection() const;
 		glm::vec3 GetRightDirection() const;

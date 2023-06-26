@@ -161,6 +161,7 @@ namespace Hazel
 		Color Color{Color::White};
 		float Kerning = 0.0f;
 		float LineSpace = 0.0f;
+		bool IsScreenSpace = false; // TODO Serialize
 		Ref<Font> FontAsset = Font::GetDefault();
 		
 		TextComponent() = default;

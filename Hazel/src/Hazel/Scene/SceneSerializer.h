@@ -15,8 +15,8 @@ namespace Hazel
 		bool DeserializeRuntime() override;
 
 	private:
-		void SerializeData(YAML::Emitter& out);
-		bool DeserializeData(const YAML::Node& data, bool isWithLog = true);
+		void SerializeData(YAML::Emitter& out) const;
+		bool DeserializeData(const YAML::Node& data, bool isWithLog = true) const;
 
 	private:
 		Ref<Scene> _scene;

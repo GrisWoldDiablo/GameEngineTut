@@ -414,7 +414,7 @@ namespace Hazel
 	void EditorLayer::OnOverlayRender() const
 	{
 		float cameraPositionZ = 1.0f;
-		bool hasSceneBegun;
+		glm::mat4 viewProjection;
 
 		if (_sceneState == SceneState::Play)
 		{
@@ -432,25 +432,24 @@ namespace Hazel
 				cameraPositionZ = transformComponent.Position.z;
 			}
 
-			hasSceneBegun = Renderer2D::BeginScene(camera, transform);
+			viewProjection = camera.GetViewProjection(transform);
 		}
 		else
 		{
 			cameraPositionZ = _editorCamera.GetPosition().z;
-			hasSceneBegun = Renderer2D::BeginScene(_editorCamera.GetViewProjection());
+			viewProjection = _editorCamera.GetViewProjection();
 		}
 
-		if (!hasSceneBegun)
+		if (!Renderer2D::BeginScene(viewProjection))
 		{
 			return;
 		}
 
 		const auto selectedEntity = _sceneHierarchyPanel.GetSelectedEntity();
 
-		if (_shouldShowPhysicsColliders ||
-			(selectedEntity &&
-				(selectedEntity.HasComponent<BoxCollider2DComponent>() ||
-					selectedEntity.HasComponent<CircleCollider2DComponent>())))
+		if (_shouldShowPhysicsColliders || (selectedEntity
+			&& (selectedEntity.HasComponent<BoxCollider2DComponent>()
+				|| selectedEntity.HasComponent<CircleCollider2DComponent>())))
 		{
 			constexpr auto kIdentityMatrix = glm::mat4(1.0f);
 
@@ -959,7 +958,7 @@ namespace Hazel
 			ImGui::SameLine();
 			if (ImGui::ImageButton(Utils::ERM::GetTexture(Utils::Icon_Pause)->GetRawID(), size, uv0, uv1, 3, isPaused ? selectedColor : normalColor, isPaused ? tintColor : whiteColor))
 			{
-				_activeScene->SetPause(!isPaused);
+				_activeScene->SetPaused(!isPaused);
 			}
 
 			if (!isPaused)
@@ -1262,8 +1261,8 @@ namespace Hazel
 
 				ImGuizmo::SetDrawlist();
 
-				auto windowWidth = ImGui::GetWindowWidth();
-				auto windowHeight = ImGui::GetWindowHeight();
+				const auto windowWidth = ImGui::GetWindowWidth();
+				const auto windowHeight = ImGui::GetWindowHeight();
 				ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, windowWidth, windowHeight);
 
 
@@ -1290,16 +1289,6 @@ namespace Hazel
 				if (ImGuizmo::IsUsing() && !_hasStoredPreviousGizmoType)
 				{
 					transformComponent.SetWorldTransform(worldTransform);
-					// glm::vec3 position, rotation, scale;
-					// if (HMath::DecomposeTransform(transform, position, rotation, scale))
-					// {
-					// 	transformComponent.Position = position;
-					// 	auto rotationDelta = rotation - transformComponent.Rotation;
-					// 	transformComponent.Rotation += rotationDelta;
-					// 	transformComponent.Scale = scale;
-					//
-					// 	_sceneHierarchyPanel.EditRuntimeRigidbody(selectedEntity, true);
-					// }
 				}
 			}
 		}

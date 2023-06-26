@@ -17,6 +17,45 @@
 
 namespace Hazel
 {
+	template<typename... Component>
+	static void CopyComponent(entt::registry& dst, const entt::registry& src, const std::unordered_map<UUID, entt::entity>& enttMap)
+	{
+		([&]()
+		{
+			auto view = src.view<Component>();
+			for (auto srcEntity : view)
+			{
+				entt::entity dstEntity = enttMap.at(src.get<IDComponent>(srcEntity).ID);
+				auto& srcComponent = src.get<Component>(srcEntity);
+				dst.emplace_or_replace<Component>(dstEntity, srcComponent);
+			}
+		}(), ...);
+	}
+
+	template<typename... Component>
+	static void CopyComponents(ComponentGroup<Component...>, entt::registry& dst, const entt::registry& src, const std::unordered_map<UUID, entt::entity>& enttMap)
+	{
+		CopyComponent<Component...>(dst, src, enttMap);
+	}
+
+	template<typename... Component>
+	static void CopyComponentIfExist(Entity dst, Entity src)
+	{
+		([&]()
+		{
+			if (src.HasComponent<Component>())
+			{
+				dst.AddOrReplaceComponent<Component>(src.GetComponent<Component>());
+			}
+		}(), ...);
+	}
+
+	template<typename... Component>
+	static void CopyComponentsIfExist(ComponentGroup<Component...>, Entity dst, Entity src)
+	{
+		CopyComponentIfExist<Component...>(dst, src);
+	}
+
 	Ref<Texture2D> Scene::_sAudioSourceIcon;
 	Ref<Texture2D> Scene::_sAudioListenerIcon;
 
@@ -57,45 +96,6 @@ namespace Hazel
 	{
 		_registry.clear();
 		delete _physicsWorld;
-	}
-
-	template<typename... Component>
-	static void CopyComponent(entt::registry& dst, const entt::registry& src, const std::unordered_map<UUID, entt::entity>& enttMap)
-	{
-		([&]()
-		{
-			auto view = src.view<Component>();
-			for (auto srcEntity : view)
-			{
-				entt::entity dstEntity = enttMap.at(src.get<IDComponent>(srcEntity).ID);
-				auto& srcComponent = src.get<Component>(srcEntity);
-				dst.emplace_or_replace<Component>(dstEntity, srcComponent);
-			}
-		}(), ...);
-	}
-
-	template<typename... Component>
-	static void CopyComponents(ComponentGroup<Component...>, entt::registry& dst, const entt::registry& src, const std::unordered_map<UUID, entt::entity>& enttMap)
-	{
-		CopyComponent<Component...>(dst, src, enttMap);
-	}
-
-	template<typename... Component>
-	static void CopyComponentIfExist(Entity dst, Entity src)
-	{
-		([&]()
-		{
-			if (src.HasComponent<Component>())
-			{
-				dst.AddOrReplaceComponent<Component>(src.GetComponent<Component>());
-			}
-		}(), ...);
-	}
-
-	template<typename... Component>
-	static void CopyComponentsIfExist(ComponentGroup<Component...>, Entity dst, Entity src)
-	{
-		CopyComponentIfExist<Component...>(dst, src);
 	}
 
 	Ref<Scene> Scene::Copy(const Ref<Scene>& other)
@@ -302,33 +302,13 @@ namespace Hazel
 		}
 
 		// Render 2D
-		const Camera* mainCamera = nullptr;
-		glm::mat4 cameraTransform;
-		glm::vec3 cameraPosition;
 		for (const auto&& [enttID, camera, transform] : GetEntitiesViewWith<CameraComponent, TransformComponent>().each())
 		{
 			if (camera.IsPrimary)
 			{
-				mainCamera = &camera.Camera;
-				cameraTransform = transform.GetWorldTransformMatrix();
-				cameraPosition = transform.Position;
+				RenderScene(transform.Position, transform.Rotation, camera.Camera.GetViewProjection(transform.GetWorldTransformMatrix()));
 				break;
 			}
-		}
-
-		if (mainCamera == nullptr)
-		{
-			return;
-		}
-
-		if (Renderer2D::BeginScene(*mainCamera, cameraTransform))
-		{
-			DrawSpriteRenderComponent(cameraPosition);
-			DrawCircleRenderComponent(cameraPosition);
-			DrawTextComponent(cameraPosition);
-			DrawAudioComponent(cameraPosition, true);
-
-			Renderer2D::EndScene();
 		}
 	}
 
@@ -371,73 +351,6 @@ namespace Hazel
 	void Scene::Step(int frames)
 	{
 		_stepFrames = frames;
-	}
-
-	void Scene::DrawSpriteRenderComponent(const glm::vec3& cameraPosition)
-	{
-		auto entities = GetEntitiesViewWith<SpriteRendererComponent, TransformComponent, FamilyComponent>();
-		//TODO Fix sorting?. Can't have 2 groups sprite and circle render
-		//group.sort<TransformComponent>([&](const auto& lhs, const auto& rhs)
-		//{
-		//	auto lhsDistance = glm::distance(lhs.Position, cameraPosition);
-		//	auto rhsDistance = glm::distance(rhs.Position, cameraPosition);
-		//	return lhsDistance > rhsDistance;
-		//});
-		for (const auto&& [enttID, sprite, transform] : GetEntitiesViewWith<SpriteRendererComponent, TransformComponent>().each())
-		{
-			Renderer2D::DrawSprite(transform.GetWorldTransformMatrix(), sprite, (int)enttID);
-
-			// Comment out to draw the sprite bounding box for testing.
-			// Renderer2D::DrawRect(transform.GetTransformMatrix(), Color::Green, (int)entity);
-		}
-	}
-
-	void Scene::DrawCircleRenderComponent(const glm::vec3& cameraPosition)
-	{
-		for (const auto&& [enttID, circle, transform] : GetEntitiesViewWith<CircleRendererComponent, TransformComponent>().each())
-		{
-			Renderer2D::DrawCircle(transform.GetWorldTransformMatrix(), circle.Color, circle.Thickness, circle.Fade, (int)enttID);
-		}
-	}
-
-	void Scene::DrawTextComponent(const glm::vec3& cameraPosition)
-	{
-		for (const auto&& [enttID, text, transform] : GetEntitiesViewWith<TextComponent, TransformComponent>().each())
-		{
-			Renderer2D::DrawString(transform.GetWorldTransformMatrix(), text, (int)enttID);
-		}
-	}
-
-	void Scene::DrawAudioComponent(const glm::vec3& cameraPosition, bool isRuntime)
-	{
-		//TODO create draw Icon generic.
-
-		const float cameraPositionZ = cameraPosition.z;
-		for (const auto&& [enttID, audioSource, transform] : GetEntitiesViewWith<AudioSourceComponent, TransformComponent>().each())
-		{
-			if (!isRuntime || audioSource.IsVisibleInGame)
-			{
-				const float sign = cameraPositionZ > transform.Position.z ? 1.0f : -1.0f;
-				auto position = transform.Position;
-				position.z += 0.001f * sign;
-				auto scale = glm::vec3(1.0f);
-				scale.x *= sign;
-				Renderer2D::DrawQuad(position, scale, _sAudioSourceIcon, glm::vec2(1.0f), Color::White, static_cast<int>(enttID));
-			}
-		}
-
-		for (const auto&& [enttID, audioListener, transform] : GetEntitiesViewWith<AudioListenerComponent, TransformComponent>().each())
-		{
-			if (!isRuntime || audioListener.IsVisibleInGame)
-			{
-				const float sign = cameraPositionZ > transform.Position.z ? 1.0f : -1.0f;
-				auto position = transform.Position;
-				position.z += 0.001f * sign;
-				auto scale = glm::vec3(1.0f);
-				scale.x *= sign;
-				Renderer2D::DrawQuad(position, scale, _sAudioListenerIcon, glm::vec2(1.0f), Color::White, static_cast<int>(enttID));
-			}
-		}
 	}
 
 	void Scene::OnViewportResize(uint32_t width, uint32_t height)
@@ -729,18 +642,113 @@ namespace Hazel
 
 	void Scene::RenderScene(const EditorCamera& camera)
 	{
-		if (Renderer2D::BeginScene(camera.GetViewProjection()))
+		RenderScene(camera.GetPosition(), camera.GetRotation(), camera.GetViewProjection());
+	}
+
+	void Scene::RenderScene(const glm::vec3& cameraPosition, const glm::vec3& cameraRotation, const glm::mat4& viewProjection)
+	{
+		if (Renderer2D::BeginScene(viewProjection))
 		{
-			DrawSpriteRenderComponent(camera.GetPosition());
-			DrawCircleRenderComponent(camera.GetPosition());
-			DrawTextComponent(camera.GetPosition());
-			DrawAudioComponent(camera.GetPosition());
+			DrawSpriteRenderComponent(cameraPosition);
+			DrawCircleRenderComponent(cameraPosition);
+			DrawTextComponent(cameraPosition);
+			DrawAudioComponent(cameraPosition);
 
 			// TESTING
 			//Renderer2D::DrawLine(glm::vec3(Random::Float()), glm::vec3(5.0f), Color::Magenta);
 			//Renderer2D::DrawRect(glm::vec3(0.0f), glm::vec3(1.0f), Color::White);
 
 			Renderer2D::EndScene();
+		}
+	}
+
+	void Scene::DrawSpriteRenderComponent(const glm::vec3& cameraPosition)
+	{
+		auto entities = GetEntitiesViewWith<SpriteRendererComponent, TransformComponent, FamilyComponent>();
+		//TODO Fix sorting?. Can't have 2 groups sprite and circle render
+		//group.sort<TransformComponent>([&](const auto& lhs, const auto& rhs)
+		//{
+		//	auto lhsDistance = glm::distance(lhs.Position, cameraPosition);
+		//	auto rhsDistance = glm::distance(rhs.Position, cameraPosition);
+		//	return lhsDistance > rhsDistance;
+		//});
+		for (const auto&& [enttID, sprite, transform] : GetEntitiesViewWith<SpriteRendererComponent, TransformComponent>().each())
+		{
+			Renderer2D::DrawSprite(transform.GetWorldTransformMatrix(), sprite, static_cast<int>(enttID));
+
+			// Comment out to draw the sprite bounding box for testing.
+			// Renderer2D::DrawRect(transform.GetTransformMatrix(), Color::Green, (int)entity);
+		}
+	}
+
+	void Scene::DrawCircleRenderComponent(const glm::vec3& cameraPosition)
+	{
+		for (const auto&& [enttID, circle, transform] : GetEntitiesViewWith<CircleRendererComponent, TransformComponent>().each())
+		{
+			Renderer2D::DrawCircle(transform.GetWorldTransformMatrix(), circle.Color, circle.Thickness, circle.Fade, static_cast<int>(enttID));
+		}
+	}
+
+	void Scene::DrawTextComponent(const glm::vec3& cameraPosition)
+	{
+		for (const auto&& [enttID, text, transform] : GetEntitiesViewWith<TextComponent, TransformComponent>().each())
+		{
+			if (!text.IsScreenSpace)
+			{
+				Renderer2D::DrawString(transform.GetWorldTransformMatrix(), text, static_cast<int>(enttID));
+				continue;
+			}
+
+			const auto primaryCamera = GetPrimaryCameraEntity();
+			if (!primaryCamera)
+			{
+				return;
+			}
+
+			const auto& camera = primaryCamera.GetComponent<CameraComponent>().Camera;
+			const auto& transformComponent = primaryCamera.Transform();
+			const auto viewProjection = camera.GetViewProjection(transformComponent.GetWorldTransformMatrix());
+			const auto inverseView = glm::inverse(viewProjection);
+			const auto pointInScreenSpace = transform.Position;
+			const auto pointInWorldSpace = glm::vec3(inverseView * glm::vec4(pointInScreenSpace, 1.0f));
+			
+			TransformComponent stringTransform;
+			stringTransform.Position = pointInWorldSpace;
+			stringTransform.Rotation = transform.Rotation;
+			stringTransform.Scale = transform.Scale;
+			Renderer2D::DrawString(stringTransform.GetWorldTransformMatrix(), text, static_cast<int>(enttID));
+		}
+	}
+
+	void Scene::DrawAudioComponent(const glm::vec3& cameraPosition)
+	{
+		//TODO create draw Icon generic.
+
+		const float cameraPositionZ = cameraPosition.z;
+		for (const auto&& [enttID, audioSource, transform] : GetEntitiesViewWith<AudioSourceComponent, TransformComponent>().each())
+		{
+			if (!_isRunning || audioSource.IsVisibleInGame)
+			{
+				const float sign = cameraPositionZ > transform.Position.z ? 1.0f : -1.0f;
+				auto position = transform.Position;
+				position.z += 0.001f * sign;
+				auto scale = glm::vec3(1.0f);
+				scale.x *= sign;
+				Renderer2D::DrawQuad(position, scale, _sAudioSourceIcon, glm::vec2(1.0f), Color::White, static_cast<int>(enttID));
+			}
+		}
+
+		for (const auto&& [enttID, audioListener, transform] : GetEntitiesViewWith<AudioListenerComponent, TransformComponent>().each())
+		{
+			if (!_isRunning || audioListener.IsVisibleInGame)
+			{
+				const float sign = cameraPositionZ > transform.Position.z ? 1.0f : -1.0f;
+				auto position = transform.Position;
+				position.z += 0.001f * sign;
+				auto scale = glm::vec3(1.0f);
+				scale.x *= sign;
+				Renderer2D::DrawQuad(position, scale, _sAudioListenerIcon, glm::vec2(1.0f), Color::White, static_cast<int>(enttID));
+			}
 		}
 	}
 
@@ -879,7 +887,7 @@ namespace Hazel
 	{
 		glm::vec3 position{};
 
-		for (const auto&& [enttID, component, transform] : GetEntitiesViewWith<AudioListenerComponent, TransformComponent>().each())
+		for (const auto&& [enttID, otherComponent, transform] : GetEntitiesViewWith<AudioListenerComponent, TransformComponent>().each())
 		{
 			if (entity != enttID)
 			{

@@ -24,7 +24,7 @@ namespace Hazel
 		void DrawEntityNode(Entity entity);
 		void DragDropEntityHierarchy(Entity entity);
 		void DrawComponents(Entity entity);
-		void UpdateComponents(Entity entity);
+		void UpdateComponents(Entity entity) const;
 		template<typename T>
 		void AddComponentMenu(const std::string& label);
 		void CleanUpComponents(Entity entity);

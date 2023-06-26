@@ -25,7 +25,7 @@ namespace Hazel
 		Entity CreateEntity(const std::string& name = "Entity", int tag = 0, int layer = 0);
 		Entity CreateEntityWithUUID(UUID uuid, const std::string& name = "Entity", int tag = 0, int layer = 0);
 		void DestroyEntity(Entity entity);
-		bool CheckEntityValidity(const entt::entity entity) const;
+		bool CheckEntityValidity(entt::entity entity) const;
 
 		void OnRuntimeStart();
 		void OnRuntimeStop();
@@ -37,22 +37,14 @@ namespace Hazel
 		void OnUpdateEditor(Timestep timestep, const EditorCamera& camera);
 		void Step(int frames = 1);
 
-		void DrawSpriteRenderComponent(const glm::vec3& cameraPosition);
-		void DrawCircleRenderComponent(const glm::vec3& cameraPosition);
-		void DrawTextComponent(const glm::vec3& cameraPosition);
-		void DrawAudioComponent(const glm::vec3& cameraPosition, bool isRuntime = false);
-
 		void OnViewportResize(uint32_t width, uint32_t height);
 
 		void ReparentEntity(Entity newParent, Entity newChild);
-		bool IsChildOf(Entity parent, Entity child);
+		bool IsChildOf(Entity child, Entity entity);
 
 		Entity DuplicateEntity(Entity entity);
 		Entity GetEntityByUUID(UUID uuid);
 		Entity GetEntityByName(const std::string& name);
-
-		std::string GetName() const { return _name; }
-		void SetName(const std::string& name) { _name = name; }
 
 		Entity GetPrimaryCameraEntity();
 
@@ -63,9 +55,12 @@ namespace Hazel
 		template<typename... Components>
 		auto GetEntitiesGroupWith() { return _registry.group<Components...>(entt::exclude<Root>); }
 
+		std::string GetName() const { return _name; }
+		void SetName(const std::string& name) { _name = name; }
+
 		bool IsRunning() const { return _isRunning; }
 		bool IsPaused() const { return _isPaused; }
-		void SetPause(bool isPaused) { _isPaused = isPaused; }
+		void SetPaused(const bool isPaused) { _isPaused = isPaused; }
 
 		bool& ShouldCloneAudioSource() { return _shouldCloneAudioSource; }
 
@@ -86,6 +81,12 @@ namespace Hazel
 		void OnPhysic2DStop();
 
 		void RenderScene(const EditorCamera& camera);
+		void RenderScene(const glm::vec3& cameraPosition, const glm::vec3& cameraRotation, const glm::mat4& viewProjection);
+
+		void DrawSpriteRenderComponent(const glm::vec3& cameraPosition);
+		void DrawCircleRenderComponent(const glm::vec3& cameraPosition);
+		void DrawTextComponent(const glm::vec3& cameraPosition);
+		void DrawAudioComponent(const glm::vec3& cameraPosition);
 
 		bool IsChildOfImpl(Entity child, Entity entity);
 

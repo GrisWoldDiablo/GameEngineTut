@@ -36,7 +36,7 @@ namespace Hazel
 		static void Shutdown();
 
 		static bool BeginScene(const Camera& camera, const glm::mat4& transform);
-		static bool BeginScene(glm::mat4 viewProjection);
+		static bool BeginScene(const glm::mat4& viewProjection);
 
 		static void EndScene();
 		static void Flush();

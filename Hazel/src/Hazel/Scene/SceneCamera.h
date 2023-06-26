@@ -76,6 +76,11 @@ namespace Hazel
 			RecalculateProjection();
 		}
 
+		virtual const glm::mat4 GetViewProjection(const glm::mat4& transform) const override
+		{
+			return _projection * glm::inverse(transform);
+		}
+
 	private:
 		void RecalculateProjection();
 

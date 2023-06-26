@@ -1,5 +1,5 @@
 Project:
   Name: Sandbox
-  StartScene: Scenes/2D Physic.hazel
+  StartScene: Scenes\Text Example.hazel
   AssetDirectory: Assets
   ScriptModulePath: Scripts/Binaries/Sandbox.dll

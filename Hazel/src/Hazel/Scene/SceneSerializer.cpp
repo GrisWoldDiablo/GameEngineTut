@@ -15,7 +15,7 @@ namespace Hazel
 	SceneSerializer::SceneSerializer(const Ref<Scene>& scene)
 		: _scene(scene) {}
 
-	static std::string ProjectionTypeToString(SceneCamera::ProjectionType projectionType)
+	static std::string ProjectionTypeToString(const SceneCamera::ProjectionType projectionType)
 	{
 		switch (projectionType)
 		{
@@ -43,7 +43,7 @@ namespace Hazel
 		return SceneCamera::ProjectionType::Perspective;
 	}
 
-	static std::string Rigidbody2DBodyTypeToString(Rigidbody2DComponent::BodyType bodyType)
+	static std::string Rigidbody2DBodyTypeToString(const Rigidbody2DComponent::BodyType bodyType)
 	{
 		switch (bodyType)
 		{
@@ -66,7 +66,7 @@ namespace Hazel
 		return Rigidbody2DComponent::BodyType::Static;
 	}
 
-	static void SerializeEntity(YAML::Emitter& out, Entity entity)
+	static void SerializeEntity(YAML::Emitter& out, const Entity entity)
 	{
 		HZ_CORE_ASSERT(entity.HasComponent<IDComponent>(), "IDComponent missing!");
 
@@ -472,7 +472,7 @@ namespace Hazel
 		_runtimeSceneData = out.c_str();
 	}
 
-	void SceneSerializer::SerializeData(YAML::Emitter& out)
+	void SceneSerializer::SerializeData(YAML::Emitter& out) const
 	{
 		out << YAML::BeginMap;
 		out << YAML::Key << "Scene" << YAML::Value << _scene->GetName();
@@ -497,7 +497,7 @@ namespace Hazel
 		out << YAML::EndMap;
 	}
 
-	bool SceneSerializer::Deserialize(const std::filesystem::path& filepath, bool isWithLog)
+	bool SceneSerializer::Deserialize(const std::filesystem::path& filepath, const bool isWithLog)
 	{
 		YAML::Node data;
 		try
@@ -519,7 +519,7 @@ namespace Hazel
 		return DeserializeData(data, false);
 	}
 
-	bool SceneSerializer::DeserializeData(const YAML::Node& data, bool isWithLog)
+	bool SceneSerializer::DeserializeData(const YAML::Node& data, bool isWithLog) const
 	{
 		if (!data["Scene"])
 		{
