@@ -339,6 +339,7 @@ namespace Hazel
 			out << YAML::Key << "Color" << YAML::Value << component.Color;
 			out << YAML::Key << "Kerning" << YAML::Value << component.Kerning;
 			out << YAML::Key << "LineSpace" << YAML::Value << component.LineSpace;
+			out << YAML::Key << "IsScreenSpace" << YAML::Value << component.IsScreenSpace;
 			// TODO FontAsset
 			//out << YAML::Key << "FontAsset" << YAML::Value << component.FontAsset;
 
@@ -783,6 +784,7 @@ namespace Hazel
 					component.Color = GetValue<glm::vec4>(textComponent, "Color", Color::White);
 					component.Kerning = GetValue<float>(textComponent, "Kerning");
 					component.LineSpace = GetValue<float>(textComponent, "LineSpace");
+					component.IsScreenSpace = GetValue<bool>(textComponent, "IsScreenSpace");
 					// TODO FontAsset
 					//component.FontAsset = GetValue<float>(textComponent, "LineSpace");
 				}

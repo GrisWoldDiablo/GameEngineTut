@@ -328,10 +328,67 @@
 			set => InternalCalls.AudioSourceComponent_SetIsVisibleInGame(Entity.Id, value);
 		}
 
-
 		public void Play() => InternalCalls.AudioSourceComponent_Play(Entity.Id);
 		public void Stop() => InternalCalls.AudioSourceComponent_Stop(Entity.Id);
 		public void Pause() => InternalCalls.AudioSourceComponent_Pause(Entity.Id);
 		public void Rewind() => InternalCalls.AudioSourceComponent_Rewind(Entity.Id);
+	}
+
+	public class TextComponent : Component
+	{
+		public string Text
+		{
+			get
+			{
+				InternalCalls.TextComponent_GetText(Entity.Id, out var text);
+				return text;
+			}
+
+			set => InternalCalls.TextComponent_SetText(Entity.Id, value);
+		}
+
+		public Color Color
+		{
+			get
+			{
+				InternalCalls.TextComponent_GetColor(Entity.Id, out var color);
+				return color;
+			}
+
+			set => InternalCalls.TextComponent_SetColor(Entity.Id, ref value);
+		}
+
+		public float Kerning
+		{
+			get
+			{
+				InternalCalls.TextComponent_GetKerning(Entity.Id, out var kerning);
+				return kerning;
+			}
+
+			set => InternalCalls.TextComponent_SetKerning(Entity.Id, ref value);
+		}
+
+		public float LineSpace
+		{
+			get
+			{
+				InternalCalls.TextComponent_GetLineSpace(Entity.Id, out var lineSpace);
+				return lineSpace;
+			}
+
+			set => InternalCalls.TextComponent_SetLineSpace(Entity.Id, ref value);
+		}
+
+		public bool IsScreenSpace
+		{
+			get
+			{
+				InternalCalls.TextComponent_GetIsScreenSpace(Entity.Id, out var isScreenSpace);
+				return isScreenSpace;
+			}
+
+			set => InternalCalls.TextComponent_SetIsScreenSpace(Entity.Id, ref value);
+		}
 	}
 }

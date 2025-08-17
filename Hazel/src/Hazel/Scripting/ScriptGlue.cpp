@@ -413,7 +413,6 @@ namespace Hazel
 	}
 #pragma endregion
 
-
 #pragma region SpriteRenderer
 
 	// TODO Add sprite/texture class to C#
@@ -890,8 +889,131 @@ namespace Hazel
 		component.AudioSource->Rewind();
 	}
 #pragma endregion
-#pragma endregion
 
+#pragma region Text
+	static void TextComponent_GetText(UUID entityId, MonoString** outText)
+	{
+		auto* scene = ScriptEngine::GetSceneContext();
+		HZ_CORE_ASSERT(scene, "Scene is null!");
+		const auto entity = scene->GetEntityByUUID(entityId);
+		HZ_CORE_ASSERT(entity, "Entity is null!");
+
+		const auto& component = entity.GetComponent<TextComponent>();
+
+		*outText = mono_string_new_wrapper(component.Text.c_str());
+	}
+
+	static void TextComponent_SetText(UUID entityId, MonoString* inText)
+	{
+		auto* scene = ScriptEngine::GetSceneContext();
+		HZ_CORE_ASSERT(scene, "Scene is null!");
+		const auto entity = scene->GetEntityByUUID(entityId);
+		HZ_CORE_ASSERT(entity, "Entity is null!");
+
+		auto& component = entity.GetComponent<TextComponent>();
+		auto* text = mono_string_to_utf8(inText);
+		component.Text = text;
+		mono_free(text);
+	}
+
+	static void TextComponent_GetColor(UUID entityId, Color* outColor)
+	{
+		auto* scene = ScriptEngine::GetSceneContext();
+		HZ_CORE_ASSERT(scene, "Scene is null!");
+		const auto entity = scene->GetEntityByUUID(entityId);
+		HZ_CORE_ASSERT(entity, "Entity is null!");
+
+		const auto& component = entity.GetComponent<TextComponent>();
+
+		*outColor = component.Color;
+	}
+
+	static void TextComponent_SetColor(UUID entityId, Color* color)
+	{
+		auto* scene = ScriptEngine::GetSceneContext();
+		HZ_CORE_ASSERT(scene, "Scene is null!");
+		const auto entity = scene->GetEntityByUUID(entityId);
+		HZ_CORE_ASSERT(entity, "Entity is null!");
+
+		auto& component = entity.GetComponent<TextComponent>();
+
+		component.Color = *color;
+	}
+
+	static void TextComponent_GetKerning(UUID entityId, float* outKerning)
+	{
+		auto* scene = ScriptEngine::GetSceneContext();
+		HZ_CORE_ASSERT(scene, "Scene is null!");
+		const auto entity = scene->GetEntityByUUID(entityId);
+		HZ_CORE_ASSERT(entity, "Entity is null!");
+
+		const auto& component = entity.GetComponent<TextComponent>();
+
+		*outKerning = component.Kerning;
+	}
+
+	static void TextComponent_SetKerning(UUID entityId, float* kerning)
+	{
+		auto* scene = ScriptEngine::GetSceneContext();
+		HZ_CORE_ASSERT(scene, "Scene is null!");
+		const auto entity = scene->GetEntityByUUID(entityId);
+		HZ_CORE_ASSERT(entity, "Entity is null!");
+
+		auto& component = entity.GetComponent<TextComponent>();
+
+		component.Kerning = *kerning;
+	}
+
+	static void TextComponent_GetLineSpace(UUID entityId, float* outLineSpace) // linespace
+	{
+		auto* scene = ScriptEngine::GetSceneContext();
+		HZ_CORE_ASSERT(scene, "Scene is null!");
+		const auto entity = scene->GetEntityByUUID(entityId);
+		HZ_CORE_ASSERT(entity, "Entity is null!");
+
+		const auto& component = entity.GetComponent<TextComponent>();
+
+		*outLineSpace = component.LineSpace;
+	}
+
+	static void TextComponent_SetLineSpace(UUID entityId, float* lineSpace)
+	{
+		auto* scene = ScriptEngine::GetSceneContext();
+		HZ_CORE_ASSERT(scene, "Scene is null!");
+		const auto entity = scene->GetEntityByUUID(entityId);
+		HZ_CORE_ASSERT(entity, "Entity is null!");
+
+		auto& component = entity.GetComponent<TextComponent>();
+
+		component.LineSpace = *lineSpace;
+	}
+
+	static void TextComponent_GetIsScreenSpace(UUID entityId, bool* outIsScreenSpace) //isScreenspace
+	{
+		auto* scene = ScriptEngine::GetSceneContext();
+		HZ_CORE_ASSERT(scene, "Scene is null!");
+		const auto entity = scene->GetEntityByUUID(entityId);
+		HZ_CORE_ASSERT(entity, "Entity is null!");
+
+		const auto& component = entity.GetComponent<TextComponent>();
+
+		*outIsScreenSpace = component.IsScreenSpace;
+	}
+
+	static void TextComponent_SetIsScreenSpace(UUID entityId, bool isScreenSpace)
+	{
+		auto* scene = ScriptEngine::GetSceneContext();
+		HZ_CORE_ASSERT(scene, "Scene is null!");
+		const auto entity = scene->GetEntityByUUID(entityId);
+		HZ_CORE_ASSERT(entity, "Entity is null!");
+
+		auto& component = entity.GetComponent<TextComponent>();
+
+		component.IsScreenSpace = isScreenSpace;
+	}
+
+#pragma endregion
+#pragma endregion
 
 	/////////////////
 	/// Registers
@@ -1035,6 +1157,19 @@ namespace Hazel
 		HZ_ADD_INTERNAL_CALL(AudioSourceComponent_Stop);
 		HZ_ADD_INTERNAL_CALL(AudioSourceComponent_Pause);
 		HZ_ADD_INTERNAL_CALL(AudioSourceComponent_Rewind);
+#pragma endregion
+
+#pragma region Text
+		HZ_ADD_INTERNAL_CALL(TextComponent_GetText);
+		HZ_ADD_INTERNAL_CALL(TextComponent_SetText);
+		HZ_ADD_INTERNAL_CALL(TextComponent_GetColor);
+		HZ_ADD_INTERNAL_CALL(TextComponent_SetColor);
+		HZ_ADD_INTERNAL_CALL(TextComponent_GetKerning);
+		HZ_ADD_INTERNAL_CALL(TextComponent_SetKerning);
+		HZ_ADD_INTERNAL_CALL(TextComponent_GetLineSpace);
+		HZ_ADD_INTERNAL_CALL(TextComponent_SetLineSpace);
+		HZ_ADD_INTERNAL_CALL(TextComponent_GetIsScreenSpace);
+		HZ_ADD_INTERNAL_CALL(TextComponent_SetIsScreenSpace);
 #pragma endregion
 #pragma endregion
 	}

@@ -110,14 +110,19 @@ namespace Hazel
 		/* Camera */
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern void CameraComponent_GetIsPrimary(ulong entityId, out bool isPrimary);
+
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern void CameraComponent_SetIsPrimary(ulong entityId, ref bool isPrimary);
+
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern void CameraComponent_GetIsFixedAspectRatio(ulong entityId, out bool isFixedAspectRatio);
+
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern void CameraComponent_SetIsFixedAspectRatio(ulong entityId, ref bool isFixedAspectRatio);
+
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern void CameraComponent_GetOrthographicSize(ulong entityId, out float size);
+
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern void CameraComponent_SetOrthographicSize(ulong entityId, ref float size);
 		#endregion
@@ -240,6 +245,39 @@ namespace Hazel
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern void AudioSourceComponent_SetIsVisibleInGame(UUID id, bool isVisibleInGame);
+		#endregion
+
+		#region Text
+		/* Text */
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern void TextComponent_GetText(ulong entityId, out string text);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern void TextComponent_SetText(ulong entityId, string text);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern void TextComponent_GetColor(ulong entityId, out Color color);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern void TextComponent_SetColor(ulong entityId, ref Color color);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern void TextComponent_GetKerning(ulong entityId, out float kerning);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern void TextComponent_SetKerning(ulong entityId, ref float kerning);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern void TextComponent_GetLineSpace(ulong entityId, out float lineSpace);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern void TextComponent_SetLineSpace(ulong entityId, ref float lineSpace);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern void TextComponent_GetIsScreenSpace(ulong entityId, out bool isScreenSpace);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern void TextComponent_SetIsScreenSpace(ulong entityId, ref bool isScreenSpace);
 		#endregion
 	}
 }

@@ -18,12 +18,12 @@ namespace Hazel
 			_start = std::chrono::high_resolution_clock::now();
 		}
 
-		float Elapsed()
+		[[nodiscard]] float Elapsed() const
 		{
 			return static_cast<float>(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - _start).count()) * 0.000000001f;
 		}
 
-		float ElapsedMillis()
+		[[nodiscard]] float ElapsedMillis() const
 		{
 			return Elapsed() * 1000.0f;
 		}

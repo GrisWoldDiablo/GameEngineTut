@@ -591,7 +591,7 @@ namespace Hazel
 
 			while (MonoClassField* field = mono_class_get_fields(monoClass, &iterator))
 			{
-				const auto type = mono_type_get_underlying_type(mono_field_get_type(field));
+				auto* const type = mono_type_get_underlying_type(mono_field_get_type(field));
 				auto scriptFieldType = Utils::MonoTypeToScriptFieldType(type);
 
 				if (scriptFieldType == ScriptFieldType::None && mono_type_get_type(type) == MONO_TYPE_CLASS)
